@@ -33,7 +33,7 @@ Wir lernen den <strong>Übergang vom Spielzeug zur Anwendung</strong> und entwic
 </ChapterIntroduction>
 
 ::: info Hinweis
-In diesem Artikel könnten einige Geschäftsbegriffe vorkommen. Wenn Sie diese nicht verstehen, können Sie AI um eine Erklärung bitten.
+In diesem Artikel könnten einige Geschäftsbegriffe vorkommen. Wenn Sie diese nicht verstheen, können Sie AI um eine Erklärung bitten.
 :::
 
 <div style="margin: 50px 0;">
@@ -104,7 +104,7 @@ Bisher haben wir mit AI IDE nur Spielzeugprojekte wie Snake oder Taschenrechner 
 **Geschäft** ist das, was Nutzer täglich tun &ndash; ihre Arbeitsweise. Zum Beispiel E-Commerce-Operations: Produkte einstellen, Preise ändern, Bilder erstellen, Daten analysieren... Das alles ist Geschäft.
 
 **Warum sich fürs Geschäft interessieren?**
-Weil Ihr Tool sonst "gut aussieht, aber niemand nutzt". Nur wenn Sie wirklich verstehen, wie Nutzer täglich arbeiten und wo sie feststecken, können Sie etwas bauen, das ihnen wirklich hilft.
+Weil Ihr Tool sonst "gut aussieht, aber niemand nutzt". Nur wenn Sie wirklich verstheen, wie Nutzer täglich arbeiten und wo sie feststecken, können Sie etwas bauen, das ihnen wirklich hilft.
 
 :::
 
@@ -242,7 +242,7 @@ Ein häufiger Fehler von Anfängern bei der Produktentwicklung ist: Mehr Funktio
 - Aus einer Menge von Problemen **konvergieren** auf das schmerzhafteste, am besten lösbare
 - Zuerst die **minimal nutzbare** Version erstellen, dann schrittweise iterieren
 
-Das ist es, was wir klären müssen, bevor wir Code schreiben. Code ist nur ein Werkzeug &ndash; **Nutzer verstehen, das richtige Problem finden** ist der erste Schritt.
+Das ist es, was wir klären müssen, bevor wir Code schreiben. Code ist nur ein Werkzeug &ndash; **Nutzer verstheen, das richtige Problem finden** ist der erste Schritt.
 
 <div style="margin: 50px 0;">
   <ClientOnly>
@@ -358,12 +358,12 @@ Sie können diesen Prompt nach kleinen Anpassungen an AI IDE senden, um Code zu 
 
 ### 2.2 Zweiter Schritt: AI IDE direkt Code generieren lassen
 
-#### 2.2.1 Vorbereitung: Grundlegende Bedienung von AI IDE verstehen
+#### 2.2.1 Vorbereitung: Grundlegende Bedienung von AI IDE verstheen
 
 Wenn Sie mit AI IDE (wie Cursor, Trae, Windsurf etc.) noch nicht vertraut sind, empfehlen wir, zunächst das [IDE-Grundlagen-Tutorial](/zh-cn/appendix/2-development-tools/ide-basics/) im Anhang zu lesen, um zu erfahren:
 - Wie man ein neues Projekt erstellt
 - Wie man mit dem AI Agent kommuniziert
-- Wie man den Code-Generierungsprozess der AI versteht
+- Wie man den Code-Generierungsprozess der AI versthet
 
 #### 2.2.2 Mit der Code-Generierung beginnen
 
@@ -424,7 +424,7 @@ Schließlich erhalten wir:
 
 ### 2.3 Was tun bei Fehlern
 
-In der Praxis sind Fehler unvermeidlich. Das ist normal und bedeutet nicht, dass Sie etwas falsch gemacht haben. Sie müssen die Fehler nicht verstehen &ndash; geben Sie einfach das "Was Sie sehen" vollständig an AI weiter.
+In der Praxis sind Fehler unvermeidlich. Das ist normal und bedeutet nicht, dass Sie etwas falsch gemacht haben. Sie müssen die Fehler nicht verstheen &ndash; geben Sie einfach das "Was Sie sehen" vollständig an AI weiter.
 
 Es gibt grundsätzlich drei Behandlungsmethoden:
 
@@ -445,8 +445,8 @@ Es gibt grundsätzlich drei Behandlungsmethoden:
 - **F: AI hat es repariert, aber es kommt derselbe Fehler &ndash; was nun?**
 - A: Das ist ein häufiges Szenario. Machen Sie weiterhin Screenshots oder kopieren Sie die neueste Fehlermeldung und senden Sie sie an AI, damit sie auf Basis der letzten Änderung weiter repariert.
 
-- **F: Muss ich AI's Reparaturansatz vollständig verstehen?**
-- A: Nicht auf einmal. Konzentrieren Sie sich jedes Mal auf ein bis zwei Punkte. Mit der Zeit werden Sie zunehmend mehr Code verstehen &ndash; wie beim Aufbau eines englischen Wortschatzes.
+- **F: Muss ich AI's Reparaturansatz vollständig verstheen?**
+- A: Nicht auf einmal. Konzentrieren Sie sich jedes Mal auf ein bis zwei Punkte. Mit der Zeit werden Sie zunehmend mehr Code verstheen &ndash; wie beim Aufbau eines englischen Wortschatzes.
 
 - **F: Viele Male geändert, das Problem ist immer noch nicht gelöst &ndash; was nun?**
 - A: Sie können Folgendes versuchen:

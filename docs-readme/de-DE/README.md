@@ -159,7 +159,7 @@ Easy-Vibe zeigt dir, wie du daraus ein echtes Produkt machst.
 <details>
 <summary>Vergangene Neuigkeiten</summary>
 
-- **[2026-03-02]** 🦞 **OpenClaw- und KI-Agent-freundliche Unterstuetzung**: `llms.txt` hinzugefuegt, damit OpenClaw, Claude, Cursor, Trae und andere KI-Agenten die Repository-Struktur schnell verstehen und die richtigen Tutorial-Inhalte finden koennen.
+- **[2026-03-02]** 🦞 **OpenClaw- und KI-Agent-freundliche Unterstuetzung**: `llms.txt` hinzugefuegt, damit OpenClaw, Claude, Cursor, Trae und andere KI-Agenten die Repository-Struktur schnell verstheen und die richtigen Tutorial-Inhalte finden koennen.
 - **[2026-03-01]** Der Abschnitt [Fortgeschrittene Entwicklung](https://datawhalechina.github.io/easy-vibe/en/stage-3/) wurde umfassend mit tiefen Anleitungen fuer Claude Code aktualisiert, einschliesslich MCP, Skills, Agent Teams und mehr, zusammen mit acht plattformuebergreifenden Projekttutorials.
 - **[2026-02-25]** Die [Anhang-Wissensdatenbank](https://datawhalechina.github.io/easy-vibe/en/appendix/) wurde aktualisiert und deckt jetzt 9 Wissensbereiche und ueber 80 interaktive Themen ab.
 - **[2026-01-27]** Tutorials fuer Android- und iOS-App-Entwicklung hinzugefuegt.
@@ -172,7 +172,7 @@ Easy-Vibe zeigt dir, wie du daraus ein echtes Produkt machst.
 
 ## Fuer wen ist das
 
-- **Komplette Anfaenger**: Baue zuerst dein erstes Projekt, dann verstehe, wie es funktioniert
+- **Komplette Anfaenger**: Baue zuerst dein erstes Projekt, dann versthee, wie es funktioniert
 - **Produktmanager / Gruender**: Ideen schnell validieren und MVPs mit niedrigen Kosten erstellen
 - **Studierende**: Praktische Faehigkeiten fuer das KI-Zeitalter entwickeln
 - **Junior-Entwickler**: Den vollstaendigen Weg von der Idee zum Launch lernen
@@ -247,7 +247,7 @@ Easy-Vibe zeigt dir, wie du daraus ein echtes Produkt machst.
 | Abschnitt | Wichtiger Inhalt |
 | :------ | :---------- |
 | [Produktdenken und Loungsdesign](https://datawhalechina.github.io/easy-vibe/en/stage-1/appendix-a-product-thinking/) | Kern-Frameworks fuer den Weg von Null zu Eins mit einem Produkt |
-| [KI-Branchen-Anwendungsszenarien (B2B)](https://datawhalechina.github.io/easy-vibe/en/stage-1/appendix-industry-scenarios/) | Verstehen, wie KI ueber Branchen hinweg angewendet wird |
+| [KI-Branchen-Anwendungsszenarien (B2B)](https://datawhalechina.github.io/easy-vibe/en/stage-1/appendix-industry-scenarios/) | Verstheen, wie KI ueber Branchen hinweg angewendet wird |
 | [KI-Konsumentenszenarien-Inspiration (B2C)](https://datawhalechina.github.io/easy-vibe/en/stage-1/appendix-c-consumer-scenarios/) | Produktmoeglichkeiten in der Konsum-KI erkunden |
 
 #### Anhang: Nutzerforschung und Anforderungsvalidierung
@@ -328,7 +328,7 @@ Easy-Vibe zeigt dir, wie du daraus ein echtes Produkt machst.
 | Abschnitt | Wichtiger Inhalt |
 | :------ | :---------- |
 | [Die richtige Plattform fuer deine App waehlen](https://datawhalechina.github.io/easy-vibe/en/stage-3/cross-platform/choose-platform/) | App-Formen vergleichen und die richtige Plattform basierend auf Nutzern, Szenarien und Bereitstellungszielen waehlen |
-| [WeChat-Mini-Programm erstellen](https://datawhalechina.github.io/easy-vibe/en/stage-3/cross-platform/wechat-miniprogram/) | Das Oekosystem verstehen und ein Frontend-Mini-Programm von der Vorlage bis zum Launch bereitstellen |
+| [WeChat-Mini-Programm erstellen](https://datawhalechina.github.io/easy-vibe/en/stage-3/cross-platform/wechat-miniprogram/) | Das Oekosystem verstheen und ein Frontend-Mini-Programm von der Vorlage bis zum Launch bereitstellen |
 | [WeChat-Mini-Programm mit Backend erstellen](https://datawhalechina.github.io/easy-vibe/en/stage-3/cross-platform/wechat-miniprogram-backend/) | Backend-Logik und Datenbanken hinzufuegen, um die vollstaendige Geschaeftsschleife abzuschliessen |
 | [Android-App erstellen](https://datawhalechina.github.io/easy-vibe/en/stage-3/cross-platform/android-app/) | Android-App-Entwicklung mit einem modernen nativen Workflow lernen |
 | [iOS-App erstellen](https://datawhalechina.github.io/easy-vibe/en/stage-3/cross-platform/ios-app/) | iOS-App-Entwicklung und die Konventionen des Apple-Oekosystems lernen |
@@ -348,7 +348,7 @@ Easy-Vibe zeigt dir, wie du daraus ein echtes Produkt machst.
 
 ### 📚 Anhang Wissensdatenbank
 
-> Mit **9 grossen Wissensbereichen** und **ueber 80 interaktiven Themen** hilft dieser Anhang durch Animation und visuelle Komponenten, Kernkonzepte von Informatik-Grundlagen bis zur KI-Frontier intuitiv zu verstehen.
+> Mit **9 grossen Wissensbereichen** und **ueber 80 interaktiven Themen** hilft dieser Anhang durch Animation und visuelle Komponenten, Kernkonzepte von Informatik-Grundlagen bis zur KI-Frontier intuitiv zu verstheen.
 >
 > 👉 [Vollstaendigen Anhang ansehen](https://datawhalechina.github.io/easy-vibe/en/appendix/)
 

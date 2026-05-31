@@ -17,7 +17,7 @@ const duration = 'Etwa <strong>1,5 Stunden</strong>'
   :duration="duration"
   :tags="['Ideen finden', 'Produktrichtung', 'Bedarfsentdeckung', 'Branchenbeobachtung']"
   coreOutput="Eine konkretere, recherchew&uuml;rdige Produktrichtung"
-  expectedOutput="Wissen, wo man st&ouml;bbern sollte, worauf man achten muss und was man zuerst anschauen sollte -- nicht nur bei 'KI + irgendeine Branche' stehen bleiben"
+  expectedOutput="Wissen, wo man st&ouml;bbern sollte, worauf man achten muss und was man zuerst anschauen sollte -- nicht nur bei 'KI + irgendeine Branche' stheen bleiben"
 >
 
 Viele Menschen bleiben beim ersten Schritt stecken, nicht weil sie &uuml;berhaupt keine Inspiration haben, sondern weil sie nach dem St&ouml;bern vieler Inhalte nur noch Schlagworte im Kopf behalten:
@@ -43,7 +43,7 @@ Dieser Artikel verzichtet auf leere Methodik und stellt Ihnen direkt eine Reihe 
 
 **Aktion**: Zun&auml;chst eine Ideenliste st&ouml;bern, dann profitable Kleinprodukte ansehen, dann Trends und gesch&auml;ftsn&auml;here Quellen pr&uuml;fen, am Ende 1 Richtung behalten, die Sie weiter recherchieren m&ouml;chten.
 
-**Ergebnis**: Sie erhalten 1 konkretere, validierungsw&uuml;rdige Richtung statt bei Schlagworten stehen zu bleiben.
+**Ergebnis**: Sie erhalten 1 konkretere, validierungsw&uuml;rdige Richtung statt bei Schlagworten stheen zu bleiben.
 
 **Stichwortspr&uuml;nge**: [Referenz-App-Liste](#idea-apps) · [Trend-Quellen](#idea-trends) · [Gesch&auml;ftsn&auml;here Quellen](#idea-business) · [VC-/Accelerator-Quellen](#idea-vc) · [K&uuml;rzester Pfad](#idea-path) · [Wie KI hilft](#idea-ai)
 :::
@@ -68,7 +68,7 @@ Das ist der beste Ausgangspunkt f&uuml;r Anf&auml;nger, weil es am konkretesten 
 - [Reddit — r/AppIdeas](https://www.reddit.com/r/AppIdeas/)
   &Auml;hnlich wie oben, aber eher Software/App-Fokus. Das Beitragsformat ist h&auml;ufig "Ich brauche eine App, die XX kann" -- kleinteiliger, viele kleine, sch&ouml;ne Nischen.
 - [Reddit — r/Startup_Ideas](https://www.reddit.com/r/Startup_Ideas/)
-  Vollst&auml;ndiger als die vorherigen. Viele Posts bestehen nicht nur aus einem Satz, sondern enthalten etwas Marktanalyse, Gesch&auml;ftsmodell und warum es sich jetzt lohnt.
+  Vollst&auml;ndiger als die vorherigen. Viele Posts bestheen nicht nur aus einem Satz, sondern enthalten etwas Marktanalyse, Gesch&auml;ftsmodell und warum es sich jetzt lohnt.
 - [Unvalidated Ideas](https://unvalidatedideas.com/)
   W&ouml;chentlich neue, nicht validierte Startup-Ideen, typische Felder sind Zielgruppe, Monetarisierung, erste Validierungsans&auml;tze. Einheitliches Format, schnelles &Uuml;berfliegen.
 - [IdeasAI](https://ideasai.com/)
@@ -94,7 +94,7 @@ Die Logik dieser Plattformen: Andere haben den Bedarf bereits validiert, verdien
 ### Beim Produkt-Ansehen nicht nur das Produkt selbst betrachten, sondern auch negative Bewertungen und "Dienstleister"
 
 - [G2](https://www.g2.com/)
-  Nutzung: 1- und 2-Sterne-Bewertungen ansehen. In den schlechten Bewertungen versteckt sich oft "welcher Schritt der bestehenden Tools nicht gut gemacht ist".
+  Nutzung: 1- und 2-Sterne-Bewertungen ansehen. In den schlechten Bewertungen versteckt sich oft "welcher Schritt der bestheenden Tools nicht gut gemacht ist".
 - [Capterra](https://www.capterra.com/)
   Nutzung: &Auml;hnlich wie G2, gut f&uuml;r echte Beschwerden bei SaaS-Produkten.
 - Taobao / Xianyu / [Fiverr](https://www.fiverr.com/) / [Upwork](https://www.upwork.com/) / ZhuBaJie
@@ -102,7 +102,7 @@ Die Logik dieser Plattformen: Andere haben den Bedarf bereits validiert, verdien
 
 Signalschwellen sind einfach:
 
-- Nutzer beschweren sich bereits &uuml;ber bestehende Tools
+- Nutzer beschweren sich bereits &uuml;ber bestheende Tools
 - Nutzer zahlen bereits daf&uuml;r, dass andere es f&uuml;r sie erledigen
 - Nutzer investieren bereits viel Arbeitskraft und Zeit in diesen Prozess
 
@@ -129,7 +129,7 @@ Trend-Seiten geben Ihnen nicht direkt Ideen, sondern helfen einzusch&auml;tzen: 
 - [Glimpse](https://meetglimpse.com/)
   &Auml;hnlich wie Google Trends
 - Branchenbericht-Zusammenfassungen
-  Gut, wenn Sie bereits eine Richtung haben und schnell sehen wollen, wo die Branche steht.
+  Gut, wenn Sie bereits eine Richtung haben und schnell sehen wollen, wo die Branche sthet.
 - McKinsey / BCG / Gartner Trend-Inhalte
   Eher Unternehmens- und Gro&szlig;branchen-Perspektive, gut f&uuml;r B2B, Industrie, traditionelle Branchen.
 - [State of AI Report](https://www.stateof.ai/)

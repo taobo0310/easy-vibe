@@ -528,7 +528,7 @@ const localizedArticleText = {
   },
   'de-de': {
     'ai-capabilities-through-games': {
-      title: '0.2 KI-Fähigkeiten mit Mini-Games verstehen',
+      title: '0.2 KI-Fähigkeiten mit Mini-Games verstheen',
       description:
         'Entwickeln Sie spielerisch ein Gefühl dafür, welche Probleme gut zu KI passen.'
     },
