@@ -1,43 +1,47 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { portsLocalhostLocale } from '../../../locales/ports-localhost/index.js'
+
+const { t } = useI18n(portsLocalhostLocale)
 
 const currentStep = ref(0)
 const isPlaying = ref(false)
 
-const steps = [
+const steps = computed(() => [
   {
-    title: '1. 你执行 npm run dev',
+    title: t('devServerFlow.step1Title'),
     terminal: '$ npm run dev\n\n> vite\n\n  准备就绪...',
-    desc: '你在终端里敲下启动命令',
+    desc: t('devServerFlow.step1Desc'),
     highlight: 'terminal'
   },
   {
-    title: '2. Vite 启动 HTTP 服务器',
+    title: t('devServerFlow.step2Title'),
     terminal: '$ npm run dev\n\n> vite\n\n  VITE v5.4.0  ready in 200 ms\n\n  ➜  Local:   http://localhost:5173/\n  ➜  Network: http://192.168.1.10:5173/',
-    desc: 'Vite 在本机的 5173 端口启动了一个 HTTP 服务器，等待连接',
+    desc: t('devServerFlow.step2Desc'),
     highlight: 'server'
   },
   {
-    title: '3. 你打开浏览器访问',
+    title: t('devServerFlow.step3Title'),
     terminal: '$ npm run dev\n\n> vite\n\n  VITE v5.4.0  ready in 200 ms\n\n  ➜  Local:   http://localhost:5173/\n  ➜  Network: http://192.168.1.10:5173/',
     browser: 'http://localhost:5173',
-    desc: '浏览器向 localhost:5173 发起 HTTP 请求',
+    desc: t('devServerFlow.step3Desc'),
     highlight: 'browser'
   },
   {
-    title: '4. 服务器返回页面',
+    title: t('devServerFlow.step4Title'),
     terminal: '$ npm run dev\n\n> vite\n\n  VITE v5.4.0  ready in 200 ms\n\n  ➜  Local:   http://localhost:5173/\n  ➜  Network: http://192.168.1.10:5173/\n\n  10:30:01 [200] /\n  10:30:01 [200] /src/main.js\n  10:30:01 [200] /src/App.vue',
     browser: 'http://localhost:5173',
-    page: '🎉 你的页面出现了！',
-    desc: 'Vite 处理请求，返回 HTML/JS/CSS，浏览器渲染页面',
+    page: t('devServerFlow.pageAppeared'),
+    desc: t('devServerFlow.step4Desc'),
     highlight: 'page'
   },
   {
-    title: '5. 热更新（HMR）',
+    title: t('devServerFlow.step5Title'),
     terminal: '$ npm run dev\n\n  VITE v5.4.0  ready in 200 ms\n\n  ➜  Local:   http://localhost:5173/\n\n  10:30:01 [200] /\n  10:35:22 [vite] hmr update /src/App.vue',
     browser: 'http://localhost:5173',
-    page: '🔄 页面自动刷新了！',
-    desc: '你修改代码后，Vite 通过 WebSocket 通知浏览器，页面自动更新',
+    page: t('devServerFlow.pageRefreshed'),
+    desc: t('devServerFlow.step5Desc'),
     highlight: 'hmr'
   }
 ]
@@ -46,7 +50,7 @@ async function playAll() {
   if (isPlaying.value) return
   isPlaying.value = true
   currentStep.value = 0
-  for (let i = 0; i < steps.length; i++) {
+  for (let i = 0; i < steps.value.length; i++) {
     currentStep.value = i
     await new Promise(r => setTimeout(r, 1800))
   }
@@ -78,9 +82,9 @@ function reset() {
       </div>
       <div class="control-btns">
         <button class="action-btn" :disabled="isPlaying" @click="playAll">
-          {{ isPlaying ? '播放中...' : '▶ 自动演示' }}
+          {{ isPlaying ? t('devServerFlow.playing') : t('devServerFlow.autoPlay') }}
         </button>
-        <button class="action-btn ghost" @click="reset">重置</button>
+        <button class="action-btn ghost" @click="reset">{{ t('devServerFlow.reset') }}</button>
       </div>
     </div>
 
@@ -91,14 +95,14 @@ function reset() {
         <div :class="['panel terminal-panel', { highlight: steps[currentStep].highlight === 'terminal' }]">
           <div class="panel-header">
             <span class="dot red" /><span class="dot yellow" /><span class="dot green" />
-            <span class="panel-title">终端</span>
+            <span class="panel-title">{{ t('devServerFlow.terminal') }}</span>
           </div>
           <pre class="terminal-content">{{ steps[currentStep].terminal }}</pre>
         </div>
 
         <div class="arrow-col">
           <div :class="['flow-arrow', { active: currentStep >= 1 }]">
-            <span class="arrow-label">监听</span>
+            <span class="arrow-label">{{ t('devServerFlow.listening') }}</span>
             <span class="arrow-char">↕</span>
           </div>
         </div>
@@ -109,13 +113,13 @@ function reset() {
 >
           <div class="panel-header">
             <span class="dot red" /><span class="dot yellow" /><span class="dot green" />
-            <span class="panel-title">浏览器</span>
+            <span class="panel-title">{{ t('devServerFlow.browser') }}</span>
           </div>
           <div class="browser-content">
             <div v-if="steps[currentStep].browser" class="browser-url-bar">
               {{ steps[currentStep].browser }}
             </div>
-            <div v-else class="browser-empty">等待你打开浏览器...</div>
+            <div v-else class="browser-empty">等待你打开{{ t('devServerFlow.browser') }}...</div>
             <div v-if="steps[currentStep].page" class="browser-page">
               {{ steps[currentStep].page }}
             </div>
@@ -129,34 +133,34 @@ function reset() {
     </div>
 
     <div class="http-explain">
-      <div class="http-title">什么是 HTTP 服务器？</div>
+      <div class="http-title">{{ t('devServerFlow.httpTitle') }}</div>
       <div class="http-analogy">
         <div class="analogy-item">
           <span class="analogy-icon">🏪</span>
           <div class="analogy-text">
-            <strong>想象一个前台窗口</strong>
+            <strong>{{ t('devServerFlow.httpAnalogy1') }}</strong>
             <span>HTTP 服务器就像一个"永远开着的服务窗口"——它一直等在那里，有人来问就回答，没人来就静静等着。</span>
           </div>
         </div>
         <div class="analogy-item">
           <span class="analogy-icon">📋</span>
           <div class="analogy-text">
-            <strong>只懂一种"暗号"</strong>
+            <strong>{{ t('devServerFlow.httpAnalogy2') }}</strong>
             <span>这个窗口只听得懂 HTTP 协议的请求格式（比如 <code>GET /index.html</code>），然后把对应的文件内容返回给你。</span>
           </div>
         </div>
         <div class="analogy-item">
           <span class="analogy-icon">⚙️</span>
           <div class="analogy-text">
-            <strong>开发服务器 = 加强版窗口</strong>
-            <span>Vite、Webpack 的开发服务器不只是"原样返回文件"，它还会即时编译你的代码（Vue → JS、TS → JS、Sass → CSS），然后再返回给浏览器。</span>
+            <strong>{{ t('devServerFlow.httpAnalogy3') }}</strong>
+            <span>Vite、Webpack 的开发服务器不只是"原样返回文件"，它还会即时编译你的代码（Vue → JS、TS → JS、Sass → CSS），然后再返回给{{ t('devServerFlow.browser') }}。</span>
           </div>
         </div>
       </div>
     </div>
 
     <div class="info-box">
-      <strong>一句话总结：</strong>开发服务器 = 一个运行在 localhost 上的 HTTP 服务器 + 即时代码编译器。它监听某个端口，浏览器来请求，它就把编译好的代码返回。
+      <strong>{{ t('devServerFlow.summary') }}</strong>{{ t('devServerFlow.summaryContent') }}
     </div>
   </div>
 </template>

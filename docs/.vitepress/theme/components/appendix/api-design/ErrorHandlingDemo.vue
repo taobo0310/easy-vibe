@@ -3,7 +3,7 @@
     <div class="eh-terminal">
       <div class="term-bar">
         <span class="dot r" /><span class="dot y" /><span class="dot g" />
-        <span class="term-title">错误处理演示</span>
+        <span class="term-title">{{ t('errorHandling.terminalTitle') }}</span>
       </div>
       <div ref="termEl" class="term-body">
         <div v-for="(l, i) in lines" :key="i" class="t-line">
@@ -28,23 +28,23 @@
         ]"
         @click="run(op)"
       >
-        <code>{{ op.cmd }}</code>
+        <code v-html="op.cmd" />
       </button>
       <button class="eh-btn eh-btn--reset" :disabled="running" @click="reset">
-        重置
+        {{ t('errorHandling.reset') }}
       </button>
     </div>
 
     <div class="eh-response">
       <div class="res-header">
-        <span class="res-label">响应结构</span>
-        <span class="res-status" :class="responseStatus">{{
+        <span class="res-label">{{ t('errorHandling.responseLabel') }}</span>
+        <span class="res-status" :class="responseStatusClass">{{
           responseStatus
         }}</span>
       </div>
       <div class="res-body">
         <pre v-if="responseData">{{ responseData }}</pre>
-        <div v-else class="res-empty">点击上方按钮查看错误响应示例</div>
+        <div v-else class="res-empty">{{ t('errorHandling.emptyResponse') }}</div>
       </div>
     </div>
 
@@ -53,153 +53,27 @@
 </template>
 
 <script setup>
-import { ref, nextTick } from 'vue'
+import { ref, nextTick, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { apiDesignLocale } from '../../../locales/api-design/index.js'
 
+const { t, messages } = useI18n(apiDesignLocale)
 const termEl = ref(null)
-const lines = ref([{ kind: 'dim', text: '// 对比好的和差的错误处理方式' }])
+const lines = ref([{ kind: 'dim', text: t('errorHandling.initialLine') }])
 const typing = ref('')
 const running = ref(false)
 const active = ref(null)
-const hint = ref('点击按钮，对比"好的"和"差的"错误响应设计。')
+const hint = ref(t('errorHandling.initialHint'))
 const responseData = ref('')
 const responseStatus = ref('')
+const responseStatusClass = computed(() => {
+  if (responseStatus.value.startsWith('200')) return 'warning'
+  return `s${responseStatus.value}`
+})
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
 
-const ops = [
-  {
-    id: 'bad1',
-    cmd: '❌ 差: 所有错误都 200',
-    ok: () => true,
-    output: [
-      { kind: 'dim', text: '// HTTP 200 但业务失败' },
-      { kind: 'yel', text: 'HTTP/1.1 200 OK' },
-      { kind: 'dim', text: '' },
-      { kind: 'yel', text: '{ "error": "出错了" }' }
-    ],
-    hint: '问题：HTTP 状态码说"成功"，但业务说"出错"。缓存层会缓存这个"成功"响应，监控系统也发现不了问题。',
-    do: () => {
-      responseStatus.value = '200 (错误)'
-      responseData.value = `{
-  "error": "出错了"
-}`
-    }
-  },
-  {
-    id: 'bad2',
-    cmd: '❌ 差: 错误信息太笼统',
-    ok: () => true,
-    output: [
-      { kind: 'dim', text: '// 错误信息没有帮助' },
-      { kind: 'red', text: 'HTTP/1.1 400 Bad Request' },
-      { kind: 'dim', text: '' },
-      { kind: 'red', text: '{ "message": "参数错误" }' }
-    ],
-    hint: '问题：客户端不知道哪个参数错了、为什么错。用户只能看到"参数错误"，无法修正。',
-    do: () => {
-      responseStatus.value = '400'
-      responseData.value = `{
-  "message": "参数错误"
-}`
-    }
-  },
-  {
-    id: 'bad3',
-    cmd: '❌ 差: 暴露敏感信息',
-    ok: () => true,
-    output: [
-      { kind: 'dim', text: '// 500 错误暴露堆栈' },
-      { kind: 'red', text: 'HTTP/1.1 500 Internal Server Error' },
-      { kind: 'dim', text: '' },
-      {
-        kind: 'red',
-        text: '{ "error": "TypeError: Cannot read property..." }'
-      },
-      { kind: 'red', text: '{ "stack": "at UserService.login..." }' },
-      { kind: 'red', text: '{ "sql": "SELECT * FROM users WHERE..." }' }
-    ],
-    hint: '危险！暴露了代码结构、数据库查询。攻击者可以利用这些信息进行攻击。',
-    do: () => {
-      responseStatus.value = '500'
-      responseData.value = `{
-  "error": "TypeError: Cannot read property 'id' of undefined",
-  "stack": "at UserService.login (src/service.js:45)",
-  "sql": "SELECT * FROM users WHERE email='...'"
-}`
-    }
-  },
-  {
-    id: 'good1',
-    cmd: '✅ 好: 正确的状态码',
-    ok: () => true,
-    output: [
-      { kind: 'dim', text: '// HTTP 状态码准确表达错误类型' },
-      { kind: 'grn', text: 'HTTP/1.1 404 Not Found' },
-      { kind: 'dim', text: '' },
-      { kind: 'grn', text: '{ "code": 10002, "message": "用户不存在" }' }
-    ],
-    hint: '正确！404 表示资源不存在，客户端一看就知道问题所在。',
-    do: () => {
-      responseStatus.value = '404'
-      responseData.value = `{
-  "code": 10002,
-  "message": "用户不存在",
-  "request_id": "req-550e8400"
-}`
-    }
-  },
-  {
-    id: 'good2',
-    cmd: '✅ 好: 详细的错误信息',
-    ok: () => true,
-    output: [
-      { kind: 'dim', text: '// 错误信息帮助定位问题' },
-      { kind: 'grn', text: 'HTTP/1.1 422 Unprocessable Entity' },
-      { kind: 'dim', text: '' },
-      { kind: 'grn', text: '{ "code": 20003, "message": "密码强度不足" }' },
-      { kind: 'grn', text: '{ "errors": [{ "field": "password", ... }] }' }
-    ],
-    hint: '正确！提供了错误码、字段级别的错误详情，前端可以精确提示用户。',
-    do: () => {
-      responseStatus.value = '422'
-      responseData.value = `{
-  "code": 20003,
-  "message": "密码强度不足",
-  "errors": [
-    {
-      "field": "password",
-      "code": "VALIDATION_ERROR",
-      "message": "密码必须包含至少 1 个大写字母、1 个小写字母、1 个数字"
-    }
-  ],
-  "request_id": "req-550e8400"
-}`
-    }
-  },
-  {
-    id: 'good3',
-    cmd: '✅ 好: 安全的错误响应',
-    ok: () => true,
-    output: [
-      { kind: 'dim', text: '// 500 只返回错误 ID' },
-      { kind: 'grn', text: 'HTTP/1.1 500 Internal Server Error' },
-      { kind: 'dim', text: '' },
-      { kind: 'grn', text: '{ "code": 10000, "message": "服务器错误" }' },
-      { kind: 'grn', text: '{ "error_id": "err-a1b2c3d4" }' }
-    ],
-    hint: '正确！只返回错误 ID，详细日志记录在服务器。用户反馈错误 ID，技术人员可以快速定位。',
-    do: () => {
-      responseStatus.value = '500'
-      responseData.value = `{
-  "code": 10000,
-  "message": "服务器内部错误，请联系管理员",
-  "error_id": "err-a1b2c3d4",
-  "request_id": "req-550e8400",
-  "help_url": "https://docs.example.com/errors/10000"
-}`
-    }
-  }
-]
+const ops = computed(() => messages.value.errorHandling.ops.map((op) => ({ ...op, ok: () => true })))
 
 async function run(op) {
   if (running.value) return
@@ -228,7 +102,8 @@ async function run(op) {
     await sleep(50)
   }
 
-  op.do()
+  responseStatus.value = op.responseStatus
+  responseData.value = op.responseData
   await sleep(120)
   hint.value = op.hint
   running.value = false
@@ -239,9 +114,9 @@ function scroll() {
 }
 
 function reset() {
-  lines.value = [{ kind: 'dim', text: '// 对比好的和差的错误处理方式' }]
+  lines.value = [{ kind: 'dim', text: t('errorHandling.initialLine') }]
   active.value = null
-  hint.value = '点击按钮，对比"好的"和"差的"错误响应设计。'
+  hint.value = t('errorHandling.initialHint')
   typing.value = ''
   running.value = false
   responseData.value = ''
@@ -384,7 +259,6 @@ function reset() {
   display: none;
 }
 .eh-btn--reset::after {
-  content: '重置';
   font-size: 0.7rem;
   color: #585b70;
 }
@@ -413,23 +287,23 @@ function reset() {
   padding: 2px 8px;
   border-radius: 4px;
 }
-.res-status\.200\ \(错误\) {
+.res-status.warning {
   background: #f9e2af22;
   color: #d97706;
 }
-.res-status\.400 {
+.res-status.s400 {
   background: #f59e0b22;
   color: #d97706;
 }
-.res-status\.404 {
+.res-status.s404 {
   background: #3b82f622;
   color: #3b82f6;
 }
-.res-status\.422 {
+.res-status.s422 {
   background: #8b5cf622;
   color: #8b5cf6;
 }
-.res-status\.500 {
+.res-status.s500 {
   background: #ef444422;
   color: #ef4444;
 }

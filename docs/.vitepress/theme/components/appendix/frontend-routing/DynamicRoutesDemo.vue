@@ -2,16 +2,15 @@
   <div class="dynamic-routes-demo">
     <div class="demo-header">
       <span class="icon">🔗</span>
-      <span class="title">动态路由</span>
-      <span class="subtitle">让URL变身数据容器</span>
+      <span class="title">{{ t('dynamicRoutes.title') }}</span>
+      <span class="subtitle">{{ t('dynamicRoutes.subtitle') }}</span>
     </div>
 
     <div class="intro-text">
-      想象你在<span class="highlight">图书馆</span>找书：每本书都有编号（动态参数），你需要根据这个编号找到对应的书籍。动态路由就像这样，用<span class="highlight">占位符</span>匹配不同的内容。
+      {{ t('dynamicRoutes.intro.prefix') }}<span class="highlight">{{ t('dynamicRoutes.intro.highlight1') }}</span>{{ t('dynamicRoutes.intro.middle') }}<span class="highlight">{{ t('dynamicRoutes.intro.highlight2') }}</span>{{ t('dynamicRoutes.intro.suffix') }}
     </div>
 
     <div class="demo-content">
-      <!-- 参数类型说明 -->
       <div class="param-types">
         <div
           v-for="type in paramTypes"
@@ -26,15 +25,14 @@
             {{ type.label }}
           </div>
           <div class="param-example">
-            例: {{ type.example }}
+            {{ t('dynamicRoutes.exampleLabel') }} {{ type.example }}
           </div>
         </div>
       </div>
 
-      <!-- 参数解析演示 -->
       <div class="parsing-demo">
         <div class="demo-section">
-          <h5>📍 测试路径</h5>
+          <h5>{{ t('dynamicRoutes.testPathTitle') }}</h5>
           <div class="input-group">
             <span class="input-prefix">/</span>
             <input
@@ -46,25 +44,25 @@
             >
           </div>
           <div class="hint-text">
-            试试输入：user/123 或 products/electronics/456
+            {{ t('dynamicRoutes.hint') }}
           </div>
         </div>
 
         <div class="demo-section">
-          <h5>🎯 匹配结果</h5>
+          <h5>{{ t('dynamicRoutes.resultTitle') }}</h5>
           <div
             v-if="parseResult"
             class="result-box"
           >
             <div class="result-row">
-              <span class="result-label">匹配路由:</span>
+              <span class="result-label">{{ t('dynamicRoutes.matchedRoute') }}</span>
               <code class="result-value">{{ parseResult.route }}</code>
             </div>
             <div
               v-if="Object.keys(parseResult.params).length"
               class="result-params"
             >
-              <span class="result-label">提取参数:</span>
+              <span class="result-label">{{ t('dynamicRoutes.extractedParams') }}</span>
               <div class="params-grid">
                 <div
                   v-for="(value, key) in parseResult.params"
@@ -85,7 +83,7 @@
             <div class="no-match-icon">
               🔍
             </div>
-            <div>输入路径查看解析结果</div>
+            <div>{{ t('dynamicRoutes.noResult') }}</div>
           </div>
         </div>
       </div>
@@ -93,47 +91,21 @@
 
     <div class="info-box">
       <span class="icon">💡</span>
-      <strong>核心思想：</strong>动态路由用占位符（如 :id）捕获URL中的变量值，就像给数据贴上了"标签"，让组件可以通过这些标签获取具体内容。
+      <strong>{{ t('common.coreIdea') }}</strong>{{ t('dynamicRoutes.info') }}
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { frontendRoutingLocale } from '../../../locales/frontend-routing/index.js'
 
+const { t, messages } = useI18n(frontendRoutingLocale)
 const selectedType = ref('required')
 const testPath = ref('user/123/profile')
 
-const paramTypes = [
-  {
-    name: 'required',
-    pattern: ':id',
-    label: '必填参数',
-    example: '/user/123',
-    description: 'URL中必须有对应的值'
-  },
-  {
-    name: 'optional',
-    pattern: ':id?',
-    label: '可选参数',
-    example: '/user 或 /user/123',
-    description: '可以省略的参数'
-  },
-  {
-    name: 'multiple',
-    pattern: ':id+',
-    label: '重复参数',
-    example: '/files/a/b/c',
-    description: '一个或多个值'
-  },
-  {
-    name: 'zeroOrMore',
-    pattern: ':id*',
-    label: '灵活参数',
-    example: '/tags 或 /tags/vue/router',
-    description: '零个或多个值'
-  }
-]
+const paramTypes = computed(() => messages.value.dynamicRoutes.paramTypes)
 
 const routePatterns = [
   { pattern: '/user/:id', name: 'UserDetail' },
@@ -146,7 +118,7 @@ const routePatterns = [
 
 const selectType = (type) => {
   selectedType.value = type.name
-  testPath.value = type.example.split(' 或 ')[0].replace('/', '')
+  testPath.value = type.example.split(/\s+(?:or|\u6216)\s+/u)[0].replace('/', '')
 }
 
 const parsePath = () => {

@@ -1,30 +1,27 @@
 <template>
   <div class="lc-root">
-    <h4 class="lc-title">开源许可证对比工具</h4>
+    <h4 class="lc-title">{{ t('licenseComparison.title') }}</h4>
 
-    <!-- Filter -->
     <div class="lc-filter">
-      <span class="lc-filter-label">我的需求：</span>
+      <span class="lc-filter-label">{{ t('licenseComparison.needs') }}</span>
       <button
         v-for="f in filters"
         :key="f.id"
         :class="['lc-tag', { 'lc-tag--on': activeFilters.includes(f.id) }]"
         @click="toggle(f.id)"
       >{{ f.label }}</button>
-      <button v-if="activeFilters.length" class="lc-tag lc-tag--clear" @click="activeFilters = []">清除筛选</button>
+      <button v-if="activeFilters.length" class="lc-tag lc-tag--clear" @click="activeFilters = []">{{ t('licenseComparison.clear') }}</button>
     </div>
 
-    <!-- Recommendation -->
     <div v-if="recommended" class="lc-recommend">
-      推荐许可证：<strong>{{ recommended.name }}</strong> — {{ recommended.summary }}
+      {{ t('licenseComparison.recommendation') }} <strong>{{ recommended.name }}</strong> — {{ recommended.summary }}
     </div>
 
-    <!-- Table -->
     <div class="lc-table-wrap">
       <table class="lc-table">
         <thead>
           <tr>
-            <th>许可证</th>
+            <th>{{ t('licenseComparison.licenseColumn') }}</th>
             <th v-for="p in permissions" :key="p.id">{{ p.label }}</th>
           </tr>
         </thead>
@@ -48,63 +45,23 @@
       </table>
     </div>
 
-    <!-- Legend -->
     <div class="lc-legend">
-      <span><span class="lc-yes">&#10003;</span> 允许</span>
-      <span><span class="lc-no">&#10007;</span> 不允许/限制</span>
-      <span><span class="lc-cond">&#9888;</span> 有条件</span>
+      <span><span class="lc-yes">&#10003;</span> {{ t('licenseComparison.yes') }}</span>
+      <span><span class="lc-no">&#10007;</span> {{ t('licenseComparison.no') }}</span>
+      <span><span class="lc-cond">&#9888;</span> {{ t('licenseComparison.conditional') }}</span>
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { engineeringExcellenceLocale } from '../../../locales/engineering-excellence/index.js'
 
-const permissions = [
-  { id: 'commercial', label: '商用' },
-  { id: 'modify', label: '修改' },
-  { id: 'distribute', label: '分发' },
-  { id: 'patent', label: '专利授权' },
-  { id: 'private', label: '私用' },
-  { id: 'copyleft', label: '需开源衍生' },
-  { id: 'liability', label: '免责' }
-]
-
-const licenses = [
-  {
-    id: 'mit', name: 'MIT', summary: '最宽松，几乎无限制',
-    perms: { commercial: true, modify: true, distribute: true, patent: false, private: true, copyleft: false, liability: true },
-    tags: ['commercial', 'simple', 'private']
-  },
-  {
-    id: 'apache2', name: 'Apache 2.0', summary: '宽松 + 专利保护',
-    perms: { commercial: true, modify: true, distribute: true, patent: true, private: true, copyleft: false, liability: true },
-    tags: ['commercial', 'patent', 'private']
-  },
-  {
-    id: 'gpl3', name: 'GPL 3.0', summary: '强 Copyleft，衍生必须开源',
-    perms: { commercial: true, modify: true, distribute: true, patent: true, private: true, copyleft: true, liability: true },
-    tags: ['copyleft', 'patent']
-  },
-  {
-    id: 'bsd2', name: 'BSD 2-Clause', summary: '类似 MIT，极简宽松',
-    perms: { commercial: true, modify: true, distribute: true, patent: false, private: true, copyleft: false, liability: true },
-    tags: ['commercial', 'simple', 'private']
-  },
-  {
-    id: 'mpl2', name: 'MPL 2.0', summary: '文件级 Copyleft，折中方案',
-    perms: { commercial: true, modify: true, distribute: true, patent: true, private: true, copyleft: 'cond', liability: true },
-    tags: ['commercial', 'patent', 'copyleft']
-  }
-]
-
-const filters = [
-  { id: 'commercial', label: '允许商用' },
-  { id: 'patent', label: '需要专利保护' },
-  { id: 'simple', label: '尽量简单' },
-  { id: 'copyleft', label: '要求衍生开源' },
-  { id: 'private', label: '允许闭源使用' }
-]
+const { t, messages } = useI18n(engineeringExcellenceLocale)
+const permissions = computed(() => messages.value.licenseComparison.permissions)
+const licenses = computed(() => messages.value.licenseComparison.licenses)
+const filters = computed(() => messages.value.licenseComparison.filters)
 
 const activeFilters = ref([])
 
@@ -118,7 +75,7 @@ const recommended = computed(() => {
   if (!activeFilters.value.length) return null
   let best = null
   let bestScore = -1
-  for (const l of licenses) {
+  for (const l of licenses.value) {
     const score = activeFilters.value.filter(f => l.tags.includes(f)).length
     if (score > bestScore) { bestScore = score; best = l }
   }

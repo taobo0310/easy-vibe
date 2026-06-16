@@ -1,8 +1,8 @@
 <template>
   <div class="demo-root">
     <div class="demo-header">
-      <span class="title">.env 文件 + 代码读取</span>
-      <span class="subtitle">左边写配置，右边读取——两者之间只有变量名这一条线</span>
+      <span class="title">{{ t('dotEnv.title') }}</span>
+      <span class="subtitle">{{ t('dotEnv.subtitle') }}</span>
     </div>
 
     <div class="lang-tabs">
@@ -18,11 +18,10 @@
     </div>
 
     <div class="two-col">
-      <!-- Left: .env file -->
       <div class="file-panel">
         <div class="file-title">
           <span class="file-icon">📄</span> .env
-          <span class="file-badge no-commit">不提交 Git</span>
+          <span class="file-badge no-commit">{{ t('dotEnv.noCommit') }}</span>
         </div>
         <div class="code-area">
           <div v-for="(line, i) in envLines" :key="i" class="code-line" :class="line.type">
@@ -40,19 +39,18 @@
         </div>
         <div class="file-title example">
           <span class="file-icon">📋</span> .env.example
-          <span class="file-badge can-commit">可以提交 Git</span>
+          <span class="file-badge can-commit">{{ t('dotEnv.canCommit') }}</span>
         </div>
         <div class="code-area dim">
           <div v-for="(line, i) in exampleLines" :key="i" class="code-line" :class="line.type">
             <span v-if="line.key" class="env-key">{{ line.key }}</span>
             <span v-if="line.key" class="env-eq">=</span>
-            <span v-if="line.key" class="env-val empty">（值留空）</span>
+            <span v-if="line.key" class="env-val empty">{{ t('dotEnv.emptyValue') }}</span>
             <span v-else class="env-comment">{{ line.text }}</span>
           </div>
         </div>
       </div>
 
-      <!-- Right: code -->
       <div class="code-panel">
         <div class="file-title">
           <span class="file-icon">💻</span> {{ currentLangObj.filename }}
@@ -63,7 +61,7 @@
           </div>
         </div>
         <div class="read-result">
-          <div class="result-title">程序实际读到的值</div>
+          <div class="result-title">{{ t('dotEnv.resultTitle') }}</div>
           <div v-for="kv in readResults" :key="kv.key" class="result-row">
             <span
               class="result-key"
@@ -79,77 +77,31 @@
     </div>
 
     <div class="info-box">
-      <strong>工作流程：</strong><code>load_dotenv()</code> / <code>import 'dotenv/config'</code> 在启动时读取 <code>.env</code> 文件，把里面的键值注入到进程环境变量中，代码里再用 <code>os.environ</code> 或 <code>process.env</code> 读取，两端只靠变量名连接。
+      <strong>{{ t('dotEnv.workflowStrong') }}</strong>{{ t('dotEnv.workflow') }}
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { developmentToolsLocale } from '../../../locales/development-tools/index.js'
+
+const { t, messages } = useI18n(developmentToolsLocale)
 
 const hoveredKey = ref(null)
 const currentLang = ref('python')
 
-const langs = [
-  { id: 'python', label: 'Python' },
-  { id: 'node', label: 'Node.js' }
-]
-
-const envLines = [
-  { type: 'comment', text: '# 本地开发配置，不提交到 Git' },
-  { key: 'OPENAI_API_KEY', value: 'sk-proj-abc123...' },
-  { key: 'DATABASE_URL', value: 'postgresql://localhost/dev' },
-  { key: 'PORT', value: '3000' },
-  { key: 'NODE_ENV', value: 'development' }
-]
-
-const exampleLines = [
-  { type: 'comment', text: '# 复制为 .env，填入真实值' },
-  { key: 'OPENAI_API_KEY', value: '' },
-  { key: 'DATABASE_URL', value: '' },
-  { key: 'PORT', value: '' },
-  { key: 'NODE_ENV', value: '' }
-]
-
-const readResults = [
-  { key: 'OPENAI_API_KEY', value: 'sk-proj-abc123...' },
-  { key: 'DATABASE_URL', value: 'postgresql://localhost/dev' },
-  { key: 'PORT', value: '3000' }
-]
-
-const pythonLines = [
-  { type: 'comment', text: '# pip install python-dotenv openai' },
-  { type: 'normal', text: 'from dotenv import load_dotenv' },
-  { type: 'normal', text: 'import os, openai' },
-  { type: 'normal', text: '&nbsp;' },
-  { type: 'highlight', text: 'load_dotenv()  <span class="comment-inline"># 读取 .env 文件</span>' },
-  { type: 'normal', text: '&nbsp;' },
-  { type: 'normal', text: 'client = openai.OpenAI(' },
-  { type: 'highlight', text: '  api_key=os.environ.get(<span class="key-ref">"OPENAI_API_KEY"</span>)' },
-  { type: 'normal', text: ')' },
-  { type: 'normal', text: '&nbsp;' },
-  { type: 'normal', text: 'db = os.environ.get(<span class="key-ref">"DATABASE_URL"</span>)' },
-  { type: 'normal', text: 'port = int(os.environ.get(<span class="key-ref">"PORT"</span>, 8000))' }
-]
-
-const nodeLines = [
-  { type: 'comment', text: '# npm install dotenv openai' },
-  { type: 'highlight', text: "import 'dotenv/config'  <span class=\"comment-inline\">// 读取 .env 文件</span>" },
-  { type: 'normal', text: "import OpenAI from 'openai'" },
-  { type: 'normal', text: '&nbsp;' },
-  { type: 'normal', text: 'const client = new OpenAI({' },
-  { type: 'highlight', text: '  apiKey: process.env.<span class="key-ref">OPENAI_API_KEY</span>' },
-  { type: 'normal', text: '})' },
-  { type: 'normal', text: '&nbsp;' },
-  { type: 'normal', text: 'const db = process.env.<span class="key-ref">DATABASE_URL</span>' },
-  { type: 'normal', text: 'const port = process.env.<span class="key-ref">PORT</span> ?? 8000' }
-]
+const langs = computed(() => messages.value.dotEnv.langs)
+const envLines = computed(() => messages.value.dotEnv.envLines)
+const exampleLines = computed(() => messages.value.dotEnv.exampleLines)
+const readResults = computed(() => messages.value.dotEnv.readResults)
 
 const currentLangObj = computed(() => {
   if (currentLang.value === 'python') {
-    return { filename: 'main.py', lines: pythonLines }
+    return { filename: 'main.py', lines: messages.value.dotEnv.pythonLines }
   }
-  return { filename: 'index.js', lines: nodeLines }
+  return { filename: 'index.js', lines: messages.value.dotEnv.nodeLines }
 })
 </script>
 

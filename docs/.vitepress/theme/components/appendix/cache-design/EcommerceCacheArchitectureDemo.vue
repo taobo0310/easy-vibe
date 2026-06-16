@@ -12,17 +12,20 @@
         type="info"
         :closable="false"
       >
-        电商缓存架构演示组件占位符 - 待实现具体交互
+        {{ t('ecommerceArchitecture.placeholder') }}
       </el-alert>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { cacheDesignLocale } from '../../../locales/cache-design/index.js'
 
-const title = ref('电商缓存架构演示')
-const description = ref('展示电商系统中的多级缓存架构设计，包括商品缓存、库存缓存、用户缓存等')
+const { t } = useI18n(cacheDesignLocale)
+const title = computed(() => t('ecommerceArchitecture.title'))
+const description = computed(() => t('ecommerceArchitecture.description'))
 </script>
 
 <style scoped>

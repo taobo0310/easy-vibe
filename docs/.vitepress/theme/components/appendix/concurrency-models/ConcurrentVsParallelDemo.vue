@@ -1,6 +1,6 @@
 <template>
   <div class="demo-container">
-    <h4>并发 (Concurrency) vs 并行 (Parallelism) 演示</h4>
+    <h4>{{ t('concurrentVsParallel.title') }}</h4>
 
     <div class="controls">
       <el-radio-group
@@ -8,13 +8,13 @@
         size="small"
       >
         <el-radio-button label="concurrent">
-          单核并发
+          {{ t('concurrentVsParallel.singleCoreConcurrent') }}
         </el-radio-button>
         <el-radio-button label="parallel">
-          多核并行
+          {{ t('concurrentVsParallel.multiCoreParallel') }}
         </el-radio-button>
         <el-radio-button label="hybrid">
-          混合模式
+          {{ t('concurrentVsParallel.hybridMode') }}
         </el-radio-button>
       </el-radio-group>
 
@@ -24,14 +24,14 @@
         :disabled="isRunning"
         @click="startDemo"
       >
-        {{ isRunning ? '运行中...' : '开始演示' }}
+        {{ isRunning ? t('common.running') : t('concurrentVsParallel.startDemo') }}
       </el-button>
 
       <el-button
         size="small"
         @click="reset"
       >
-        重置
+        {{ t('common.reset') }}
       </el-button>
 
       <el-slider
@@ -46,10 +46,10 @@
     </div>
 
     <div class="demo-grid">
-      <!-- CPU 核心显示 -->
+      <!-- CPU Cores -->
       <div class="section">
         <div class="section-title">
-          {{ demoMode === 'concurrent' ? 'CPU 核心 (单核)' : 'CPU 核心 (' + cpuCores.length + '核)' }}
+          {{ demoMode === 'concurrent' ? t('concurrentVsParallel.cpuCoreSingle') : t('concurrentVsParallel.cpuCoreMulti', { count: cpuCores.length }) }}
         </div>
 
         <div
@@ -77,16 +77,16 @@
               {{ core.task }}
             </div>
             <div class="core-status">
-              {{ core.active ? '运行中' : '空闲' }}
+              {{ core.active ? t('common.runningState') : t('common.idleState') }}
             </div>
           </div>
         </div>
       </div>
 
-      <!-- 任务视图 -->
+      <!-- Task View -->
       <div class="section">
         <div class="section-title">
-          任务执行
+          {{ t('concurrentVsParallel.taskExecution') }}
         </div>
 
         <div class="task-timeline">
@@ -97,7 +97,7 @@
           >
             <div class="task-info">
               <div class="task-name">
-                任务 {{ task.id }}
+                {{ t('common.taskLabel') }} {{ task.id }}
               </div>
               <div class="task-duration">
                 {{ task.duration }}ms
@@ -116,7 +116,7 @@
                   v-if="segment.width > 5"
                   class="segment-text"
                 >
-                  {{ segment.type === 'execution' ? '执行' : '等待' }}
+                  {{ segment.type === 'execution' ? t('common.execution') : t('common.waiting') }}
                 </span>
               </div>
             </div>
@@ -127,55 +127,55 @@
 
     <div class="comparison-table">
       <div class="table-header">
-        并发 vs 并行 对比
+        {{ t('concurrentVsParallel.comparisonTitle') }}
       </div>
 
       <div class="comparison-grid">
         <div class="comparison-item">
           <div class="item-icon">
-            🔄
+            &#x1F504;
           </div>
           <div class="item-title">
-            并发 (Concurrency)
+            {{ t('concurrentVsParallel.concurrencyTitle') }}
           </div>
           <div class="item-desc">
-            多个任务交替执行，宏观上同时推进
+            {{ t('concurrentVsParallel.concurrencyDesc') }}
           </div>
           <div class="item-examples">
-            <strong>例子:</strong> 单核CPU多线程、协程调度、异步I/O
+            <strong>{{ t('concurrentVsParallel.examplesLabel') }}:</strong> {{ t('concurrentVsParallel.concurrencyExamples') }}
           </div>
         </div>
 
         <div class="comparison-item">
           <div class="item-icon">
-            ⚡
+            &#x26A1;
           </div>
           <div class="item-title">
-            并行 (Parallelism)
+            {{ t('concurrentVsParallel.parallelismTitle') }}
           </div>
           <div class="item-desc">
-            多个任务真正同时执行
+            {{ t('concurrentVsParallel.parallelismDesc') }}
           </div>
           <div class="item-examples">
-            <strong>例子:</strong> 多核CPU计算、GPU并行计算、分布式处理
+            <strong>{{ t('concurrentVsParallel.examplesLabel') }}:</strong> {{ t('concurrentVsParallel.parallelismExamples') }}
           </div>
         </div>
       </div>
 
       <div class="need-table">
         <div class="need-title">
-          需要什么条件?
+          {{ t('concurrentVsParallel.needConditions') }}
         </div>
 
         <div class="need-items">
           <div class="need-item">
-            <span class="need-check">✓</span>
-            <span class="need-text"><strong>并发:</strong> 单核 CPU 即可实现</span>
+            <span class="need-check">&#x2713;</span>
+            <span class="need-text"><strong>{{ t('concurrentVsParallel.concurrencyNeed') }}</strong></span>
           </div>
 
           <div class="need-item">
-            <span class="need-check need-multi">✓</span>
-            <span class="need-text"><strong>并行:</strong> 需要多核 CPU 或多台机器</span>
+            <span class="need-check need-multi">&#x2713;</span>
+            <span class="need-text"><strong>{{ t('concurrentVsParallel.parallelismNeed') }}</strong></span>
           </div>
         </div>
       </div>
@@ -185,12 +185,15 @@
 
 <script setup>
 import { ref } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { concurrencyModelsLocale } from '../../../locales/concurrency-models/index.js'
+
+const { t } = useI18n(concurrencyModelsLocale)
 
 const demoMode = ref('concurrent')
 const isRunning = ref(false)
 const workerCount = ref(4)
 
-// CPU 核心
 const cpuCores = ref([
   { active: false, color: '#409eff', task: null },
   { active: false, color: '#67c23a', task: null },
@@ -198,7 +201,6 @@ const cpuCores = ref([
   { active: false, color: '#f56c6c', task: null },
 ])
 
-// 演示任务
 const demoTasks = ref([
   { id: 1, duration: 40, segments: [] },
   { id: 2, duration: 30, segments: [] },
@@ -210,11 +212,8 @@ function startDemo() {
   if (isRunning.value) return
 
   isRunning.value = true
-
-  // 生成任务时间线
   generateTaskTimeline()
 
-  // 模拟执行
   setTimeout(() => {
     isRunning.value = false
   }, 3000)
@@ -227,7 +226,6 @@ function generateTaskTimeline() {
     const colors = ['#409eff', '#67c23a', '#e6a23c', '#f56c6c']
 
     if (mode === 'concurrent') {
-      // 单核并发：任务交替执行
       const baseStart = 5 + idx * 3
       segments.push({
         type: 'execution',
@@ -248,7 +246,6 @@ function generateTaskTimeline() {
         color: colors[idx % colors.length]
       })
     } else if (mode === 'parallel') {
-      // 多核并行：任务同时执行
       segments.push({
         type: 'execution',
         start: 5,
@@ -256,7 +253,6 @@ function generateTaskTimeline() {
         color: colors[idx % colors.length]
       })
     } else {
-      // 混合模式
       if (idx < workerCount.value) {
         segments.push({
           type: 'execution',

@@ -1,15 +1,15 @@
 <template>
   <div class="demo-root">
     <div class="demo-header">
-      <span class="title">环境变量浏览器</span>
-      <span class="subtitle">点击任意变量行，在终端中查看它的值和作用</span>
+      <span class="title">{{ t('envVarOverview.title') }}</span>
+      <span class="subtitle">{{ t('envVarOverview.subtitle') }}</span>
     </div>
 
     <div class="content-layout">
       <div class="env-table">
         <div class="table-header">
-          <span>变量名</span>
-          <span>示例值</span>
+          <span>{{ messages.envVarOverview.headers[0] }}</span>
+          <span>{{ messages.envVarOverview.headers[1] }}</span>
         </div>
         <div
           v-for="item in envVars"
@@ -49,62 +49,23 @@
     </div>
 
     <div class="info-box">
-      <strong>核心概念：</strong>环境变量是每个进程持有的一组「键=值」配置。程序启动时自动从父进程继承一份，可随时通过
-      <code>echo $变量名</code> 查看，用 <code>export KEY=value</code> 设置。
+      <strong>{{ t('envVarOverview.infoStrong') }}</strong>{{ t('envVarOverview.info') }}
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, nextTick } from 'vue'
+import { ref, computed, nextTick } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { developmentToolsLocale } from '../../../locales/development-tools/index.js'
+
+const { t, messages } = useI18n(developmentToolsLocale)
 
 let lineId = 0
-const termLines = ref([{ id: lineId++, type: 'hint', text: '← 点击左侧任意变量行来查看它' }])
+const termLines = ref([{ id: lineId++, type: 'hint', text: t('envVarOverview.hint') }])
 const selected = ref(null)
 const termBody = ref(null)
-
-const envVars = [
-  {
-    key: 'HOME',
-    value: '/Users/alice',
-    desc: '当前用户的主目录路径。cd ~ 本质上就是跳到 $HOME。很多程序把配置文件存在这里。'
-  },
-  {
-    key: 'USER',
-    value: 'alice',
-    desc: '当前登录的用户名。服务器程序常用它做权限判断或日志记录。'
-  },
-  {
-    key: 'SHELL',
-    value: '/bin/zsh',
-    desc: '当前使用的 Shell 程序路径。决定了你输入命令后由哪个程序来解释执行。'
-  },
-  {
-    key: 'PATH',
-    value: '/usr/local/bin:/usr/bin:/bin',
-    desc: '最重要的环境变量！Shell 查找可执行文件时，依次在这些目录里搜索，用冒号分隔。见下方演示。'
-  },
-  {
-    key: 'PWD',
-    value: '/Users/alice/projects',
-    desc: '当前工作目录（Print Working Directory）。就是你现在"站在"的那个目录。'
-  },
-  {
-    key: 'LANG',
-    value: 'zh_CN.UTF-8',
-    desc: '系统语言和字符编码。影响程序的错误提示语言、日期格式、排序规则等。'
-  },
-  {
-    key: 'NODE_ENV',
-    value: 'development',
-    desc: '开发者自定义变量。告诉 Node.js 应用当前是开发（development）还是生产（production）环境，影响日志、错误显示等行为。'
-  },
-  {
-    key: 'OPENAI_API_KEY',
-    value: 'sk-••••••••••••••••',
-    desc: '开发者自定义变量，存储 API 密钥。把密钥放在环境变量里（而非写死在代码里）是重要的安全最佳实践。'
-  }
-]
+const envVars = computed(() => messages.value.envVarOverview.vars)
 
 const echoVar = (item) => {
   selected.value = item

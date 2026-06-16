@@ -1,27 +1,27 @@
 <template>
   <div class="fullstack-demo">
     <div class="demo-header">
-      <span class="title">全栈技能树</span>
-      <span class="subtitle">前后端通吃的核心能力</span>
+      <span class="title">{{ t('computerOrganization.vibeCodingFullstack.fullstackSkill.title') }}</span>
+      <span class="subtitle">{{ t('computerOrganization.vibeCodingFullstack.fullstackSkill.subtitle') }}</span>
     </div>
 
     <div class="skill-sections">
       <div class="skill-section">
-        <div class="section-title">前端能力</div>
+        <div class="section-title">{{ t('computerOrganization.vibeCodingFullstack.fullstackSkill.frontendTitle') }}</div>
         <div class="skill-list">
           <div v-for="skill in frontendSkills" :key="skill" class="skill-item">{{ skill }}</div>
         </div>
       </div>
 
       <div class="skill-section bridge">
-        <div class="section-title">全栈核心</div>
+        <div class="section-title">{{ t('computerOrganization.vibeCodingFullstack.fullstackSkill.bridgeTitle') }}</div>
         <div class="skill-list">
           <div v-for="skill in bridgeSkills" :key="skill" class="skill-item highlight">{{ skill }}</div>
         </div>
       </div>
 
       <div class="skill-section">
-        <div class="section-title">后端能力</div>
+        <div class="section-title">{{ t('computerOrganization.vibeCodingFullstack.fullstackSkill.backendTitle') }}</div>
         <div class="skill-list">
           <div v-for="skill in backendSkills" :key="skill" class="skill-item">{{ skill }}</div>
         </div>
@@ -29,17 +29,21 @@
     </div>
 
     <div class="info-box">
-      <strong>全栈不等于全部精通：</strong>核心是打通前后端，能独立完成一个完整功能。不需要在每个领域都达到专家级别。
+      <strong>{{ t('computerOrganization.vibeCodingFullstack.fullstackSkill.noteLabel') }}</strong>{{ t('computerOrganization.vibeCodingFullstack.fullstackSkill.note') }}
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { computerFundamentalsLocale } from '../../../locales/computer-fundamentals/index.js'
 
-const frontendSkills = ref(['HTML/CSS', 'JavaScript', '框架使用', '响应式设计'])
-const backendSkills = ref(['API 设计', '数据库操作', '业务逻辑', '服务器部署'])
-const bridgeSkills = ref(['HTTP 协议', 'Git 协作', '调试能力', '系统设计'])
+const { t, messages } = useI18n(computerFundamentalsLocale)
+
+const frontendSkills = computed(() => messages.value.computerOrganization.vibeCodingFullstack.fullstackSkill.frontendSkills)
+const backendSkills = computed(() => messages.value.computerOrganization.vibeCodingFullstack.fullstackSkill.backendSkills)
+const bridgeSkills = computed(() => messages.value.computerOrganization.vibeCodingFullstack.fullstackSkill.bridgeSkills)
 </script>
 
 <style scoped>

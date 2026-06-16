@@ -1,12 +1,8 @@
-<!--
-  ApiDocumentDemo.vue - 紧凑版
-  目标：演示如何阅读 API 文档
--->
 <template>
   <div class="demo-root">
     <div class="demo-header">
       <span class="icon">📖</span>
-      <span class="title">API 文档翻译机</span>
+      <span class="title">{{ t('apiDocument.title') }}</span>
     </div>
 
     <div class="demo-layout">
@@ -29,30 +25,48 @@ Content-Type: application/json</pre>
         </div>
 
         <div class="doc-section">
-          <div class="doc-title">Body 参数</div>
+          <div class="doc-title">{{ t('apiDocument.bodyParams') }}</div>
           <div class="params-list">
             <div class="param-item">
               <span class="p-name">model</span>
-              <span class="p-req">必填</span>
-              <span class="p-desc">模型名称</span>
+              <span class="p-req">{{ t('apiDocument.required') }}</span>
+              <span class="p-desc">{{ t('apiDocument.modelDesc') }}</span>
             </div>
             <div class="param-item">
               <span class="p-name">messages</span>
-              <span class="p-req">必填</span>
-              <span class="p-desc">对话消息</span>
+              <span class="p-req">{{ t('apiDocument.required') }}</span>
+              <span class="p-desc">{{ t('apiDocument.messagesDesc') }}</span>
             </div>
             <div class="param-item">
               <span class="p-name">temperature</span>
-              <span class="p-opt">可选</span>
-              <span class="p-desc">0-2，默认1</span>
+              <span class="p-opt">{{ t('apiDocument.optional') }}</span>
+              <span class="p-desc">{{ t('apiDocument.temperatureDesc') }}</span>
             </div>
           </div>
         </div>
       </div>
 
       <div class="right-panel">
-        <div class="result-title">翻译成代码</div>
-        <pre class="result-code"><code>from openai import OpenAI
+        <div class="result-title">{{ t('apiDocument.resultTitle') }}</div>
+        <pre class="result-code"><code>{{ codeSample }}</code></pre>
+      </div>
+    </div>
+
+    <div class="info-box">
+      <strong>{{ t('apiDocument.coreTitle') }}</strong>
+      <span>{{ t('apiDocument.coreText') }}</span>
+    </div>
+  </div>
+</template>
+
+<script setup>
+import { computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { apiIntroLocale } from '../../../locales/api-intro/index.js'
+
+const { t } = useI18n(apiIntroLocale)
+
+const codeSample = computed(() => `from openai import OpenAI
 
 client = OpenAI(
     api_key="sk-xxx",
@@ -61,20 +75,9 @@ client = OpenAI(
 
 response = client.chat.completions.create(
     model="deepseek-chat",
-    messages=[{"role": "user", "content": "你好"}]
-)</code></pre>
-      </div>
-    </div>
-
-    <div class="info-box">
-      <strong>核心思想：</strong>
-      <span>看文档找三样：地址（Base
-        URL）、鉴权（Authorization）、参数（Parameters）。</span>
-    </div>
-  </div>
-</template>
-
-<script setup></script>
+    messages=[{"role": "user", "content": "${t('apiDocument.userGreeting')}"}]
+)`)
+</script>
 
 <style scoped>
 .demo-root {

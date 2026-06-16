@@ -1,21 +1,17 @@
-<!--
-  ResponsiveGridDemo.vue
-  响应式布局断点演示
--->
 <template>
   <div class="responsive-demo">
     <div class="header">
       <div class="title">
-        响应式布局：一套代码，多种屏幕
+        {{ t('frameworks.responsiveGrid.title') }}
       </div>
       <div class="subtitle">
-        拖动宽度，观察列数变化
+        {{ t('frameworks.responsiveGrid.subtitle') }}
       </div>
     </div>
 
     <div class="controls">
       <label>
-        视口宽度：<strong>{{ viewportWidth }}</strong> px
+        {{ t('frameworks.responsiveGrid.viewport') }}<strong>{{ viewportWidth }}</strong> px
       </label>
       <input
         v-model="viewportWidth"
@@ -39,19 +35,23 @@
           :key="n"
           class="card"
         >
-          Card {{ n }}
+          {{ t('frameworks.responsiveGrid.card', { n }) }}
         </div>
       </div>
     </div>
 
     <div class="note">
-      当前列数：<strong>{{ columns }}</strong>
+      {{ t('frameworks.responsiveGrid.columns') }}<strong>{{ columns }}</strong>
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { webBasicsLocale } from '../../../locales/web-basics/index.js'
+
+const { t } = useI18n(webBasicsLocale)
 
 const viewportWidth = ref(860)
 

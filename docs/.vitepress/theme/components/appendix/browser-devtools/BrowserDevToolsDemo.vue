@@ -1,7 +1,11 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted, nextTick, watch } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { browserDevtoolsLocale } from '../../../locales/browser-devtools/index.js'
 
-const activeTab = ref('elements') // 默认改为 Elements，匹配截图
+const { t, messages } = useI18n(browserDevtoolsLocale)
+
+const activeTab = ref('elements')
 const hoverInfo = ref('')
 const isDark = ref(false)
 const isAutoPlaying = ref(false)
@@ -13,59 +17,57 @@ const highlightStyle = ref({})
 let tourTimeout = null
 const demoRef = ref(null)
 
-// 导览选项
-const tourOptions = [
-  { value: '', label: '选择导览场景...', disabled: true },
-  { value: 'elements', label: '1. 元素面板 (Elements)' },
-  { value: 'console', label: '2. 控制台 (Console)' },
-  { value: 'sources', label: '3. 源代码 (Sources)' },
-  { value: 'network', label: '4. 网络 (Network)' },
-  { value: 'application', label: '5. 应用 (Application)' }
-]
+const tourOptions = computed(() => [
+  { value: '', label: t('mainDemo.tourPlaceholder'), disabled: true },
+  { value: 'elements', label: t('mainDemo.tourOptions.elements') },
+  { value: 'console', label: t('mainDemo.tourOptions.console') },
+  { value: 'sources', label: t('mainDemo.tourOptions.sources') },
+  { value: 'network', label: t('mainDemo.tourOptions.network') },
+  { value: 'application', label: t('mainDemo.tourOptions.application') }
+])
 const selectedTour = ref('')
 
-const tabs = [
+const tabs = computed(() => [
   {
     id: 'elements',
-    label: '元素',
-    desc: '查看和修改页面 HTML 结构与 CSS 样式'
+    label: t('mainDemo.tabs.elements.label'),
+    desc: t('mainDemo.tabs.elements.desc')
   },
   {
     id: 'console',
-    label: '控制台',
-    desc: '查看日志、错误信息，执行 JavaScript 代码'
+    label: t('mainDemo.tabs.console.label'),
+    desc: t('mainDemo.tabs.console.desc')
   },
   {
     id: 'sources',
-    label: '源代码/来源',
-    desc: '查看源代码，设置断点调试 JavaScript'
+    label: t('mainDemo.tabs.sources.label'),
+    desc: t('mainDemo.tabs.sources.desc')
   },
   {
     id: 'network',
-    label: '网络',
-    desc: '监控网络请求，查看接口数据和加载性能'
+    label: t('mainDemo.tabs.network.label'),
+    desc: t('mainDemo.tabs.network.desc')
   },
-  { id: 'performance', label: '性能', desc: '分析页面运行性能' },
-  { id: 'memory', label: '内存', desc: '检测内存泄漏' },
+  { id: 'performance', label: t('mainDemo.tabs.performance.label'), desc: t('mainDemo.tabs.performance.desc') },
+  { id: 'memory', label: t('mainDemo.tabs.memory.label'), desc: t('mainDemo.tabs.memory.desc') },
   {
     id: 'application',
-    label: '应用',
-    desc: '查看本地存储(Storage)、Cookies、缓存等'
+    label: t('mainDemo.tabs.application.label'),
+    desc: t('mainDemo.tabs.application.desc')
   },
-  { id: 'security', label: '隐私与安全', desc: '查看证书和安全问题' },
-  { id: 'lighthouse', label: 'Lighthouse', desc: '页面质量审计' },
-  { id: 'recorder', label: '记录器', desc: '录制用户操作' }
-]
+  { id: 'security', label: t('mainDemo.tabs.security.label'), desc: t('mainDemo.tabs.security.desc') },
+  { id: 'lighthouse', label: t('mainDemo.tabs.lighthouse.label'), desc: t('mainDemo.tabs.lighthouse.desc') },
+  { id: 'recorder', label: t('mainDemo.tabs.recorder.label'), desc: t('mainDemo.tabs.recorder.desc') }
+])
 
-// --- Console Data ---
-const consoleSidebarItems = [
-  { label: '6 条消息', icon: 'list', count: 6, type: 'all' },
-  { label: '6 条用户消息', icon: 'user', count: 6, type: 'user' },
-  { label: '无错误', icon: 'error', count: 0, type: 'error' },
-  { label: '无警告', icon: 'warn', count: 0, type: 'warn' },
-  { label: '无信息', icon: 'info', count: 0, type: 'info' },
-  { label: '6 条详细消息', icon: 'verbose', count: 6, type: 'verbose' }
-]
+const consoleSidebarItems = computed(() => [
+  { label: t('mainDemo.consoleSidebar.messages'), icon: 'list', count: 6, type: 'all' },
+  { label: t('mainDemo.consoleSidebar.userMessages'), icon: 'user', count: 6, type: 'user' },
+  { label: t('mainDemo.consoleSidebar.noErrors'), icon: 'error', count: 0, type: 'error' },
+  { label: t('mainDemo.consoleSidebar.noWarnings'), icon: 'warn', count: 0, type: 'warn' },
+  { label: t('mainDemo.consoleSidebar.noInfo'), icon: 'info', count: 0, type: 'info' },
+  { label: t('mainDemo.consoleSidebar.verbose'), icon: 'verbose', count: 6, type: 'verbose' }
+])
 const consoleLogs = ref([
   { type: 'log', msg: '[vite] connecting...', source: 'client:733' },
   { type: 'log', msg: '[vite] connected.', source: 'client:827' },
@@ -331,16 +333,16 @@ const handleTourSelect = async () => {
   if (!selectedTour.value) return
   const target = selectedTour.value
 
-  // 如果已经在播放，先停止
+  // If already playing, stop first
   if (isAutoPlaying.value) {
     stopTour()
     await new Promise((r) => setTimeout(r, 100))
   }
 
-  // 切换到目标 Tab
+  // Switch to target tab
   activeTab.value = target
 
-  // 启动导览
+  // Start tour
   startTour(target)
 }
 
@@ -423,170 +425,165 @@ const startTour = async (targetTab) => {
 const runConsoleTour = async () => {
   await moveCursorTo(
     '.tab[data-id="console"]',
-    '控制台 (Console)：查看日志、交互式运行代码'
+    t('mainDemo.tours.console.tab')
   )
   if (!isAutoPlaying.value) return
   await moveCursorTo(
     '.console-toolbar',
-    '工具栏：可清空日志、设置 Log 级别、过滤内容'
+    t('mainDemo.tours.console.toolbar')
   )
   if (!isAutoPlaying.value) return
   await moveCursorTo(
     '.console-sidebar',
-    '侧边栏：按类型聚合消息 (Errors, Warnings)'
+    t('mainDemo.tours.console.sidebar')
   )
   if (!isAutoPlaying.value) return
   await moveCursorTo(
     '.log-line:nth-child(1)',
-    '日志流：显示代码输出，点击右侧链接可跳转源码'
+    t('mainDemo.tours.console.logLine')
   )
   if (!isAutoPlaying.value) return
   await moveCursorTo(
     '.bottom-drawer-header',
-    '抽屉 (Drawer)：查看搜索结果、Issues 等辅助信息'
+    t('mainDemo.tours.console.drawer')
   )
   if (!isAutoPlaying.value) return
   await moveCursorTo(
     '.console-input-area',
-    '即时执行：在这里输入 JS 表达式并回车运行'
+    t('mainDemo.tours.console.input')
   )
 }
 
 const runElementsTour = async () => {
   await moveCursorTo(
     '.tab[data-id="elements"]',
-    '元素面板 (Elements)：实时查看和修改 DOM/CSS'
+    t('mainDemo.tours.elements.tab')
   )
   if (!isAutoPlaying.value) return
   await moveCursorTo(
     '.dom-tree-panel',
-    'DOM 树：页面的 HTML 结构，可折叠/展开/拖拽'
+    t('mainDemo.tours.elements.domTree')
   )
   if (!isAutoPlaying.value) return
   await moveCursorTo(
     '.dom-node[data-tag="div"]',
-    '选中元素：点击元素以在右侧查看其样式'
+    t('mainDemo.tours.elements.selectedElement')
   )
   if (!isAutoPlaying.value) return
   await moveCursorTo(
     '.styles-panel',
-    '样式面板 (Styles)：查看计算后的样式和 CSS 规则'
+    t('mainDemo.tours.elements.stylesPanel')
   )
   if (!isAutoPlaying.value) return
   await moveCursorTo(
     '.style-rule:first-child',
-    'CSS 规则：可直接修改属性值，实时预览效果'
+    t('mainDemo.tours.elements.cssRule')
   )
 }
 
 const runSourcesTour = async () => {
   await moveCursorTo(
     '.tab[data-id="sources"]',
-    '源代码 (Sources)：文件浏览与断点调试'
+    t('mainDemo.tours.sources.tab')
   )
   if (!isAutoPlaying.value) return
-  await moveCursorTo('.file-navigator', '文件系统：查看加载的所有资源文件')
+  await moveCursorTo('.file-navigator', t('mainDemo.tours.sources.fileSystem'))
   if (!isAutoPlaying.value) return
-  await moveCursorTo('.code-editor', '编辑器：查看源码，点击行号设置断点')
+  await moveCursorTo('.code-editor', t('mainDemo.tours.sources.codeEditor'))
   if (!isAutoPlaying.value) return
   await moveCursorTo(
     '.debugger-sidebar',
-    '调试器：查看变量 (Watch)、调用栈 (Call Stack)'
+    t('mainDemo.tours.sources.debugger')
   )
 }
 
 const runNetworkTour = async () => {
-  await moveCursorTo('.tab[data-id="network"]', '网络 (Network)：抓包分析')
+  await moveCursorTo('.tab[data-id="network"]', t('mainDemo.tours.network.tab'))
   if (!isAutoPlaying.value) return
   await moveCursorTo(
     '.network-toolbar',
-    '过滤器：按类型筛选请求 (XHR/Fetch, CSS, JS)'
+    t('mainDemo.tours.network.toolbar')
   )
   if (!isAutoPlaying.value) return
   await moveCursorTo(
     '.network-grid-header',
-    '请求列表：查看状态码、类型、大小、耗时'
+    t('mainDemo.tours.network.gridHeader')
   )
   if (!isAutoPlaying.value) return
 
-  // Simulate clicking the API request
-  await moveCursorTo('.network-row:nth-child(4)', '点击请求行查看详情')
+  await moveCursorTo('.network-row:nth-child(4)', t('mainDemo.tours.network.clickRow'))
   if (!isAutoPlaying.value) return
 
-  // Trigger selection
-  selectedRequest.value = networkRequests.value[3] // api/user
+  selectedRequest.value = networkRequests.value[3]
 
   await moveCursorTo(
     '.detail-header',
-    '详情面板：查看 Headers, Preview, Response'
+    t('mainDemo.tours.network.detailPanel')
   )
   if (!isAutoPlaying.value) return
 
-  // 1. Headers Tab
   activeDetailTab.value = 'headers'
   await moveCursorTo(
     '.detail-title:nth-child(1)',
-    'Headers: 查看请求/响应头信息'
+    t('mainDemo.tours.network.headersTab')
   )
   if (!isAutoPlaying.value) return
 
   await moveCursorTo(
     '.detail-section:nth-child(1)',
-    'General：查看 URL、Method (GET/POST) 和状态码 (200)'
+    t('mainDemo.tours.network.general')
   )
   if (!isAutoPlaying.value) return
 
   await moveCursorTo(
     '.detail-section:nth-child(2)',
-    'Response Headers：服务器返回的头信息 (Content-Type)'
+    t('mainDemo.tours.network.responseHeaders')
   )
   if (!isAutoPlaying.value) return
 
   await moveCursorTo(
     '.detail-section:nth-child(3)',
-    'Request Headers：浏览器发送的头信息 (User-Agent, Cookies)'
+    t('mainDemo.tours.network.requestHeaders')
   )
   if (!isAutoPlaying.value) return
 
-  // 2. Preview Tab
   await moveCursorTo(
     '.detail-title:nth-child(2)',
-    'Preview: 格式化预览接口返回的数据'
+    t('mainDemo.tours.network.previewTab')
   )
   if (!isAutoPlaying.value) return
   activeDetailTab.value = 'preview'
 
-  await moveCursorTo('.preview-content', 'Preview Content: 查看 JSON 结构')
+  await moveCursorTo('.preview-content', t('mainDemo.tours.network.previewContent'))
   if (!isAutoPlaying.value) return
 
-  // 3. Response Tab
-  await moveCursorTo('.detail-title:nth-child(3)', 'Response: 查看原始响应数据')
+  await moveCursorTo('.detail-title:nth-child(3)', t('mainDemo.tours.network.responseTab'))
   if (!isAutoPlaying.value) return
   activeDetailTab.value = 'response'
 
-  await moveCursorTo('.preview-content', 'Response Body: 原始文本内容')
+  await moveCursorTo('.preview-content', t('mainDemo.tours.network.responseBody'))
   if (!isAutoPlaying.value) return
 
   await moveCursorTo(
     '.waterfall-cell',
-    '瀑布流 (Waterfall)：请求生命周期耗时分析'
+    t('mainDemo.tours.network.waterfall')
   )
 }
 
 const runApplicationTour = async () => {
   await moveCursorTo(
     '.tab[data-id="application"]',
-    '应用 (Application)：存储与缓存管理'
+    t('mainDemo.tours.application.tab')
   )
   if (!isAutoPlaying.value) return
   await moveCursorTo(
     '.storage-sidebar',
-    '存储类型：Local Storage, Cookies, IndexedDB'
+    t('mainDemo.tours.application.storageSidebar')
   )
   if (!isAutoPlaying.value) return
   await moveCursorTo(
     '.storage-content',
-    '数据视图：查看 Key-Value 数据，支持增删改查'
+    t('mainDemo.tours.application.storageContent')
   )
 }
 
@@ -604,7 +601,7 @@ onUnmounted(() => {
     <!-- Top Controls (Custom for Demo) -->
     <div class="demo-controls">
       <div class="control-label">
-        Chrome DevTools 模拟器
+        {{ t('mainDemo.controlLabel') }}
       </div>
       <div class="control-actions">
         <select
@@ -627,7 +624,7 @@ onUnmounted(() => {
           class="stop-btn"
           @click="stopTour"
         >
-          停止演示
+          {{ t('mainDemo.stopBtn') }}
         </button>
       </div>
     </div>
@@ -666,7 +663,7 @@ onUnmounted(() => {
         <div class="header-left">
           <div
             class="icon-btn element-picker"
-            title="选择页面中的元素以进行检查"
+            :title="t('mainDemo.titles.elementPicker')"
           >
             <svg
               width="16"
@@ -681,7 +678,7 @@ onUnmounted(() => {
           </div>
           <div
             class="icon-btn device-toggle"
-            title="切换设备工具栏"
+            :title="t('mainDemo.titles.deviceToggle')"
           >
             <svg
               width="16"
@@ -713,13 +710,13 @@ onUnmounted(() => {
         <div class="header-right">
           <div
             class="icon-btn settings"
-            title="设置"
+            :title="t('mainDemo.titles.settings')"
           >
             ⚙️
           </div>
           <div
             class="icon-btn close"
-            title="关闭"
+            :title="t('mainDemo.titles.close')"
           >
             ×
           </div>
@@ -735,11 +732,11 @@ onUnmounted(() => {
         >
           <div
             class="console-toolbar"
-            @mouseenter="showInfo('控制台工具栏')"
+            @mouseenter="showInfo(t('mainDemo.consoleToolbar.title'))"
           >
             <div
               class="icon-btn clear"
-              title="清除控制台"
+              :title="t('mainDemo.consoleToolbar.clear')"
             >
               🚫
             </div>
@@ -749,15 +746,15 @@ onUnmounted(() => {
             </div>
             <div
               class="icon-btn eye"
-              title="创建实时表达式"
+              :title="t('mainDemo.consoleToolbar.liveExpression')"
             >
               👁️
             </div>
             <div class="filter-box">
-              <span class="filter-icon">🔍</span><input placeholder="过滤">
+              <span class="filter-icon">🔍</span><input :placeholder="t('mainDemo.consoleToolbar.filter')">
             </div>
             <div class="dropdown-trigger">
-              默认级别 ▼
+              {{ t('mainDemo.consoleToolbar.defaultLevel') }}
             </div>
           </div>
           <div class="console-main-area">
@@ -840,19 +837,19 @@ onUnmounted(() => {
                 ⋮
               </div>
               <div class="drawer-tab">
-                控制台
+                {{ t('mainDemo.bottomDrawer.console') }}
               </div>
               <div class="drawer-tab">
-                AI 辅助
+                {{ t('mainDemo.bottomDrawer.aiAssist') }}
               </div>
               <div class="drawer-tab">
-                新变化
+                {{ t('mainDemo.bottomDrawer.changes') }}
               </div>
               <div class="drawer-tab">
-                问题
+                {{ t('mainDemo.bottomDrawer.issues') }}
               </div>
               <div class="drawer-tab active">
-                搜索 <span class="close-icon">×</span>
+                {{ t('mainDemo.bottomDrawer.search') }} <span class="close-icon">×</span>
               </div>
             </div>
             <div class="drawer-content">
@@ -870,10 +867,10 @@ onUnmounted(() => {
                 <div class="search-results">
                   <div class="no-results">
                     <div class="no-results-title">
-                      未找到匹配项
+                      {{ t('mainDemo.bottomDrawer.noResultsTitle') }}
                     </div>
                     <div class="no-results-desc">
-                      没有与您的搜索查询相符的结果
+                      {{ t('mainDemo.bottomDrawer.noResultsDesc') }}
                     </div>
                   </div>
                 </div>
@@ -1012,19 +1009,19 @@ onUnmounted(() => {
                   ⋮
                 </div>
                 <div class="drawer-tab">
-                  控制台
+                  {{ t('mainDemo.bottomDrawer.console') }}
                 </div>
                 <div class="drawer-tab">
-                  AI 辅助
+                  {{ t('mainDemo.bottomDrawer.aiAssist') }}
                 </div>
                 <div class="drawer-tab">
-                  新变化
+                  {{ t('mainDemo.bottomDrawer.changes') }}
                 </div>
                 <div class="drawer-tab">
-                  问题
+                  {{ t('mainDemo.bottomDrawer.issues') }}
                 </div>
                 <div class="drawer-tab active">
-                  搜索 <span class="close-icon">×</span>
+                  {{ t('mainDemo.bottomDrawer.search') }} <span class="close-icon">×</span>
                 </div>
               </div>
               <div class="drawer-content">
@@ -1042,10 +1039,10 @@ onUnmounted(() => {
                   <div class="search-results">
                     <div class="no-results">
                       <div class="no-results-title">
-                        未找到匹配项
+                        {{ t('mainDemo.bottomDrawer.noResultsTitle') }}
                       </div>
                       <div class="no-results-desc">
-                        没有与您的搜索查询相符的结果
+                        {{ t('mainDemo.bottomDrawer.noResultsDesc') }}
                       </div>
                     </div>
                   </div>
@@ -1056,16 +1053,16 @@ onUnmounted(() => {
           <div class="styles-panel">
             <div class="styles-tabs">
               <div class="style-tab active">
-                样式
+                {{ t('mainDemo.stylesPanel.styles') }}
               </div>
               <div class="style-tab">
-                计算样式
+                {{ t('mainDemo.stylesPanel.computed') }}
               </div>
               <div class="style-tab">
-                布局
+                {{ t('mainDemo.stylesPanel.layout') }}
               </div>
               <div class="style-tab">
-                事件监听器
+                {{ t('mainDemo.stylesPanel.eventListeners') }}
               </div>
               <div class="style-tab">
                 »
@@ -1133,7 +1130,7 @@ onUnmounted(() => {
               </div>
 
               <div class="filter-bar">
-                <input placeholder="过滤">
+                <input :placeholder="t('mainDemo.elementsFilter')">
                 <span class="filter-opt">:hov</span>
                 <span class="filter-opt">.cls</span>
                 <span class="filter-opt">+</span>
@@ -1169,8 +1166,8 @@ onUnmounted(() => {
         >
           <div class="file-navigator">
             <div class="nav-header">
-              <span class="nav-tab active">Page</span>
-              <span class="nav-tab">Filesystem</span>
+              <span class="nav-tab active">{{ t('mainDemo.sources.page') }}</span>
+              <span class="nav-tab">{{ t('mainDemo.sources.filesystem') }}</span>
             </div>
             <div class="file-tree">
               <div class="file-item file">
@@ -1212,7 +1209,7 @@ onUnmounted(() => {
                 <span class="arrow">▼</span> Watch
               </div>
               <div class="section-content empty">
-                No watch expressions
+                {{ t('mainDemo.sources.noWatchExpressions') }}
               </div>
             </div>
             <div class="debug-section">

@@ -2,8 +2,8 @@
   <div class="container-docker-demo">
     <div class="demo-header">
       <span class="icon">🐳</span>
-      <span class="title">Docker 容器化演示</span>
-      <span class="subtitle">理解容器如何让应用"一次打包，到处运行"</span>
+      <span class="title">{{ t('containerDocker.title') }}</span>
+      <span class="subtitle">{{ t('containerDocker.subtitle') }}</span>
     </div>
 
     <div class="docker-visualization">
@@ -12,13 +12,13 @@
         :class="{ active: showTraditional }"
         @click="showTraditional = true; showDocker = false"
       >
-        <h5>传统部署</h5>
+        <h5>{{ t('containerDocker.traditional') }}</h5>
         <div class="server-stack">
-          <div class="layer-item app">应用 A</div>
-          <div v-if="showConflict" class="layer-item conflict">依赖冲突!</div>
-          <div class="layer-item deps">依赖库 v1.0</div>
-          <div class="layer-item os">操作系统</div>
-          <div class="layer-item hardware">物理服务器</div>
+          <div class="layer-item app">{{ t('containerDocker.appA') }}</div>
+          <div v-if="showConflict" class="layer-item conflict">{{ t('containerDocker.conflict') }}</div>
+          <div class="layer-item deps">{{ t('containerDocker.depsV1') }}</div>
+          <div class="layer-item os">{{ t('containerDocker.os') }}</div>
+          <div class="layer-item hardware">{{ t('containerDocker.hardware') }}</div>
         </div>
       </div>
 
@@ -29,21 +29,21 @@
         :class="{ active: showDocker }"
         @click="showDocker = true; showTraditional = false"
       >
-        <h5>Docker 容器</h5>
+        <h5>{{ t('containerDocker.docker') }}</h5>
         <div class="docker-stack">
           <div class="containers">
             <div class="container-box">
-              <div class="container-app">应用 A</div>
-              <div class="container-deps">依赖 v1.0</div>
+              <div class="container-app">{{ t('containerDocker.appA') }}</div>
+              <div class="container-deps">{{ t('containerDocker.depsShortV1') }}</div>
             </div>
             <div class="container-box">
-              <div class="container-app">应用 B</div>
-              <div class="container-deps">依赖 v2.0</div>
+              <div class="container-app">{{ t('containerDocker.appB') }}</div>
+              <div class="container-deps">{{ t('containerDocker.depsShortV2') }}</div>
             </div>
           </div>
           <div class="docker-engine">Docker Engine</div>
-          <div class="host-os">宿主机操作系统</div>
-          <div class="hardware">物理服务器</div>
+          <div class="host-os">{{ t('containerDocker.hostOs') }}</div>
+          <div class="hardware">{{ t('containerDocker.hardware') }}</div>
         </div>
       </div>
     </div>
@@ -68,32 +68,23 @@
 
     <div class="info-box">
       <span class="icon">💡</span>
-      <strong>核心思想：</strong>容器化让应用"一次构建，到处运行"，解决了环境一致性和快速部署的问题。
+      <strong>{{ t('common.ideaTitle') }}</strong>{{ t('containerDocker.idea') }}
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { backendEvolutionLocale } from '../../../locales/backend-evolution/index.js'
+
+const { t, messages } = useI18n(backendEvolutionLocale)
 
 const showTraditional = ref(true)
 const showDocker = ref(false)
 const showConflict = ref(false)
 
-const benefits = [
-  {
-    icon: '📦',
-    title: '环境一致性',
-    desc: '开发、测试、生产环境完全一致，告别"在我机器上能跑"'
-  },
-  { icon: '🚀', title: '快速部署', desc: '秒级启动，镜像分发，滚动更新无停机' },
-  {
-    icon: '📊',
-    title: '资源隔离',
-    desc: 'CPU/内存限制，互不干扰，一台机器跑多个应用'
-  },
-  { icon: '🔄', title: '版本管理', desc: '镜像版本化，随时回滚，灰度发布' }
-]
+const benefits = computed(() => messages.value.containerDocker.benefits)
 </script>
 
 <style scoped>

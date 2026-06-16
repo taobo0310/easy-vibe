@@ -1,6 +1,6 @@
 <template>
   <div class="demo-container">
-    <h4>线程调度演示</h4>
+    <h4>{{ t('threadScheduling.title') }}</h4>
 
     <div class="controls">
       <el-radio-group
@@ -8,13 +8,13 @@
         size="small"
       >
         <el-radio-button label="fifo">
-          FIFO (先来先服务)
+          {{ t('threadScheduling.fifo') }}
         </el-radio-button>
         <el-radio-button label="roundrobin">
-          时间片轮转
+          {{ t('threadScheduling.roundRobin') }}
         </el-radio-button>
         <el-radio-button label="priority">
-          优先级调度
+          {{ t('threadScheduling.priority') }}
         </el-radio-button>
       </el-radio-group>
 
@@ -24,7 +24,7 @@
         :disabled="threads.length >= 6"
         @click="addThread"
       >
-        添加线程
+        {{ t('threadScheduling.addThread') }}
       </el-button>
 
       <el-button
@@ -32,20 +32,20 @@
         size="small"
         @click="toggleSimulation"
       >
-        {{ isRunning ? '暂停' : '开始调度' }}
+        {{ isRunning ? t('threadScheduling.pause') : t('threadScheduling.startScheduling') }}
       </el-button>
 
       <el-button
         size="small"
         @click="reset"
       >
-        重置
+        {{ t('common.reset') }}
       </el-button>
     </div>
 
     <div class="timeline-container">
       <div class="timeline-header">
-        <span class="timeline-label">时间轴</span>
+        <span class="timeline-label">{{ t('threadScheduling.timelineLabel') }}</span>
         <div class="time-marker">
           0ms
         </div>
@@ -84,9 +84,9 @@
                 size="small"
                 :type="thread.state === 'running' ? 'success' : thread.state === 'ready' ? 'warning' : 'info'"
               >
-                {{ stateText(thread.state) }}
+                {{ t('threadScheduling.stateTexts.' + thread.state) }}
               </el-tag>
-              <span class="priority">优先级: {{ thread.priority }}</span>
+              <span class="priority">{{ t('threadScheduling.priorityLabel') }}: {{ thread.priority }}</span>
             </div>
           </div>
 
@@ -101,11 +101,11 @@
               <span
                 v-if="slot.state === 'running'"
                 class="slot-label"
-              >运行</span>
+              >{{ t('threadScheduling.slotRunning') }}</span>
               <span
                 v-else
                 class="slot-label"
-              >等待</span>
+              >{{ t('threadScheduling.slotWaiting') }}</span>
             </div>
 
             <div
@@ -126,7 +126,7 @@
           {{ completedThreads }}
         </div>
         <div class="stat-label">
-          已完成线程
+          {{ t('threadScheduling.completedThreads') }}
         </div>
       </div>
       <div class="stat-item">
@@ -134,7 +134,7 @@
           {{ contextSwitches }}
         </div>
         <div class="stat-label">
-          上下文切换
+          {{ t('threadScheduling.contextSwitches') }}
         </div>
       </div>
       <div class="stat-item">
@@ -142,7 +142,7 @@
           {{ avgWaitTime }}ms
         </div>
         <div class="stat-label">
-          平均等待时间
+          {{ t('threadScheduling.avgWaitTime') }}
         </div>
       </div>
       <div class="stat-item">
@@ -150,20 +150,24 @@
           {{ throughput }}
         </div>
         <div class="stat-label">
-          吞吐量 (线程/秒)
+          {{ t('threadScheduling.throughput') }}
         </div>
       </div>
     </div>
 
     <div class="algorithm-info">
-      <h5>当前调度算法: {{ algorithmName }}</h5>
-      <p>{{ algorithmDescription }}</p>
+      <h5>{{ t('threadScheduling.currentAlgorithm') }}: {{ t('threadScheduling.algorithmNames.' + schedulingPolicy) }}</h5>
+      <p>{{ t('threadScheduling.algorithmDescriptions.' + schedulingPolicy) }}</p>
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { concurrencyModelsLocale } from '../../../locales/concurrency-models/index.js'
+
+const { t } = useI18n(concurrencyModelsLocale)
 
 const schedulingPolicy = ref('roundrobin')
 const threads = ref([])
@@ -179,24 +183,6 @@ let currentThreadIndex = 0
 
 const colors = ['#409eff', '#67c23a', '#e6a23c', '#f56c6c', '#909399', '#b3d8ff']
 
-const algorithmName = computed(() => {
-  const names = {
-    fifo: 'FIFO (First In First Out)',
-    roundrobin: 'Round Robin (时间片轮转)',
-    priority: 'Priority Scheduling (优先级调度)'
-  }
-  return names[schedulingPolicy.value]
-})
-
-const algorithmDescription = computed(() => {
-  const descriptions = {
-    fifo: '按照线程到达的先后顺序执行，直到当前线程完成才执行下一个。简单公平但可能导致短任务等待长任务。',
-    roundrobin: '每个线程轮流执行一个时间片，时间片用完就切换到下一个线程。响应性好，适合交互式系统。',
-    priority: '根据线程优先级决定执行顺序，高优先级线程优先执行。需要处理优先级反转和饥饿问题。'
-  }
-  return descriptions[schedulingPolicy.value]
-})
-
 const avgWaitTime = computed(() => {
   if (completedThreads.value === 0) return 0
   return Math.round(totalWaitTime.value / completedThreads.value)
@@ -209,22 +195,12 @@ const throughput = computed(() => {
   return (completedThreads.value / elapsed).toFixed(2)
 })
 
-const stateText = (state) => {
-  const map = {
-    running: '运行中',
-    ready: '就绪',
-    blocked: '阻塞',
-    completed: '完成'
-  }
-  return map[state] || state
-}
-
 function addThread() {
   if (threads.value.length >= 6) return
 
   const id = threads.value.length + 1
   const priority = Math.floor(Math.random() * 10) + 1
-  const workAmount = 30 + Math.floor(Math.random() * 50) // 30-80% 的工作量
+  const workAmount = 30 + Math.floor(Math.random() * 50)
 
   threads.value.push({
     id,
@@ -265,7 +241,6 @@ function toggleSimulation() {
 
 function startSimulation() {
   if (threads.value.length === 0) {
-    // 自动创建一些线程
     for (let i = 0; i < 3; i++) {
       addThread()
     }
@@ -276,7 +251,6 @@ function startSimulation() {
     startTime.value = Date.now()
   }
 
-  // 初始化所有线程的开始时间
   threads.value.forEach(thread => {
     if (!thread.startTime) {
       thread.startTime = Date.now()
@@ -297,13 +271,11 @@ function pauseSimulation() {
 function runSimulation() {
   if (!isRunning.value) return
 
-  // 根据调度策略选择下一个线程
   let nextThread = null
   let nextIndex = -1
 
   switch (schedulingPolicy.value) {
     case 'fifo':
-      // FIFO: 找到第一个未完成的线程
       for (let i = 0; i < threads.value.length; i++) {
         if (threads.value[i].progress < threads.value[i].workAmount) {
           nextThread = threads.value[i]
@@ -314,7 +286,6 @@ function runSimulation() {
       break
 
     case 'roundrobin':
-      // Round Robin: 轮流执行
       let attempts = 0
       while (attempts < threads.value.length) {
         const idx = currentThreadIndex % threads.value.length
@@ -330,7 +301,6 @@ function runSimulation() {
       break
 
     case 'priority':
-      // Priority: 选择优先级最高的就绪线程
       let highestPriority = -1
       for (let i = 0; i < threads.value.length; i++) {
         const thread = threads.value[i]
@@ -343,22 +313,18 @@ function runSimulation() {
       break
   }
 
-  // 执行选中的线程
   if (nextThread) {
-    // 记录状态变化
     if (nextThread.state !== 'running') {
       contextSwitches.value++
       nextThread.state = 'running'
     }
 
-    // 其他线程设为就绪状态
     threads.value.forEach((thread, idx) => {
       if (idx !== nextIndex && thread.state === 'running') {
         thread.state = 'ready'
       }
     })
 
-    // 记录执行槽
     const lastSlot = nextThread.executionSlots[nextThread.executionSlots.length - 1]
     if (!lastSlot || lastSlot.state !== 'running') {
       nextThread.executionSlots.push({
@@ -370,11 +336,9 @@ function runSimulation() {
       lastSlot.width = 2
     }
 
-    // 增加进度
     const increment = schedulingPolicy.value === 'roundrobin' ? 5 : 3
     nextThread.progress = Math.min(nextThread.progress + increment, nextThread.workAmount)
 
-    // 检查是否完成
     if (nextThread.progress >= nextThread.workAmount) {
       nextThread.state = 'completed'
       nextThread.endTime = Date.now()
@@ -382,11 +346,9 @@ function runSimulation() {
       totalWaitTime.value += (nextThread.endTime - nextThread.startTime)
     }
 
-    // 更新时间显示
     currentTime.value = nextThread.progress
   }
 
-  // 检查是否所有线程都完成
   const allCompleted = threads.value.every(t => t.progress >= t.workAmount)
   if (allCompleted) {
     isRunning.value = false
@@ -395,9 +357,7 @@ function runSimulation() {
   }
 }
 
-// 生命周期
 onMounted(() => {
-  // 自动创建初始线程
   for (let i = 0; i < 3; i++) {
     addThread()
   }
@@ -429,146 +389,168 @@ h4 {
   flex-wrap: wrap;
 }
 
-.memory-view {
+.timeline-container {
   background: white;
   border-radius: 6px;
   padding: 16px;
   margin-bottom: 16px;
 }
 
-.memory-label {
-  font-weight: bold;
-  color: #303133;
-  margin-bottom: 12px;
-}
-
-.memory-blocks {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.process-block {
-  border-radius: 6px;
-  padding: 12px;
-  color: white;
-  transition: all 0.3s;
-  position: relative;
-  overflow: hidden;
-}
-
-.process-block.crashed {
-  opacity: 0.5;
-}
-
-.process-block.active {
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-}
-
-.process-header {
+.timeline-header {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 8px;
-  font-size: 14px;
+  padding: 8px 0;
+  border-bottom: 1px solid #e4e7ed;
+  margin-bottom: 16px;
 }
 
-.process-name {
+.timeline-label {
   font-weight: bold;
+  color: #303133;
+  font-size: 13px;
 }
 
-.process-pid {
-  opacity: 0.8;
+.time-marker {
+  font-size: 11px;
+  color: #909399;
+}
+
+.thread-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.thread-row {
+  display: grid;
+  grid-template-columns: 140px 1fr;
+  gap: 12px;
+  align-items: center;
+}
+
+.thread-info {
   font-size: 12px;
 }
 
-.process-memory {
+.thread-name {
+  font-weight: bold;
+  margin-bottom: 4px;
+}
+
+.thread-details {
   display: flex;
-  gap: 8px;
+  gap: 6px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.priority {
+  color: #909399;
   font-size: 11px;
 }
 
-.memory-section {
-  background: rgba(255, 255, 255, 0.2);
-  padding: 4px 8px;
+.execution-track {
+  position: relative;
+  height: 28px;
+  background: #f5f7fa;
   border-radius: 4px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  overflow: hidden;
 }
 
-.section-label {
-  opacity: 0.7;
-  font-size: 10px;
-}
-
-.section-size {
-  font-weight: bold;
-}
-
-.crash-overlay {
+.execution-slot {
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.7);
+  height: 100%;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
+  border-radius: 2px;
 }
 
-.crash-text {
-  font-size: 24px;
-  margin-bottom: 8px;
+.slot-label {
+  font-size: 9px;
+  color: white;
+  font-weight: 500;
 }
 
-.crash-info {
-  font-size: 12px;
-  opacity: 0.8;
+.execution-slot.blocked .slot-label {
+  color: #606266;
 }
 
-.shared-memory {
-  margin-top: 16px;
-  padding: 12px;
-  background: #f4f4f5;
+.current-indicator {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+}
+
+.indicator-arrow {
+  width: 0;
+  height: 0;
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  border-top: 6px solid currentColor;
+  position: absolute;
+  top: -6px;
+  left: -3px;
+}
+
+.stats-panel {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.stat-item {
+  background: white;
   border-radius: 6px;
-  border: 2px dashed #c0c4cc;
+  padding: 12px;
+  text-align: center;
 }
 
-.shared-label {
+.stat-value {
+  font-size: 20px;
   font-weight: bold;
-  color: #606266;
-  margin-bottom: 8px;
+  color: #303133;
 }
 
-.shared-content {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.shared-access {
-  display: flex;
-  align-items: center;
-  gap: 4px;
+.stat-label {
   font-size: 12px;
+  color: #909399;
+  margin-top: 4px;
+}
+
+.algorithm-info {
+  background: white;
+  border-radius: 6px;
+  padding: 16px;
+}
+
+.algorithm-info h5 {
+  margin: 0 0 8px 0;
+  color: #303133;
+}
+
+.algorithm-info p {
+  margin: 0;
+  font-size: 13px;
   color: #606266;
-}
-
-.access-indicator {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-}
-
-.info-panel {
-  margin-top: 16px;
+  line-height: 1.6;
 }
 
 @media (max-width: 768px) {
-  .process-memory {
-    flex-wrap: wrap;
+  .stats-panel {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .thread-row {
+    grid-template-columns: 1fr;
+  }
+
+  .thread-info {
+    display: flex;
+    gap: 8px;
+    align-items: center;
   }
 }
 </style>

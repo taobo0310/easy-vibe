@@ -1,21 +1,21 @@
 <template>
   <div class="compilation-practice-demo">
     <div class="demo-header">
-      <span class="title">编译过程实践</span>
-      <span class="subtitle">从代码到可执行文件</span>
+      <span class="title">{{ t('compilers.practice.title') }}</span>
+      <span class="subtitle">{{ t('compilers.practice.subtitle') }}</span>
     </div>
 
     <div class="code-input">
-      <div class="input-title">输入代码</div>
+      <div class="input-title">{{ t('compilers.practice.inputTitle') }}</div>
       <textarea
         v-model="sourceCode"
         class="code-textarea"
-        placeholder="输入 C 语言代码..."
+        :placeholder="t('compilers.practice.placeholder')"
       ></textarea>
     </div>
 
     <div class="compilation-steps">
-      <div class="steps-title">编译步骤</div>
+      <div class="steps-title">{{ t('compilers.practice.stepsTitle') }}</div>
       <div class="steps-flow">
         <div v-for="(step, index) in steps" :key="index" class="step-item">
           <div class="step-number">{{ index + 1 }}</div>
@@ -29,7 +29,7 @@
     </div>
 
     <div class="file-outputs">
-      <div class="outputs-title">生成的文件</div>
+      <div class="outputs-title">{{ t('compilers.practice.outputsTitle') }}</div>
       <div class="file-list">
         <div v-for="file in outputFiles" :key="file.name" class="file-item">
           <div class="file-icon">{{ file.icon }}</div>
@@ -42,19 +42,11 @@
     </div>
 
     <div class="tools">
-      <div class="tools-title">常用编译工具</div>
+      <div class="tools-title">{{ t('compilers.practice.toolsTitle') }}</div>
       <div class="tools-grid">
-        <div class="tool-card">
-          <div class="tool-name">GCC</div>
-          <div class="tool-desc">GNU Compiler Collection</div>
-        </div>
-        <div class="tool-card">
-          <div class="tool-name">Clang</div>
-          <div class="tool-desc">LLVM 的 C/C++ 编译器</div>
-        </div>
-        <div class="tool-card">
-          <div class="tool-name">MSVC</div>
-          <div class="tool-desc">Microsoft Visual C++</div>
+        <div v-for="tool in tools" :key="tool.name" class="tool-card">
+          <div class="tool-name">{{ tool.name }}</div>
+          <div class="tool-desc">{{ tool.desc }}</div>
         </div>
       </div>
     </div>
@@ -62,7 +54,11 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
+import { useI18n } from '../../../composables/useI18n'
+import { computerFundamentalsLocale } from '../../../locales/computer-fundamentals'
+
+const { t, messages } = useI18n(computerFundamentalsLocale)
 
 const sourceCode = ref(`#include <stdio.h>
 
@@ -71,56 +67,10 @@ int main() {
     return 0;
 }`)
 
-const steps = [
-  {
-    name: '预处理',
-    command: 'gcc -E hello.c -o hello.i',
-    output: '处理 #include，展开宏定义'
-  },
-  {
-    name: '编译',
-    command: 'gcc -S hello.i -o hello.s',
-    output: '生成汇编代码'
-  },
-  {
-    name: '汇编',
-    command: 'gcc -c hello.s -o hello.o',
-    output: '生成目标文件'
-  },
-  {
-    name: '链接',
-    command: 'gcc hello.o -o hello',
-    output: '生成可执行文件'
-  }
-]
+const steps = computed(() => messages.value.compilers.practice.steps)
 
-const outputFiles = [
-  {
-    name: 'hello.c',
-    icon: '📄',
-    desc: '源代码文件'
-  },
-  {
-    name: 'hello.i',
-    icon: '📝',
-    desc: '预处理后的文件'
-  },
-  {
-    name: 'hello.s',
-    icon: '⚙️',
-    desc: '汇编代码文件'
-  },
-  {
-    name: 'hello.o',
-    icon: '📦',
-    desc: '目标文件'
-  },
-  {
-    name: 'hello',
-    icon: '🚀',
-    desc: '可执行文件'
-  }
-]
+const outputFiles = computed(() => messages.value.compilers.practice.outputFiles)
+const tools = computed(() => messages.value.compilers.practice.tools)
 </script>
 
 <style scoped>

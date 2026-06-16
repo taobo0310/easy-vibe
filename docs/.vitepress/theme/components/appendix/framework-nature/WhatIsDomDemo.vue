@@ -1,13 +1,13 @@
 <template>
   <div class="what-is-dom-demo">
     <div class="demo-header">
-      <span class="title">HTML → DOM 树</span>
-      <span class="subtitle">浏览器如何理解你写的 HTML</span>
+      <span class="title">{{ t('whatIsDom.title') }}</span>
+      <span class="subtitle">{{ t('whatIsDom.subtitle') }}</span>
     </div>
 
     <div class="demo-body">
       <div class="html-panel">
-        <div class="panel-title">你写的 HTML 代码</div>
+        <div class="panel-title">{{ t('whatIsDom.htmlTitle') }}</div>
         <div class="code-display">
           <div
             v-for="(line, i) in htmlLines"
@@ -23,12 +23,12 @@
       </div>
 
       <div class="arrow-col">
-        <div class="arrow-label">浏览器解析</div>
+        <div class="arrow-label">{{ t('whatIsDom.parseLabel') }}</div>
         <div class="arrow-icon">→</div>
       </div>
 
       <div class="tree-panel">
-        <div class="panel-title">浏览器生成的 DOM 树</div>
+        <div class="panel-title">{{ t('whatIsDom.treeTitle') }}</div>
         <div class="tree-display">
           <div
             v-for="node in treeNodes"
@@ -47,67 +47,33 @@
     </div>
 
     <div class="dom-explain">
-      <div class="explain-item">
-        <span class="explain-icon">📄</span>
+      <div v-for="item in explanations" :key="item.title" class="explain-item">
+        <span class="explain-icon">{{ item.icon }}</span>
         <div class="explain-content">
-          <strong>节点（Node）</strong>
-          <span>DOM 树上的每一个方块就是一个节点。每个 HTML 标签（如 <code>&lt;h1&gt;</code>、<code>&lt;p&gt;</code>）都对应一个节点。</span>
-        </div>
-      </div>
-      <div class="explain-item">
-        <span class="explain-icon">🌳</span>
-        <div class="explain-content">
-          <strong>父子关系</strong>
-          <span>标签嵌套在另一个标签里面，在 DOM 树上就是父节点和子节点的关系。<code>&lt;body&gt;</code> 里包含 <code>&lt;h1&gt;</code>，所以 body 是 h1 的父节点。</span>
-        </div>
-      </div>
-      <div class="explain-item">
-        <span class="explain-icon">✏️</span>
-        <div class="explain-content">
-          <strong>DOM 操作</strong>
-          <span>JavaScript 可以增加、删除、修改 DOM 树上的节点。修改节点后，浏览器会重新计算布局并重新绘制页面，这就是"DOM 操作"。</span>
+          <strong>{{ item.title }}</strong>
+          <span v-html="item.text" />
         </div>
       </div>
     </div>
 
     <div class="info-box">
-      <strong>关键概念：</strong>
-      <span>DOM 是浏览器在内存中维护的一棵树，它和你写的 HTML 一一对应。JavaScript 无法直接修改 HTML 文件，它修改的是这棵 DOM 树——浏览器再根据 DOM 树的变化更新屏幕上的显示。</span>
+      <strong>{{ t('whatIsDom.infoStrong') }}</strong>
+      <span>{{ t('whatIsDom.info') }}</span>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { frameworkNatureLocale } from '../../../locales/framework-nature/index.js'
 
+const { t, messages } = useI18n(frameworkNatureLocale)
 const highlightedTag = ref('')
 
-const htmlLines = [
-  { text: '<html>', indent: 0, tag: 'html' },
-  { text: '<body>', indent: 1, tag: 'body' },
-  { text: '<h1>我的购物车</h1>', indent: 2, tag: 'h1' },
-  { text: '<p>共 3 件商品</p>', indent: 2, tag: 'p' },
-  { text: '<ul>', indent: 2, tag: 'ul' },
-  { text: '<li>耳机</li>', indent: 3, tag: 'li1' },
-  { text: '<li>键盘</li>', indent: 3, tag: 'li2' },
-  { text: '<li>鼠标</li>', indent: 3, tag: 'li3' },
-  { text: '</ul>', indent: 2, tag: 'ul' },
-  { text: '<button>结算</button>', indent: 2, tag: 'btn' },
-  { text: '</body>', indent: 1, tag: 'body' },
-  { text: '</html>', indent: 0, tag: 'html' }
-]
-
-const treeNodes = [
-  { id: 1, label: 'html', depth: 0, tag: 'html' },
-  { id: 2, label: 'body', depth: 1, tag: 'body' },
-  { id: 3, label: 'h1', depth: 2, tag: 'h1', text: '我的购物车' },
-  { id: 4, label: 'p', depth: 2, tag: 'p', text: '共 3 件商品' },
-  { id: 5, label: 'ul', depth: 2, tag: 'ul' },
-  { id: 6, label: 'li', depth: 3, tag: 'li1', text: '耳机' },
-  { id: 7, label: 'li', depth: 3, tag: 'li2', text: '键盘' },
-  { id: 8, label: 'li', depth: 3, tag: 'li3', text: '鼠标' },
-  { id: 9, label: 'button', depth: 2, tag: 'btn', text: '结算' }
-]
+const htmlLines = computed(() => messages.value.whatIsDom.htmlLines)
+const treeNodes = computed(() => messages.value.whatIsDom.treeNodes)
+const explanations = computed(() => messages.value.whatIsDom.explanations)
 </script>
 
 <style scoped>

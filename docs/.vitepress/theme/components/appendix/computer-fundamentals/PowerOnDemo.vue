@@ -1,6 +1,6 @@
 <template>
   <div class="power-on-demo">
-    <div class="demo-title">硬件启动链路</div>
+    <div class="demo-title">{{ t('powerOnToWeb.powerOn.title') }}</div>
     <div class="flow">
       <div v-for="(step, i) in steps" :key="step.name" class="flow-item">
         <div class="step-card">
@@ -10,7 +10,7 @@
         </div>
         <div v-if="i < steps.length - 1" class="arrow">
           <svg width="24" height="16" viewBox="0 0 24 16">
-            <path d="M0 8h18M14 3l6 5-6 5" fill="none" stroke="var(--vp-c-text-3)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M0 8h18M14 3l6 5-6 5" fill="none" stroke="var(--vp-c-text-3)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
           </svg>
         </div>
       </div>
@@ -19,12 +19,13 @@
 </template>
 
 <script setup>
-const steps = [
-  { icon: '🔌', name: '电源 PSU', desc: '交流电 → 直流电' },
-  { icon: '🧩', name: '主板芯片组', desc: '协调各硬件部件' },
-  { icon: '⚙️', name: 'CPU 复位', desc: '清零寄存器，就绪' },
-  { icon: '📟', name: 'BIOS/UEFI', desc: '执行第一条指令' }
-]
+import { computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n'
+import { computerFundamentalsLocale } from '../../../locales/computer-fundamentals'
+
+const { t, messages } = useI18n(computerFundamentalsLocale)
+
+const steps = computed(() => messages.value.powerOnToWeb.powerOn.steps)
 </script>
 
 <style scoped>

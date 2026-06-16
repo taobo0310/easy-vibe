@@ -2,30 +2,30 @@
   <div class="https-optimization-demo">
     <div class="demo-header">
       <span class="icon">🔒</span>
-      <span class="title">HTTPS 优化</span>
-      <span class="subtitle">理解 CDN 的 HTTPS 协议和证书管理</span>
+      <span class="title">{{ t('placeholders.https.title') }}</span>
+      <span class="subtitle">{{ t('placeholders.https.subtitle') }}</span>
     </div>
     <div class="demo-content">
       <el-alert
         type="info"
         :closable="false"
       >
-        HTTPS 优化演示组件占位符 - 待实现具体交互
+        {{ t('placeholders.https.placeholder') }}
       </el-alert>
     </div>
 
     <div class="info-box">
       <span class="icon">💡</span>
-      <strong>核心思想：</strong>HTTPS 通过 TLS/SSL 加密数据传输，防止中间人攻击和数据泄露，是现代 Web 应用的安全基础。
+      <strong>{{ t('common.coreIdea') }}</strong>{{ t('placeholders.https.idea') }}
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { cloudStorageCdnLocale } from '../../../locales/cloud-storage-cdn/index.js'
 
-const title = ref('HTTPS 优化演示')
-const description = ref('展示CDN的HTTPS优化技术，包括TLS握手优化、证书管理、HSTS等')
+const { t } = useI18n(cloudStorageCdnLocale)
 </script>
 
 <style scoped>

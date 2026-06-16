@@ -1,16 +1,11 @@
-<!--
-  JQueryVsStateDemo.vue
-  用可视化方式解释：jQuery = 手动改 DOM；框架 = 改 State 自动同步
--->
 <template>
   <div class="jq-demo">
     <div class="header">
       <div class="title">
-        什么是 jQuery？用“购物车数量”秒懂
+        {{ t('frameworks.jqueryState.title') }}
       </div>
       <div class="subtitle">
-        左边：像 jQuery 一样手动改页面（容易漏）。右边：像 Vue/React
-        一样只改状态。
+        {{ t('frameworks.jqueryState.subtitle') }}
       </div>
     </div>
 
@@ -18,11 +13,11 @@
       <!-- jQuery-like -->
       <div class="pane">
         <div class="pane-title">
-          jQuery 思路：到处改 DOM
+          {{ t('frameworks.jqueryState.jqueryTitle') }}
         </div>
         <div class="mock-app">
           <div class="topbar">
-            <span>🛒 角标：</span>
+            <span>{{ t('frameworks.jqueryState.badge') }}</span>
             <span
               class="badge"
               :class="{ wrong: jqBadgeWrong }"
@@ -32,7 +27,7 @@
           </div>
           <div class="content">
             <div class="row">
-              购物车页数量：
+              {{ t('frameworks.jqueryState.cartPage') }}
               <span
                 class="num"
                 :class="{ wrong: jqPageWrong }"
@@ -41,9 +36,9 @@
               }}</span>
             </div>
             <div class="row">
-              结算按钮：
+              {{ t('frameworks.jqueryState.checkout') }}
               <button class="checkout">
-                去结算 ({{ jqButtonLabel }})
+                {{ t('frameworks.jqueryState.checkoutAction') }} ({{ jqButtonLabel }})
               </button>
             </div>
           </div>
@@ -51,20 +46,20 @@
 
         <div class="controls">
           <div class="control-title">
-            模拟“你写的命令”
+            {{ t('frameworks.jqueryState.commandTitle') }}
           </div>
           <div class="btns">
             <button @click="jqIncreaseData">
-              数据 +1（但还没改页面）
+              {{ t('frameworks.jqueryState.increaseData') }}
             </button>
             <button @click="jqUpdateBadge">
-              改角标
+              {{ t('frameworks.jqueryState.updateBadge') }}
             </button>
             <button @click="jqUpdateCartPage">
-              改购物车页
+              {{ t('frameworks.jqueryState.updateCartPage') }}
             </button>
             <button @click="jqUpdateCheckoutButton">
-              改结算按钮
+              {{ t('frameworks.jqueryState.updateCheckout') }}
             </button>
           </div>
 
@@ -77,13 +72,13 @@
 
           <div class="log">
             <div class="log-title">
-              命令日志
+              {{ t('frameworks.jqueryState.logTitle') }}
             </div>
             <div
               v-if="jqLogs.length === 0"
               class="log-empty"
             >
-              （还没有操作）
+              {{ t('frameworks.jqueryState.emptyLog') }}
             </div>
             <div
               v-else
@@ -104,21 +99,21 @@
       <!-- State-driven -->
       <div class="pane">
         <div class="pane-title">
-          Vue/React 思路：只改 State
+          {{ t('frameworks.jqueryState.stateTitle') }}
         </div>
         <div class="mock-app">
           <div class="topbar">
-            <span>🛒 角标：</span>
+            <span>{{ t('frameworks.jqueryState.badge') }}</span>
             <span class="badge">{{ state }}</span>
           </div>
           <div class="content">
             <div class="row">
-              购物车页数量： <span class="num">{{ state }}</span>
+              {{ t('frameworks.jqueryState.cartPage') }} <span class="num">{{ state }}</span>
             </div>
             <div class="row">
-              结算按钮：
+              {{ t('frameworks.jqueryState.checkout') }}
               <button class="checkout">
-                去结算 ({{ state }} 件)
+                {{ t('frameworks.jqueryState.checkoutAction') }} ({{ state }} {{ t('frameworks.jqueryState.unit') }})
               </button>
             </div>
           </div>
@@ -126,7 +121,7 @@
 
         <div class="controls">
           <div class="control-title">
-            你只需要做一件事
+            {{ t('frameworks.jqueryState.oneThing') }}
           </div>
           <div class="btns">
             <button
@@ -139,22 +134,22 @@
               class="secondary"
               @click="resetAll"
             >
-              重置
+              {{ t('frameworks.jqueryState.reset') }}
             </button>
           </div>
           <div class="hint ok">
-            State 变了，界面三处会自动同步，不需要你“手动找 DOM 去改”。
+            {{ t('frameworks.jqueryState.okHint') }}
           </div>
 
           <div class="mini">
             <div class="mini-title">
-              这里的两个新词
+              {{ t('frameworks.jqueryState.termsTitle') }}
             </div>
             <div class="mini-item">
-              <strong>DOM</strong>：浏览器里的页面结构（按钮/文字/图片都在里面）
+              <strong>DOM</strong>: {{ t('frameworks.jqueryState.domTerm') }}
             </div>
             <div class="mini-item">
-              <strong>State</strong>：页面的数据（比如购物车数量）
+              <strong>State</strong>: {{ t('frameworks.jqueryState.stateTerm') }}
             </div>
           </div>
         </div>
@@ -165,6 +160,10 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { webBasicsLocale } from '../../../locales/web-basics/index.js'
+
+const { t } = useI18n(webBasicsLocale)
 
 const state = ref(1)
 
@@ -172,12 +171,12 @@ const state = ref(1)
 const jqData = ref(1)
 const jqBadge = ref(1)
 const jqPage = ref(1)
-const jqButtonLabel = ref('1 件')
+const jqButtonLabel = ref(`1 ${t('frameworks.jqueryState.unit')}`)
 const jqLogs = ref([])
 
 const log = (txt) => {
   jqLogs.value.unshift(
-    `${new Date().toLocaleTimeString('zh-CN', {
+    `${new Date().toLocaleTimeString(undefined, {
       hour: '2-digit',
       minute: '2-digit',
       second: '2-digit'
@@ -188,26 +187,26 @@ const log = (txt) => {
 
 const jqIncreaseData = () => {
   jqData.value += 1
-  log(`数据 +1（现在真实数据 = ${jqData.value}）`)
+  log(t('frameworks.jqueryState.logs.increase', { value: jqData.value }))
 }
 const jqUpdateBadge = () => {
   jqBadge.value = jqData.value
-  log(`更新角标 DOM = ${jqBadge.value}`)
+  log(t('frameworks.jqueryState.logs.badge', { value: jqBadge.value }))
 }
 const jqUpdateCartPage = () => {
   jqPage.value = jqData.value
-  log(`更新购物车页 DOM = ${jqPage.value}`)
+  log(t('frameworks.jqueryState.logs.cart', { value: jqPage.value }))
 }
 const jqUpdateCheckoutButton = () => {
-  jqButtonLabel.value = `${jqData.value} 件`
-  log(`更新结算按钮 DOM = ${jqButtonLabel.value}`)
+  jqButtonLabel.value = `${jqData.value} ${t('frameworks.jqueryState.unit')}`
+  log(t('frameworks.jqueryState.logs.checkout', { value: jqButtonLabel.value }))
 }
 
 const jqInconsistent = computed(() => {
   return (
     jqBadge.value !== jqData.value ||
     jqPage.value !== jqData.value ||
-    jqButtonLabel.value !== `${jqData.value} 件`
+    jqButtonLabel.value !== `${jqData.value} ${t('frameworks.jqueryState.unit')}`
   )
 })
 
@@ -215,8 +214,8 @@ const jqBadgeWrong = computed(() => jqBadge.value !== jqData.value)
 const jqPageWrong = computed(() => jqPage.value !== jqData.value)
 
 const jqHint = computed(() => {
-  if (!jqInconsistent.value) return '✅ 三处显示一致（恭喜你都改对了）'
-  return '⚠️ 数据和页面不一致：你可能漏更新了某一处 DOM（真实项目里这就是 bug）'
+  if (!jqInconsistent.value) return t('frameworks.jqueryState.consistent')
+  return t('frameworks.jqueryState.inconsistent')
 })
 
 const resetAll = () => {
@@ -224,7 +223,7 @@ const resetAll = () => {
   jqData.value = 1
   jqBadge.value = 1
   jqPage.value = 1
-  jqButtonLabel.value = '1 件'
+  jqButtonLabel.value = `1 ${t('frameworks.jqueryState.unit')}`
   jqLogs.value = []
 }
 </script>

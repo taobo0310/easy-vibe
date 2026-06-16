@@ -2,8 +2,8 @@
   <div class="role-policy-demo">
     <div class="demo-header">
       <span class="icon">🎭</span>
-      <span class="title">角色与策略</span>
-      <span class="subtitle">策略叠加原理</span>
+      <span class="title">{{ t('rolePolicy.title') }}</span>
+      <span class="subtitle">{{ t('rolePolicy.subtitle') }}</span>
     </div>
 
     <div class="main-area">
@@ -15,7 +15,7 @@
           <span class="role-icon">🎭</span>
           <div class="role-info">
             <span class="role-name">CrossAccountS3AccessRole</span>
-            <span class="role-type">跨账号访问角色</span>
+            <span class="role-type">{{ t('rolePolicy.roleType') }}</span>
           </div>
           <span class="expand-icon">{{ showTrust ? '▼' : '▶' }}</span>
         </div>
@@ -24,15 +24,15 @@
           class="trust-policy"
         >
           <div class="trust-title">
-            🔐 信任策略
+            {{ t('rolePolicy.trustTitle') }}
           </div>
           <div
-            v-for="(t, i) in trustPolicy"
+            v-for="(trust, i) in trustPolicy"
             :key="i"
             class="trust-item"
           >
-            <span class="principal">{{ t.principal }}</span>
-            <span class="action">{{ t.action }}</span>
+            <span class="principal">{{ trust.principal }}</span>
+            <span class="action">{{ trust.action }}</span>
           </div>
         </div>
       </div>
@@ -71,48 +71,21 @@
 
     <div class="info-box">
       <span class="icon">💡</span>
-      <strong>核心思想：</strong>策略叠加——一个角色可附加多个策略，最终权限是所有策略的叠加结果。Deny 优先级高于 Allow。
+      <strong>{{ t('common.coreIdea') }}</strong>{{ t('rolePolicy.info') }}
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { cloudIamLocale } from '../../../locales/cloud-iam/index.js'
 
+const { t, messages } = useI18n(cloudIamLocale)
 const showTrust = ref(false)
 const selectedPolicy = ref(0)
-
-const trustPolicy = [
-  { principal: '账号 A (123456789012)', action: 'sts:AssumeRole' },
-  { principal: '特定 IAM 用户', action: 'sts:AssumeRole' }
-]
-
-const attachedPolicies = [
-  {
-    name: 'S3ReadWritePolicy',
-    icon: '📦',
-    permissions: [
-      { effect: 'Allow', action: 's3:GetObject' },
-      { effect: 'Allow', action: 's3:PutObject' }
-    ]
-  },
-  {
-    name: 'CloudWatchLogsPolicy',
-    icon: '📊',
-    permissions: [
-      { effect: 'Allow', action: 'logs:CreateLogGroup' },
-      { effect: 'Allow', action: 'logs:PutLogEvents' }
-    ]
-  },
-  {
-    name: 'DenySensitiveData',
-    icon: '🚫',
-    permissions: [
-      { effect: 'Deny', action: 's3:GetObject (sensitive/*)' },
-      { effect: 'Deny', action: 's3:DeleteObject' }
-    ]
-  }
-]
+const trustPolicy = computed(() => messages.value.rolePolicy.trustPolicy)
+const attachedPolicies = computed(() => messages.value.rolePolicy.attachedPolicies)
 </script>
 
 <style scoped>

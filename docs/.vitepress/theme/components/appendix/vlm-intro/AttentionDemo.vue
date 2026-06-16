@@ -5,7 +5,7 @@
         Self-Attention Mechanism
       </div>
       <div class="subtitle">
-        自注意力机制：全局信息交互
+        {{ t('attention.subtitle') }}
       </div>
     </div>
 
@@ -92,14 +92,14 @@
           class="placeholder-text"
         >
           <span class="cursor-icon">👆</span>
-          把鼠标悬停在任意方块上，<br>观察它在"关注"谁
+          <span v-html="t('attention.placeholder')" />
         </div>
         <div
           v-else
           class="active-info"
         >
           <div class="source-info">
-            <span class="label">当前 Patch:</span>
+            <span class="label">{{ t('attention.currentPatch') }}</span>
             <div class="patch-tag">
               {{ items[hoverIndex].icon }} {{ items[hoverIndex].label }}
             </div>
@@ -107,7 +107,7 @@
 
           <div class="attn-list">
             <div class="list-header">
-              Attention Weights (注意力权重)
+              {{ t('attention.weightsTitle') }}
             </div>
             <div
               v-for="(score, idx) in getTopAttentions(hoverIndex)"
@@ -143,22 +143,14 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { vlmIntroLocale } from '../../../locales/vlm-intro/index.js'
 
+const { t, messages } = useI18n(vlmIntroLocale)
 const hoverIndex = ref(-1)
 
-// 3x3 Grid Data (Cat in grass)
-const items = [
-  { icon: '🌿', label: '草地' }, // 0
-  { icon: '🌿', label: '草地' }, // 1
-  { icon: '🦋', label: '蝴蝶' }, // 2
-  { icon: '🌿', label: '草地' }, // 3
-  { icon: '🐱', label: '猫头' }, // 4
-  { icon: '🌿', label: '草地' }, // 5
-  { icon: '🧶', label: '毛球' }, // 6
-  { icon: '🐾', label: '猫爪' }, // 7
-  { icon: '🌿', label: '草地' } // 8
-]
+const items = computed(() => messages.value.attention.items)
 
 // Layout Logic
 const getCenter = (index) => {
@@ -227,7 +219,7 @@ const getLineOpacity = (source, target) => {
 
 const getTopAttentions = (source) => {
   const scores = {}
-  items.forEach((_, idx) => {
+  items.value.forEach((_, idx) => {
     if (idx !== source) {
       scores[idx] = getAttentionScore(source, idx)
     }
@@ -242,13 +234,14 @@ const getTopAttentions = (source) => {
 }
 
 const getInsightText = (idx) => {
-  if (idx === 4) return '猫头最关注猫爪（组成身体）和蝴蝶（捕猎目标）。'
-  if (idx === 7) return '猫爪最关注毛球（正在玩耍）和猫头。'
-  if (idx === 2) return '蝴蝶关注到了猫，可能是因为它是个威胁。'
+  const insights = messages.value.attention.insights
+  if (idx === 4) return insights.catHead
+  if (idx === 7) return insights.paws
+  if (idx === 2) return insights.butterfly
   if ([0, 1, 3, 5, 8].includes(idx))
-    return '草地主要关注周围的草地，确认背景纹理。'
-  if (idx === 6) return '毛球和猫爪有很强的互动关系。'
-  return 'Self-Attention 让每个部分找到它的上下文关联。'
+    return insights.grass
+  if (idx === 6) return insights.yarn
+  return insights.fallback
 }
 </script>
 

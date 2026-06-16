@@ -1,6 +1,6 @@
 <template>
   <div class="demo-container">
-    <h4>协程轻量级对比演示</h4>
+    <h4>{{ t('coroutineLightweight.title') }}</h4>
 
     <div class="controls">
       <el-radio-group
@@ -8,13 +8,13 @@
         size="small"
       >
         <el-radio-button label="memory">
-          内存占用对比
+          {{ t('coroutineLightweight.memoryComparison') }}
         </el-radio-button>
         <el-radio-button label="switch">
-          切换开销对比
+          {{ t('coroutineLightweight.switchComparison') }}
         </el-radio-button>
         <el-radio-button label="creation">
-          创建速度对比
+          {{ t('coroutineLightweight.creationComparison') }}
         </el-radio-button>
       </el-radio-group>
 
@@ -26,16 +26,16 @@
         show-input
         style="width: 300px;"
       />
-      <span class="slider-label">{{ coroutineCount }} 个协程</span>
+      <span class="slider-label">{{ t('coroutineLightweight.coroutineCountLabel', { count: coroutineCount }) }}</span>
     </div>
 
     <div class="comparison-view">
       <div class="comparison-column">
-        <h5>线程模型</h5>
+        <h5>{{ t('coroutineLightweight.threadModel') }}</h5>
         <div class="resource-visualization">
           <div class="resource-bar">
             <div class="bar-label">
-              内存占用
+              {{ t('coroutineLightweight.memoryUsage') }}
             </div>
             <div class="bar-container">
               <div
@@ -49,7 +49,7 @@
 
           <div class="resource-bar">
             <div class="bar-label">
-              创建时间
+              {{ t('coroutineLightweight.creationTime') }}
             </div>
             <div class="bar-container">
               <div
@@ -63,14 +63,14 @@
 
           <div class="resource-bar">
             <div class="bar-label">
-              上下文切换
+              {{ t('coroutineLightweight.contextSwitch') }}
             </div>
             <div class="bar-container">
               <div
                 class="bar-fill thread-bar"
                 :style="{ width: 100 + '%', backgroundColor: '#e6a23c' }"
               >
-                ~1-10 μs
+                ~1-10 us
               </div>
             </div>
           </div>
@@ -88,7 +88,7 @@
               v-if="coroutineCount / 100 > 50"
               class="more-indicator"
             >
-              +{{ Math.floor(coroutineCount / 100 - 50) }} 更多...
+              {{ t('coroutineLightweight.moreIndicator', { count: Math.floor(coroutineCount / 100 - 50) }) }}
             </div>
           </div>
         </div>
@@ -101,11 +101,11 @@
       </div>
 
       <div class="comparison-column">
-        <h5>协程模型</h5>
+        <h5>{{ t('coroutineLightweight.coroutineModel') }}</h5>
         <div class="resource-visualization">
           <div class="resource-bar">
             <div class="bar-label">
-              内存占用
+              {{ t('coroutineLightweight.memoryUsage') }}
             </div>
             <div class="bar-container">
               <div
@@ -119,7 +119,7 @@
 
           <div class="resource-bar">
             <div class="bar-label">
-              创建时间
+              {{ t('coroutineLightweight.creationTime') }}
             </div>
             <div class="bar-container">
               <div
@@ -133,7 +133,7 @@
 
           <div class="resource-bar">
             <div class="bar-label">
-              上下文切换
+              {{ t('coroutineLightweight.contextSwitch') }}
             </div>
             <div class="bar-container">
               <div
@@ -158,7 +158,7 @@
               v-if="coroutineCount / 10 > 100"
               class="more-indicator"
             >
-              +{{ Math.floor(coroutineCount / 10 - 100) }} 更多...
+              {{ t('coroutineLightweight.moreIndicator', { count: Math.floor(coroutineCount / 10 - 100) }) }}
             </div>
           </div>
         </div>
@@ -172,7 +172,7 @@
             effect="dark"
             size="large"
           >
-            🚀 节省 {{ savingsPercent }}% 内存
+            {{ t('coroutineLightweight.savingsBadge', { percent: savingsPercent }) }}
           </el-tag>
         </div>
       </div>
@@ -192,17 +192,19 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { concurrencyModelsLocale } from '../../../locales/concurrency-models/index.js'
+
+const { t } = useI18n(concurrencyModelsLocale)
 
 const comparisonMode = ref('memory')
 const coroutineCount = ref(1000)
 
-// 基础参数
-const THREAD_STACK_SIZE = 1024 * 1024 // 1MB 线程栈
-const COROUTINE_STACK_SIZE = 2 * 1024 // 2KB 协程栈
-const THREAD_CREATION_TIME = 100 // 10us * 10000 = 100ms
-const COROUTINE_CREATION_TIME = 10 // 10ns * 10000 = 100us
+const THREAD_STACK_SIZE = 1024 * 1024
+const COROUTINE_STACK_SIZE = 2 * 1024
+const THREAD_CREATION_TIME = 100
+const COROUTINE_CREATION_TIME = 10
 
-// 计算值
 const threadMemory = computed(() => {
   return Math.round((coroutineCount.value * THREAD_STACK_SIZE) / (1024 * 1024))
 })
@@ -219,7 +221,6 @@ const coroutineCreationTime = computed(() => {
   return Math.round((coroutineCount.value * COROUTINE_CREATION_TIME) / 1000)
 })
 
-// 百分比计算
 const threadMemoryPercent = computed(() => {
   const max = threadMemory.value
   return max > 0 ? 100 : 0
@@ -245,14 +246,13 @@ const savingsPercent = computed(() => {
   return Math.round((1 - coroutineMemory.value / threadMemory.value) * 100)
 })
 
-// 洞察信息
 const insightTitle = computed(() => {
   if (coroutineCount.value < 100) {
-    return '小规模场景'
+    return t('coroutineLightweight.insightTitles.small')
   } else if (coroutineCount.value < 5000) {
-    return '中等规模场景'
+    return t('coroutineLightweight.insightTitles.medium')
   } else {
-    return '大规模高并发场景'
+    return t('coroutineLightweight.insightTitles.large')
   }
 })
 
@@ -267,15 +267,23 @@ const insightDescription = computed(() => {
   const memSaved = threadMemory.value - coroutineMemory.value
 
   if (coroutineCount.value < 100) {
-    return `当前 ${coroutineCount.value} 个并发单元，线程和协程的差别还不明显。建议增加到 1000+ 来观察显著差异。`
+    return t('coroutineLightweight.insightDescriptions.small', { count: coroutineCount.value })
   } else if (coroutineCount.value < 5000) {
-    return `使用协程可以节省 ${savings}% 的内存（约 ${memSaved}MB），创建速度快 ${Math.round(threadCreationTime.value / coroutineCreationTime.value)} 倍。`
+    return t('coroutineLightweight.insightDescriptions.medium', {
+      savings,
+      memSaved,
+      speedup: Math.round(threadCreationTime.value / coroutineCreationTime.value)
+    })
   } else {
-    return `🚀 在高并发场景下，协程优势巨大！节省 ${savings}% 内存（${memSaved}MB），${threadMemory.value}MB vs ${coroutineMemory.value}MB。这是 C10K/C10M 问题的关键解决方案。`
+    return t('coroutineLightweight.insightDescriptions.large', {
+      savings,
+      memSaved,
+      threadMem: threadMemory.value,
+      coroutineMem: coroutineMemory.value
+    })
   }
 })
 
-// 方法
 function reset() {
   coroutineCount.value = 1000
 }

@@ -14,11 +14,12 @@
 </template>
 
 <script setup>
-const strategies = [
-  { name: 'Update DB, then delete cache', desc: 'Low complexity and a short inconsistency window; works for most products.' },
-  { name: 'Delayed double delete', desc: 'Deletes cache twice to reduce stale reads in high consistency scenarios.' },
-  { name: 'Avoid delete-before-update', desc: 'Deleting cache first can reload old database values under concurrency.' }
-]
+import { computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { cacheDesignLocale } from '../../../locales/cache-design/index.js'
+
+const { messages } = useI18n(cacheDesignLocale)
+const strategies = computed(() => messages.value.consistency.strategies)
 </script>
 
 <style scoped>

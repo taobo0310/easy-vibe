@@ -1,12 +1,12 @@
 <template>
   <div class="box-demo">
     <div class="demo-header">
-      <span class="title">CSS 盒模型</span>
-      <span class="subtitle">理解元素实际占用空间的构成</span>
+      <span class="title">{{ t('layout.boxModel.title') }}</span>
+      <span class="subtitle">{{ t('layout.boxModel.subtitle') }}</span>
     </div>
 
     <div class="scenario">
-      <strong>场景：</strong>你要做三个并排卡片，容器宽度 900px，每个卡片设 width: 200px。结果第三个掉下去了——为什么？
+      {{ t('layout.boxModel.scenario') }}
     </div>
 
     <div class="main-area">
@@ -78,7 +78,7 @@
             <span
               v-if="margin >= 8"
               class="layer-label"
-            >margin</span>
+            >{{ t('layout.boxModel.layers.margin') }}</span>
             <div
               class="layer border"
               :style="{ borderWidth: border + 'px' }"
@@ -86,7 +86,7 @@
               <span
                 v-if="border >= 5"
                 class="layer-label"
-              >border</span>
+              >{{ t('layout.boxModel.layers.border') }}</span>
               <div
                 class="layer padding"
                 :style="{ padding: padding + 'px' }"
@@ -94,12 +94,12 @@
                 <span
                   v-if="padding >= 8"
                   class="layer-label"
-                >padding</span>
+                >{{ t('layout.boxModel.layers.padding') }}</span>
                 <div
                   class="content"
                   :style="{ width: contentW + 'px' }"
                 >
-                  content<br>{{ contentW }}px
+                  {{ t('layout.boxModel.layers.content') }}<br>{{ contentW }}px
                 </div>
               </div>
             </div>
@@ -110,7 +110,7 @@
       <div class="right-panel">
         <div class="result-card">
           <div class="result-header">
-            <span class="result-title">实际占用宽度</span>
+            <span class="result-title">{{ t('layout.boxModel.actualWidth') }}</span>
             <span class="result-value">{{ total }}px</span>
           </div>
           <div class="formula">
@@ -118,7 +118,7 @@
               {{ contentW }} + {{ padding }}×2 + {{ border }}×2 + {{ margin }}×2 = {{ total }}px
             </template>
             <template v-else>
-              {{ contentW }}px（已包含 padding 和 border） + {{ margin }}×2 = {{ total }}px
+              {{ t('layout.boxModel.includedFormula', { width: contentW, margin, total }) }}
             </template>
           </div>
           <div
@@ -126,10 +126,10 @@
             :class="{ warning: total * 3 > 900 }"
           >
             <template v-if="total * 3 > 900">
-              三个卡片需要 {{ total * 3 }}px，超出容器 900px，第三个会掉下去
+              {{ t('layout.boxModel.overflowHint', { width: total * 3 }) }}
             </template>
             <template v-else>
-              三个卡片共 {{ total * 3 }}px，可以放下
+              {{ t('layout.boxModel.fitHint', { width: total * 3 }) }}
             </template>
           </div>
         </div>
@@ -166,15 +166,18 @@
     </div>
 
     <div class="info-box">
-      <strong>关键区别：</strong>
-      <code>content-box</code>（默认）的 width 只是内容宽度；
-      <code>border-box</code> 的 width 包含 content + padding + border。推荐全局设置 <code>box-sizing: border-box</code>。
+      <strong>{{ t('layout.boxModel.keyDifference') }}</strong>
+      {{ t('layout.boxModel.info') }}
     </div>
   </div>
 </template>
 
 <script setup>
 import { computed, ref } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { webBasicsLocale } from '../../../locales/web-basics/index.js'
+
+const { t } = useI18n(webBasicsLocale)
 
 const contentW = ref(100)
 const padding = ref(15)

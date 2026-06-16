@@ -1,78 +1,37 @@
 <template>
   <div class="a2a-visual-demo">
-    <div class="section-title">A2A 是什么？</div>
+    <div class="section-title">{{ t('a2aVisual.title') }}</div>
 
     <div class="intro-text">
-      A2A（Agent-to-Agent Protocol）是 Google 于 2025 年 4 月推出的<strong>Agent 之间相互协作的通信标准</strong>。它让不同厂商、不同框架的 Agent 能够相互发现、分配任务、交换信息，就像给 AI 世界装上了"对讲机"。
+      {{ t('a2aVisual.introBefore') }}<strong>{{ t('a2aVisual.introStrong') }}</strong>{{ t('a2aVisual.introAfter') }}
     </div>
 
-    <div class="section-title">核心概念</div>
+    <div class="section-title">{{ t('a2aVisual.conceptTitle') }}</div>
 
     <div class="concepts-grid">
-      <div class="concept">
-        <div class="concept-title">Agent Card（Agent 名片）</div>
-        <div class="concept-desc">每个 Agent 公开的元数据，包括能力描述、版本号、端点地址等，相当于人的"名片"</div>
-      </div>
-      <div class="concept">
-        <div class="concept-title">Task（任务）</div>
-        <div class="concept-desc">Agent 之间传递的工作单元，可以包含多轮对话、文件附件等</div>
-      </div>
-      <div class="concept">
-        <div class="concept-title">Message（消息）</div>
-        <div class="concept-desc">Agent 之间的通信内容，支持文本、文件、语音等多模态</div>
-      </div>
-      <div class="concept">
-        <div class="concept-title">SSE（Server-Sent Events）</div>
-        <div class="concept-desc">服务器推送技术，用于实时任务进度更新</div>
+      <div v-for="concept in messages.a2aVisual.concepts" :key="concept.title" class="concept">
+        <div class="concept-title">{{ concept.title }}</div>
+        <div class="concept-desc">{{ concept.desc }}</div>
       </div>
     </div>
 
-    <div class="section-title">什么时候用 A2A？</div>
+    <div class="section-title">{{ t('a2aVisual.useCaseTitle') }}</div>
 
     <div class="use-cases">
-      <div class="use-case">
-        <div class="use-case-title">当需要多个 Agent 协作完成复杂任务时</div>
-        <div class="use-case-desc">一个 Agent 负责需求分析，一个负责写代码，一个负责测试，各自发挥专长</div>
-      </div>
-      <div class="use-case">
-        <div class="use-case-title">当需要集成不同厂商的 Agent 时</div>
-        <div class="use-case-desc">Google 的 Agent、Anthropic 的 Agent、OpenAI 的 Agent 需要相互协作</div>
-      </div>
-      <div class="use-case">
-        <div class="use-case-title">当需要任务委托和进度追踪时</div>
-        <div class="use-case-desc">主 Agent 分配任务给专家 Agent，并实时接收进度更新</div>
+      <div v-for="useCase in messages.a2aVisual.useCases" :key="useCase.title" class="use-case">
+        <div class="use-case-title">{{ useCase.title }}</div>
+        <div class="use-case-desc">{{ useCase.desc }}</div>
       </div>
     </div>
 
-    <div class="section-title">如何使用 A2A？</div>
+    <div class="section-title">{{ t('a2aVisual.usageTitle') }}</div>
 
     <div class="usage-steps">
-      <div class="step">
-        <div class="step-num">1</div>
+      <div v-for="(step, index) in messages.a2aVisual.steps" :key="step.title" class="step">
+        <div class="step-num">{{ index + 1 }}</div>
         <div class="step-content">
-          <div class="step-title">发布 Agent Card</div>
-          <div class="step-desc">在 /.well-known/agent.json 路径暴露 Agent 的能力描述</div>
-        </div>
-      </div>
-      <div class="step">
-        <div class="step-num">2</div>
-        <div class="step-content">
-          <div class="step-title">发现 Agent</div>
-          <div class="step-desc">通过 agents/get API 获取其他 Agent 的名片，了解其能力</div>
-        </div>
-      </div>
-      <div class="step">
-        <div class="step-num">3</div>
-        <div class="step-content">
-          <div class="step-title">发送任务</div>
-          <div class="step-desc">通过 tasks/send API 发送任务，支持 SSE 接收进度更新</div>
-        </div>
-      </div>
-      <div class="step">
-        <div class="step-num">4</div>
-        <div class="step-content">
-          <div class="step-title">获取结果</div>
-          <div class="step-desc">任务完成后，通过 tasks/get API 获取最终结果</div>
+          <div class="step-title">{{ step.title }}</div>
+          <div class="step-desc">{{ step.desc }}</div>
         </div>
       </div>
     </div>
@@ -80,6 +39,10 @@
 </template>
 
 <script setup>
+import { useI18n } from '../../../composables/useI18n.js'
+import { aiProtocolsLocale } from '../../../locales/ai-protocols/index.js'
+
+const { t, messages } = useI18n(aiProtocolsLocale)
 </script>
 
 <style scoped>

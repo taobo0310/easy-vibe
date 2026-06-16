@@ -2,10 +2,10 @@
   <div class="vlm-quick-start">
     <div class="header">
       <div class="title">
-        👁️ VLM 初体验：不只是看图说话
+        {{ t('quickStart.title') }}
       </div>
       <div class="subtitle">
-        选择不同场景，体验多模态模型的多种能力。
+        {{ t('quickStart.subtitle') }}
       </div>
     </div>
 
@@ -39,7 +39,7 @@
               class="upload-btn"
               @click="loadImage"
             >
-              上传图片 (模拟)
+              {{ t('quickStart.upload') }}
             </button>
           </div>
 
@@ -95,7 +95,7 @@
               class="factory-image"
             >
               <div class="safety-sign">
-                ⚠️ 安全生产
+                {{ t('quickStart.safetySign') }}
               </div>
               <div class="worker-container">
                 <span class="worker">👷</span>
@@ -150,7 +150,7 @@
             v-if="messages.length === 0"
             class="empty-text"
           >
-            {{ hasImage ? '图片已就绪，请选择指令' : '请先上传图片' }}
+            {{ hasImage ? t('quickStart.ready') : t('quickStart.needUpload') }}
           </div>
           <div
             v-for="(msg, index) in messages"
@@ -185,24 +185,24 @@
           >
             <button
               v-for="q in currentQuestions"
-              :key="q"
+              :key="q.id"
               class="action-btn"
               @click="ask(q)"
             >
-              {{ q }}
+              {{ q.text }}
             </button>
           </div>
           <div
             v-else-if="isGenerating"
             class="status-text"
           >
-            AI 正在观察图片并思考...
+            {{ t('quickStart.thinking') }}
           </div>
           <div
             v-else
             class="status-text"
           >
-            等待图片上传...
+            {{ t('quickStart.waitingUpload') }}
           </div>
         </div>
       </div>
@@ -212,13 +212,11 @@
 
 <script setup>
 import { ref, computed, nextTick } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { vlmIntroLocale } from '../../../locales/vlm-intro/index.js'
 
-const scenarios = [
-  { id: 'chat', name: '通用对话' },
-  { id: 'detection', name: '目标检测' },
-  { id: 'ocr', name: 'OCR 提取' },
-  { id: 'analysis', name: '业务风控' }
-]
+const { t, messages: localeMessages } = useI18n(vlmIntroLocale)
+const scenarios = computed(() => localeMessages.value.quickStart.scenarios)
 
 const currentScenario = ref('chat')
 const hasImage = ref(false)
@@ -227,96 +225,15 @@ const showBoundingBox = ref(false)
 const messages = ref([])
 const messagesRef = ref(null)
 
-const questionsMap = {
-  chat: ['这里是哪里？', '描述一下天气', '写首关于这座山的诗'],
-  detection: ['检测图中的水果', '数数有几个苹果', '输出检测框坐标'],
-  ocr: ['提取所有文字', '总金额是多少？', '消费日期是哪天？'],
-  analysis: ['工人是否佩戴安全帽？', '检测现场安全隐患', '输出风险评估报告']
-}
-
-const answersMap = {
-  chat: {
-    '这里是哪里？':
-      '这是一张高山风景照。远处是覆盖着皑皑白雪的山峰，可能是阿尔卑斯山或喜马拉雅山脉。山脚下有郁郁葱葱的松树林。',
-    描述一下天气:
-      '天气看起来非常晴朗，阳光明媚（☀️），能见度很高。蓝天白云，是一个适合登山或滑雪的好天气。',
-    写首关于这座山的诗:
-      '🏔️ 雪岭插云天，\n🌲 松涛响翠烟。\n☀️ 金阳融冷色，\n🏞️ 壮丽入心田。'
-  },
-  detection: {
-    检测图中的水果: {
-      type: 'json',
-      text: JSON.stringify(
-        { objects: ['apple', 'banana', 'grape'], count: 3 },
-        null,
-        2
-      ),
-      action: 'showBox'
-    },
-    数数有几个苹果: '图中检测到 1 个苹果（🍎）。',
-    输出检测框坐标: {
-      type: 'json',
-      text: JSON.stringify(
-        {
-          objects: [
-            { label: 'apple', box: [15, 15, 85, 85] },
-            { label: 'banana', box: [95, 15, 165, 85] }
-          ]
-        },
-        null,
-        2
-      ),
-      action: 'showBox'
-    }
-  },
-  ocr: {
-    提取所有文字: {
-      type: 'json',
-      text: JSON.stringify(
-        {
-          lines: [
-            'RECEIPT',
-            'Coffee $4.50',
-            'Bagel $3.00',
-            'TOTAL $7.50',
-            '2023-10-24'
-          ]
-        },
-        null,
-        2
-      )
-    },
-    '总金额是多少？': '这张小票的总金额是 $7.50。',
-    '消费日期是哪天？': '消费日期是 2023年10月24日。'
-  },
-  analysis: {
-    '工人是否佩戴安全帽？':
-      '检测到画面中有一名工人（👷），已正确佩戴红色安全帽（⛑️）。',
-    检测现场安全隐患: {
-      type: 'json',
-      text: JSON.stringify(
-        { hazards: [], safety_score: 100, status: 'SAFE' },
-        null,
-        2
-      )
-    },
-    输出风险评估报告:
-      '✅ **安全合规**\n- 人员：1人\n- 防护装备：齐全\n- 机械设备：正常运行中\n- 风险等级：低'
-  }
-}
+const questionsMap = computed(() => localeMessages.value.quickStart.questions)
+const answersMap = computed(() => localeMessages.value.quickStart.answers)
 
 const getImageLabel = () => {
-  const map = {
-    chat: '已上传：雪山风景.jpg',
-    detection: '已上传：水果果盘.jpg',
-    ocr: '已上传：购物小票.jpg',
-    analysis: '已上传：车间监控.jpg'
-  }
-  return map[currentScenario.value]
+  return localeMessages.value.quickStart.imageLabels[currentScenario.value]
 }
 
 const currentQuestions = computed(
-  () => questionsMap[currentScenario.value] || []
+  () => questionsMap.value[currentScenario.value] || []
 )
 
 const switchScenario = (id) => {
@@ -333,13 +250,14 @@ const loadImage = () => {
 }
 
 const ask = async (question) => {
-  messages.value.push({ role: 'user', content: question })
+  messages.value.push({ role: 'user', content: question.text })
   isGenerating.value = true
 
   await wait(800) // Simulate vision encoding time
 
-  const scenarioAnswers = answersMap[currentScenario.value]
-  const rawAnswer = scenarioAnswers[question] || '我还在学习这个任务...'
+  const scenarioAnswers = answersMap.value[currentScenario.value]
+  const rawAnswer =
+    scenarioAnswers[question.id] || t('quickStart.fallbackAnswer')
 
   let content = ''
   let isJson = false

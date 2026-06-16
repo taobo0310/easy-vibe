@@ -2,12 +2,12 @@
   <div class="component-hierarchy-demo">
     <div class="demo-header">
       <span class="icon">🌳</span>
-      <span class="title">组件层级结构</span>
-      <span class="subtitle">像家谱树一样的组件关系</span>
+      <span class="title">{{ t('hierarchy.title') }}</span>
+      <span class="subtitle">{{ t('hierarchy.subtitle') }}</span>
     </div>
 
     <div class="intro-text">
-      想象你在<span class="highlight">公司组织架构</span>工作：CEO（根组件）在顶层，下面是各个部门（父组件），每个部门里还有员工（子组件）。这就是组件树！
+      {{ t('hierarchy.introPrefix') }}<span class="highlight">{{ t('hierarchy.introHighlight') }}</span>{{ t('hierarchy.introSuffix') }}
     </div>
 
     <div class="demo-content">
@@ -18,14 +18,14 @@
           @click="selectNode('app')"
         >
           <div class="node-icon">
-            👑
+            {{ n('app').icon }}
           </div>
           <div class="node-info">
             <div class="node-label">
-              App (根组件)
+              {{ n('app').label }}
             </div>
             <div class="node-desc">
-              CEO - 管理全局
+              {{ n('app').desc }}
             </div>
           </div>
         </div>
@@ -39,14 +39,14 @@
               @click="selectNode('header')"
             >
               <div class="node-icon">
-                📌
+                {{ n('header').icon }}
               </div>
               <div class="node-info">
                 <div class="node-label">
-                  Header
+                  {{ n('header').label }}
                 </div>
                 <div class="node-desc">
-                  导航栏部门
+                  {{ n('header').desc }}
                 </div>
               </div>
             </div>
@@ -60,14 +60,14 @@
               @click="selectNode('main')"
             >
               <div class="node-icon">
-                📄
+                {{ n('main').icon }}
               </div>
               <div class="node-info">
                 <div class="node-label">
-                  Main Content
+                  {{ n('main').label }}
                 </div>
                 <div class="node-desc">
-                  主内容部门
+                  {{ n('main').desc }}
                 </div>
               </div>
             </div>
@@ -81,14 +81,14 @@
                   @click="selectNode('sidebar')"
                 >
                   <div class="node-icon">
-                    📑
+                    {{ n('sidebar').icon }}
                   </div>
                   <div class="node-info">
                     <div class="node-label">
-                      Sidebar
+                      {{ n('sidebar').label }}
                     </div>
                     <div class="node-desc">
-                      侧边栏小组
+                      {{ n('sidebar').desc }}
                     </div>
                   </div>
                 </div>
@@ -102,14 +102,14 @@
                   @click="selectNode('productlist')"
                 >
                   <div class="node-icon">
-                    🛍️
+                    {{ n('productlist').icon }}
                   </div>
                   <div class="node-info">
                     <div class="node-label">
-                      ProductList
+                      {{ n('productlist').label }}
                     </div>
                     <div class="node-desc">
-                      商品列表组
+                      {{ n('productlist').desc }}
                     </div>
                   </div>
                 </div>
@@ -123,14 +123,14 @@
                       @click="selectNode('productcard')"
                     >
                       <div class="node-icon">
-                        🏷️
+                        {{ n('productcard').icon }}
                       </div>
                       <div class="node-info">
                         <div class="node-label">
-                          ProductCard
+                          {{ n('productcard').label }}
                         </div>
                         <div class="node-desc">
-                          商品卡片员工
+                          {{ n('productcard').desc }}
                         </div>
                       </div>
                     </div>
@@ -148,14 +148,14 @@
               @click="selectNode('footer')"
             >
               <div class="node-icon">
-                🔻
+                {{ n('footer').icon }}
               </div>
               <div class="node-info">
                 <div class="node-label">
-                  Footer
+                  {{ n('footer').label }}
                 </div>
                 <div class="node-desc">
-                  页脚部门
+                  {{ n('footer').desc }}
                 </div>
               </div>
             </div>
@@ -183,14 +183,14 @@
               v-if="selectedNodeInfo.props"
               class="info-section"
             >
-              <strong>📥 接收:</strong>
+              <strong>{{ t('common.receive') }}</strong>
               <span class="prop-tags">{{ selectedNodeInfo.props.join(', ') }}</span>
             </div>
             <div
               v-if="selectedNodeInfo.events"
               class="info-section"
             >
-              <strong>📤 触发:</strong>
+              <strong>{{ t('common.emit') }}</strong>
               <span class="prop-tags">{{ selectedNodeInfo.events.join(', ') }}</span>
             </div>
           </div>
@@ -201,76 +201,32 @@
         v-if="!selectedNode"
         class="hint-text"
       >
-        👆 点击上方任意节点，查看职责说明
+        {{ t('hierarchy.hint') }}
       </div>
     </div>
 
     <div class="info-box">
       <span class="icon">💡</span>
-      <strong>核心思想：</strong>组件像组织架构，父组件管理整体，子组件负责具体功能。数据从上往下传，事件从下往上报。
+      <strong>{{ t('common.coreIdea') }}</strong>{{ t('hierarchy.idea') }}
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { componentStateManagementLocale } from '../../../locales/component-state-management/index.js'
+
+const { t, messages } = useI18n(componentStateManagementLocale)
 
 const selectedNode = ref(null)
 
-const nodeInfoMap = {
-  app: {
-    icon: '👑',
-    title: 'App 根组件',
-    description: '就像公司的CEO，负责整个应用的初始化和全局管理。包含路由、全局状态、主题配置等大方向决策。',
-    props: [],
-    events: []
-  },
-  header: {
-    icon: '📌',
-    title: 'Header 导航栏',
-    description: '公司的前台部门，负责展示Logo、导航菜单、用户信息和购物车等。大部分页面都会用到它。',
-    props: ['user', 'cartCount'],
-    events: ['logout', 'search']
-  },
-  main: {
-    icon: '📄',
-    title: 'Main Content 主内容',
-    description: '公司的核心业务部门，管理页面的主要内容区域。用flex或grid布局组织侧边栏和内容。',
-    props: [],
-    events: []
-  },
-  sidebar: {
-    icon: '📑',
-    title: 'Sidebar 侧边栏',
-    description: '公司的导航小组，提供可折叠的菜单。常见于后台管理系统或分类浏览页面。',
-    props: ['menuItems', 'collapsed'],
-    events: ['select', 'toggle']
-  },
-  productlist: {
-    icon: '🛍️',
-    title: 'ProductList 商品列表',
-    description: '商品展示团队，负责数据获取、分页、排序和筛选。包含多个ProductCard成员。',
-    props: ['products', 'loading', 'total'],
-    events: ['loadMore', 'sort', 'filter']
-  },
-  productcard: {
-    icon: '🏷️',
-    title: 'ProductCard 商品卡片',
-    description: '最基层的员工，负责展示单个商品的信息（图片、名称、价格、评分）。专注于UI展示。',
-    props: ['product', 'showAddToCart'],
-    events: ['addToCart', 'click']
-  },
-  footer: {
-    icon: '🔻',
-    title: 'Footer 页脚',
-    description: '公司的后勤部门，展示版权信息、友情链接、联系方式、社交媒体链接等辅助信息。',
-    props: [],
-    events: []
-  }
-}
+const nodeInfoMap = computed(() => messages.value.hierarchy.nodes)
+
+const n = (id) => nodeInfoMap.value[id]
 
 const selectedNodeInfo = computed(() => {
-  return selectedNode.value ? nodeInfoMap[selectedNode.value] : null
+  return selectedNode.value ? nodeInfoMap.value[selectedNode.value] : null
 })
 
 const selectNode = (nodeId) => {

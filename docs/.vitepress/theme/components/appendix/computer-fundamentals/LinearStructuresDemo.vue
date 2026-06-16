@@ -1,8 +1,8 @@
 <template>
   <div class="linear-structures-demo">
     <div class="demo-header">
-      <span class="title">线性结构的四种形态</span>
-      <span class="subtitle">数组、链表、栈、队列的区别</span>
+      <span class="title">{{ t('dataStructures.linear.title') }}</span>
+      <span class="subtitle">{{ t('dataStructures.linear.subtitle') }}</span>
     </div>
 
     <div class="structure-tabs">
@@ -16,14 +16,12 @@
       </button>
     </div>
 
-    <!-- 可视化展示 -->
     <div class="structure-visual">
       <div class="visual-header">
         <span class="structure-title">{{ currentStructure.name }}</span>
         <span class="structure-tagline">{{ currentStructure.tagline }}</span>
       </div>
 
-      <!-- 数组 -->
       <div v-if="activeStructure === 'array'" class="array-visual">
         <div class="memory-block">
           <div
@@ -36,11 +34,10 @@
           </div>
         </div>
         <div class="visual-note">
-          ✓ 连续内存存储 | ✓ 快速访问 (O(1)) | ✗ 插入删除慢 (O(n))
+          {{ t('dataStructures.linear.notes.array') }}
         </div>
       </div>
 
-      <!-- 链表 -->
       <div v-if="activeStructure === 'linkedlist'" class="linkedlist-visual">
         <div class="nodes-chain">
           <div
@@ -56,14 +53,13 @@
           </div>
         </div>
         <div class="visual-note">
-          ✓ 非连续内存 | ✗ 访问慢 (O(n)) | ✓ 快速插入删除
+          {{ t('dataStructures.linear.notes.linkedlist') }}
         </div>
       </div>
 
-      <!-- 栈 -->
       <div v-if="activeStructure === 'stack'" class="stack-visual">
         <div class="stack-container">
-          <div class="stack-top">栈顶 ↓</div>
+          <div class="stack-top">{{ t('dataStructures.linear.stackTop') }}</div>
           <div class="stack-items">
             <div
               v-for="(item, index) in stackData"
@@ -73,21 +69,24 @@
               {{ item }}
             </div>
           </div>
-          <div class="stack-bottom">栈底</div>
+          <div class="stack-bottom">{{ t('dataStructures.linear.stackBottom') }}</div>
         </div>
         <div class="stack-operations">
-          <button class="op-btn" @click="pushStack">入栈 (PUSH)</button>
-          <button class="op-btn" @click="popStack">出栈 (POP)</button>
+          <button class="op-btn" @click="pushStack">
+            {{ t('dataStructures.linear.push') }}
+          </button>
+          <button class="op-btn" @click="popStack">
+            {{ t('dataStructures.linear.pop') }}
+          </button>
         </div>
         <div class="visual-note">
-          后进先出 (LIFO) | 应用：撤销操作、函数调用
+          {{ t('dataStructures.linear.notes.stack') }}
         </div>
       </div>
 
-      <!-- 队列 -->
       <div v-if="activeStructure === 'queue'" class="queue-visual">
         <div class="queue-container">
-          <div class="queue-front">队首 →</div>
+          <div class="queue-front">{{ t('dataStructures.linear.queueFront') }}</div>
           <div class="queue-items">
             <div
               v-for="(item, index) in queueData"
@@ -97,29 +96,28 @@
               {{ item }}
             </div>
           </div>
-          <div class="queue-rear">→ 队尾</div>
+          <div class="queue-rear">{{ t('dataStructures.linear.queueRear') }}</div>
         </div>
         <div class="queue-operations">
-          <button class="op-btn" @click="enqueue">入队 (ENQUEUE)</button>
-          <button class="op-btn" @click="dequeue">出队 (DEQUEUE)</button>
+          <button class="op-btn" @click="enqueue">
+            {{ t('dataStructures.linear.enqueue') }}
+          </button>
+          <button class="op-btn" @click="dequeue">
+            {{ t('dataStructures.linear.dequeue') }}
+          </button>
         </div>
         <div class="visual-note">
-          先进先出 (FIFO) | 应用：任务队列、打印队列
+          {{ t('dataStructures.linear.notes.queue') }}
         </div>
       </div>
     </div>
 
-    <!-- 对比表格 -->
     <div class="comparison-table">
-      <div class="table-title">操作对比</div>
+      <div class="table-title">{{ t('dataStructures.linear.tableTitle') }}</div>
       <table>
         <thead>
           <tr>
-            <th>数据结构</th>
-            <th>访问</th>
-            <th>插入</th>
-            <th>删除</th>
-            <th>特点</th>
+            <th v-for="header in tableHeaders" :key="header">{{ header }}</th>
           </tr>
         </thead>
         <tbody>
@@ -138,9 +136,8 @@
       </table>
     </div>
 
-    <!-- 应用场景 -->
     <div class="applications">
-      <div class="app-title">实际应用场景</div>
+      <div class="app-title">{{ t('dataStructures.linear.appTitle') }}</div>
       <div class="app-list">
         <div
           v-for="(app, index) in currentStructure.applications"
@@ -160,83 +157,33 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n'
+import { computerFundamentalsLocale } from '../../../locales/computer-fundamentals'
+
+const { t, messages } = useI18n(computerFundamentalsLocale)
 
 const activeStructure = ref('array')
 
-const structures = [
-  {
-    id: 'array',
-    name: '数组',
-    icon: '📊',
-    tagline: '连续内存，编号访问',
-    access: 'O(1) 快',
-    insert: 'O(n) 慢',
-    delete: 'O(n) 慢',
-    feature: '大小固定',
-    applications: [
-      { icon: '📋', name: '列表数据', desc: '学生成绩、商品价格列表' },
-      { icon: '🖼️', name: '图像处理', desc: '像素矩阵存储' },
-      { icon: '📈', name: '统计图表', desc: '按时间顺序的数据' }
-    ]
-  },
-  {
-    id: 'linkedlist',
-    name: '链表',
-    icon: '🔗',
-    tagline: '指针链接，灵活增删',
-    access: 'O(n) 慢',
-    insert: 'O(1) 快',
-    delete: 'O(1) 快',
-    feature: '大小可变',
-    applications: [
-      { icon: '↩️', name: '撤销功能', desc: '操作历史记录' },
-      { icon: '🎵', name: '音乐播放', desc: '播放列表' },
-      { icon: '📝', name: '文本编辑', desc: '文档内容的动态存储' }
-    ]
-  },
-  {
-    id: 'stack',
-    name: '栈',
-    icon: '🥞',
-    tagline: '后进先出',
-    access: 'O(n)',
-    insert: 'O(1) 快',
-    delete: 'O(1) 快',
-    feature: '一端操作',
-    applications: [
-      { icon: '↩️', name: '撤销操作', desc: '编辑器的撤销功能' },
-      { icon: '🔙', name: '浏览器历史', desc: '后退按钮实现' },
-      { icon: '📞', name: '函数调用', desc: '程序调用栈管理' }
-    ]
-  },
-  {
-    id: 'queue',
-    name: '队列',
-    icon: '🚶',
-    tagline: '先进先出',
-    access: 'O(n)',
-    insert: 'O(1) 快',
-    delete: 'O(1) 快',
-    feature: '两端操作',
-    applications: [
-      { icon: '🖨️', name: '打印队列', desc: '文档按顺序打印' },
-      { icon: '🎫', name: '任务调度', desc: '操作系统进程调度' },
-      { icon: '💬', name: '消息队列', desc: '异步任务处理' }
-    ]
-  }
-]
+const structures = computed(() => messages.value.dataStructures.linear.structures)
+const tableHeaders = computed(() => messages.value.dataStructures.linear.tableHeaders)
 
 const arrayData = ref([10, 25, 33, 47, 59, 62])
 const linkedListData = ref(['A', 'B', 'C', 'D', 'E'])
-const stackData = ref(['书5', '书4', '书3', '书2', '书1'])
-const queueData = ref(['人1', '人2', '人3', '人4'])
+const stackData = ref(
+  messages.value.dataStructures.linear.initialStackItems.map((item) => item)
+)
+const queueData = ref(
+  messages.value.dataStructures.linear.initialQueueItems.map((item) => item)
+)
 
 const currentStructure = computed(() =>
-  structures.find((s) => s.id === activeStructure.value)
+  structures.value.find((s) => s.id === activeStructure.value)
 )
 
 const pushStack = () => {
-  const newItem = `书${stackData.value.length + 1}`
+  const newItem = t('dataStructures.linear.stackItem', {
+    index: stackData.value.length + 1
+  })
   stackData.value.unshift(newItem)
 }
 
@@ -247,7 +194,9 @@ const popStack = () => {
 }
 
 const enqueue = () => {
-  const newItem = `人${queueData.value.length + 1}`
+  const newItem = t('dataStructures.linear.queueItem', {
+    index: queueData.value.length + 1
+  })
   queueData.value.push(newItem)
 }
 

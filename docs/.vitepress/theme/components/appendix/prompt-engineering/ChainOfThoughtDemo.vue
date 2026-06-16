@@ -6,27 +6,27 @@
     <template #header>
       <div class="controls-header">
         <div class="control-group">
-          <span class="label">任务场景：</span>
+          <span class="label">{{ t('chainOfThought.taskLabel') }}</span>
           <el-select
             v-model="currentTask"
             style="width: 200px"
           >
             <el-option
-              label="代码审查 (Code Review)"
+              :label="t('chainOfThought.taskCodeReview')"
               value="debug"
             />
             <el-option
-              label="行程规划 (Travel Plan)"
+              :label="t('chainOfThought.taskTravelPlan')"
               value="travel"
             />
           </el-select>
         </div>
-        
+
         <div class="control-group">
-          <span class="label">思考模式：</span>
+          <span class="label">{{ t('chainOfThought.modeLabel') }}</span>
           <el-radio-group v-model="currentMode">
-            <el-radio-button 
-              v-for="m in modes" 
+            <el-radio-button
+              v-for="m in modes"
               :key="m.id"
               :label="m.id"
             >
@@ -51,21 +51,21 @@
             <template #header>
               <div class="panel-header">
                 <el-icon><EditPen /></el-icon>
-                <span>输入提示词 (Prompt)</span>
+                <span>{{ t('chainOfThought.promptTitle') }}</span>
               </div>
             </template>
             <div class="prompt-text">
               {{ currentScenario.prompt }}
             </div>
             <div class="action-area">
-              <el-button 
-                type="primary" 
+              <el-button
+                type="primary"
                 :loading="isPlaying"
-                class="run-btn" 
+                class="run-btn"
                 size="large"
                 @click="runSimulation"
               >
-                {{ isPlaying ? '生成中...' : '开始生成' }}
+                {{ isPlaying ? t('common.running') : t('common.run') }}
               </el-button>
             </div>
           </el-card>
@@ -84,7 +84,7 @@
               <div class="panel-header">
                 <div class="left">
                   <el-icon><Cpu /></el-icon>
-                  <span>AI 思考与输出</span>
+                  <span>{{ t('chainOfThought.outputTitle') }}</span>
                 </div>
                 <el-tag
                   :type="statusType"
@@ -95,17 +95,17 @@
                 </el-tag>
               </div>
             </template>
-            
+
             <div
               ref="outputContainer"
               class="output-container"
             >
-              <el-empty 
-                v-if="!hasRun && !isPlaying" 
-                description="点击“开始生成”观察 AI 如何处理任务..." 
+              <el-empty
+                v-if="!hasRun && !isPlaying"
+                :description="t('chainOfThought.emptyHint')"
                 :image-size="80"
               />
-              
+
               <el-timeline v-else>
                 <el-timeline-item
                   v-for="(step, index) in displaySteps"
@@ -146,14 +146,14 @@
         show-icon
       >
         <template #title>
-          <span class="insight-title">模式分析</span>
+          <span class="insight-title">{{ t('chainOfThought.analysisTitle') }}</span>
         </template>
         <template #default>
           <div v-if="currentMode === 'direct'">
-            <strong>直接输出模式：</strong> 模型急于给出结果，容易忽略边界情况或细节，导致内容泛泛而谈。
+            <strong>{{ t('chainOfThought.directModeTitle') }}</strong> {{ t('chainOfThought.directModeDesc') }}
           </div>
           <div v-else>
-            <strong>CoT (思维链) 模式：</strong> 强迫模型先“思考”再“行动”。通过列出清单/计划，它相当于给自己建立了“检查点”，大大降低了遗漏和跑偏的概率。
+            <strong>{{ t('chainOfThought.cotModeTitle') }}</strong> {{ t('chainOfThought.cotModeDesc') }}
           </div>
         </template>
       </el-alert>
@@ -162,8 +162,12 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, nextTick } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { EditPen, Cpu } from '@element-plus/icons-vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { promptEngineeringLocale } from '../../../locales/prompt-engineering/index.js'
+
+const { t } = useI18n(promptEngineeringLocale)
 
 const currentTask = ref('debug')
 const currentMode = ref('plan-first')
@@ -179,38 +183,38 @@ function add(a, b) {
   return a - b;
 }`,
     direct: [
-      { title: '直接输出', content: 'The function `add` incorrectly uses the subtraction operator `-` instead of `+`. It should be `return a + b;`.' }
+      { title: () => t('chainOfThought.scenarios.debug.direct.title'), content: 'The function `add` incorrectly uses the subtraction operator `-` instead of `+`. It should be `return a + b;`.' }
     ],
     cot: [
-      { title: '1. 理解意图', content: 'User wants to add two numbers.' },
-      { title: '2. 检查实现', content: 'Line 2 uses `-` operator.' },
-      { title: '3. 发现矛盾', content: 'Function name is `add` but logic is subtraction.' },
-      { title: '4. 最终输出', content: 'The function has a bug: it subtracts instead of adds. Fix: change `-` to `+`.' }
+      { title: () => t('chainOfThought.scenarios.debug.cot.step1Title'), content: 'User wants to add two numbers.' },
+      { title: () => t('chainOfThought.scenarios.debug.cot.step2Title'), content: 'Line 2 uses `-` operator.' },
+      { title: () => t('chainOfThought.scenarios.debug.cot.step3Title'), content: 'Function name is `add` but logic is subtraction.' },
+      { title: () => t('chainOfThought.scenarios.debug.cot.step4Title'), content: 'The function has a bug: it subtracts instead of adds. Fix: change `-` to `+`.' }
     ]
   },
   travel: {
     prompt: 'Plan a 2-day trip to Paris for an art lover.',
     direct: [
-      { title: '直接输出', content: 'Day 1: Eiffel Tower, Louvre. Day 2: Montmartre, Orsay Museum. Enjoy!' }
+      { title: () => t('chainOfThought.scenarios.travel.direct.title'), content: 'Day 1: Eiffel Tower, Louvre. Day 2: Montmartre, Orsay Museum. Enjoy!' }
     ],
     cot: [
-      { title: '1. 分析需求', content: 'Destination: Paris. Duration: 2 days. Interest: Art.' },
-      { title: '2. 筛选景点', content: 'Must-sees: Louvre (Mona Lisa), Musee d\'Orsay (Impressionism), Pompidou (Modern).' },
-      { title: '3. 规划路线', content: 'Cluster locations to save travel time.' },
-      { title: '4. 最终行程', content: 'Day 1: Louvre (morning) -> Tuileries -> Orangerie. Day 2: Orsay (morning) -> Montmartre -> Sacré-Cœur.' }
+      { title: () => t('chainOfThought.scenarios.travel.cot.step1Title'), content: 'Destination: Paris. Duration: 2 days. Interest: Art.' },
+      { title: () => t('chainOfThought.scenarios.travel.cot.step2Title'), content: 'Must-sees: Louvre (Mona Lisa), Musee d\'Orsay (Impressionism), Pompidou (Modern).' },
+      { title: () => t('chainOfThought.scenarios.travel.cot.step3Title'), content: 'Cluster locations to save travel time.' },
+      { title: () => t('chainOfThought.scenarios.travel.cot.step4Title'), content: 'Day 1: Louvre (morning) -> Tuileries -> Orangerie. Day 2: Orsay (morning) -> Montmartre -> Sacré-Cœur.' }
     ]
   }
 }
 
-const modes = [
-  { id: 'direct', label: '直接回答 (Zero-Shot)' },
-  { id: 'plan-first', label: '思维链 (Chain-of-Thought)' }
-]
+const modes = computed(() => [
+  { id: 'direct', label: t('chainOfThought.modeDirect') },
+  { id: 'plan-first', label: t('chainOfThought.modeCOT') }
+])
 
 const currentScenario = computed(() => scenarios[currentTask.value])
 const targetSteps = computed(() => {
-  return currentMode.value === 'direct' 
-    ? currentScenario.value.direct 
+  return currentMode.value === 'direct'
+    ? currentScenario.value.direct
     : currentScenario.value.cot
 })
 
@@ -235,6 +239,12 @@ const getStepType = (index) => {
   return ''
 }
 
+// Resolve step titles (they are functions for i18n)
+const resolveSteps = (steps) => steps.map(s => ({
+  ...s,
+  title: typeof s.title === 'function' ? s.title() : s.title
+}))
+
 // Reset when controls change
 watch([currentTask, currentMode], () => {
   reset()
@@ -251,9 +261,10 @@ async function runSimulation() {
   if (isPlaying.value) return
   reset()
   isPlaying.value = true
-  
+
+  const resolved = resolveSteps(targetSteps.value)
   // Initialize steps structure
-  displaySteps.value = targetSteps.value.map(s => ({
+  displaySteps.value = resolved.map(s => ({
     ...s,
     displayedContent: ''
   }))
@@ -262,7 +273,7 @@ async function runSimulation() {
     currentStepIndex.value = i
     const step = displaySteps.value[i]
     const fullContent = step.content
-    
+
     // Simulate typing effect
     for (let j = 0; j <= fullContent.length; j++) {
       step.displayedContent = fullContent.slice(0, j)
@@ -350,7 +361,7 @@ async function runSimulation() {
 .output-container {
   min-height: 300px;
   max-height: 400px;
-  
+
   padding: 0 4px;
 }
 
@@ -393,18 +404,18 @@ async function runSimulation() {
     flex-direction: column;
     align-items: flex-start;
   }
-  
+
   .control-group {
     width: 100%;
     flex-direction: column;
     align-items: flex-start;
   }
-  
-  .control-group .el-select, 
+
+  .control-group .el-select,
   .control-group .el-radio-group {
     width: 100%;
   }
-  
+
   .prompt-panel {
     margin-bottom: 16px;
     min-height: auto;

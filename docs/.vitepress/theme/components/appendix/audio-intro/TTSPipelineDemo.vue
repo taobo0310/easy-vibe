@@ -1,18 +1,11 @@
-<!--
-  TTSPipelineDemo.vue
-  TTS 流程演示组件
-
-  用途：
-  展示文本转语音的完整流程，对比不同架构（自回归/非自回归/流匹配）。
--->
 <template>
   <div class="tts-pipeline-demo">
     <div class="header">
       <div class="title">
-        🔄 TTS 架构演进：从慢到快
+        {{ t('ttsPipeline.title') }}
       </div>
       <div class="subtitle">
-        探索文本如何变成语音，以及不同架构的优劣对比
+        {{ t('ttsPipeline.subtitle') }}
       </div>
     </div>
 
@@ -88,15 +81,15 @@
       </div>
       <div class="detail-meta">
         <div class="meta-item">
-          <span class="label">输入:</span>
+          <span class="label">{{ t('ttsPipeline.input') }}</span>
           <span>{{ currentStage.input }}</span>
         </div>
         <div class="meta-item">
-          <span class="label">输出:</span>
+          <span class="label">{{ t('ttsPipeline.output') }}</span>
           <span>{{ currentStage.output }}</span>
         </div>
         <div class="meta-item">
-          <span class="label">技术:</span>
+          <span class="label">{{ t('ttsPipeline.tech') }}</span>
           <span>{{ currentStage.tech }}</span>
         </div>
       </div>
@@ -104,21 +97,21 @@
 
     <div class="comparison-table">
       <div class="table-title">
-        📊 架构对比
+        {{ t('ttsPipeline.comparisonTitle') }}
       </div>
       <div class="table">
         <div class="table-header">
           <div class="cell">
-            特性
+            {{ t('ttsPipeline.feature') }}
           </div>
           <div class="cell">
-            自回归
+            {{ architectures[0].name }}
           </div>
           <div class="cell">
-            非自回归
+            {{ architectures[1].name }}
           </div>
           <div class="cell">
-            流匹配
+            {{ architectures[2].name }}
           </div>
         </div>
         <div
@@ -153,7 +146,7 @@
 
     <div class="models-section">
       <div class="models-title">
-        🏆 代表模型
+        {{ t('ttsPipeline.modelsTitle') }}
       </div>
       <div class="models-grid">
         <div
@@ -179,9 +172,8 @@
     <div class="info-box">
       <span class="icon">💡</span>
       <p>
-        <strong>TTS 演进趋势：</strong>
-        从早期的自回归模型（如 Tacotron）到非自回归（如 FastSpeech），再到最新的流匹配模型（如 F5-TTS），
-        TTS 技术正在向更快、更稳定、更高质量的方向发展。
+        <strong>{{ t('ttsPipeline.infoStrong') }}</strong>
+        {{ t('ttsPipeline.info') }}
       </p>
     </div>
   </div>
@@ -189,53 +181,20 @@
 
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { audioIntroLocale } from '../../../locales/audio-intro/index.js'
 
-const architectures = [
-  { id: 'ar', name: '自回归', icon: '📝', tag: 'AR', tagClass: 'primary' },
-  { id: 'nar', name: '非自回归', icon: '⚡', tag: 'NAR', tagClass: 'success' },
-  { id: 'flow', name: '流匹配', icon: '🌊', tag: 'Flow', tagClass: 'warning' }
-]
-
-const pipelineStages = {
-  ar: [
-    { id: 'text', name: '文本处理', icon: '📝', shortDesc: '分词 & 音素', description: '将输入文本转换为音素序列', input: '原始文本', output: '音素序列', tech: 'G2P' },
-    { id: 'encoder', name: '文本编码', icon: '🔢', shortDesc: '提取特征', description: '使用 Encoder 编码文本', input: '音素序列', output: '文本特征', tech: 'Transformer' },
-    { id: 'decoder', name: '自回归解码', icon: '🎯', shortDesc: '逐帧生成', description: '逐个时间步生成梅尔频谱', input: '文本特征', output: '梅尔频谱', tech: 'AR Decoder' },
-    { id: 'vocoder', name: '声码器', icon: '🔊', shortDesc: '频谱转波形', description: '将频谱转换为音频波形', input: '梅尔频谱', output: '音频波形', tech: 'HiFi-GAN' }
-  ],
-  nar: [
-    { id: 'text', name: '文本处理', icon: '📝', shortDesc: '分词 & 音素', description: '将输入文本转换为音素序列', input: '原始文本', output: '音素序列', tech: 'G2P' },
-    { id: 'duration', name: '时长预测', icon: '⏱️', shortDesc: '预测时长', description: '预测每个音素的帧数', input: '音素序列', output: '时长信息', tech: 'Duration Predictor' },
-    { id: 'decoder', name: '并行解码', icon: '⚡', shortDesc: '一次性生成', description: '并行生成完整梅尔频谱', input: '文本特征', output: '梅尔频谱', tech: 'Non-AR Transformer' },
-    { id: 'vocoder', name: '声码器', icon: '🔊', shortDesc: '频谱转波形', description: '将频谱转换为音频波形', input: '梅尔频谱', output: '音频波形', tech: 'HiFi-GAN' }
-  ],
-  flow: [
-    { id: 'text', name: '文本处理', icon: '📝', shortDesc: '分词 & 音素', description: '将输入文本转换为音素序列', input: '原始文本', output: '音素序列', tech: 'G2P' },
-    { id: 'embedding', name: '文本嵌入', icon: '🔢', shortDesc: '特征提取', description: '将音素转换为向量', input: '音素序列', output: '文本嵌入', tech: 'DiT' },
-    { id: 'flow', name: '流匹配', icon: '🌊', shortDesc: '最优传输', description: '使用流匹配生成频谱', input: '文本嵌入', output: '梅尔频谱', tech: 'Flow Matching' },
-    { id: 'vocoder', name: '声码器', icon: '🔊', shortDesc: '频谱转波形', description: '将频谱转换为音频波形', input: '梅尔频谱', output: '音频波形', tech: 'Vocoder' }
-  ]
-}
-
-const comparisonRows = [
-  { feature: '生成速度', ar: '慢', nar: '快', flow: '很快' },
-  { feature: '音质', ar: '高', nar: '中高', flow: '高' },
-  { feature: '稳定性', ar: '中', nar: '高', flow: '高' },
-  { feature: '可控性', ar: '中', nar: '高', flow: '高' }
-]
-
-const models = [
-  { name: 'Tacotron 2', arch: 'ar', type: 'AR', tagClass: 'primary', desc: '经典 AR 模型，音质优秀' },
-  { name: 'FastSpeech 2', arch: 'nar', type: 'NAR', tagClass: 'success', desc: '并行生成，速度快' },
-  { name: 'F5-TTS', arch: 'flow', type: 'Flow', tagClass: 'warning', desc: '最新 SOTA，10 步生成' },
-  { name: 'CosyVoice', arch: 'flow', type: 'Flow', tagClass: 'warning', desc: '阿里开源，支持多语言' }
-]
+const { t, messages } = useI18n(audioIntroLocale)
+const architectures = computed(() => messages.value.ttsPipeline.architectures)
+const pipelineStages = computed(() => messages.value.ttsPipeline.pipelineStages)
+const comparisonRows = computed(() => messages.value.ttsPipeline.comparisonRows)
+const models = computed(() => messages.value.ttsPipeline.models)
 
 const selectedArch = ref('flow')
 const activeStage = ref(0)
 const detailCanvas = ref(null)
 
-const currentStages = computed(() => pipelineStages[selectedArch.value])
+const currentStages = computed(() => pipelineStages.value[selectedArch.value])
 const currentStage = computed(() => currentStages.value[activeStage.value])
 
 const selectArch = (id) => {
@@ -255,9 +214,7 @@ const drawVisualization = () => {
   const stage = currentStage.value
   if (!stage) return
 
-  // 根据阶段绘制不同的可视化
   if (stage.id === 'text') {
-    // 文本到音素
     ctx.font = '16px sans-serif'
     ctx.fillStyle = '#333'
     ctx.fillText('"Hello"', 50, h/2)
@@ -279,7 +236,6 @@ const drawVisualization = () => {
       x += 40
     })
   } else if (stage.id === 'decoder' && selectedArch.value === 'ar') {
-    // 自回归解码
     for (let i = 0; i < 5; i++) {
       const x = 80 + i * 80
       for (let j = 0; j < 8; j++) {
@@ -296,9 +252,8 @@ const drawVisualization = () => {
       }
     }
     ctx.fillStyle = '#666'
-    ctx.fillText('逐个时间步生成', 50, 30)
+    ctx.fillText(t('ttsPipeline.chartSerial'), 50, 30)
   } else if (stage.id === 'flow') {
-    // 流匹配
     ctx.strokeStyle = '#409eff'
     ctx.lineWidth = 3
     ctx.beginPath()
@@ -311,7 +266,7 @@ const drawVisualization = () => {
     ctx.stroke()
 
     const steps = [0, 0.25, 0.5, 0.75, 1]
-    steps.forEach((t, i) => {
+    steps.forEach((t) => {
       const x = 50 + t * 400
       const y = h - 50 - t * (h - 100) + Math.sin(t * Math.PI * 4) * 20
       ctx.fillStyle = '#e6a23c'

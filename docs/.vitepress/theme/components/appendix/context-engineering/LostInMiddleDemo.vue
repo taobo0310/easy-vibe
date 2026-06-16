@@ -2,7 +2,7 @@
   <div class="lost-in-middle-demo">
     <div class="control-panel">
       <div class="control-group">
-        <label>关键信息大概在整段话的哪个位置：{{ needlePosition }}%</label>
+        <label>{{ t('lostInMiddle.positionLabel', { position: needlePosition }) }}</label>
         <input 
           v-model.number="needlePosition" 
           type="range" 
@@ -15,19 +15,16 @@
     </div>
 
     <div class="visualization-area">
-      <!-- Context Window Bar -->
       <div class="context-bar">
         <div class="context-label start">
-          Start (System)
+          {{ t('lostInMiddle.start') }}
         </div>
         <div class="context-label end">
-          End (Query)
+          {{ t('lostInMiddle.end') }}
         </div>
         
-        <!-- Attention Heatmap Background -->
         <div class="attention-heatmap" />
         
-        <!-- Needle Marker -->
         <div 
           class="needle-marker"
           :style="{ left: `${needlePosition}%` }"
@@ -36,19 +33,17 @@
             📍
           </div>
           <div class="needle-tooltip">
-            关键事实
+            {{ t('lostInMiddle.needle') }}
           </div>
         </div>
       </div>
 
-      <!-- Probability Curve Chart -->
       <div class="chart-container">
         <svg
           viewBox="0 0 100 60"
           preserveAspectRatio="none"
           class="chart-svg"
         >
-          <!-- U-Curve Path -->
           <path 
             d="M 0 5 Q 50 55 100 5" 
             fill="none" 
@@ -56,7 +51,6 @@
             stroke-width="2" 
             stroke-dasharray="4"
           />
-          <!-- Active Dot -->
           <circle 
             :cx="needlePosition" 
             :cy="60 - (retrievalProb * 0.5 + 5)" 
@@ -65,10 +59,10 @@
           />
         </svg>
         <div class="chart-label y-axis">
-          被记住的概率
+          {{ t('lostInMiddle.yAxis') }}
         </div>
         <div class="chart-label x-axis">
-          在上下文里的位置
+          {{ t('lostInMiddle.xAxis') }}
         </div>
       </div>
     </div>
@@ -82,7 +76,7 @@
           {{ retrievalProb.toFixed(1) }}%
         </div>
         <div class="metric-label">
-          检索成功率
+          {{ t('lostInMiddle.retrieval') }}
         </div>
       </div>
       <div class="metric-card">
@@ -90,7 +84,7 @@
           {{ positionLabel }}
         </div>
         <div class="metric-label">
-          位置描述
+          {{ t('lostInMiddle.description') }}
         </div>
       </div>
     </div>
@@ -98,9 +92,9 @@
     <div class="info-box">
       <p>
         <span class="icon">🔍</span>
-        <strong>实验观察：</strong>当关键信息藏在整段话的<strong>中间位置</strong>时，模型最容易“漏看掉”（Lost in the Middle）。
+        <strong>{{ t('lostInMiddle.observationStrong') }}</strong>{{ t('lostInMiddle.observation') }}
         <br>
-        最靠谱的做法：把重要指令放在<strong>最前面的 System Prompt</strong>，或者<strong>最后的用户问题里</strong>。
+        {{ t('lostInMiddle.advice') }}
       </p>
     </div>
   </div>
@@ -108,12 +102,13 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { contextEngineeringLocale } from '../../../locales/context-engineering/index.js'
 
-const needlePosition = ref(50) // 0 to 100
+const { t } = useI18n(contextEngineeringLocale)
 
-// Parabolic curve calculation: Vertex at (50, 40), passing through (0, 95) and (100, 95)
-// y = a(x-h)^2 + k
-// a = 0.022
+const needlePosition = ref(50)
+
 const retrievalProb = computed(() => {
   const x = needlePosition.value
   const prob = 0.022 * Math.pow(x - 50, 2) + 40
@@ -122,9 +117,9 @@ const retrievalProb = computed(() => {
 
 const positionLabel = computed(() => {
   const p = needlePosition.value
-  if (p < 20) return '偏开头'
-  if (p > 80) return '偏结尾'
-  return '中间区域（最危险）'
+  if (p < 20) return t('lostInMiddle.front')
+  if (p > 80) return t('lostInMiddle.back')
+  return t('lostInMiddle.middle')
 })
 
 const getScoreClass = (score) => {

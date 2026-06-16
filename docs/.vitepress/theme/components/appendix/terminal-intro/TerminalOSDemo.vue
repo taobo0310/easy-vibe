@@ -52,7 +52,7 @@
         >
           <div class="start-hint">
             <span class="icon">👆</span>
-            <span class="text">不断点击屏幕演示 / Keep Clicking</span>
+            <span class="text">{{ t('terminalOSDemo.clickLabel') }} / Keep Clicking</span>
           </div>
         </div>
 
@@ -66,7 +66,7 @@
             @click.stop="resetDemo"
           >
             <span class="icon">✅</span>
-            <span class="text">演示结束，点击重置 / Finished (Reset)</span>
+            <span class="text">{{ t('terminalOSDemo.finishedLabel') }} / Finished (Reset)</span>
           </div>
         </div>
 
@@ -99,7 +99,7 @@
             v-if="lines.length === 0"
             class="hint"
           >
-            (点击屏幕继续 / Click screen to continue)</span>
+            ({{ t('terminalOSDemo.clickHint') }} / Click screen to continue)</span>
           <span
             v-else
             class="hint blink-hint"
@@ -121,6 +121,10 @@
 
 <script setup>
 import { ref, computed, watch } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { terminalIntroLocale } from '../../../locales/terminal-intro/index.js'
+
+const { t } = useI18n(terminalIntroLocale)
 
 const currentOS = ref('win-cmd')
 const isTyping = ref(false)
@@ -135,24 +139,23 @@ const osList = [
   { id: 'linux', name: 'Linux Terminal', icon: '🐧' }
 ]
 
-const configs = {
+const configs = computed(() => ({
   'win-cmd': {
     title: 'Command Prompt',
     prompt: 'C:\\Users\\User>',
     demo: [
-      { type: 'explanation', content: '准备输入命令...' },
+      { type: 'explanation', content: t('terminalOSDemo.ready') },
       {
         type: 'command',
         content: 'dir',
         delay: 400,
-        explanation:
-          '输入 `dir` (Directory)。这是 Windows 系统用来**列出当前文件夹内容**的命令。'
+        explanation: t('terminalOSDemo.dirCmd')
       },
       {
         type: 'output',
         content: ' Volume in drive C has no label.',
         delay: 100,
-        explanation: '系统正在执行命令...'
+        explanation: t('terminalOSDemo.dirOutput')
       },
       {
         type: 'output',
@@ -186,8 +189,7 @@ const configs = {
         type: 'output',
         content: '               2 Dir(s)  50,000,000,000 bytes free',
         delay: 50,
-        explanation:
-          '系统返回了文件列表。`<DIR>` 表示这是一个文件夹，数字表示文件大小。'
+        explanation: t('terminalOSDemo.dirOutput')
       },
       { type: 'output', content: '', delay: 100 }
     ]
@@ -196,19 +198,18 @@ const configs = {
     title: 'Windows PowerShell',
     prompt: 'PS C:\\Users\\User>',
     demo: [
-      { type: 'explanation', content: '准备输入命令...' },
+      { type: 'explanation', content: t('terminalOSDemo.ready') },
       {
         type: 'command',
         content: 'Get-Date',
         delay: 400,
-        explanation:
-          '输入 `Get-Date`。PowerShell 使用动词-名词的命名方式，这里是**获取当前时间**。'
+        explanation: t('terminalOSDemo.getDateCmd')
       },
       {
         type: 'output',
         content: '',
         delay: 100,
-        explanation: '系统返回了当前的日期和时间。'
+        explanation: t('terminalOSDemo.getDateOutput')
       },
       {
         type: 'output',
@@ -220,14 +221,13 @@ const configs = {
         type: 'command',
         content: 'echo "Hello World"',
         delay: 400,
-        explanation:
-          '输入 `echo`。这是让计算机**复读**你说的话，常用于测试或打印信息。'
+        explanation: t('terminalOSDemo.echoCmd')
       },
       {
         type: 'output',
         content: 'Hello World',
         delay: 100,
-        explanation: '计算机乖乖地输出了 "Hello World"。'
+        explanation: t('terminalOSDemo.echoOutput')
       }
     ]
   },
@@ -235,13 +235,12 @@ const configs = {
     title: 'user — -zsh — 80x24',
     prompt: 'user@MacBook-Pro ~ % ',
     demo: [
-      { type: 'explanation', content: '准备输入命令...' },
+      { type: 'explanation', content: t('terminalOSDemo.ready') },
       {
         type: 'command',
         content: 'ls -G',
         delay: 400,
-        explanation:
-          '输入 `ls` (List)。这是 Mac/Linux 系统用来**列出文件**的命令。`-G` 参数让输出带颜色。'
+        explanation: t('terminalOSDemo.lsCmd')
       },
       {
         type: 'output',
@@ -252,14 +251,13 @@ const configs = {
         type: 'output',
         content: 'Documents Library     Pictures  Public',
         delay: 100,
-        explanation: '系统列出了你的主目录下的文件夹。'
+        explanation: t('terminalOSDemo.lsOutput')
       },
       {
         type: 'command',
         content: 'sw_vers',
         delay: 400,
-        explanation:
-          '输入 `sw_vers` (Software Version)。这是 macOS 特有的命令，查看**系统版本**。'
+        explanation: t('terminalOSDemo.swVersCmd')
       },
       { type: 'output', content: 'ProductName:		macOS', delay: 50 },
       { type: 'output', content: 'ProductVersion:		15.1', delay: 50 },
@@ -267,7 +265,7 @@ const configs = {
         type: 'output',
         content: 'BuildVersion:		24B83',
         delay: 50,
-        explanation: '系统返回了当前的 macOS 版本信息。'
+        explanation: t('terminalOSDemo.swVersOutput')
       }
     ]
   },
@@ -275,20 +273,18 @@ const configs = {
     title: 'user@hostname: ~',
     prompt: 'user@hostname:~$ ',
     demo: [
-      { type: 'explanation', content: '准备输入命令...' },
+      { type: 'explanation', content: t('terminalOSDemo.ready') },
       {
         type: 'command',
         content: 'ls -la',
         delay: 400,
-        explanation:
-          '输入 `ls` (List)。这是 Linux/Mac 系统用来**列出文件**的命令。`-la` 是参数，表示“列出所有文件(all)的详细信息(long)”。'
+        explanation: t('terminalOSDemo.lsLaCmd')
       },
       {
         type: 'output',
         content: 'total 8',
         delay: 100,
-        explanation:
-          '系统返回了文件列表。左边的 `drwxr-xr-x` 看起来像乱码，其实是**权限描述**（谁能读、谁能写）。'
+        explanation: t('terminalOSDemo.lsLaOutput')
       },
       {
         type: 'output',
@@ -309,20 +305,19 @@ const configs = {
         type: 'command',
         content: 'whoami',
         delay: 400,
-        explanation:
-          '输入 `whoami` (Who am I)。这是一个经典的哲学命令（笑），告诉计算机：**我是谁？**（当前登录用户）。'
+        explanation: t('terminalOSDemo.whoamiCmd')
       },
       {
         type: 'output',
         content: 'user',
         delay: 100,
-        explanation: '系统回答：你是 "user"。'
+        explanation: t('terminalOSDemo.whoamiOutput')
       }
     ]
   }
-}
+}))
 
-const currentOSConfig = computed(() => configs[currentOS.value])
+const currentOSConfig = computed(() => configs.value[currentOS.value])
 const isFinished = computed(
   () =>
     currentOSConfig.value &&

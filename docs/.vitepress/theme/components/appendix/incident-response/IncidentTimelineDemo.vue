@@ -1,12 +1,8 @@
-<!--
-  IncidentTimelineDemo.vue
-  事故响应时间线演示：展示从发现到复盘的完整事故响应流程
--->
 <template>
   <div class="incident-timeline-demo">
     <div class="header">
-      <div class="title">事故响应时间线 (Incident Timeline)</div>
-      <div class="subtitle">点击各阶段，了解每个环节的关键动作</div>
+      <div class="title">{{ t('timeline.title') }}</div>
+      <div class="subtitle">{{ t('timeline.subtitle') }}</div>
     </div>
 
     <div class="timeline">
@@ -48,7 +44,7 @@
       <div class="phase-body">
         <div class="phase-desc">{{ currentPhase.description }}</div>
         <div class="phase-actions">
-          <div class="actions-title">关键动作：</div>
+          <div class="actions-title">{{ t('timeline.actionsTitle') }}</div>
           <div
             v-for="(action, i) in currentPhase.actions"
             :key="i"
@@ -59,7 +55,7 @@
           </div>
         </div>
         <div class="phase-roles">
-          <span class="roles-label">参与角色：</span>
+          <span class="roles-label">{{ t('timeline.rolesLabel') }}</span>
           <span
             v-for="role in currentPhase.roles"
             :key="role"
@@ -72,122 +68,39 @@
     </div>
 
     <div class="auto-controls">
-      <button class="play-btn" @click="autoPlay" :disabled="isPlaying">
-        {{ isPlaying ? '播放中...' : '自动演示完整流程' }}
+      <button class="play-btn" :disabled="isPlaying" @click="autoPlay">
+        {{ isPlaying ? t('timeline.playing') : t('timeline.play') }}
       </button>
-      <button class="reset-btn" @click="resetAll">重置</button>
+      <button class="reset-btn" @click="resetAll">{{ t('timeline.reset') }}</button>
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { incidentResponseLocale } from '../../../locales/incident-response/index.js'
 
 const activePhase = ref(null)
 const completedPhases = ref([])
 const isPlaying = ref(false)
+const { t, messages } = useI18n(incidentResponseLocale)
 
-const phases = [
-  {
-    id: 'detect',
-    name: '发现',
-    timeHint: 'T+0',
-    icon: '🔍',
-    color: '#ef4444',
-    duration: '目标 < 5 分钟',
-    description:
-      '通过监控告警、用户反馈或自动化检测发现系统异常。越早发现，损失越小。',
-    actions: [
-      '监控系统触发告警（CPU、延迟、错误率等）',
-      '值班人员收到通知并确认',
-      '初步判断影响范围',
-      '在事故频道发出第一条通报'
-    ],
-    roles: ['值班工程师', '监控系统']
-  },
-  {
-    id: 'triage',
-    name: '分级',
-    timeHint: 'T+5min',
-    icon: '📋',
-    color: '#f59e0b',
-    duration: '目标 < 10 分钟',
-    description:
-      '快速评估事故严重程度，确定优先级（P0-P4），决定响应规模和升级路径。',
-    actions: [
-      '评估用户影响面（多少用户受影响？）',
-      '确定业务影响（核心功能是否不可用？）',
-      '分配事故等级（P0/P1/P2/P3/P4）',
-      '根据等级启动对应的响应流程'
-    ],
-    roles: ['值班工程师', '事故指挥官']
-  },
-  {
-    id: 'mitigate',
-    name: '止血',
-    timeHint: 'T+15min',
-    icon: '🚑',
-    color: '#3b82f6',
-    duration: '目标 < 1 小时',
-    description:
-      '采取紧急措施恢复服务，优先止血而非根治。回滚、降级、限流都是常见手段。',
-    actions: [
-      '回滚最近的变更（代码、配置、基础设施）',
-      '启用降级方案或备用系统',
-      '实施限流保护核心链路',
-      '持续监控恢复进度并通报状态'
-    ],
-    roles: ['事故指挥官', '运维工程师', '开发工程师']
-  },
-  {
-    id: 'resolve',
-    name: '解决',
-    timeHint: 'T+1h',
-    icon: '🔧',
-    color: '#22c55e',
-    duration: '视复杂度而定',
-    description:
-      '在服务恢复后，定位根本原因并实施永久修复，确保同类问题不再发生。',
-    actions: [
-      '深入分析日志、监控数据定位根因',
-      '编写并审核修复代码',
-      '在预发布环境验证修复效果',
-      '灰度发布修复，确认问题彻底解决'
-    ],
-    roles: ['开发工程师', '架构师', 'QA 工程师']
-  },
-  {
-    id: 'postmortem',
-    name: '复盘',
-    timeHint: 'T+48h',
-    icon: '📝',
-    color: '#8b5cf6',
-    duration: '事故后 48 小时内',
-    description:
-      '召开无责复盘会议，分析根因，提炼经验教训，制定改进措施防止再次发生。',
-    actions: [
-      '撰写事故复盘报告（时间线、影响、根因）',
-      '召开复盘会议，全员参与讨论',
-      '使用"五个为什么"深挖根本原因',
-      '制定并跟踪改进行动项（Action Items）'
-    ],
-    roles: ['事故指挥官', '全体相关人员', '管理层']
-  }
-]
+const phases = computed(() => messages.value.timeline.phases)
 
 const currentPhase = computed(() => {
   if (!activePhase.value) return null
-  return phases.find((p) => p.id === activePhase.value)
+  return phases.value.find((p) => p.id === activePhase.value)
 })
 
 const progressWidth = computed(() => {
   if (completedPhases.value.length === 0 && !activePhase.value) return '0%'
-  const activeIndex = phases.findIndex((p) => p.id === activePhase.value)
+  const activeIndex = phases.value.findIndex((p) => p.id === activePhase.value)
   if (activeIndex === -1) {
     const lastCompleted = completedPhases.value.length
-    return `${(lastCompleted / phases.length) * 100}%`
+    return `${(lastCompleted / phases.value.length) * 100}%`
   }
-  return `${((activeIndex + 0.5) / phases.length) * 100}%`
+  return `${((activeIndex + 0.5) / phases.value.length) * 100}%`
 })
 
 const selectPhase = (id) => {
@@ -199,10 +112,10 @@ const autoPlay = async () => {
   completedPhases.value = []
   activePhase.value = null
 
-  for (let i = 0; i < phases.length; i++) {
-    activePhase.value = phases[i].id
+  for (let i = 0; i < phases.value.length; i++) {
+    activePhase.value = phases.value[i].id
     await new Promise((r) => setTimeout(r, 1800))
-    completedPhases.value.push(phases[i].id)
+    completedPhases.value.push(phases.value[i].id)
   }
   isPlaying.value = false
 }

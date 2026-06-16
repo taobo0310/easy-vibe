@@ -1,16 +1,20 @@
 <script setup>
 import { ref, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { portsLocalhostLocale } from '../../../locales/ports-localhost/index.js'
+
+const { t } = useI18n(portsLocalhostLocale)
 
 const searchQuery = ref('')
 const selectedCategory = ref('all')
 
-const categories = [
-  { id: 'all', label: '全部' },
-  { id: 'web', label: '网页' },
-  { id: 'data', label: '数据库' },
-  { id: 'dev', label: '开发常用' },
-  { id: 'remote', label: '远程/传输' }
-]
+const categories = computed(() => [
+  { id: 'all', label: t('commonPorts.all') },
+  { id: 'web', label: t('commonPorts.web') },
+  { id: 'data', label: t('commonPorts.data') },
+  { id: 'dev', label: t('commonPorts.dev') },
+  { id: 'remote', label: t('commonPorts.remote') }
+])
 
 const ports = [
   { port: 80, name: 'HTTP', desc: '网页访问（未加密）', category: 'web', risk: 'low', example: 'http://example.com' },
@@ -60,7 +64,7 @@ function toggleExpand(port) {
         <input
           v-model="searchQuery"
           type="text"
-          placeholder="搜索端口号或服务名..."
+          :placeholder="t('commonPorts.searchPlaceholder')"
           class="search-input"
         >
       </div>
@@ -79,10 +83,10 @@ function toggleExpand(port) {
     <div class="visualization-area">
       <div class="port-table">
         <div class="table-header">
-          <span class="col-port">端口</span>
-          <span class="col-name">服务</span>
-          <span class="col-desc">说明</span>
-          <span class="col-risk">暴露风险</span>
+          <span class="col-port">{{ t('commonPorts.colPort') }}</span>
+          <span class="col-name">{{ t('commonPorts.colService') }}</span>
+          <span class="col-desc">{{ t('commonPorts.colDesc') }}</span>
+          <span class="col-risk">{{ t('commonPorts.colRisk') }}</span>
         </div>
         <div
           v-for="p in filteredPorts"
@@ -103,13 +107,13 @@ function toggleExpand(port) {
           </div>
           <transition name="expand">
             <div v-if="expandedPort === p.port" class="row-detail">
-              <span class="detail-label">使用示例：</span>
+              <span class="detail-label">{{ t('commonPorts.useExample') }}</span>
               <code>{{ p.example }}</code>
             </div>
           </transition>
         </div>
         <div v-if="filteredPorts.length === 0" class="empty-state">
-          没有匹配的端口，试试其他关键词？
+          {{ t('commonPorts.emptyState') }}
         </div>
       </div>
     </div>
@@ -118,28 +122,28 @@ function toggleExpand(port) {
       <div class="range-item">
         <div class="range-header well-known">0 – 1023</div>
         <div class="range-body">
-          <strong>系统端口</strong>
-          <span>预留给标准服务（HTTP、SSH 等），普通用户不能随便占用。</span>
+          <strong>{{ t('commonPorts.systemPorts') }}</strong>
+          <span>{{ t('commonPorts.systemPortsDesc') }}</span>
         </div>
       </div>
       <div class="range-item">
         <div class="range-header registered">1024 – 49151</div>
         <div class="range-body">
-          <strong>注册端口</strong>
-          <span>留给常见应用（MySQL 3306、Redis 6379 等），开发中最常遇到的范围。</span>
+          <strong>{{ t('commonPorts.registeredPorts') }}</strong>
+          <span>{{ t('commonPorts.registeredPortsDesc') }}</span>
         </div>
       </div>
       <div class="range-item">
         <div class="range-header dynamic">49152 – 65535</div>
         <div class="range-body">
-          <strong>动态端口</strong>
-          <span>操作系统临时分配的端口，比如你的浏览器发请求时，系统会随机给你一个。</span>
+          <strong>{{ t('commonPorts.dynamicPorts') }}</strong>
+          <span>{{ t('commonPorts.dynamicPortsDesc') }}</span>
         </div>
       </div>
     </div>
 
     <div class="info-box">
-      <strong>安全提醒：</strong>数据库端口（3306、5432、27017、6379）绝对不要直接暴露到公网！生产环境应只允许内网访问或通过 SSH 隧道连接。
+      <strong>{{ t('commonPorts.securityAlert') }}</strong>数据库端口（3306、5432、27017、6379）绝对不要直接暴露到公网！生产环境应只允许内网访问或通过 SSH 隧道连接。
     </div>
   </div>
 </template>

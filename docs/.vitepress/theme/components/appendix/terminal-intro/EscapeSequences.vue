@@ -1,16 +1,3 @@
-<!--
-  EscapeSequences.vue
-  转义序列演示组件
-  
-  用途：
-  解释终端如何通过“不可见字符”来控制颜色、光标位置和清屏操作。
-  揭示 ANSI 转义序列（如 `\033[31m`）的工作原理。
-  
-  交互功能：
-  - 颜色/样式按钮：点击后发送对应的转义序列。
-  - 序列显示：实时显示当前发送的原始序列代码（如 `^[[31m`）。
-  - 终端反馈：下方模拟终端根据接收到的序列改变文字颜色或清除内容。
--->
 <template>
   <div class="escape-demo">
     <div class="controls">
@@ -18,7 +5,7 @@
         <div class="section-title">
           <span class="en">16-COLOR PALETTE</span>
           <span class="divider">|</span>
-          <span class="zh">16 色调色板</span>
+          <span class="zh">{{ t('escapeSequences.paletteLabel') }}</span>
         </div>
         <div class="palette-grid">
           <div
@@ -43,7 +30,7 @@
         <div class="section-title">
           <span class="en">STYLE SEQUENCES</span>
           <span class="divider">|</span>
-          <span class="zh">样式序列</span>
+          <span class="zh">{{ t('escapeSequences.stylesLabel') }}</span>
         </div>
         <div class="btn-group">
           <button
@@ -51,14 +38,14 @@
             @click="applyStyle('1')"
           >
             <span class="btn-code">^[[1m</span>
-            <span class="btn-label">Bold / 加粗</span>
+            <span class="btn-label">Bold / {{ t('escapeSequences.boldLabel') }}</span>
           </button>
           <button
             :class="{ active: isUnderline }"
             @click="applyStyle('4')"
           >
             <span class="btn-code">^[[4m</span>
-            <span class="btn-label">Underline / 下划线</span>
+            <span class="btn-label">Underline / {{ t('escapeSequences.underlineLabel') }}</span>
           </button>
         </div>
         <div
@@ -70,7 +57,7 @@
             @click="resetStyle"
           >
             <span class="btn-code">^[[0m</span>
-            <span class="btn-label">Reset / 重置所有样式</span>
+            <span class="btn-label">Reset / {{ t('escapeSequences.resetLabel') }}</span>
           </button>
         </div>
       </div>
@@ -79,20 +66,20 @@
         <div class="section-title">
           <span class="en">CURSOR SEQUENCES</span>
           <span class="divider">|</span>
-          <span class="zh">光标控制序列</span>
+          <span class="zh">{{ t('escapeSequences.cursorLabel') }}</span>
         </div>
         <div class="btn-stack">
           <button @click="clearScreen">
             <span class="code">^[[2J</span>
-            <span class="desc">Clear Screen / 清屏</span>
+            <span class="desc">Clear Screen / {{ t('escapeSequences.clearScreen') }}</span>
           </button>
           <button @click="moveHome">
             <span class="code">^[[H</span>
-            <span class="desc">Move Home / 回到原点 (0,0)</span>
+            <span class="desc">Move Home / {{ t('escapeSequences.moveHome') }}</span>
           </button>
           <button @click="moveTo">
             <span class="code">^[[5;10H</span>
-            <span class="desc">Move to 5,10 / 移动到 (5,10)</span>
+            <span class="desc">Move to 5,10 / {{ t('escapeSequences.moveTo') }}</span>
           </button>
         </div>
       </div>
@@ -150,6 +137,10 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { terminalIntroLocale } from '../../../locales/terminal-intro/index.js'
+
+const { t } = useI18n(terminalIntroLocale)
 
 const palette = [
   '#000000',

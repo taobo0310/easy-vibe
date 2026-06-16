@@ -1,21 +1,21 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { typescriptIntroLocale } from '../../../locales/typescript-intro/index.js'
 
-// 泛型函数演示
+const { t, locale } = useI18n(typescriptIntroLocale)
 const inputValue = ref('')
 const selectedType = ref('number')
 const result = ref(null)
 const showResult = ref(false)
 
-// 泛型数组反转（不使用 TypeScript 泛型语法）
 function reverseArray(arr) {
   return [...arr].reverse()
 }
 
-// 执行反转操作
 const executeReverse = () => {
   if (!inputValue.value) {
-    result.value = '请输入内容'
+    result.value = t('generics.emptyError')
     showResult.value = true
     return
   }
@@ -39,94 +39,83 @@ const executeReverse = () => {
         }
         break
       default:
-        result.value = { error: '未知类型' }
+        result.value = { error: t('generics.unknownType') }
     }
     showResult.value = true
-  } catch (error) {
-    result.value = { error: '输入格式错误' }
+  } catch {
+    result.value = { error: t('generics.formatError') }
     showResult.value = true
   }
 }
 
-// 重置
 const reset = () => {
   inputValue.value = ''
   result.value = null
   showResult.value = false
 }
 
-// 示例数据
 const loadExample = (type) => {
   selectedType.value = type
   if (type === 'number') {
-    inputValue.value = '1, 2, 3, 4, 5'
+    inputValue.value = t('generics.numberPlaceholder')
   } else {
-    inputValue.value = '苹果, 香蕉, 橙子, 葡萄'
+    inputValue.value = t('generics.stringExampleValue')
   }
   result.value = null
   showResult.value = false
 }
+
+watch(locale, reset)
 </script>
 
 <template>
   <div class="generic-demo">
-    <h3>🔄 泛型 (Generics) 演示</h3>
+    <h3>🔄 {{ t('generics.title') }}</h3>
 
     <div class="demo-container">
-      <!-- 泛型概念说明 -->
       <div class="concept-box">
         <div class="concept-icon">
           💡
         </div>
         <div class="concept-text">
-          <strong>泛型就像"通用模板"</strong> - 可以处理不同类型的数据，同时保持类型安全
+          <strong>{{ t('generics.conceptStrong') }}</strong> - {{ t('generics.conceptText') }}
         </div>
       </div>
 
-      <!-- 泛型函数定义 -->
       <div class="function-definition">
         <div class="code-header">
           <span class="typescript-logo">TS</span>
-          <span>泛型函数定义</span>
+          <span>{{ t('generics.definitionTitle') }}</span>
         </div>
-        <pre><code class="typescript">// T 是类型变量，使用时才会确定具体类型
-function identity&lt;T&gt;(arg: T): T {
-  return arg
-}
-
-// 泛型数组反转
-function reverseArray&lt;T&gt;(arr: T[]): T[] {
-  return [...arr].reverse()
-}</code></pre>
+        <pre><code class="typescript">{{ t('generics.definitionCode') }}</code></pre>
       </div>
 
-      <!-- 交互演示 -->
       <div class="interactive-demo">
         <div class="demo-controls">
           <div class="input-group">
-            <label>选择数据类型：</label>
+            <label>{{ t('generics.selectType') }}</label>
             <div class="type-selector">
               <button
                 :class="['type-btn', { active: selectedType === 'number' }]"
                 @click="selectedType = 'number'"
               >
-                数字数组
+                {{ t('generics.numberArray') }}
               </button>
               <button
                 :class="['type-btn', { active: selectedType === 'string' }]"
                 @click="selectedType = 'string'"
               >
-                字符串数组
+                {{ t('generics.stringArray') }}
               </button>
             </div>
           </div>
 
           <div class="input-group">
-            <label>输入数组（逗号分隔）：</label>
+            <label>{{ t('generics.inputLabel') }}</label>
             <input
               v-model="inputValue"
               type="text"
-              :placeholder="selectedType === 'number' ? '1, 2, 3, 4, 5' : '苹果, 香蕉, 橙子'"
+              :placeholder="selectedType === 'number' ? t('generics.numberPlaceholder') : t('generics.stringPlaceholder')"
               class="text-input"
             >
           </div>
@@ -136,13 +125,13 @@ function reverseArray&lt;T&gt;(arr: T[]): T[] {
               class="btn-example"
               @click="loadExample('number')"
             >
-              加载数字示例
+              {{ t('generics.loadNumber') }}
             </button>
             <button
               class="btn-example"
               @click="loadExample('string')"
             >
-              加载字符串示例
+              {{ t('generics.loadString') }}
             </button>
           </div>
 
@@ -151,25 +140,24 @@ function reverseArray&lt;T&gt;(arr: T[]): T[] {
               class="btn-primary"
               @click="executeReverse"
             >
-              执行反转
+              {{ t('generics.execute') }}
             </button>
             <button
               class="btn-secondary"
               @click="reset"
             >
-              重置
+              {{ t('common.reset') }}
             </button>
           </div>
         </div>
 
-        <!-- 结果展示 -->
         <div
           v-if="showResult"
           class="result-display"
         >
           <div class="result-header">
             <span class="result-icon">📊</span>
-            <span>执行结果</span>
+            <span>{{ t('generics.resultTitle') }}</span>
           </div>
 
           <div
@@ -178,7 +166,7 @@ function reverseArray&lt;T&gt;(arr: T[]): T[] {
           >
             <div class="result-item">
               <div class="result-label">
-                输入类型：
+                {{ t('generics.inputType') }}
               </div>
               <div class="result-value type-badge">
                 {{ result.type }}
@@ -187,7 +175,7 @@ function reverseArray&lt;T&gt;(arr: T[]): T[] {
 
             <div class="result-item">
               <div class="result-label">
-                输入数组：
+                {{ t('generics.inputArray') }}
               </div>
               <div class="result-value array-display">
                 [{{ result.input.join(', ') }}]
@@ -196,7 +184,7 @@ function reverseArray&lt;T&gt;(arr: T[]): T[] {
 
             <div class="result-item">
               <div class="result-label">
-                输出数组：
+                {{ t('generics.outputArray') }}
               </div>
               <div class="result-value array-display output">
                 [{{ result.output.join(', ') }}]
@@ -207,7 +195,7 @@ function reverseArray&lt;T&gt;(arr: T[]): T[] {
               <div class="info-icon">
                 ✅
               </div>
-              <div>类型安全：输入 {{ result.type }}，输出 {{ result.type }}</div>
+              <div>{{ t('generics.typeSafety', { type: result.type }) }}</div>
             </div>
           </div>
 
@@ -220,28 +208,21 @@ function reverseArray&lt;T&gt;(arr: T[]): T[] {
         </div>
       </div>
 
-      <!-- 使用示例 -->
       <div class="usage-examples">
-        <h4>📝 泛型使用示例</h4>
+        <h4>📝 {{ t('generics.usageTitle') }}</h4>
         <div class="example-grid">
           <div class="example-card">
             <div class="example-title">
-              数字数组
+              {{ t('generics.numberExampleTitle') }}
             </div>
-            <pre><code class="typescript">const nums = [1, 2, 3, 4, 5]
-const reversed = reverseArray&lt;number&gt;(nums)
-// 结果: [5, 4, 3, 2, 1]
-// 类型: number[]</code></pre>
+            <pre><code class="typescript">{{ t('generics.numberExampleCode') }}</code></pre>
           </div>
 
           <div class="example-card">
             <div class="example-title">
-              字符串数组
+              {{ t('generics.stringExampleTitle') }}
             </div>
-            <pre><code class="typescript">const strs = ["a", "b", "c"]
-const reversed = reverseArray&lt;string&gt;(strs)
-// 结果: ["c", "b", "a"]
-// 类型: string[]</code></pre>
+            <pre><code class="typescript">{{ t('generics.stringExampleCode') }}</code></pre>
           </div>
         </div>
       </div>

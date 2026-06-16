@@ -2,12 +2,12 @@
   <div class="route-guards-demo">
     <div class="demo-header">
       <span class="icon">🛡️</span>
-      <span class="title">路由守卫</span>
-      <span class="subtitle">导航流程的安检员</span>
+      <span class="title">{{ t('routeGuards.title') }}</span>
+      <span class="subtitle">{{ t('routeGuards.subtitle') }}</span>
     </div>
 
     <div class="intro-text">
-      想象你在<span class="highlight">机场过安检</span>：登机前要检查身份、行李，登机后可能还要确认信息。路由守卫就像这些安检员，在导航的各个阶段进行检查和拦截。
+      {{ t('routeGuards.intro.prefix') }}<span class="highlight">{{ t('routeGuards.intro.highlight') }}</span>{{ t('routeGuards.intro.suffix') }}
     </div>
 
     <div class="demo-content">
@@ -42,7 +42,7 @@
           </div>
           <div class="detail-example">
             <div class="example-label">
-              💻 代码示例：
+              {{ t('routeGuards.codeExample') }}
             </div>
             <pre class="code-block">{{ currentGuard?.example }}</pre>
           </div>
@@ -51,7 +51,7 @@
     </div>
 
     <div class="execution-flow">
-      <h5>📋 守卫执行顺序</h5>
+      <h5>{{ t('routeGuards.executionTitle') }}</h5>
       <div class="flow-steps">
         <div
           v-for="(step, index) in executionSteps"
@@ -75,94 +75,23 @@
 
     <div class="info-box">
       <span class="icon">💡</span>
-      <strong>核心用途：</strong>路由守卫常用于权限验证（检查用户是否登录）、页面预加载（获取数据）、防止误操作（离开前提示保存）等场景。
+      <strong>{{ t('common.coreIdea') }}</strong>{{ t('routeGuards.info') }}
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { frontendRoutingLocale } from '../../../locales/frontend-routing/index.js'
 
+const { t, messages } = useI18n(frontendRoutingLocale)
 const activeGuard = ref('beforeEach')
-
-const guardTypes = [
-  {
-    name: 'beforeEach',
-    type: 'global',
-    icon: '🌍',
-    shortDesc: '全局前置守卫',
-    description: '在路由跳转前执行，常用于权限验证、登录检查等',
-    example: `router.beforeEach((to, from, next) => {
-  if (to.meta.requiresAuth && !isLoggedIn()) {
-    next('/login')
-  } else {
-    next()
-  }
-})`
-  },
-  {
-    name: 'beforeResolve',
-    type: 'global',
-    icon: '🔍',
-    shortDesc: '全局解析守卫',
-    description: '在导航被确认之前、组件内守卫和异步路由组件被解析之后调用',
-    example: `router.beforeResolve((to, from, next) => {
-  // 数据预加载
-  next()
-})`
-  },
-  {
-    name: 'afterEach',
-    type: 'global',
-    icon: '✅',
-    shortDesc: '全局后置钩子',
-    description: '在导航完成后执行，不能改变导航，常用于页面统计',
-    example: `router.afterEach((to, from) => {
-  document.title = to.meta.title
-  analytics.track(to.path)
-})`
-  },
-  {
-    name: 'beforeEnter',
-    type: 'route',
-    icon: '🛣️',
-    shortDesc: '路由独享守卫',
-    description: '在单个路由配置中定义，只在进入该路由时触发',
-    example: `{
-  path: '/admin',
-  beforeEnter: (to, from, next) => {
-    if (!isAdmin()) next('/unauthorized')
-    else next()
-  }
-}`
-  },
-  {
-    name: 'beforeRouteEnter',
-    type: 'component',
-    icon: '🔧',
-    shortDesc: '组件内守卫-进入',
-    description: '在渲染该组件的对应路由被验证前调用，不能访问组件实例',
-    example: `beforeRouteEnter(to, from, next) {
-  next(vm => {
-    // 通过 vm 访问组件实例
-  })
-}`
-  }
-]
-
-const executionSteps = [
-  { name: '触发导航', description: '用户点击链接或调用 router.push()' },
-  { name: 'beforeRouteLeave', description: '离开组件的守卫' },
-  { name: 'beforeEach', description: '全局前置守卫' },
-  { name: 'beforeEnter', description: '路由独享守卫' },
-  { name: 'beforeRouteEnter', description: '组件内守卫' },
-  { name: 'beforeResolve', description: '全局解析守卫' },
-  { name: 'afterEach', description: '全局后置钩子' },
-  { name: 'DOM 更新', description: '渲染新页面' }
-]
+const guardTypes = computed(() => messages.value.routeGuards.guards)
+const executionSteps = computed(() => messages.value.routeGuards.executionSteps)
 
 const currentGuard = computed(() => {
-  return guardTypes.find(g => g.name === activeGuard.value)
+  return guardTypes.value.find(g => g.name === activeGuard.value)
 })
 </script>
 

@@ -1,85 +1,43 @@
 <template>
   <div class="a2a-detailed-demo">
     <div class="demo-header">
-      <span class="title">A2A 内部实现</span>
-      <span class="subtitle">对等网络架构的通信细节</span>
+      <span class="title">{{ t('a2aDetailed.title') }}</span>
+      <span class="subtitle">{{ t('a2aDetailed.subtitle') }}</span>
     </div>
 
     <div class="intro-section">
-      <div class="section-title">A2A 可以做什么？</div>
+      <div class="section-title">{{ t('a2aDetailed.introTitle') }}</div>
       <p class="intro-text">
-        A2A 让多个 AI Agent 可以相互协作，不再是单打独斗。一个复杂任务可以分配给多个专业 Agent，每个 Agent 做自己擅长的事。
+        {{ t('a2aDetailed.introText') }}
       </p>
       <div class="popular-uses">
-        <div class="use-item">
-          <div class="use-title">软件开发流水线</div>
-          <div class="use-desc">需求分析 Agent → 代码 Agent → 测试 Agent → 部署 Agent</div>
-        </div>
-        <div class="use-item">
-          <div class="use-title">多厂商 Agent 集成</div>
-          <div class="use-desc">Google、Anthropic、OpenAI 的 Agent 可以相互调用</div>
-        </div>
-        <div class="use-item">
-          <div class="use-title">企业工作流</div>
-          <div class="use-desc">HR Agent、财务 Agent、审批 Agent 协同处理业务流程</div>
-        </div>
-        <div class="use-item">
-          <div class="use-title">智能客服升级</div>
-          <div class="use-desc">接待 Agent → 业务 Agent → 人工 Agent 逐级转接</div>
-        </div>
-        <div class="use-item">
-          <div class="use-title">科研协作</div>
-          <div class="use-desc">文献 Agent → 实验 Agent → 分析 Agent → 报告 Agent</div>
-        </div>
-        <div class="use-item">
-          <div class="use-title">自动化运维</div>
-          <div class="use-desc">监控 Agent → 诊断 Agent → 修复 Agent → 通知 Agent</div>
+        <div v-for="item in messages.a2aDetailed.popularUses" :key="item.title" class="use-item">
+          <div class="use-title">{{ item.title }}</div>
+          <div class="use-desc">{{ item.desc }}</div>
         </div>
       </div>
     </div>
 
     <div class="usage-section">
-      <div class="section-title">如何使用 A2A？</div>
+      <div class="section-title">{{ t('a2aDetailed.usageTitle') }}</div>
       <p class="usage-intro">
-        A2A 目前还在早期阶段，主要由 Google 推动。如果你想尝试 A2A，需要开发支持 A2A 协议的 Agent 服务。
+        {{ t('a2aDetailed.usageIntro') }}
       </p>
       
       <div class="usage-steps">
-        <div class="usage-step">
-          <div class="step-num">1</div>
+        <div v-for="(step, index) in messages.a2aDetailed.usageSteps" :key="step.title" class="usage-step">
+          <div class="step-num">{{ index + 1 }}</div>
           <div class="step-content">
-            <div class="step-title">实现 Agent Card 端点</div>
-            <div class="step-desc">
-              在你的 Agent 服务中暴露 <code>/.well-known/agent.json</code>，声明 Agent 的能力和版本
-            </div>
-          </div>
-        </div>
-        
-        <div class="usage-step">
-          <div class="step-num">2</div>
-          <div class="step-content">
-            <div class="step-title">实现 A2A API</div>
-            <div class="step-desc">
-              实现 <code>agents/get</code>、<code>tasks/send</code>、<code>tasks/get</code> 等核心 API
-            </div>
-          </div>
-        </div>
-        
-        <div class="usage-step">
-          <div class="step-num">3</div>
-          <div class="step-content">
-            <div class="step-title">部署并注册 Agent</div>
-            <div class="step-desc">
-              将 Agent 部署到服务器，并在 Agent 注册表中登记，让其他 Agent 可以发现它
-            </div>
+            <div class="step-title">{{ step.title }}</div>
+            <div class="step-desc">{{ step.desc }}</div>
           </div>
         </div>
       </div>
       
       <div class="usage-note">
-        <div class="note-title">当前状态</div>
+        <div class="note-title">{{ t('a2aDetailed.statusTitle') }}</div>
         <div class="note-content">
-          A2A 协议于 2025 年 4 月发布，目前还在快速发展中。Google 提供了参考实现，但生态还在建设中。建议关注 <a href="https://google.github.io/A2A" target="_blank">官方文档</a> 获取最新进展。
+          {{ t('a2aDetailed.statusTextBefore') }}<a href="https://google.github.io/A2A" target="_blank">{{ t('a2aDetailed.statusLinkText') }}</a>{{ t('a2aDetailed.statusTextAfter') }}
         </div>
       </div>
     </div>
@@ -88,7 +46,7 @@
       <div class="flow-section">
         <div class="flow-title">
           
-          通信流程（5 步）
+          {{ t('a2aDetailed.flowTitle') }}
         </div>
         
         <div class="flow-steps">
@@ -116,19 +74,19 @@
       <details class="tech-details">
         <summary class="tech-summary">
           
-          <span class="summary-text">技术深究：Agent Card 名片格式</span>
+          <span class="summary-text">{{ t('a2aDetailed.techAgentCardTitle') }}</span>
         </summary>
         <div class="tech-content">
           <div class="tech-intro">
-            Agent Card 是一个 JSON 文件，通常放在 <code>/.well-known/agent.json</code> 路径
+            {{ t('a2aDetailed.agentCardIntro') }}
           </div>
           <div class="tech-section">
-            <div class="tech-title">Agent Card 示例</div>
-            <pre class="tech-code"><code>{{ agentCardExample }}</code></pre>
+            <div class="tech-title">{{ t('a2aDetailed.agentCardExampleTitle') }}</div>
+            <pre class="tech-code"><code>{{ codeExamples.agentCardExample }}</code></pre>
           </div>
           <div class="tech-note">
             
-            <span>通过 Agent Card，Agent 之间可以相互发现，了解对方的能力和版本，实现互操作</span>
+            <span>{{ t('a2aDetailed.agentCardNote') }}</span>
           </div>
         </div>
       </details>
@@ -136,19 +94,19 @@
       <details class="tech-details">
         <summary class="tech-summary">
           
-          <span class="summary-text">技术深究：HTTP + SSE 通信</span>
+          <span class="summary-text">{{ t('a2aDetailed.techHttpTitle') }}</span>
         </summary>
         <div class="tech-content">
           <div class="tech-section">
-            <div class="tech-title">任务发送（HTTP POST）</div>
-            <pre class="tech-code"><code>{{ taskSendExample }}</code></pre>
+            <div class="tech-title">{{ t('a2aDetailed.taskSendTitle') }}</div>
+            <pre class="tech-code"><code>{{ codeExamples.taskSendExample }}</code></pre>
           </div>
           <div class="tech-section">
-            <div class="tech-title">实时推送（SSE）</div>
-            <pre class="tech-code"><code>{{ sseExample }}</code></pre>
+            <div class="tech-title">{{ t('a2aDetailed.sseTitle') }}</div>
+            <pre class="tech-code"><code>{{ codeExamples.sseExample }}</code></pre>
           </div>
           <div class="tech-note">
-            <span>SSE（Server-Sent Events）允许服务器主动推送消息，适合长时任务的状态更新</span>
+            <span>{{ t('a2aDetailed.sseNote') }}</span>
           </div>
         </div>
       </details>
@@ -156,11 +114,11 @@
       <details class="tech-details">
         <summary class="tech-summary">
           
-          <span class="summary-text">技术深究：A2A 核心 API</span>
+          <span class="summary-text">{{ t('a2aDetailed.techApiTitle') }}</span>
         </summary>
         <div class="tech-content">
           <div class="api-list">
-            <div v-for="(api, index) in a2aApis" :key="index" class="api-item">
+            <div v-for="api in messages.a2aDetailed.apis" :key="api.name" class="api-item">
               <div class="api-method">
                 <span class="method-badge">{{ api.method }}</span>
                 <span class="method-name">{{ api.name }}</span>
@@ -174,29 +132,19 @@
       <details class="tech-details">
         <summary class="tech-summary">
           
-          <span class="summary-text">技术深究：认证机制</span>
+          <span class="summary-text">{{ t('a2aDetailed.techAuthTitle') }}</span>
         </summary>
         <div class="tech-content">
           <div class="auth-grid">
-            <div class="auth-card">
+            <div v-for="card in messages.a2aDetailed.authCards" :key="card.name" class="auth-card">
               <div class="auth-header">
                 
-                <span class="auth-name">API Key</span>
+                <span class="auth-name">{{ card.name }}</span>
               </div>
               <div class="auth-desc">
-                简单的认证方式，适合内部 Agent 通信
+                {{ card.desc }}
               </div>
-              <pre class="auth-example"><code>{{ apiKeyExample }}</code></pre>
-            </div>
-            <div class="auth-card">
-              <div class="auth-header">
-                
-                <span class="auth-name">OAuth 2.0</span>
-              </div>
-              <div class="auth-desc">
-                企业级认证，支持令牌刷新和权限控制
-              </div>
-              <pre class="auth-example"><code>{{ oauthExample }}</code></pre>
+              <pre class="auth-example"><code>{{ codeExamples[card.codeKey] }}</code></pre>
             </div>
           </div>
         </div>
@@ -206,219 +154,20 @@
 </template>
 
 <script setup>
+import { computed } from 'vue'
 import { ref } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { aiProtocolsLocale } from '../../../locales/ai-protocols/index.js'
 
 const expandedStep = ref(0)
+const { t, messages } = useI18n(aiProtocolsLocale)
+const a2aFlowSteps = computed(() => messages.value.a2aDetailed.flowSteps)
+const codeExamples = computed(() => messages.value.a2aDetailed.codeExamples)
 
 const toggleStep = (index) => {
   expandedStep.value = expandedStep.value === index ? -1 : index
 }
 
-const a2aFlowSteps = [
-  {
-    name: '发现（agents/get）',
-    desc: 'Agent 之间通过 HTTP 请求获取对方的 Agent Card，了解对方的能力和版本',
-    example: {
-      title: 'HTTP 请求',
-      code: `// Agent A 获取 Agent B 的 Agent Card
-GET /.well-known/agent.json HTTP/1.1
-Host: agent-b.company.com
-
-// 响应
-{
-  "name": "Code Agent",
-  "description": "专业代码生成 Agent",
-  "url": "https://agent-b.company.com",
-  "version": "1.0.0",
-  "capabilities": {
-    "streaming": true,
-    "pushNotifications": true
-  },
-  "skills": [
-    {"id": "code-gen", "name": "代码生成"},
-    {"id": "code-review", "name": "代码审查"}
-  ]
-}`
-    }
-  },
-  {
-    name: '发任务（tasks/send）',
-    desc: 'Agent A 调用 tasks/send 向 Agent B 发送任务，包含任务ID、描述、上下文等',
-    example: {
-      title: 'HTTP POST',
-      code: `// Agent A 发送任务给 Agent B
-POST /tasks/send HTTP/1.1
-Content-Type: application/json
-Authorization: Bearer xxx
-
-{
-  "id": "task-12345",
-  "sessionId": "session-001",
-  "message": {
-    "role": "user",
-    "parts": [
-      {
-        "type": "text",
-        "text": "请帮我写一个登录 API"
-      },
-      {
-        "type": "resource",
-        "resource": "file:///specs/login.yaml"
-      }
-    ]
-  }
-}`
-    }
-  },
-  {
-    name: '执行（Task Processing）',
-    desc: 'Agent B 接收任务后，可能调用自己的 LLM 或 MCP 工具来执行任务',
-    example: {
-      title: 'Agent B 内部处理',
-      code: `// Agent B 内部处理流程
-1. 解析任务请求
-2. 分析需要的技能（从 skills 中匹配）
-3. 调用内部 LLM 生成代码
-4. 可选：通过 MCP 调用外部工具验证代码
-5. 生成最终结果
-
-// 整个过程可能耗时较长，通过 SSE 推送进度`
-    }
-  },
-  {
-    name: '推送（SSE）',
-    desc: 'Agent B 通过 SSE（Server-Sent Events）实时推送任务进度和中间结果',
-    example: {
-      title: 'SSE 推送',
-      code: `// 服务器持续推送
-event: taskProgress
-data: {
-  "taskId": "task-12345",
-  "status": "processing",
-  "progress": 30,
-  "message": "正在生成登录逻辑..."
-}
-
-event: taskProgress  
-data: {
-  "taskId": "task-12345", 
-  "status": "processing",
-  "progress": 60,
-  "message": "正在生成数据库操作..."
-}
-
-event: taskCompleted
-data: {
-  "taskId": "task-12345",
-  "status": "completed",
-  "result": { ... }
-}`
-    }
-  },
-  {
-    name: '返回结果（tasks/get）',
-    desc: '任务完成后，Agent A 可以通过 tasks/get 获取最终结果',
-    example: {
-      title: 'HTTP GET',
-      code: `// Agent A 获取任务结果
-GET /tasks/task-12345 HTTP/1.1
-Authorization: Bearer xxx
-
-// 响应
-{
-  "id": "task-12345",
-  "status": "completed",
-  "result": {
-    "message": {
-      "role": "agent",
-      "parts": [
-        {
-          "type": "text",
-          "text": "登录 API 已生成..."
-        },
-        {
-          "type": "file",
-          "file": {
-            "name": "login.py",
-            "mimeType": "text/plain",
-            "uri": "file:///generated/login.py"
-          }
-        }
-      ]
-    }
-  }
-}`
-    }
-  }
-]
-
-const agentCardExample = `{
-  "name": "代码生成 Agent",
-  "description": "专业的前后端代码生成 Agent",
-  "url": "https://code-agent.company.com",
-  "version": "1.0.0",
-  "capabilities": {
-    "streaming": true,
-    "pushNotifications": true
-  },
-  "skills": [
-    {
-      "id": "frontend",
-      "name": "前端开发",
-      "description": "React/Vue/Angular"
-    },
-    {
-      "id": "backend", 
-      "name": "后端开发",
-      "description": "Node/Python/Go"
-    }
-  ],
-  "authentication": {
-    "schemes": ["Bearer", "OAuth2"]
-  }
-}`
-
-const taskSendExample = `POST /tasks/send HTTP/1.1
-Host: agent-b.company.com
-Content-Type: application/json
-Authorization: Bearer {token}
-
-{
-  "id": "task-001",
-  "message": {
-    "role": "user",
-    "parts": [{ "type": "text", "text": "写一个登录接口" }]
-  }
-}`
-
-const sseExample = `GET /tasks/task-001/sse HTTP/1.1
-Authorization: Bearer {token}
-
-event: progress
-data: {"status": "processing", "progress": 50}
-
-event: completed  
-data: {"status": "completed", "result": {...}}`
-
-const a2aApis = [
-  { method: 'GET', name: 'agents/get', desc: '获取指定 Agent 的 Agent Card，了解其能力' },
-  { method: 'POST', name: 'tasks/send', desc: '发送任务给目标 Agent，同步等待结果' },
-  { method: 'POST', name: 'tasks/sendSubscribe', desc: '发送任务并订阅 SSE 推送，实时获取进度' },
-  { method: 'GET', name: 'tasks/get', desc: '根据任务 ID 获取任务状态和结果' },
-  { method: 'GET', name: 'tasks/cancel', desc: '取消正在执行的任务' }
-]
-
-const apiKeyExample = `Authorization: Bearer sk-xxxxx
-# 或
-Authorization: ApiKey sk-xxxxx`
-
-const oauthExample = `Authorization: Bearer {access_token}
-# 支持刷新令牌
-POST /oauth/token
-{
-  "grant_type": "refresh_token",
-  "refresh_token": "xxx"
-}`
 </script>
 
 <style scoped>

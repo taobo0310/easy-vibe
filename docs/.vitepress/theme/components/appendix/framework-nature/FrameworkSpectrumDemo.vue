@@ -1,15 +1,15 @@
 <template>
   <div class="demo-root">
     <div class="demo-header">
-      <span class="title">框架光谱</span>
-      <span class="subtitle">运行时 ↔ 编译时</span>
+      <span class="title">{{ t('frameworkSpectrum.title') }}</span>
+      <span class="subtitle">{{ t('frameworkSpectrum.subtitle') }}</span>
     </div>
 
     <div class="visualization-area">
       <div class="spectrum-wrapper">
         <div class="spectrum-labels">
-          <span class="spectrum-label-left">更多运行时</span>
-          <span class="spectrum-label-right">更多编译时</span>
+          <span class="spectrum-label-left">{{ t('frameworkSpectrum.moreRuntime') }}</span>
+          <span class="spectrum-label-right">{{ t('frameworkSpectrum.moreCompile') }}</span>
         </div>
         <div class="spectrum-bar">
           <button
@@ -43,7 +43,7 @@
         <div class="detail-summary">{{ selected.summary }}</div>
         <div class="work-bars">
           <div class="work-bar-row">
-            <span class="work-label">运行时工作量</span>
+            <span class="work-label">{{ t('frameworkSpectrum.runtimeWork') }}</span>
             <div class="work-bar-track">
               <div
                 class="work-bar-fill runtime"
@@ -53,7 +53,7 @@
             <span class="work-value">{{ selected.runtimePercent }}%</span>
           </div>
           <div class="work-bar-row">
-            <span class="work-label">编译时工作量</span>
+            <span class="work-label">{{ t('frameworkSpectrum.compileWork') }}</span>
             <div class="work-bar-track">
               <div
                 class="work-bar-fill compile"
@@ -65,11 +65,11 @@
         </div>
         <div class="detail-meta">
           <span class="meta-item">
-            <span class="meta-label">打包体积</span>
+            <span class="meta-label">{{ t('frameworkSpectrum.bundleSize') }}</span>
             <span class="meta-value">{{ selected.bundleSize }}</span>
           </span>
           <span class="meta-item">
-            <span class="meta-label">开发体验</span>
+            <span class="meta-label">{{ t('frameworkSpectrum.devExperience') }}</span>
             <span class="meta-value">{{ selected.devExperience }}</span>
           </span>
         </div>
@@ -77,92 +77,26 @@
     </div>
 
     <div class="info-box">
-      <strong>趋势：</strong>
-      {{ selected.trendMessage }}
+      <strong>{{ t('frameworkSpectrum.trendStrong') }}</strong>
+      {{ t('frameworkSpectrum.trend') }}
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { frameworkNatureLocale } from '../../../locales/framework-nature/index.js'
 
-const FRAMEWORKS = {
-  react: {
-    id: 'react',
-    name: 'React',
-    short: 'R',
-    emoji: '⚛️',
-    percent: 20,
-    runtimePercent: 80,
-    compilePercent: 20,
-    bundleSize: '中等',
-    devExperience: '★★★★☆',
-    summary: '运行时为主：虚拟 DOM + Reconciliation',
-    trendMessage:
-      '趋势很明确：框架在不断将工作从运行时移向编译时，目标是同时实现更好的开发体验和更优的运行性能。'
-  },
-  vue3: {
-    id: 'vue3',
-    name: 'Vue 3',
-    short: 'V',
-    emoji: '💚',
-    percent: 40,
-    runtimePercent: 60,
-    compilePercent: 40,
-    bundleSize: '中等',
-    devExperience: '★★★★★',
-    summary: '混合：编译优化模板 + 运行时虚拟 DOM',
-    trendMessage:
-      '趋势很明确：框架在不断将工作从运行时移向编译时，目标是同时实现更好的开发体验和更优的运行性能。'
-  },
-  vapor: {
-    id: 'vapor',
-    name: 'Vue Vapor',
-    short: 'Vp',
-    emoji: '🌫️',
-    percent: 60,
-    runtimePercent: 40,
-    compilePercent: 60,
-    bundleSize: '较小',
-    devExperience: '★★★★☆',
-    summary: '编译时为主：跳过虚拟 DOM，编译生成直接操作',
-    trendMessage:
-      '趋势很明确：框架在不断将工作从运行时移向编译时，目标是同时实现更好的开发体验和更优的运行性能。'
-  },
-  svelte: {
-    id: 'svelte',
-    name: 'Svelte',
-    short: 'S',
-    emoji: '🔥',
-    percent: 80,
-    runtimePercent: 20,
-    compilePercent: 80,
-    bundleSize: '最小',
-    devExperience: '★★★★☆',
-    summary: '编译时为主：编译时生成精确 DOM 更新代码',
-    trendMessage:
-      '趋势很明确：框架在不断将工作从运行时移向编译时，目标是同时实现更好的开发体验和更优的运行性能。'
-  },
-  solid: {
-    id: 'solid',
-    name: 'Solid.js',
-    short: 'Sd',
-    emoji: '⬆️',
-    percent: 90,
-    runtimePercent: 10,
-    compilePercent: 90,
-    bundleSize: '最小',
-    devExperience: '★★★★☆',
-    summary: '纯编译时：细粒度响应式，无虚拟 DOM',
-    trendMessage:
-      '趋势很明确：框架在不断将工作从运行时移向编译时，目标是同时实现更好的开发体验和更优的运行性能。'
-  }
-}
+const { t, messages } = useI18n(frameworkNatureLocale)
 
-const frameworks = Object.values(FRAMEWORKS)
 const selectedId = ref('vue3')
+const frameworksMap = computed(() => messages.value.frameworkSpectrum.frameworks)
+const frameworks = computed(() => Object.values(frameworksMap.value))
 
-const selected = computed(() => FRAMEWORKS[selectedId.value] ?? FRAMEWORKS.vue3)
+const selected = computed(
+  () => frameworksMap.value[selectedId.value] ?? frameworksMap.value.vue3
+)
 
 function selectFramework(id) {
   selectedId.value = id

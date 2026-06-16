@@ -1,5 +1,9 @@
 <script setup>
 import { ref, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { browserDevtoolsLocale } from '../../../locales/browser-devtools/index.js'
+
+const { t } = useI18n(browserDevtoolsLocale)
 
 const codeLines = [
   'function calculateTotal(price, tax) {',
@@ -241,7 +245,7 @@ const flatNext = () => {
   >
     <template #header>
       <div class="header">
-        <span class="title">Sources (源代码调试)</span>
+        <span class="title">{{ t('sourcesDemo.title') }}</span>
         <div class="controls">
           <el-button-group>
             <el-button
@@ -330,7 +334,7 @@ const flatNext = () => {
     </div>
     
     <div class="footer-tip">
-      点击行号设置断点。点击 Run 开始执行，代码将在断点处暂停。
+      {{ t('sourcesDemo.footerTip') }}
     </div>
   </el-card>
 </template>

@@ -1,6 +1,6 @@
 <template>
   <div class="test-pyramid-demo">
-    <div class="demo-label">交互式测试金字塔 ── 点击每一层查看详情</div>
+    <div class="demo-label">{{ t('testPyramid.title') }}</div>
 
     <div class="pyramid-container">
       <div
@@ -26,69 +26,27 @@
           </tr>
         </table>
         <div class="example">
-          <strong>示例：</strong>{{ layers[selected].example }}
+          <strong>{{ t('testPyramid.example') }}</strong>{{ layers[selected].example }}
         </div>
       </div>
     </Transition>
 
     <div class="pyramid-legend">
-      <span class="legend-item"><span class="dot e2e"></span>越往上：越慢、越贵、越接近用户</span>
-      <span class="legend-item"><span class="dot unit"></span>越往下：越快、越多、越接近代码</span>
+      <span class="legend-item"><span class="dot e2e"></span>{{ t('testPyramid.upperLegend') }}</span>
+      <span class="legend-item"><span class="dot unit"></span>{{ t('testPyramid.lowerLegend') }}</span>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { engineeringExcellenceLocale } from '../../../locales/engineering-excellence/index.js'
 
+const { t, messages } = useI18n(engineeringExcellenceLocale)
 const selected = ref(-1)
-
-const detailRows = [
-  { key: 'count', label: '数量占比' },
-  { key: 'speed', label: '执行速度' },
-  { key: 'cost', label: '维护成本' },
-  { key: 'scope', label: '覆盖范围' },
-  { key: 'confidence', label: '信心指数' }
-]
-
-const layers = [
-  {
-    name: 'E2E 测试',
-    cls: 'e2e',
-    icon: '🖥️',
-    width: '40%',
-    count: '约 10%',
-    speed: '慢（秒~分钟级）',
-    cost: '高 — 环境依赖多，易碎',
-    scope: '完整用户流程',
-    confidence: '最高 — 模拟真实用户操作',
-    example: '用 Playwright 模拟用户登录 → 下单 → 支付的完整流程'
-  },
-  {
-    name: '集成测试',
-    cls: 'integration',
-    icon: '🔗',
-    width: '60%',
-    count: '约 20%',
-    speed: '中等（百毫秒级）',
-    cost: '中 — 需要部分外部依赖',
-    scope: '模块间协作',
-    confidence: '较高 — 验证组件间的配合',
-    example: '测试 API 接口能否正确读写数据库并返回预期 JSON'
-  },
-  {
-    name: '单元测试',
-    cls: 'unit',
-    icon: '🧪',
-    width: '85%',
-    count: '约 70%',
-    speed: '极快（毫秒级）',
-    cost: '低 — 无外部依赖',
-    scope: '单个函数/类',
-    confidence: '基础 — 确保每个零件正常',
-    example: '测试 formatPrice(100) 是否返回 "¥1.00"'
-  }
-]
+const detailRows = computed(() => messages.value.testPyramid.detailRows)
+const layers = computed(() => messages.value.testPyramid.layers)
 </script>
 
 <style scoped>

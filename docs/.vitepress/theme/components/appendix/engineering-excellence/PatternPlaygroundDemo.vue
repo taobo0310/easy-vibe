@@ -2,8 +2,8 @@
   <div class="pattern-playground">
     <div class="demo-header">
       <span class="icon">🎮</span>
-      <span class="title">设计模式演练场</span>
-      <span class="subtitle">选择模式，动手体验</span>
+      <span class="title">{{ t('patternPlayground.title') }}</span>
+      <span class="subtitle">{{ t('patternPlayground.subtitle') }}</span>
     </div>
 
     <div class="mode-tabs">
@@ -17,58 +17,56 @@
       </button>
     </div>
 
-    <!-- 观察者模式演练 -->
     <div v-if="activeMode === 'observer'" class="playground-area">
       <div class="playground-desc">
-        模拟事件发布/订阅：添加订阅者，发布事件，观察通知如何传播。
+        {{ t('patternPlayground.observerDesc') }}
       </div>
 
       <div class="observer-layout">
         <div class="publisher-panel">
-          <div class="panel-title">📡 发布者 (Publisher)</div>
+          <div class="panel-title">{{ t('patternPlayground.publisher') }}</div>
           <div class="event-input">
             <input
               v-model="eventMessage"
-              placeholder="输入事件消息..."
+              :placeholder="t('patternPlayground.eventPlaceholder')"
               @keyup.enter="publishEvent"
             />
-            <button class="action-btn publish" @click="publishEvent">发布事件</button>
+            <button class="action-btn publish" @click="publishEvent">{{ t('patternPlayground.publish') }}</button>
           </div>
         </div>
 
         <div class="subscribers-panel">
           <div class="panel-title">
-            👥 订阅者
-            <button class="action-btn add" @click="addSubscriber">+ 添加</button>
+            {{ t('patternPlayground.subscribers') }}
+            <button class="action-btn add" @click="addSubscriber">{{ t('patternPlayground.add') }}</button>
           </div>
-          <div v-if="subscribers.length === 0" class="empty-hint">暂无订阅者，点击"添加"按钮</div>
+          <div v-if="subscribers.length === 0" class="empty-hint">{{ t('patternPlayground.emptySubscribers') }}</div>
           <div
             v-for="sub in subscribers"
             :key="sub.id"
             :class="['subscriber-card', { notified: sub.notified }]"
           >
             <span class="sub-name">{{ sub.name }}</span>
-            <span v-if="sub.lastMsg" class="sub-msg">收到: {{ sub.lastMsg }}</span>
-            <button class="remove-btn" @click="removeSubscriber(sub.id)">移除</button>
+            <span v-if="sub.lastMsg" class="sub-msg">{{ t('patternPlayground.received', { message: sub.lastMsg }) }}</span>
+            <button class="remove-btn" @click="removeSubscriber(sub.id)">{{ t('patternPlayground.remove') }}</button>
           </div>
         </div>
       </div>
 
       <div v-if="observerLog.length" class="event-log">
-        <div class="log-title">📋 事件日志</div>
+        <div class="log-title">{{ t('patternPlayground.eventLog') }}</div>
         <div v-for="(log, i) in observerLog" :key="i" class="log-item">{{ log }}</div>
       </div>
     </div>
 
-    <!-- 策略模式演练 -->
     <div v-if="activeMode === 'strategy'" class="playground-area">
       <div class="playground-desc">
-        选择不同的排序策略，观察同一组数据如何被不同算法处理。
+        {{ t('patternPlayground.strategyDesc') }}
       </div>
 
       <div class="strategy-layout">
         <div class="data-panel">
-          <div class="panel-title">📊 待排序数据</div>
+          <div class="panel-title">{{ t('patternPlayground.dataTitle') }}</div>
           <div class="data-bars">
             <div
               v-for="(v, i) in strategyData"
@@ -79,11 +77,11 @@
               <span class="bar-label">{{ v }}</span>
             </div>
           </div>
-          <button class="action-btn" @click="shuffleData" style="margin-top: 10px">🔀 打乱数据</button>
+          <button class="action-btn" style="margin-top: 10px" @click="shuffleData">{{ t('patternPlayground.shuffle') }}</button>
         </div>
 
         <div class="strategy-panel">
-          <div class="panel-title">⚙️ 选择策略</div>
+          <div class="panel-title">{{ t('patternPlayground.strategyTitle') }}</div>
           <div class="strategy-options">
             <button
               v-for="s in sortStrategies"
@@ -95,11 +93,11 @@
               <span class="strategy-complexity">{{ s.complexity }}</span>
             </button>
           </div>
-          <button class="action-btn publish" @click="executeSort" :disabled="sorting">
-            {{ sorting ? '排序中...' : '▶ 执行排序' }}
+          <button class="action-btn publish" :disabled="sorting" @click="executeSort">
+            {{ sorting ? t('patternPlayground.sorting') : t('patternPlayground.execute') }}
           </button>
           <div v-if="sortSteps.length" class="steps-info">
-            步骤数: {{ sortSteps.length }} | 策略: {{ sortStrategies.find(s => s.key === activeStrategy)?.name }}
+            {{ t('patternPlayground.stepsInfo', { count: sortSteps.length, strategy: sortStrategies.find(s => s.key === activeStrategy)?.name }) }}
           </div>
         </div>
       </div>
@@ -108,41 +106,40 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { engineeringExcellenceLocale } from '../../../locales/engineering-excellence/index.js'
 
+const { t, messages } = useI18n(engineeringExcellenceLocale)
 const activeMode = ref('observer')
-const modes = [
-  { key: 'observer', name: '观察者模式', icon: '📡' },
-  { key: 'strategy', name: '策略模式', icon: '⚙️' }
-]
+const modes = computed(() => messages.value.patternPlayground.modes)
 
-// === 观察者模式状态 ===
 let subIdCounter = 0
 const subscribers = ref([])
 const eventMessage = ref('')
 const observerLog = ref([])
-const subNames = ['小明', '小红', '小刚', '小美', '小李', '小王', '小张', '小赵']
+const subNames = computed(() => messages.value.patternPlayground.subNames)
 
 function addSubscriber() {
-  const name = subNames[subIdCounter % subNames.length]
+  const name = subNames.value[subIdCounter % subNames.value.length]
   subscribers.value.push({
     id: ++subIdCounter,
     name: name + '#' + subIdCounter,
     lastMsg: '',
     notified: false
   })
-  observerLog.value.unshift(`[订阅] ${name}#${subIdCounter} 加入了订阅列表`)
+  observerLog.value.unshift(t('patternPlayground.subscribeLog', { name: `${name}#${subIdCounter}` }))
 }
 
 function removeSubscriber(id) {
   const sub = subscribers.value.find(s => s.id === id)
   subscribers.value = subscribers.value.filter(s => s.id !== id)
-  if (sub) observerLog.value.unshift(`[取消订阅] ${sub.name} 离开了`)
+  if (sub) observerLog.value.unshift(t('patternPlayground.unsubscribeLog', { name: sub.name }))
 }
 
 function publishEvent() {
-  const msg = eventMessage.value.trim() || '默认事件'
-  observerLog.value.unshift(`[发布] 事件: "${msg}" → 通知 ${subscribers.value.length} 个订阅者`)
+  const msg = eventMessage.value.trim() || t('patternPlayground.defaultEvent')
+  observerLog.value.unshift(t('patternPlayground.publishLog', { message: msg, count: subscribers.value.length }))
   subscribers.value.forEach((sub, i) => {
     setTimeout(() => {
       sub.lastMsg = msg
@@ -153,18 +150,13 @@ function publishEvent() {
   eventMessage.value = ''
 }
 
-// === 策略模式状态 ===
 const strategyData = ref([38, 15, 72, 46, 91, 23, 64, 8, 55, 30])
 const activeStrategy = ref('bubble')
 const sorting = ref(false)
 const sortSteps = ref([])
 const highlightIdx = ref(-1)
 
-const sortStrategies = [
-  { key: 'bubble', name: '冒泡排序', complexity: 'O(n²)' },
-  { key: 'selection', name: '选择排序', complexity: 'O(n²)' },
-  { key: 'insertion', name: '插入排序', complexity: 'O(n²)' }
-]
+const sortStrategies = computed(() => messages.value.patternPlayground.sortStrategies)
 
 function shuffleData() {
   const arr = [...strategyData.value]

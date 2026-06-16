@@ -2,8 +2,8 @@
   <div class="best-practices-demo">
     <div class="demo-header">
       <span class="icon">✅</span>
-      <span class="title">权限管理最佳实践</span>
-      <span class="subtitle">按优先级实施安全措施</span>
+      <span class="title">{{ t('bestPractices.title') }}</span>
+      <span class="subtitle">{{ t('bestPractices.subtitle') }}</span>
     </div>
 
     <div class="practices-list">
@@ -42,58 +42,19 @@
 
     <div class="info-box">
       <span class="icon">💡</span>
-      <strong>核心思想：</strong>按照优先级从 P0 开始逐步实施。每个改进都能显著提升账号安全性。
+      <strong>{{ t('common.coreIdea') }}</strong>{{ t('bestPractices.info') }}
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { cloudIamLocale } from '../../../locales/cloud-iam/index.js'
 
+const { t, messages } = useI18n(cloudIamLocale)
 const expandedCard = ref(0)
-
-const bestPractices = [
-  {
-    icon: '👑',
-    title: '根账号保护',
-    priority: 'p0',
-    priorityText: 'P0',
-    description: '根账号是云服务的所有者，必须实施最高级别的保护。',
-    checklist: ['启用 MFA', '创建 IAM 管理员用户', '删除根账号访问密钥']
-  },
-  {
-    icon: '👤',
-    title: '用户权限最小化',
-    priority: 'p0',
-    priorityText: 'P0',
-    description: '遵循最小权限原则，只授予用户完成工作所需的最低权限。',
-    checklist: ['避免全权限策略', '使用用户组管理', '定期审查用户']
-  },
-  {
-    icon: '🎭',
-    title: '优先使用 IAM 角色',
-    priority: 'p1',
-    priorityText: 'P1',
-    description: 'IAM 角色没有长期凭证，通过临时凭证访问，降低泄露风险。',
-    checklist: ['EC2 使用实例角色', 'Lambda 使用执行角色', '跨账号用 AssumeRole']
-  },
-  {
-    icon: '🔑',
-    title: '访问密钥安全管理',
-    priority: 'p1',
-    priorityText: 'P1',
-    description: '如果必须使用 AK/SK，需要实施严格的安全管理措施。',
-    checklist: ['不硬编码凭证', '使用密钥管理服务', '定期轮换密钥']
-  },
-  {
-    icon: '📊',
-    title: '监控与审计',
-    priority: 'p2',
-    priorityText: 'P2',
-    description: '建立全面的监控和审计机制，及时发现安全事件。',
-    checklist: ['启用 CloudTrail', '配置关键操作告警', '定期审查权限']
-  }
-]
+const bestPractices = computed(() => messages.value.bestPractices.items)
 
 function toggleCard(index) {
   expandedCard.value = expandedCard.value === index ? null : index

@@ -1,42 +1,40 @@
 <template>
   <div class="dns-lookup-demo custom-demo-base">
-    <div class="demo-label">DNS 解析 ── 查地址簿找坐标</div>
+    <div class="demo-label">{{ t('network.dnsLookup.label') }}</div>
     <div class="demo-panel">
       
       <div class="lookup-flow">
-        <!-- 浏览器 -->
         <div class="flow-node browser-node" :class="{ active: true }">
           <div class="node-icon">📱</div>
-          <div class="node-title">浏览器</div>
-          <div class="node-desc" v-if="step === 0">要去 www.google.com</div>
-          <div class="node-desc" v-if="step === 1">问 114查号台...</div>
-          <div class="node-desc success" v-if="step === 2">收到: 142... 发车!</div>
+          <div class="node-title">{{ t('network.dnsLookup.browserTitle') }}</div>
+          <div class="node-desc" :class="{ success: step === 2 }">
+            {{ browserDescs[step] }}
+          </div>
         </div>
 
         <div class="flow-path-wrapper">
           <div class="flow-path" :class="{ active: step >= 0 }">
-            <span class="path-label">询问坐标</span>
-            <div class="moving-dot" v-if="step === 1"></div>
+            <span class="path-label">{{ t('network.dnsLookup.requestLabel') }}</span>
+            <div v-if="step === 1" class="moving-dot"></div>
           </div>
           <div class="flow-path reverse" :class="{ active: step === 2 }">
-            <span class="path-label">返回 IP</span>
-            <div class="moving-dot reverse" v-if="step === 2"></div>
+            <span class="path-label">{{ t('network.dnsLookup.responseLabel') }}</span>
+            <div v-if="step === 2" class="moving-dot reverse"></div>
           </div>
         </div>
 
-        <!-- 查号台 -->
         <div class="flow-node dns-node" :class="{ active: step >= 1, flash: step === 1 }">
           <div class="node-icon">📞</div>
-          <div class="node-title">114查号台 (DNS)</div>
-          <div class="node-desc" v-if="step === 0">待命</div>
-          <div class="node-desc" v-if="step === 1">正在翻地址簿...</div>
-          <div class="node-desc success" v-if="step === 2">找到啦: 142.250.80.46</div>
+          <div class="node-title">{{ t('network.dnsLookup.dnsTitle') }}</div>
+          <div class="node-desc" :class="{ success: step === 2 }">
+            {{ dnsDescs[step] }}
+          </div>
         </div>
       </div>
 
       <div class="action-bar">
-        <button class="action-btn" @click="runDemo" :disabled="isRunning"> 
-          {{ isRunning ? '查询中...' : (step === 2 ? '重新查询' : '开始 DNS 查询') }} 
+        <button class="action-btn" :disabled="isRunning" @click="runDemo">
+          {{ buttonLabel }}
         </button>
       </div>
 
@@ -47,16 +45,23 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { webBasicsLocale } from '../../../locales/web-basics/index.js'
+
+const { t, messages } = useI18n(webBasicsLocale)
 
 const step = ref(0)
 const isRunning = ref(false)
-const statusList = [
-  '点击按钮，告诉浏览器你不知道 Google 服务器在哪',
-  '浏览器向营运商查号台 (DNS) 请求数字坐标...',
-  '拿到具体的 IP 地址，准备开始发车通信！'
-]
 
-const statusText = computed(() => statusList[step.value])
+const browserDescs = computed(() => messages.value.network.dnsLookup.browserDescs)
+const dnsDescs = computed(() => messages.value.network.dnsLookup.dnsDescs)
+const statusList = computed(() => messages.value.network.dnsLookup.status)
+const statusText = computed(() => statusList.value[step.value])
+const buttonLabel = computed(() => {
+  const buttons = messages.value.network.dnsLookup.buttons
+  if (isRunning.value) return buttons.running
+  return step.value === 2 ? buttons.restart : buttons.start
+})
 
 const runDemo = () => {
   if (isRunning.value) return

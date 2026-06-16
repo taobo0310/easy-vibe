@@ -2,7 +2,7 @@
   <div class="demo">
     <div class="header">
       <span class="icon">🎨</span>
-      <span class="title">四种 API 风格对比</span>
+      <span class="title">{{ t('style.title') }}</span>
     </div>
 
     <div class="tabs">
@@ -12,7 +12,8 @@
         :class="['tab', { active: active === style.id }]"
         @click="active = style.id"
       >
-        {{ style.icon }} {{ style.name }}
+        <span v-html="style.icon" />
+        {{ style.name }}
       </button>
     </div>
 
@@ -25,12 +26,12 @@
       <p class="desc">{{ currentStyle.desc }}</p>
 
       <div class="example-section">
-        <div class="example-label">示例：获取用户信息</div>
+        <div class="example-label">{{ t('style.exampleLabel') }}</div>
         <pre class="code-block"><code>{{ currentStyle.example }}</code></pre>
       </div>
 
       <div class="features">
-        <div class="features-title">核心特点</div>
+        <div class="features-title">{{ t('style.featuresTitle') }}</div>
         <div class="features-grid">
           <div
             v-for="(f, i) in currentStyle.features"
@@ -45,11 +46,11 @@
 
       <div class="meta">
         <div class="meta-row">
-          <span class="meta-label">适用场景</span>
+          <span class="meta-label">{{ t('style.scenarioLabel') }}</span>
           <span class="meta-value">{{ currentStyle.scenarios }}</span>
         </div>
         <div class="meta-row">
-          <span class="meta-label">官方地址</span>
+          <span class="meta-label">{{ t('style.officialLabel') }}</span>
           <a :href="currentStyle.official" target="_blank" class="meta-link">{{
             currentStyle.official
           }}</a>
@@ -58,49 +59,31 @@
     </div>
 
     <div class="compare-section">
-      <div class="compare-title">📊 风格速览对比</div>
+      <div class="compare-title" v-html="t('style.compareTitle')" />
       <div class="compare-table">
         <div class="compare-row head">
-          <div class="cell">特性</div>
-          <div class="cell">RPC</div>
-          <div class="cell highlight">REST</div>
-          <div class="cell">GraphQL</div>
-          <div class="cell">gRPC</div>
+          <div
+            v-for="(header, idx) in compareHeaders"
+            :key="header"
+            class="cell"
+            :class="{ highlight: idx === 2 }"
+          >
+            {{ header }}
+          </div>
         </div>
-        <div class="compare-row">
-          <div class="cell">核心理念</div>
-          <div class="cell">面向过程</div>
-          <div class="cell highlight">面向资源</div>
-          <div class="cell">面向数据</div>
-          <div class="cell">面向方法</div>
-        </div>
-        <div class="compare-row">
-          <div class="cell">URL 风格</div>
-          <div class="cell">动词为主</div>
-          <div class="cell highlight">名词为主</div>
-          <div class="cell">单一端点</div>
-          <div class="cell">不依赖URL</div>
-        </div>
-        <div class="compare-row">
-          <div class="cell">学习曲线</div>
-          <div class="cell low">低</div>
-          <div class="cell">中</div>
-          <div class="cell">中</div>
-          <div class="cell high">高</div>
-        </div>
-        <div class="compare-row">
-          <div class="cell">性能</div>
-          <div class="cell">一般</div>
-          <div class="cell">一般</div>
-          <div class="cell">较好</div>
-          <div class="cell best">优秀</div>
-        </div>
-        <div class="compare-row">
-          <div class="cell">使用占比</div>
-          <div class="cell">~30%</div>
-          <div class="cell highlight">~50%</div>
-          <div class="cell">~15%</div>
-          <div class="cell">~5%</div>
+        <div
+          v-for="row in compareRows"
+          :key="row[0]"
+          class="compare-row"
+        >
+          <div
+            v-for="(cell, idx) in row"
+            :key="idx"
+            class="cell"
+            :class="cellClass(row, idx)"
+          >
+            {{ cell }}
+          </div>
         </div>
       </div>
     </div>
@@ -109,104 +92,26 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { apiDesignLocale } from '../../../locales/api-design/index.js'
 
+const { t, messages } = useI18n(apiDesignLocale)
 const active = ref('rest')
-
-const styles = [
-  {
-    id: 'rpc',
-    icon: '📞',
-    name: 'RPC',
-    badge: '最传统',
-    desc: 'Remote Procedure Call，远程过程调用。像调用本地方法一样调用远程服务，面向过程，简单直接。超过 50% 的内部 API 采用这种风格。',
-    example: `GET /getUserInfo?id=123
-POST /createUser
-POST /deleteOrder
-GET /queryUserList`,
-    features: [
-      'URL 命名往往是动词',
-      'HTTP 方法基本只用 GET/POST',
-      '设计简单，几乎无约束',
-      '需要详细文档说明'
-    ],
-    scenarios: '内部 API、性能敏感场景、难以抽象为资源的业务',
-    official: '无官方规范（概念性风格）'
-  },
-  {
-    id: 'rest',
-    icon: '🌐',
-    name: 'REST',
-    badge: '最常用',
-    desc: 'Representational State Transfer，表述性状态转移。由 Roy Fielding 于 2000 年在其博士论文中提出。面向资源，用 URL 标识资源，用 HTTP 方法操作资源。',
-    example: `GET    /users           # 获取用户列表
-GET    /users/123       # 获取单个用户
-POST   /users           # 创建用户
-PUT    /users/123       # 全量更新
-PATCH  /users/123       # 部分更新
-DELETE /users/123       # 删除用户`,
-    features: [
-      'URL 是名词，不是动词',
-      '使用 HTTP 方法表达操作',
-      '无状态，请求包含所有信息',
-      '可缓存，支持分层系统'
-    ],
-    scenarios: '公开 API、CRUD 操作、资源边界清晰的业务',
-    official: 'https://restfulapi.net/'
-  },
-  {
-    id: 'graphql',
-    icon: '📊',
-    name: 'GraphQL',
-    badge: '最灵活',
-    desc: '由 Facebook 于 2015 年开源。一种查询语言，客户端可以精确指定需要的数据字段，避免过度获取或获取不足。',
-    example: `query {
-  user(id: "123") {
-    name
-    email
-    orders {
-      id
-      total
-    }
-  }
-}`,
-    features: [
-      '单一端点（/graphql）',
-      '客户端决定返回字段',
-      'Schema 即文档',
-      '一次请求获取多资源'
-    ],
-    scenarios: '客户端需求多变、数据关系复杂、移动端 App',
-    official: 'https://graphql.org/'
-  },
-  {
-    id: 'grpc',
-    icon: '⚡',
-    name: 'gRPC',
-    badge: '最高效',
-    desc: '由 Google 于 2016 年开源。高性能 RPC 框架，使用 Protocol Buffers 序列化，基于 HTTP/2，支持双向流通信。',
-    example: `service UserService {
-  rpc GetUser(GetUserRequest) returns (User);
-  rpc CreateUser(CreateUserRequest) returns (User);
-}
-
-message User {
-  string id = 1;
-  string name = 2;
-}`,
-    features: [
-      '二进制传输，性能极高',
-      '强类型，代码自动生成',
-      '基于 HTTP/2，双向流',
-      '浏览器支持差'
-    ],
-    scenarios: '微服务内部通信、高性能场景、强类型需求',
-    official: 'https://grpc.io/'
-  }
-]
+const styles = computed(() => messages.value.style.styles)
+const compareHeaders = computed(() => messages.value.style.compareHeaders)
+const compareRows = computed(() => messages.value.style.compareRows)
 
 const currentStyle = computed(() => {
-  return styles.find((s) => s.id === active.value) || styles[1]
+  return styles.value.find((s) => s.id === active.value) || styles.value[1]
 })
+
+function cellClass(row, idx) {
+  if (idx === 2) return 'highlight'
+  if (row[0] === compareRows.value[2]?.[0] && idx === 1) return 'low'
+  if (row[0] === compareRows.value[2]?.[0] && idx === 4) return 'high'
+  if (row[0] === compareRows.value[3]?.[0] && idx === 4) return 'best'
+  return ''
+}
 </script>
 
 <style scoped>

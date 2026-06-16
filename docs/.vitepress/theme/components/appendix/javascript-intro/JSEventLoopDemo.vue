@@ -1,27 +1,15 @@
 <script setup>
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { javascriptIntroLocale } from '../../../locales/javascript-intro/index.js'
 
+const { t, messages } = useI18n(javascriptIntroLocale)
 const isPlaying = ref(false)
 const currentStep = ref(0)
-const codeQueue = ref([
-  { id: 1, code: 'console.log("1")', type: 'sync', output: '1' },
-  { id: 2, code: 'setTimeout(() => console.log("2"), 0)', type: 'async', output: '2' },
-  { id: 3, code: 'console.log("3")', type: 'sync', output: '3' },
-  { id: 4, code: 'fetch("/api").then(() => console.log("4"))', type: 'async', output: '4' },
-  { id: 5, code: 'console.log("5")', type: 'sync', output: '5' }
-])
+const codeQueue = computed(() => messages.value.eventLoop.codeQueueItems)
 const taskQueue = ref([])
 const outputLog = ref([])
-
-const steps = [
-  { description: '执行 console.log("1")', output: '1' },
-  { description: '遇到 setTimeout，把回调贴到便签栏', output: null },
-  { description: '执行 console.log("3")', output: '3' },
-  { description: '遇到 fetch，把回调贴到便签栏', output: null },
-  { description: '执行 console.log("5")', output: '5' },
-  { description: '执行 setTimeout 的回调', output: '2' },
-  { description: '执行 fetch 的回调', output: '4' }
-]
+const steps = computed(() => messages.value.eventLoop.steps)
 
 const reset = () => {
   currentStep.value = 0
@@ -31,9 +19,9 @@ const reset = () => {
 }
 
 const nextStep = () => {
-  if (currentStep.value >= steps.length) return
+  if (currentStep.value >= steps.value.length) return
 
-  const step = steps[currentStep.value]
+  const step = steps.value[currentStep.value]
 
   if (currentStep.value === 1) {
     taskQueue.value.push({ id: 2, code: 'console.log("2")', status: 'pending' })
@@ -50,7 +38,7 @@ const nextStep = () => {
   }
 
   if (step.output) {
-    outputLog.value.push({ output: step.output, source: '同步代码' })
+    outputLog.value.push({ output: step.output, source: t('eventLoop.syncSource') })
   }
 
   currentStep.value++
@@ -60,7 +48,7 @@ const play = async () => {
   if (isPlaying.value) return
   isPlaying.value = true
 
-  while (currentStep.value < steps.length && isPlaying.value) {
+  while (currentStep.value < steps.value.length && isPlaying.value) {
     nextStep()
     await new Promise(resolve => setTimeout(resolve, 1000))
   }
@@ -75,12 +63,11 @@ const stop = () => {
 
 <template>
   <div class="event-loop-demo">
-    <h3>事件循环：JavaScript 的执行机制</h3>
+    <h3>{{ t('eventLoop.title') }}</h3>
 
     <div class="workspace">
-      <!-- 代码队列 -->
       <div class="code-queue-section">
-        <h4>代码队列</h4>
+        <h4>{{ t('eventLoop.codeQueue') }}</h4>
         <div class="queue">
           <div
             v-for="(item, index) in codeQueue"
@@ -101,21 +88,20 @@ const stop = () => {
               v-if="currentStep === index"
               class="executing"
             >
-              执行中
+              {{ t('eventLoop.executing') }}
             </div>
           </div>
         </div>
       </div>
 
-      <!-- 工位 -->
       <div class="worker-section">
-        <h4>工位（单线程）</h4>
+        <h4>{{ t('eventLoop.worker') }}</h4>
         <div class="worker">
           <div class="worker-emoji">
             👨‍💻
           </div>
           <div class="worker-status">
-            {{ currentStep < steps.length ? '正在执行' : '执行完成' }}
+            {{ currentStep < steps.length ? t('eventLoop.running') : t('eventLoop.done') }}
           </div>
           <div
             v-if="currentStep < steps.length"
@@ -126,9 +112,8 @@ const stop = () => {
         </div>
       </div>
 
-      <!-- 便签栏 -->
       <div class="task-queue-section">
-        <h4>便签栏（任务队列）</h4>
+        <h4>{{ t('eventLoop.taskQueue') }}</h4>
         <div class="task-queue">
           <div
             v-for="task in taskQueue"
@@ -140,28 +125,27 @@ const stop = () => {
               {{ task.code }}
             </div>
             <div class="task-status">
-              {{ task.status === 'ready' ? '✅ 就绪' : '⏳ 等待中...' }}
+              {{ task.status === 'ready' ? t('eventLoop.ready') : t('eventLoop.waiting') }}
             </div>
           </div>
           <div
             v-if="taskQueue.length === 0"
             class="empty-queue"
           >
-            暂无待办任务
+            {{ t('eventLoop.emptyQueue') }}
           </div>
         </div>
       </div>
     </div>
 
-    <!-- 输出日志 -->
     <div class="output-section">
-      <h4>输出日志</h4>
+      <h4>{{ t('eventLoop.outputLog') }}</h4>
       <div class="output-log">
         <div
           v-if="outputLog.length === 0"
           class="empty-log"
         >
-          等待输出...
+          {{ t('eventLoop.emptyLog') }}
         </div>
         <div
           v-for="(log, index) in outputLog"
@@ -174,43 +158,41 @@ const stop = () => {
       </div>
     </div>
 
-    <!-- 控制按钮 -->
     <div class="controls">
       <button
         :disabled="isPlaying || currentStep >= steps.length"
         class="btn-play"
         @click="play"
       >
-        {{ isPlaying ? '执行中...' : '▶ 自动播放' }}
+        {{ isPlaying ? t('eventLoop.playing') : t('eventLoop.play') }}
       </button>
       <button
         :disabled="isPlaying || currentStep >= steps.length"
         class="btn-step"
         @click="nextStep"
       >
-        ⏭ 单步执行
+        {{ t('eventLoop.step') }}
       </button>
       <button
         :disabled="!isPlaying"
         class="btn-stop"
         @click="stop"
       >
-        ⏸ 停止
+        {{ t('eventLoop.stop') }}
       </button>
       <button
         class="btn-reset"
         @click="reset"
       >
-        🔄 重置
+        {{ t('eventLoop.reset') }}
       </button>
     </div>
 
-    <!-- 说明 -->
     <div class="explanation">
-      <p><strong>执行顺序：</strong>{{ outputLog.map(l => l.output).join(', ') || '还未开始' }}</p>
-      <p><strong>代码书写顺序：</strong>1, 2, 3, 4, 5</p>
+      <p><strong>{{ t('eventLoop.orderTitle') }}</strong>{{ outputLog.map(l => l.output).join(', ') || t('eventLoop.notStarted') }}</p>
+      <p><strong>{{ t('eventLoop.codeOrderTitle') }}</strong>{{ t('eventLoop.codeOrder') }}</p>
       <p class="highlight">
-        代码从上到下写的，但执行顺序不一定从上到下——因为异步操作会被"推迟"到当前代码执行完之后。
+        {{ t('eventLoop.highlight') }}
       </p>
     </div>
   </div>

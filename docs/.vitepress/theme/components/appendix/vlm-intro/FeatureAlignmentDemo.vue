@@ -2,12 +2,9 @@
   <div class="feature-alignment-demo">
     <div class="header">
       <div class="title">
-        阶段一：特征对齐 (Feature Alignment / Pre-training)
+        {{ t('featureAlignment.title') }}
       </div>
-      <div class="desc">
-        目标：让 Projector 学会“翻译”图像语言。
-        <br>做法：冻结 ViT 和 LLM，只训练 Projector。
-      </div>
+      <div class="desc" v-html="t('featureAlignment.desc')" />
     </div>
 
     <div class="training-diagram">
@@ -18,7 +15,7 @@
             🖼️
           </div>
           <div class="data-label">
-            图片<br>(猫)
+            <span v-html="t('featureAlignment.imageLabel')" />
           </div>
         </div>
         <div class="data-item text-data">
@@ -26,7 +23,7 @@
             📝
           </div>
           <div class="data-label">
-            标题<br>("一只猫")
+            <span v-html="t('featureAlignment.textLabel')" />
           </div>
         </div>
       </div>
@@ -46,7 +43,7 @@
         <!-- Vision Branch -->
         <div class="model-block frozen">
           <div class="status-badge">
-            ❄️ 冻结
+            {{ t('featureAlignment.frozen') }}
           </div>
           <div class="block-icon">
             👁️
@@ -62,7 +59,7 @@
 
         <div class="model-block training">
           <div class="status-badge fire">
-            🔥 训练
+            {{ t('featureAlignment.train') }}
           </div>
           <div class="block-icon">
             🔌
@@ -75,7 +72,7 @@
         <!-- Text Branch -->
         <div class="model-block frozen text-model">
           <div class="status-badge">
-            ❄️ 冻结
+            {{ t('featureAlignment.frozen') }}
           </div>
           <div class="block-icon">
             🧠
@@ -103,7 +100,7 @@
             🟢
           </div>
           <div class="vector-label">
-            向量 V
+            {{ t('featureAlignment.vectorV') }}
           </div>
         </div>
 
@@ -128,7 +125,7 @@
             🔵
           </div>
           <div class="vector-label">
-            向量 T
+            {{ t('featureAlignment.vectorT') }}
           </div>
         </div>
       </div>
@@ -150,6 +147,10 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { vlmIntroLocale } from '../../../locales/vlm-intro/index.js'
+
+const { t, messages } = useI18n(vlmIntroLocale)
 
 const step = ref(0) // 0: Idle, 1: Forward, 2: Loss, 3: Backprop
 
@@ -161,35 +162,15 @@ const nextStep = () => {
   }
 }
 
-const buttonText = computed(() => {
-  switch (step.value) {
-    case 0:
-      return '开始训练演示'
-    case 1:
-      return '下一步：计算 Loss'
-    case 2:
-      return '下一步：反向传播'
-    case 3:
-      return '完成并重置'
-    default:
-      return '开始'
-  }
-})
+const buttonText = computed(
+  () =>
+    messages.value.featureAlignment.buttons[step.value] ||
+    t('featureAlignment.fallbackButton')
+)
 
-const currentStepDesc = computed(() => {
-  switch (step.value) {
-    case 0:
-      return '准备就绪。点击按钮开始模拟一次训练迭代。'
-    case 1:
-      return '前向传播：图片经过 ViT (冻结) 和 Projector (训练) 得到向量 V；文本经过 LLM (冻结) 得到向量 T。'
-    case 2:
-      return '计算 Loss：比较向量 V 和向量 T 的相似度。目标是让它们尽可能接近。'
-    case 3:
-      return '反向传播：根据 Loss 更新 Projector 的参数。注意 ViT 和 LLM 不会更新！'
-    default:
-      return ''
-  }
-})
+const currentStepDesc = computed(
+  () => messages.value.featureAlignment.descriptions[step.value] || ''
+)
 
 const isCalculatingLoss = computed(() => step.value === 2)
 </script>

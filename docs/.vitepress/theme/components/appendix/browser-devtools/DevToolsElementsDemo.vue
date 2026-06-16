@@ -1,5 +1,9 @@
 <script setup>
 import { ref, reactive, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { browserDevtoolsLocale } from '../../../locales/browser-devtools/index.js'
+
+const { t } = useI18n(browserDevtoolsLocale)
 
 const selectedElement = ref('box') // 'box' or 'text'
 
@@ -41,7 +45,7 @@ const updateStyle = (prop, value) => {
   >
     <template #header>
       <div class="header">
-        <span class="title">Elements (元素面板)</span>
+        <span class="title">{{ t('elementsDemo.title') }}</span>
       </div>
     </template>
 
@@ -113,7 +117,7 @@ const updateStyle = (prop, value) => {
     <!-- Preview Area -->
     <div class="preview-area">
       <div class="preview-label">
-        页面预览 (Page Preview)
+        {{ t('elementsDemo.previewLabel') }}
       </div>
       <div class="preview-content">
         <div :style="styles.box">
@@ -123,7 +127,7 @@ const updateStyle = (prop, value) => {
     </div>
     
     <div class="footer-tip">
-      点击左侧 DOM 树中的元素，在右侧 Styles 面板修改样式，下方预览会实时更新。
+      {{ t('elementsDemo.footerTip') }}
     </div>
   </el-card>
 </template>

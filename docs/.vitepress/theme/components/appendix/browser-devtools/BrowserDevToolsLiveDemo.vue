@@ -1,10 +1,13 @@
 <script setup>
 import { ref, reactive, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { browserDevtoolsLocale } from '../../../locales/browser-devtools/index.js'
+
+const { t, messages } = useI18n(browserDevtoolsLocale)
 
 const activeTab = ref('elements')
-const selectedNode = ref('h1') // 'container', 'h1', 'button'
+const selectedNode = ref('h1')
 
-// Live State for the Virtual Page
 const liveStyles = reactive({
   container: {
     backgroundColor: '#f9f9f9',
@@ -38,11 +41,16 @@ const liveContent = reactive({
   button: 'Click Me'
 })
 
-// Presets Definition
+const presetNames = {
+  h1: ['Default', 'Vibrant Red', 'Tech Blue', 'Elegant Purple'],
+  button: ['Default', 'Warning', 'Ghost', 'Dark'],
+  container: ['Card', 'Dark', 'Minimal']
+}
+
 const stylePresets = {
   h1: [
     {
-      name: '默认样式 (Default)',
+      name: 'Default',
       style: {
         color: '#2c3e50',
         fontSize: '28px',
@@ -51,7 +59,7 @@ const stylePresets = {
       }
     },
     {
-      name: '活力红 (Vibrant Red)',
+      name: 'Vibrant Red',
       style: {
         color: '#e74c3c',
         fontSize: '36px',
@@ -60,7 +68,7 @@ const stylePresets = {
       }
     },
     {
-      name: '科技蓝 (Tech Blue)',
+      name: 'Tech Blue',
       style: {
         color: '#3498db',
         fontSize: '32px',
@@ -69,7 +77,7 @@ const stylePresets = {
       }
     },
     {
-      name: '优雅紫 (Elegant Purple)',
+      name: 'Elegant Purple',
       style: {
         color: '#9b59b6',
         fontSize: '24px',
@@ -80,7 +88,7 @@ const stylePresets = {
   ],
   button: [
     {
-      name: '默认样式 (Default)',
+      name: 'Default',
       style: {
         backgroundColor: '#42b983',
         color: '#ffffff',
@@ -89,7 +97,7 @@ const stylePresets = {
       }
     },
     {
-      name: '警告风格 (Warning)',
+      name: 'Warning',
       style: {
         backgroundColor: '#f1c40f',
         color: '#333333',
@@ -98,7 +106,7 @@ const stylePresets = {
       }
     },
     {
-      name: '幽灵按钮 (Ghost)',
+      name: 'Ghost',
       style: {
         backgroundColor: 'transparent',
         color: '#42b983',
@@ -107,7 +115,7 @@ const stylePresets = {
       }
     },
     {
-      name: '深黑按钮 (Dark)',
+      name: 'Dark',
       style: {
         backgroundColor: '#34495e',
         color: '#ecf0f1',
@@ -118,7 +126,7 @@ const stylePresets = {
   ],
   container: [
     {
-      name: '默认卡片 (Card)',
+      name: 'Card',
       style: {
         backgroundColor: '#f9f9f9',
         borderRadius: '12px',
@@ -126,7 +134,7 @@ const stylePresets = {
       }
     },
     {
-      name: '深色模式 (Dark)',
+      name: 'Dark',
       style: {
         backgroundColor: '#2c3e50',
         borderRadius: '8px',
@@ -134,7 +142,7 @@ const stylePresets = {
       }
     },
     {
-      name: '极简白 (Minimal)',
+      name: 'Minimal',
       style: {
         backgroundColor: '#ffffff',
         borderRadius: '0px',
@@ -144,32 +152,36 @@ const stylePresets = {
   ]
 }
 
-// Helper to get current styles for the selected node
 const currentStyles = computed(() => {
   return liveStyles[selectedNode.value] || {}
 })
 
-// Helper for presets
 const availablePresets = computed(() => {
-  return stylePresets[selectedNode.value] || []
+  const node = selectedNode.value
+  const names = presetNames[node] || []
+  const presets = stylePresets[node] || []
+  const localeNames = messages.value.liveDemo.presets[node] || names
+  return presets.map((p, i) => ({
+    ...p,
+    displayName: localeNames[i] || p.name
+  }))
 })
 
 const applyPreset = (event) => {
   const presetName = event.target.value
-  const preset = availablePresets.value.find((p) => p.name === presetName)
+  const preset = availablePresets.value.find((p) => p.name === presetName || p.displayName === presetName)
   if (preset) {
     Object.assign(liveStyles[selectedNode.value], preset.style)
   }
 }
 
-// Tabs definition
-const tabs = [
-  { id: 'elements', label: '元素' },
-  { id: 'console', label: '控制台' },
-  { id: 'sources', label: '源代码' },
-  { id: 'network', label: '网络' },
-  { id: 'application', label: '应用' }
-]
+const tabs = computed(() => [
+  { id: 'elements', label: t('liveDemo.tabs.elements') },
+  { id: 'console', label: t('liveDemo.tabs.console') },
+  { id: 'sources', label: t('liveDemo.tabs.sources') },
+  { id: 'network', label: t('liveDemo.tabs.network') },
+  { id: 'application', label: t('liveDemo.tabs.application') }
+])
 
 const selectNode = (node) => {
   selectedNode.value = node
@@ -209,7 +221,7 @@ const selectNode = (node) => {
         </button>
       </div>
       <div class="instruction-overlay">
-        👆 点击上方元素，下方 DevTools 实时联动
+        {{ t('liveDemo.instruction') }}
       </div>
     </div>
 
@@ -220,7 +232,7 @@ const selectNode = (node) => {
         <div class="header-left">
           <div
             class="icon-btn element-picker"
-            title="选择页面中的元素以进行检查"
+            :title="t('liveDemo.titles.elementPicker')"
           >
             <svg
               width="16"
@@ -235,7 +247,7 @@ const selectNode = (node) => {
           </div>
           <div
             class="icon-btn device-toggle"
-            title="切换设备工具栏"
+            :title="t('liveDemo.titles.deviceToggle')"
           >
             <svg
               width="16"
@@ -361,10 +373,10 @@ const selectNode = (node) => {
           <div class="styles-panel">
             <div class="styles-tabs">
               <div class="style-tab active">
-                样式 (Styles)
+                {{ t('liveDemo.stylesTabs.styles') }}
               </div>
               <div class="style-tab">
-                计算 (Computed)
+                {{ t('liveDemo.stylesTabs.computed') }}
               </div>
             </div>
             <div class="styles-content">
@@ -374,7 +386,7 @@ const selectNode = (node) => {
                 class="style-section"
               >
                 <div class="style-section-title">
-                  ✨ 快速预设 (Presets)
+                  {{ t('liveDemo.presets.title') }}
                 </div>
                 <select
                   class="preset-select"
@@ -385,14 +397,14 @@ const selectNode = (node) => {
                     disabled
                     selected
                   >
-                    选择一种风格 (Select Preset)...
+                    {{ t('liveDemo.presets.placeholder') }}
                   </option>
                   <option
                     v-for="preset in availablePresets"
                     :key="preset.name"
                     :value="preset.name"
                   >
-                    {{ preset.name }}
+                    {{ preset.displayName }}
                   </option>
                 </select>
               </div>
@@ -429,7 +441,7 @@ const selectNode = (node) => {
           class="panel placeholder-panel"
         >
           <div class="placeholder-text">
-            此演示主要展示 Elements 面板的实时编辑功能。请切换回 "元素" 面板。
+            {{ t('liveDemo.placeholder') }}
           </div>
         </div>
       </div>

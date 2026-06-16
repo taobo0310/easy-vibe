@@ -1,79 +1,45 @@
 <template>
   <div class="mcp-visual-demo">
-    <div class="section-title">MCP 是什么？</div>
+    <div class="section-title">{{ t('mcpVisual.title') }}</div>
 
     <div class="intro-text">
-      MCP（Model Context Protocol）是 Anthropic 于 2024 年 11 月推出的<strong>AI 与外部工具连接的统一标准</strong>。它让 AI 应用可以调用外部工具、读取资源数据、使用预定义提示，就像给 AI 装上了"手"和"眼睛"。
+      {{ t('mcpVisual.introBefore') }}<strong>{{ t('mcpVisual.introStrong') }}</strong>{{ t('mcpVisual.introAfter') }}
     </div>
 
-    <div class="section-title">三大核心能力</div>
+    <div class="section-title">{{ t('mcpVisual.capabilityTitle') }}</div>
 
-    <div class="能力-table">
+    <div class="capability-table">
       <div class="table-header">
-        <div class="col-能力">能力</div>
-        <div class="col-英文">英文</div>
-        <div class="col-作用">作用</div>
-        <div class="col-示例">示例</div>
+        <div class="col-capability">{{ messages.mcpVisual.tableHeaders[0] }}</div>
+        <div class="col-english">{{ messages.mcpVisual.tableHeaders[1] }}</div>
+        <div class="col-role">{{ messages.mcpVisual.tableHeaders[2] }}</div>
+        <div class="col-example">{{ messages.mcpVisual.tableHeaders[3] }}</div>
       </div>
-      <div class="table-row">
-        <div class="col-能力"><strong>工具</strong></div>
-        <div class="col-英文">Tools</div>
-        <div class="col-作用">AI 可以调用的功能</div>
-        <div class="col-示例">查询天气、发送邮件、调用 API</div>
-      </div>
-      <div class="table-row">
-        <div class="col-能力"><strong>资源</strong></div>
-        <div class="col-英文">Resources</div>
-        <div class="col-作用">AI 可以读取的数据</div>
-        <div class="col-示例">文件内容、数据库记录、配置信息</div>
-      </div>
-      <div class="table-row">
-        <div class="col-能力"><strong>提示</strong></div>
-        <div class="col-英文">Prompts</div>
-        <div class="col-作用">预定义的提示模板</div>
-        <div class="col-示例">代码审查模板、写作模板</div>
+      <div v-for="capability in messages.mcpVisual.capabilities" :key="capability.english" class="table-row">
+        <div class="col-capability"><strong>{{ capability.name }}</strong></div>
+        <div class="col-english">{{ capability.english }}</div>
+        <div class="col-role">{{ capability.role }}</div>
+        <div class="col-example">{{ capability.example }}</div>
       </div>
     </div>
 
-    <div class="section-title">什么时候用 MCP？</div>
+    <div class="section-title">{{ t('mcpVisual.useCaseTitle') }}</div>
 
     <div class="use-cases">
-      <div class="use-case">
-        <div class="use-case-title">当 AI 需要执行实际操作时</div>
-        <div class="use-case-desc">AI 不仅要回答问题，还要真正做事：发送邮件、操作文件、调用第三方 API</div>
-      </div>
-      <div class="use-case">
-        <div class="use-case-title">当 AI 需要访问私有数据时</div>
-        <div class="use-case-desc">读取本地文件、查询数据库、访问企业内部系统</div>
-      </div>
-      <div class="use-case">
-        <div class="use-case-title">当需要标准化工具接入时</div>
-        <div class="use-case-desc">一次开发，多个 AI 应用可用（Claude、Cursor、Windsurf 等）</div>
+      <div v-for="useCase in messages.mcpVisual.useCases" :key="useCase.title" class="use-case">
+        <div class="use-case-title">{{ useCase.title }}</div>
+        <div class="use-case-desc">{{ useCase.desc }}</div>
       </div>
     </div>
 
-    <div class="section-title">如何使用 MCP？</div>
+    <div class="section-title">{{ t('mcpVisual.usageTitle') }}</div>
 
     <div class="usage-steps">
-      <div class="step">
-        <div class="step-num">1</div>
+      <div v-for="(step, index) in messages.mcpVisual.steps" :key="step.title" class="step">
+        <div class="step-num">{{ index + 1 }}</div>
         <div class="step-content">
-          <div class="step-title">开发 MCP Server</div>
-          <div class="step-desc">按 MCP 规范实现 Server，提供 tools/resources/prompts</div>
-        </div>
-      </div>
-      <div class="step">
-        <div class="step-num">2</div>
-        <div class="step-content">
-          <div class="step-title">配置 AI 应用连接</div>
-          <div class="step-desc">在 AI 应用中添加 MCP Server 配置（本地或远程）</div>
-        </div>
-      </div>
-      <div class="step">
-        <div class="step-num">3</div>
-        <div class="step-content">
-          <div class="step-title">AI 自动调用</div>
-          <div class="step-desc">AI 根据任务需求，自动发现并调用合适的工具或读取资源</div>
+          <div class="step-title">{{ step.title }}</div>
+          <div class="step-desc">{{ step.desc }}</div>
         </div>
       </div>
     </div>
@@ -81,6 +47,10 @@
 </template>
 
 <script setup>
+import { useI18n } from '../../../composables/useI18n.js'
+import { aiProtocolsLocale } from '../../../locales/ai-protocols/index.js'
+
+const { t, messages } = useI18n(aiProtocolsLocale)
 </script>
 
 <style scoped>
@@ -115,7 +85,7 @@
   color: var(--vp-c-brand);
 }
 
-.能力-table {
+.capability-table {
   border: 1px solid var(--vp-c-divider);
   border-radius: 6px;
   overflow: hidden;
@@ -140,25 +110,25 @@
   border-bottom: none;
 }
 
-.col-能力 {
+.col-capability {
   width: 15%;
   padding: 0.5rem 0.6rem;
   color: var(--vp-c-text-1);
 }
 
-.col-英文 {
+.col-english {
   width: 18%;
   padding: 0.5rem 0.6rem;
   color: var(--vp-c-text-2);
 }
 
-.col-作用 {
+.col-role {
   width: 32%;
   padding: 0.5rem 0.6rem;
   color: var(--vp-c-text-2);
 }
 
-.col-示例 {
+.col-example {
   width: 35%;
   padding: 0.5rem 0.6rem;
   color: var(--vp-c-text-3);
@@ -243,10 +213,10 @@
     flex-direction: column;
   }
 
-  .col-能力,
-  .col-英文,
-  .col-作用,
-  .col-示例 {
+  .col-capability,
+  .col-english,
+  .col-role,
+  .col-example {
     width: 100%;
     padding: 0.35rem 0.6rem;
   }
@@ -259,24 +229,24 @@
     padding: 0.5rem 0;
   }
 
-  .col-能力 {
+  .col-capability {
     font-size: 0.85rem;
     padding-bottom: 0.2rem;
   }
 
-  .col-英文 {
+  .col-english {
     font-size: 0.75rem;
     padding-top: 0;
     padding-bottom: 0.2rem;
   }
 
-  .col-作用 {
+  .col-role {
     font-size: 0.8rem;
     padding-top: 0;
     padding-bottom: 0.2rem;
   }
 
-  .col-示例 {
+  .col-example {
     font-size: 0.75rem;
     padding-top: 0;
   }

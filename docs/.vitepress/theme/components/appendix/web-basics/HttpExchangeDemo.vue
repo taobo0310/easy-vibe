@@ -1,46 +1,41 @@
 <template>
   <div class="http-exchange-demo custom-demo-base">
-    <div class="demo-label">HTTP 请求与响应 ── 寄纸条买包裹</div>
+    <div class="demo-label">{{ t('network.httpExchange.label') }}</div>
     <div class="demo-panel">
 
       <div class="exchange-container">
         <!-- Request Side -->
         <div class="card request-card" :class="{ active: state !== 'idle' }">
-          <div class="card-header">📤 【买方发纸条】 HTTP Request</div>
+          <div class="card-header">{{ t('network.httpExchange.requestHeader') }}</div>
           <div class="card-body">
             <div class="line"><span class="hl-blue">GET</span> /search <span class="hl-gray">HTTP/1.1</span></div>
             <div class="line"><span class="hl-gray">Host:</span> www.google.com</div>
-            <div class="line"><span class="hl-gray">User-Agent:</span> Mac Chrome 浏览器</div>
-            <div class="line"><span class="hl-gray">Accept-Language:</span> zh-CN (我要中文货) </div>
+            <div class="line"><span class="hl-gray">User-Agent:</span> {{ t('network.httpExchange.userAgent') }}</div>
+            <div class="line"><span class="hl-gray">Accept-Language:</span> {{ t('network.httpExchange.acceptLanguage') }}</div>
           </div>
         </div>
 
         <!-- Action Center -->
         <div class="action-center">
-          <button v-if="state === 'idle'" class="action-btn" @click="sendRequest">塞入通道发送 →</button>
+          <button v-if="state === 'idle'" class="action-btn" @click="sendRequest">{{ t('network.httpExchange.send') }}</button>
           <div v-if="state === 'loading'" class="loading-state">
              <div class="spinner"></div>
-             <div>等包裹寄回...</div>
+             <div>{{ t('network.httpExchange.loading') }}</div>
           </div>
-          <button v-if="state === 'done'" class="action-btn outline" @click="reset">再试一次 ↻</button>
+          <button v-if="state === 'done'" class="action-btn outline" @click="reset">{{ t('network.httpExchange.retry') }}</button>
         </div>
 
         <!-- Response Side -->
         <div class="card response-card" :class="{ active: state === 'done' }">
-          <div class="card-header">📥 【卖方回包裹】 HTTP Response</div>
-          <div class="card-body" v-if="state === 'done'">
-            <div class="line"><span class="hl-gray">HTTP/1.1</span> <span class="hl-green">200 OK</span> (交易成功)</div>
+          <div class="card-header">{{ t('network.httpExchange.responseHeader') }}</div>
+          <div v-if="state === 'done'" class="card-body">
+            <div class="line"><span class="hl-gray">HTTP/1.1</span> <span class="hl-green">200 OK</span> ({{ t('network.httpExchange.okNote') }})</div>
             <div class="line"><span class="hl-gray">Content-Type:</span> text/html; charset=UTF-8</div>
-            <div class="divider">空行 (分隔快递单和物品正文)</div>
-            <div class="code-block">
-&lt;!DOCTYPE html&gt;
-&lt;html&gt;
-  &lt;body&gt;这里是Google搜索页面的代码&lt;/body&gt;
-&lt;/html&gt;
-            </div>
+            <div class="divider">{{ t('network.httpExchange.divider') }}</div>
+            <div class="code-block">{{ t('network.httpExchange.bodyCode') }}</div>
           </div>
-          <div class="card-body empty" v-else>
-            这里将显示服务器返回的包裹...
+          <div v-else class="card-body empty">
+            {{ t('network.httpExchange.empty') }}
           </div>
         </div>
       </div>
@@ -54,15 +49,14 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { webBasicsLocale } from '../../../locales/web-basics/index.js'
+
+const { t, messages } = useI18n(webBasicsLocale)
 
 const state = ref('idle') // idle, loading, done
-const statusList = {
-  idle: '组装好 HTTP 请求单，包含请求路径和各项补充情报。',
-  loading: '请求正在通过刚才建立好的 TCP 通道飞速传输给对方...',
-  done: '服务器找到货物 (HTML代码)，贴上 200 OK 标签原路返回送达！'
-}
 
-const statusText = computed(() => statusList[state.value])
+const statusText = computed(() => messages.value.network.httpExchange.status[state.value])
 
 const sendRequest = () => {
   state.value = 'loading'

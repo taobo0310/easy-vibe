@@ -1,23 +1,19 @@
-<!--
-  CDNAccelerationDemo.vue
-  CDN 加速演示：展示 CDN 如何加速文件访问
--->
 <template>
   <div class="cdn-demo">
     <div class="header">
-      <div class="title">CDN 加速原理</div>
-      <div class="subtitle">对比有无 CDN 时的文件访问路径</div>
+      <div class="title">{{ t('cdn.title') }}</div>
+      <div class="subtitle">{{ t('cdn.subtitle') }}</div>
     </div>
 
     <div class="mode-tabs">
-      <button :class="['tab', { active: !cdnEnabled }]" @click="cdnEnabled = false">无 CDN</button>
-      <button :class="['tab', { active: cdnEnabled }]" @click="cdnEnabled = true">有 CDN</button>
+      <button :class="['tab', { active: !cdnEnabled }]" @click="cdnEnabled = false">{{ t('cdn.tabs.off') }}</button>
+      <button :class="['tab', { active: cdnEnabled }]" @click="cdnEnabled = true">{{ t('cdn.tabs.on') }}</button>
     </div>
 
     <div class="diagram">
       <div class="node user-node">
         <div class="node-icon">👤</div>
-        <div class="node-label">北京用户</div>
+        <div class="node-label">{{ t('cdn.nodes.user') }}</div>
       </div>
 
       <div class="path-line" :class="{ highlight: !cdnEnabled }">
@@ -26,42 +22,41 @@
 
       <div v-if="cdnEnabled" class="node cdn-node">
         <div class="node-icon">⚡</div>
-        <div class="node-label">北京 CDN 节点</div>
-        <div class="node-detail">缓存命中</div>
+        <div class="node-label">{{ t('cdn.nodes.cdn') }}</div>
+        <div class="node-detail">{{ t('cdn.nodes.cdnDetail') }}</div>
       </div>
 
       <div v-if="cdnEnabled" class="path-line miss-line">
-        <span class="latency miss">缓存未命中时回源</span>
+        <span class="latency miss">{{ t('cdn.cacheMiss') }}</span>
       </div>
 
       <div class="node origin-node">
         <div class="node-icon">🏢</div>
-        <div class="node-label">源站（美西 S3）</div>
+        <div class="node-label">{{ t('cdn.nodes.origin') }}</div>
       </div>
     </div>
 
     <div class="metrics">
-      <div class="metric">
-        <div class="metric-label">首字节时间 (TTFB)</div>
+      <div v-for="metric in metrics" :key="metric.label" class="metric">
+        <div class="metric-label">{{ metric.label }}</div>
         <div class="metric-bar">
-          <div class="bar-fill" :style="{ width: cdnEnabled ? '15%' : '100%' }"></div>
+          <div class="bar-fill" :style="{ width: cdnEnabled ? metric.enabledWidth : metric.disabledWidth }"></div>
         </div>
-        <div class="metric-value">{{ cdnEnabled ? '~30ms' : '~200ms' }}</div>
-      </div>
-      <div class="metric">
-        <div class="metric-label">下载 1MB 图片</div>
-        <div class="metric-bar">
-          <div class="bar-fill" :style="{ width: cdnEnabled ? '20%' : '100%' }"></div>
-        </div>
-        <div class="metric-value">{{ cdnEnabled ? '~50ms' : '~800ms' }}</div>
+        <div class="metric-value">{{ cdnEnabled ? metric.enabledValue : metric.disabledValue }}</div>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { fileStorageLocale } from '../../../locales/file-storage/index.js'
+
+const { t, messages } = useI18n(fileStorageLocale)
+
 const cdnEnabled = ref(true)
+const metrics = computed(() => messages.value.cdn.metrics)
 </script>
 
 <style scoped>

@@ -1,7 +1,7 @@
 <template>
   <div class="ast-visualizer-demo">
-    <h4>🌳 AST 可视化：看见代码的"骨架"</h4>
-    <p class="desc">选择一个表达式，观察它的抽象语法树结构</p>
+    <h4>{{ t('compilers.ast.title') }}</h4>
+    <p class="desc">{{ t('compilers.ast.desc') }}</p>
 
     <div class="expr-selector">
       <button
@@ -16,7 +16,7 @@
 
     <div class="ast-container">
       <div class="tree-view">
-        <div class="tree-title">语法树</div>
+        <div class="tree-title">{{ t('compilers.ast.treeTitle') }}</div>
         <div class="tree-nodes">
           <ASTNode
             :node="expressions[selected].tree"
@@ -26,7 +26,7 @@
       </div>
 
       <div class="explain-view">
-        <div class="explain-title">解析说明</div>
+        <div class="explain-title">{{ t('compilers.ast.explainTitle') }}</div>
         <div class="explain-list">
           <div v-for="(step, j) in expressions[selected].explains" :key="j" class="explain-item">
             <span class="explain-num">{{ j + 1 }}</span>
@@ -34,7 +34,9 @@
           </div>
         </div>
         <div class="tool-tip">
-          💡 试试 <a href="https://astexplorer.net/" target="_blank">AST Explorer</a> — 在线查看任意代码的 AST
+          {{ t('compilers.ast.toolTipPrefix') }}
+          <a href="https://astexplorer.net/" target="_blank">AST Explorer</a>
+          {{ t('compilers.ast.toolTipSuffix') }}
         </div>
       </div>
     </div>
@@ -42,13 +44,26 @@
 </template>
 
 <script setup>
-import { ref, h, defineComponent } from 'vue'
+import { computed, ref, h, defineComponent } from 'vue'
+import { useI18n } from '../../../composables/useI18n'
+import { computerFundamentalsLocale } from '../../../locales/computer-fundamentals'
+
+const { t, messages } = useI18n(computerFundamentalsLocale)
 
 const selected = ref(0)
 
 const ASTNode = defineComponent({
   name: 'ASTNode',
-  props: { node: Object, depth: Number },
+  props: {
+    node: {
+      type: Object,
+      default: () => ({})
+    },
+    depth: {
+      type: Number,
+      default: 0
+    }
+  },
   setup(props) {
     return () => {
       const n = props.node
@@ -72,73 +87,7 @@ const ASTNode = defineComponent({
   }
 })
 
-const expressions = [
-  {
-    code: '1 + 2 * 3',
-    tree: {
-      type: 'BinaryExpression', value: '+',
-      children: [
-        { type: 'NumericLiteral', value: '1' },
-        {
-          type: 'BinaryExpression', value: '*',
-          children: [
-            { type: 'NumericLiteral', value: '2' },
-            { type: 'NumericLiteral', value: '3' }
-          ]
-        }
-      ]
-    },
-    explains: [
-      '* 优先级高于 +，所以 2 * 3 先结合',
-      '2 * 3 形成一个 BinaryExpression 子树',
-      '1 和这个子树作为 + 的左右操作数',
-      '最终 + 是根节点，体现了运算顺序'
-    ]
-  },
-  {
-    code: 'let x = 10',
-    tree: {
-      type: 'VariableDeclaration', value: 'let',
-      children: [
-        {
-          type: 'VariableDeclarator', value: '',
-          children: [
-            { type: 'Identifier', value: 'x' },
-            { type: 'NumericLiteral', value: '10' }
-          ]
-        }
-      ]
-    },
-    explains: [
-      'let 声明创建 VariableDeclaration 节点',
-      '内部包含一个 VariableDeclarator（声明器）',
-      '声明器左侧是标识符 x，右侧是初始值 10',
-      '树结构清晰表达了"把 10 赋给 x"的语义'
-    ]
-  },
-  {
-    code: 'add(a, b)',
-    tree: {
-      type: 'CallExpression', value: '',
-      children: [
-        { type: 'Identifier', value: 'add' },
-        {
-          type: 'Arguments', value: '',
-          children: [
-            { type: 'Identifier', value: 'a' },
-            { type: 'Identifier', value: 'b' }
-          ]
-        }
-      ]
-    },
-    explains: [
-      '函数调用创建 CallExpression 节点',
-      '被调用的函数名 add 是 Identifier',
-      '参数列表 (a, b) 形成 Arguments 节点',
-      '每个参数都是独立的 Identifier 子节点'
-    ]
-  }
-]
+const expressions = computed(() => messages.value.compilers.ast.expressions)
 </script>
 
 <style scoped>

@@ -1,13 +1,13 @@
 <template>
   <div class="demo-root">
     <div class="demo-header">
-      <span class="title">export 决定子进程能不能"看见"变量</span>
-      <span class="subtitle">切换开关，观察子进程是否能读到父进程设置的变量</span>
+      <span class="title">{{ t('envExport.title') }}</span>
+      <span class="subtitle">{{ t('envExport.subtitle') }}</span>
     </div>
 
     <div class="control-panel">
       <label class="toggle-wrap">
-        <span class="toggle-label">使用 <code>export</code></span>
+        <span class="toggle-label">{{ t('envExport.toggleLabel') }} <code>export</code></span>
         <button class="toggle-btn" :class="{ on: useExport }" @click="useExport = !useExport">
           <span class="thumb" />
         </button>
@@ -17,7 +17,7 @@
     <div class="two-col">
       <!-- Parent shell -->
       <div class="shell-box parent">
-        <div class="shell-title">父进程（Shell）</div>
+        <div class="shell-title">{{ t('envExport.parentTitle') }}</div>
         <div class="shell-body">
           <div class="cmd-line">
             <span class="prompt">$</span>
@@ -39,42 +39,46 @@
 
       <!-- Arrow -->
       <div class="arrow-col">
-        <div class="arrow-label">启动子进程</div>
+        <div class="arrow-label">{{ t('envExport.arrowLabel') }}</div>
         <div class="arrow-icon">→</div>
         <div class="inherit-tag" :class="useExport ? 'yes' : 'no'">
-          {{ useExport ? '变量已继承' : '变量未继承' }}
+          {{ useExport ? t('envExport.inherited') : t('envExport.notInherited') }}
         </div>
       </div>
 
       <!-- Child shell -->
       <div class="shell-box child" :class="{ has: useExport, missing: !useExport }">
-        <div class="shell-title">子进程（bash -c ...）</div>
+        <div class="shell-title">{{ t('envExport.childTitle') }}</div>
         <div class="shell-body">
           <div class="cmd-line">
             <span class="prompt">$</span>
             <span class="cmd">echo $MY_VAR</span>
           </div>
           <div v-if="useExport" class="output success">hello</div>
-          <div v-else class="output empty">（空，什么都没有）</div>
+          <div v-else class="output empty">{{ t('envExport.emptyOutput') }}</div>
           <div class="cmd-line muted">
             <span class="prompt">#</span>
-            <span class="cmd muted-text">子进程无法修改父进程的变量</span>
+            <span class="cmd muted-text">{{ t('envExport.childCannotMutate') }}</span>
           </div>
         </div>
       </div>
     </div>
 
     <div class="info-box">
-      <strong>{{ useExport ? '有 export：' : '没有 export：' }}</strong>
+      <strong>{{ useExport ? t('envExport.withExportStrong') : t('envExport.withoutExportStrong') }}</strong>
       {{ useExport
-        ? '变量被标记为"可导出"，子进程启动时自动继承一份副本。'
-        : '变量只存在于当前 Shell，子进程读到的是空字符串。' }}
+        ? t('envExport.withExportInfo')
+        : t('envExport.withoutExportInfo') }}
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { developmentToolsLocale } from '../../../locales/development-tools/index.js'
+
+const { t } = useI18n(developmentToolsLocale)
 const useExport = ref(false)
 </script>
 

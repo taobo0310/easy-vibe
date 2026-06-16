@@ -1,8 +1,8 @@
 <template>
   <div class="ssh-auth-demo">
     <div class="demo-header">
-      <span class="title">SSH 密钥认证：你的数字身份证</span>
-      <span class="subtitle">对称加密 vs 非对称加密 · 密钥对生成 · 认证流程</span>
+      <span class="title">{{ t('sshAuth.title') }}</span>
+      <span class="subtitle">{{ t('sshAuth.subtitle') }}</span>
     </div>
 
     <div class="control-panel">
@@ -19,12 +19,11 @@
     </div>
 
     <div class="visualization-area">
-      <!-- Scenario 1: Password vs Key -->
       <div v-if="activeScenario === 'compare'" class="compare-section">
         <div class="compare-grid">
           <div class="compare-card password">
             <div class="card-icon">🔑</div>
-            <div class="card-title">密码登录</div>
+            <div class="card-title">{{ t('sshAuth.passwordTitle') }}</div>
             <div class="card-flow">
               <div v-for="(step, i) in passwordFlow" :key="i" class="flow-step">
                 <span class="step-num">{{ i + 1 }}</span>
@@ -33,13 +32,13 @@
             </div>
             <div class="card-verdict danger">
               <span class="verdict-icon">⚠️</span>
-              <span>密码在网络上传输，可能被截获</span>
+              <span>{{ t('sshAuth.passwordVerdict') }}</span>
             </div>
           </div>
 
           <div class="compare-card key">
             <div class="card-icon">🔐</div>
-            <div class="card-title">密钥登录</div>
+            <div class="card-title">{{ t('sshAuth.keyTitle') }}</div>
             <div class="card-flow">
               <div v-for="(step, i) in keyFlow" :key="i" class="flow-step">
                 <span class="step-num">{{ i + 1 }}</span>
@@ -48,13 +47,12 @@
             </div>
             <div class="card-verdict success">
               <span class="verdict-icon">✅</span>
-              <span>私钥永远不离开你的电脑</span>
+              <span>{{ t('sshAuth.keyVerdict') }}</span>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Scenario 2: Key Pair Generation -->
       <div v-if="activeScenario === 'keygen'" class="keygen-section">
         <div class="keygen-visual">
           <div class="keygen-command">
@@ -64,7 +62,7 @@
               :disabled="isGenerating"
               @click="generateKeys"
             >
-              {{ isGenerating ? '生成中...' : '生成密钥对' }}
+              {{ isGenerating ? t('sshAuth.generating') : t('sshAuth.generate') }}
             </button>
           </div>
 
@@ -72,41 +70,39 @@
             <div class="key-card private" :class="{ visible: keysGenerated }">
               <div class="key-header">
                 <span class="key-icon">🔒</span>
-                <span class="key-name">私钥 (Private Key)</span>
+                <span class="key-name">{{ t('sshAuth.privateKey') }}</span>
               </div>
               <div class="key-location">~/.ssh/id_ed25519</div>
               <div class="key-content">
                 <code>{{ privateKeyDisplay }}</code>
               </div>
-              <div class="key-rule danger">绝不外泄 · 留在本机</div>
+              <div class="key-rule danger">{{ t('sshAuth.privateRule') }}</div>
             </div>
 
             <div class="key-arrow" :class="{ visible: keysGenerated }">
-              <span class="arrow-text">数学关联</span>
+              <span class="arrow-text">{{ t('sshAuth.relation') }}</span>
               <span class="arrow-icon">↔</span>
             </div>
 
             <div class="key-card public" :class="{ visible: keysGenerated }">
               <div class="key-header">
                 <span class="key-icon">🌍</span>
-                <span class="key-name">公钥 (Public Key)</span>
+                <span class="key-name">{{ t('sshAuth.publicKey') }}</span>
               </div>
               <div class="key-location">~/.ssh/id_ed25519.pub</div>
               <div class="key-content">
                 <code>{{ publicKeyDisplay }}</code>
               </div>
-              <div class="key-rule success">可以给任何人 · 放到服务器</div>
+              <div class="key-rule success">{{ t('sshAuth.publicRule') }}</div>
             </div>
           </div>
 
           <div v-if="keysGenerated" class="key-analogy">
-            <strong>生活类比：</strong>公钥 = 锁（可以随便装）· 私钥 =
-            钥匙（只有你有）· 用锁锁住的东西，只有对应的钥匙能打开
+            <strong>{{ t('sshAuth.analogyStrong') }}</strong>{{ t('sshAuth.analogy') }}
           </div>
         </div>
       </div>
 
-      <!-- Scenario 3: Auth Flow -->
       <div v-if="activeScenario === 'auth'" class="auth-section">
         <div class="auth-controls">
           <button
@@ -116,10 +112,10 @@
           >
             {{
               authStep === 0
-                ? '开始认证'
+                ? t('sshAuth.startAuth')
                 : authStep >= 5
-                  ? '重新演示'
-                  : '认证中...'
+                  ? t('sshAuth.restart')
+                  : t('sshAuth.authenticating')
             }}
           </button>
         </div>
@@ -128,8 +124,8 @@
           <div class="auth-parties">
             <div class="party client">
               <div class="party-icon">💻</div>
-              <div class="party-name">你的电脑</div>
-              <div class="party-has">持有：私钥</div>
+              <div class="party-name">{{ t('sshAuth.clientName') }}</div>
+              <div class="party-has">{{ t('sshAuth.clientHas') }}</div>
             </div>
 
             <div class="auth-messages">
@@ -137,40 +133,39 @@
                 :class="['msg', { active: authStep >= 1 }]"
                 class="msg-right"
               >
-                <span class="msg-label">① 请求连接</span>
-                <span class="msg-detail">"我要用密钥登录"</span>
+                <span class="msg-label">{{ authMessages[0].label }}</span>
+                <span class="msg-detail">{{ authMessages[0].detail }}</span>
               </div>
               <div :class="['msg', { active: authStep >= 2 }]" class="msg-left">
-                <span class="msg-label">② 发送随机挑战</span>
-                <span class="msg-detail">"请证明你有私钥：用它签名这段随机数据"</span>
+                <span class="msg-label">{{ authMessages[1].label }}</span>
+                <span class="msg-detail">{{ authMessages[1].detail }}</span>
               </div>
               <div
                 :class="['msg', { active: authStep >= 3 }]"
                 class="msg-right"
               >
-                <span class="msg-label">③ 返回签名</span>
-                <span class="msg-detail">"用私钥签名后的结果（私钥本身不发送）"</span>
+                <span class="msg-label">{{ authMessages[2].label }}</span>
+                <span class="msg-detail">{{ authMessages[2].detail }}</span>
               </div>
               <div :class="['msg', { active: authStep >= 4 }]" class="msg-left">
-                <span class="msg-label">④ 用公钥验证</span>
-                <span class="msg-detail">"用存储的公钥验证签名 → 匹配！"</span>
+                <span class="msg-label">{{ authMessages[3].label }}</span>
+                <span class="msg-detail">{{ authMessages[3].detail }}</span>
               </div>
               <div :class="['msg', 'msg-result', { active: authStep >= 5 }]">
-                <span class="msg-label">⑤ 认证成功</span>
-                <span class="msg-detail">"欢迎登录！从始至终，私钥没离开过你的电脑"</span>
+                <span class="msg-label">{{ authMessages[4].label }}</span>
+                <span class="msg-detail">{{ authMessages[4].detail }}</span>
               </div>
             </div>
 
             <div class="party server">
               <div class="party-icon">🖥️</div>
-              <div class="party-name">远程服务器</div>
-              <div class="party-has">持有：公钥</div>
+              <div class="party-name">{{ t('sshAuth.serverName') }}</div>
+              <div class="party-has">{{ t('sshAuth.serverHas') }}</div>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Scenario 4: Common Uses -->
       <div v-if="activeScenario === 'uses'" class="uses-section">
         <div class="uses-grid">
           <div v-for="use in commonUses" :key="use.name" class="use-card">
@@ -184,7 +179,7 @@
         </div>
 
         <div class="config-tips">
-          <div class="tip-title">~/.ssh/config 快捷配置</div>
+          <div class="tip-title">{{ t('sshAuth.configTitle') }}</div>
           <pre class="tip-code"><code>Host my-server
   HostName 192.168.1.100
   User deploy
@@ -195,57 +190,45 @@ Host github.com
   User git
   IdentityFile ~/.ssh/id_ed25519</code></pre>
           <div class="tip-result">
-            配置后：<code>ssh my-server</code> 即可一键连接
+            {{ t('sshAuth.configResult') }} <code>ssh my-server</code> {{ t('sshAuth.configSuffix') }}
           </div>
         </div>
       </div>
     </div>
 
     <div class="info-box">
-      <strong>核心思想：</strong>
-      <span v-if="activeScenario === 'compare'">SSH
-        密钥登录比密码更安全，因为私钥从不在网络上传输，无法被中间人窃取。</span>
-      <span v-else-if="activeScenario === 'keygen'">一次 ssh-keygen
-        生成一对密钥：私钥自己保管，公钥放到目标服务器或平台。</span>
-      <span v-else-if="activeScenario === 'auth'">认证过程基于"挑战-响应"机制：服务器出题，你的私钥签名作答，公钥验证答案。全程私钥不离开本机。</span>
-      <span v-else>SSH 密钥不仅用于服务器登录，也是 Git (GitHub/GitLab)
-        等开发工具的标准身份认证方式。</span>
+      <strong>{{ t('sshAuth.coreStrong') }}</strong>
+      <span v-if="activeScenario === 'compare'">{{ t('sshAuth.core.compare') }}</span>
+      <span v-else-if="activeScenario === 'keygen'">{{ t('sshAuth.core.keygen') }}</span>
+      <span v-else-if="activeScenario === 'auth'">{{ t('sshAuth.core.auth') }}</span>
+      <span v-else>{{ t('sshAuth.core.uses') }}</span>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed, watch } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { developmentToolsLocale } from '../../../locales/development-tools/index.js'
+
+const { t, messages } = useI18n(developmentToolsLocale)
 
 const activeScenario = ref('compare')
 
-const scenarios = [
-  { id: 'compare', label: '密码 vs 密钥' },
-  { id: 'keygen', label: '生成密钥对' },
-  { id: 'auth', label: '认证流程' },
-  { id: 'uses', label: '常见用途' }
-]
-
-const passwordFlow = [
-  '输入用户名和密码',
-  '密码通过网络发送到服务器',
-  '服务器比对密码是否正确',
-  '每次都要输密码'
-]
-
-const keyFlow = [
-  '事先把公钥放到服务器',
-  '连接时发送身份标识（不发私钥）',
-  '服务器用公钥出"数学题"',
-  '你的私钥在本地"答题"，只发答案'
-]
+const scenarios = computed(() => messages.value.sshAuth.scenarios)
+const passwordFlow = computed(() => messages.value.sshAuth.passwordFlow)
+const keyFlow = computed(() => messages.value.sshAuth.keyFlow)
+const authMessages = computed(() => messages.value.sshAuth.authMessages)
 
 const isGenerating = ref(false)
 const keysGenerated = ref(false)
-const privateKeyDisplay = ref(
-  '-----BEGIN OPENSSH PRIVATE KEY-----\n（等待生成...）\n-----END OPENSSH PRIVATE KEY-----'
-)
-const publicKeyDisplay = ref('（等待生成...）')
+const privateKeyDisplay = ref(t('sshAuth.waitingPrivate'))
+const publicKeyDisplay = ref(t('sshAuth.waitingPublic'))
+
+watch(messages, () => {
+  privateKeyDisplay.value = keysGenerated.value ? t('sshAuth.generatedPrivate') : t('sshAuth.waitingPrivate')
+  publicKeyDisplay.value = keysGenerated.value ? t('sshAuth.generatedPublic') : t('sshAuth.waitingPublic')
+})
 
 const generateKeys = async () => {
   if (isGenerating.value) return
@@ -254,10 +237,8 @@ const generateKeys = async () => {
 
   await new Promise((r) => setTimeout(r, 800))
 
-  privateKeyDisplay.value =
-    '-----BEGIN OPENSSH PRIVATE KEY-----\nb3BlbnNzaC1rZXktdjEAAAA...\n（2048 位密钥，绝不外传）\n-----END OPENSSH PRIVATE KEY-----'
-  publicKeyDisplay.value =
-    'ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAA\nIGx...kF your@email.com'
+  privateKeyDisplay.value = t('sshAuth.generatedPrivate')
+  publicKeyDisplay.value = t('sshAuth.generatedPublic')
 
   keysGenerated.value = true
   isGenerating.value = false
@@ -275,44 +256,7 @@ const startAuth = async () => {
   }
 }
 
-const commonUses = [
-  {
-    icon: '🖥️',
-    name: '远程服务器',
-    command: 'ssh user@server',
-    desc: '免密码登录 Linux/Mac 服务器'
-  },
-  {
-    icon: '🐙',
-    name: 'GitHub',
-    command: 'git push origin main',
-    desc: '用 SSH 协议推送代码'
-  },
-  {
-    icon: '🦊',
-    name: 'GitLab',
-    command: 'git clone git@gitlab.com:...',
-    desc: '克隆私有仓库'
-  },
-  {
-    icon: '📦',
-    name: 'SCP 传文件',
-    command: 'scp file.txt user@server:~/',
-    desc: '安全复制文件到远程'
-  },
-  {
-    icon: '🚇',
-    name: 'SSH 隧道',
-    command: 'ssh -L 8080:localhost:3000 server',
-    desc: '将远程端口映射到本地'
-  },
-  {
-    icon: '🐳',
-    name: '部署服务',
-    command: 'ssh deploy@prod "docker pull..."',
-    desc: '远程执行部署命令'
-  }
-]
+const commonUses = computed(() => messages.value.sshAuth.commonUses)
 </script>
 
 <style scoped>

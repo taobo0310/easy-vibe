@@ -5,20 +5,20 @@
         :class="{ active: mode === 'fast' }"
         @click="switchMode('fast')"
       >
-        ⚡️ 传统快思考 (System 1)
+        {{ t('thinking.modes.fast') }}
       </button>
       <button
         :class="{ active: mode === 'slow' }"
         @click="switchMode('slow')"
       >
-        🧠 深度慢思考 (System 2)
+        {{ t('thinking.modes.slow') }}
       </button>
     </div>
 
     <div class="demo-display">
       <div class="question-box">
-        <strong>用户提问:</strong>
-        <p>9.11 和 9.9 哪个大？</p>
+        <strong>{{ t('thinking.questionLabel') }}</strong>
+        <p>{{ t('thinking.question') }}</p>
       </div>
 
       <div class="process-area">
@@ -67,7 +67,7 @@
                 class="bubble-header"
                 @click="toggleThoughts"
               >
-                💭 思考过程 (Chain of Thought)
+                {{ t('thinking.thoughtTitle') }}
                 <span class="toggle-icon">{{ thoughtsOpen ? '▼' : '▶' }}</span>
               </div>
               <div
@@ -112,7 +112,7 @@
         :disabled="isRunning"
         @click="runSimulation"
       >
-        {{ isRunning ? '生成中...' : '开始生成' }}
+        {{ isRunning ? t('thinking.generating') : t('thinking.start') }}
       </button>
     </div>
 
@@ -121,20 +121,20 @@
       class="metrics"
     >
       <div class="metric-item">
-        <span class="label">Token 消耗:</span>
+        <span class="label">{{ t('thinking.metrics.tokens') }}</span>
         <span class="value">{{ mode === 'fast' ? '5' : '150' }} tokens</span>
       </div>
       <div class="metric-item">
-        <span class="label">耗时:</span>
+        <span class="label">{{ t('thinking.metrics.time') }}</span>
         <span class="value">{{ mode === 'fast' ? '0.2s' : '5.0s' }}</span>
       </div>
       <div class="metric-item">
-        <span class="label">准确率:</span>
+        <span class="label">{{ t('thinking.metrics.accuracy') }}</span>
         <span
           class="value"
           :class="mode === 'fast' ? 'bad' : 'good'"
         >
-          {{ mode === 'fast' ? '❌ 错误' : '✅ 正确' }}
+          {{ mode === 'fast' ? t('thinking.metrics.wrong') : t('thinking.metrics.correct') }}
         </span>
       </div>
     </div>
@@ -143,24 +143,20 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { llmIntroLocale } from '../../../locales/llm-intro/index.js'
 
+const { t } = useI18n(llmIntroLocale)
 const mode = ref('fast')
 const isRunning = ref(false)
 const completed = ref(false)
 
 // Fast Mode Data
-const fastOutput = '9.11 比 9.9 大。'
+const fastOutput = computed(() => t('thinking.fastOutput'))
 const displayedOutput = ref('')
 
-// Slow Mode Data
-const slowThoughts = `首先比较整数部分，都是9，相等。
-接下来比较小数部分。
-9.11 的小数部分是 0.11。
-9.9 的小数部分是 0.9。
-比较第一位小数：1 < 9。
-所以 0.11 小于 0.9。
-结论：9.11 小于 9.9。`
-const slowOutput = '9.11 比 9.9 小。'
+const slowThoughts = computed(() => t('thinking.slowThoughts'))
+const slowOutput = computed(() => t('thinking.slowOutput'))
 
 const displayedThoughts = ref('')
 const generating = ref(false)
@@ -201,13 +197,13 @@ const runSimulation = async () => {
 
   if (mode.value === 'fast') {
     generating.value = true
-    await typeText(fastOutput, displayedOutput, 50)
+    await typeText(fastOutput.value, displayedOutput, 50)
     generating.value = false
   } else {
     // Thinking phase
     showThoughts.value = true
     generatingThoughts.value = true
-    await typeText(slowThoughts, displayedThoughts, 20)
+    await typeText(slowThoughts.value, displayedThoughts, 20)
     generatingThoughts.value = false
 
     await new Promise((r) => setTimeout(r, 500)) // Pause
@@ -215,7 +211,7 @@ const runSimulation = async () => {
     // Final answer phase
     showFinalAnswer.value = true
     generatingFinal.value = true
-    await typeText(slowOutput, displayedOutput, 50)
+    await typeText(slowOutput.value, displayedOutput, 50)
     generatingFinal.value = false
   }
 

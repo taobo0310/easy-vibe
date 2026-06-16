@@ -1,51 +1,43 @@
 <template>
   <div class="dto-demo">
     <div class="header">
-      <div class="title">DTO 流转：数据在不同层之间的转换</div>
-      <div class="subtitle">DTO（Data Transfer Object）是层与层之间传递数据的载体</div>
+      <div class="title">{{ t('dto.title') }}</div>
+      <div class="subtitle">{{ t('dto.subtitle') }}</div>
     </div>
 
     <div class="flow-box">
       <div class="flow-step green">
-        <div class="step-label">Controller 层</div>
-        <pre class="step-code"><code>// 接收 Request DTO
-public ResponseEntity&lt;UserDTO&gt; createUser(
-    @RequestBody @Valid UserCreateRequest request) { ... }</code></pre>
+        <div class="step-label">{{ t('dto.controllerLayer') }}</div>
+        <pre class="step-code"><code>{{ t('dto.controllerCode') }}</code></pre>
       </div>
 
-      <div class="arrow">↓ 转换为 Service 需要的参数</div>
+      <div class="arrow">{{ t('dto.toService') }}</div>
 
       <div class="flow-step orange">
-        <div class="step-label">Service 层</div>
-        <pre class="step-code"><code>public UserDTO createUser(UserCreateParam param) {
-    User user = param.toEntity();   // 转换为 Entity
-    userRepository.save(user);
-    return UserDTO.from(user);      // Entity → DTO
-}</code></pre>
+        <div class="step-label">{{ t('dto.serviceLayer') }}</div>
+        <pre class="step-code"><code>{{ t('dto.serviceCode') }}</code></pre>
       </div>
 
-      <div class="arrow">↓ 转换为 Repository 需要的 Entity</div>
+      <div class="arrow">{{ t('dto.toRepository') }}</div>
 
       <div class="flow-step blue">
-        <div class="step-label">Repository 层</div>
-        <pre class="step-code"><code>public interface UserRepository
-    extends JpaRepository&lt;User, Long&gt; { }</code></pre>
+        <div class="step-label">{{ t('dto.repositoryLayer') }}</div>
+        <pre class="step-code"><code>{{ t('dto.repositoryCode') }}</code></pre>
       </div>
 
-      <div class="arrow">↑ 返回 Entity，转换为 DTO</div>
+      <div class="arrow">{{ t('dto.returnEntity') }}</div>
 
       <div class="flow-step">
-        <div class="step-label">返回给客户端</div>
-        <pre class="step-code"><code>{ "id": 10001, "username": "张三",
-  "email": "zhangsan@example.com", "createdAt": "2024-01-15T10:30:00Z" }</code></pre>
+        <div class="step-label">{{ t('dto.returnClient') }}</div>
+        <pre class="step-code"><code>{{ t('dto.responseCode') }}</code></pre>
       </div>
     </div>
 
     <div class="table-box">
-      <div class="table-title">不同层的 DTO 职责</div>
+      <div class="table-title">{{ t('dto.tableTitle') }}</div>
       <table>
         <thead>
-          <tr><th>层级</th><th>DTO 类型</th><th>职责</th><th>示例</th></tr>
+          <tr><th v-for="header in headers" :key="header">{{ header }}</th></tr>
         </thead>
         <tbody>
           <tr v-for="r in rows" :key="r.layer">
@@ -61,11 +53,13 @@ public ResponseEntity&lt;UserDTO&gt; createUser(
 </template>
 
 <script setup>
-const rows = [
-  { layer: 'Controller', cls: 'green', type: 'Request / Response DTO', purpose: '定义 API 契约、参数校验', example: 'UserCreateRequest' },
-  { layer: 'Service', cls: 'orange', type: 'Param / Result DTO', purpose: '封装业务方法参数，解耦层间依赖', example: 'UserCreateParam' },
-  { layer: 'Repository', cls: 'blue', type: 'Entity / DO', purpose: '映射数据库表结构', example: 'UserEntity' }
-]
+import { computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { backendLayeredArchitectureLocale } from '../../../locales/backend-layered-architecture/index.js'
+
+const { t, messages } = useI18n(backendLayeredArchitectureLocale)
+const headers = computed(() => messages.value.dto.headers)
+const rows = computed(() => messages.value.dto.rows)
 </script>
 
 <style scoped>

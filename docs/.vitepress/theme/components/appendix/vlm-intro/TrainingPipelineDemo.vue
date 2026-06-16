@@ -5,13 +5,13 @@
         :class="{ active: stage === 1 }"
         @click="stage = 1"
       >
-        阶段一：特征对齐
+        {{ t('trainingPipeline.stage1') }}
       </button>
       <button
         :class="{ active: stage === 2 }"
         @click="stage = 2"
       >
-        阶段二：指令微调
+        {{ t('trainingPipeline.stage2') }}
       </button>
     </div>
 
@@ -76,7 +76,7 @@
         :class="{ frozen: stage === 1, training: stage === 2 }"
       >
         <div class="status-badge">
-          {{ stage === 1 ? '❄️ Frozen' : '🔥 Train' }}
+          {{ stage === 1 ? t('trainingPipeline.frozen') : t('trainingPipeline.train') }}
         </div>
         <div class="name">
           LLM
@@ -96,13 +96,13 @@
           v-if="stage === 1"
           class="name"
         >
-          Loss Calculation
+          {{ t('trainingPipeline.lossCalculation') }}
         </div>
         <div
           v-else
           class="name"
         >
-          Text Generation
+          {{ t('trainingPipeline.textGeneration') }}
         </div>
         <div
           v-if="stage === 1"
@@ -121,22 +121,21 @@
 
     <div class="data-example">
       <div class="data-title">
-        当前训练数据示例：
+        {{ t('trainingPipeline.dataTitle') }}
       </div>
       <div
         v-if="stage === 1"
         class="data-content"
       >
-        <code>&lt;Image: 🐱&gt;, &lt;Text: "一只猫"&gt;</code>
-        <p>任务：让图像向量与文本向量距离变近。</p>
+        <code>{{ t('trainingPipeline.stage1Code') }}</code>
+        <p>{{ t('trainingPipeline.stage1Task') }}</p>
       </div>
       <div
         v-else
         class="data-content"
       >
-        <code>User: &lt;Image: 🐱&gt; 这只猫在干嘛？<br>Assistant:
-          它在睡觉。</code>
-        <p>任务：根据图像和问题生成回答。</p>
+        <code v-html="t('trainingPipeline.stage2Code')" />
+        <p>{{ t('trainingPipeline.stage2Task') }}</p>
       </div>
     </div>
   </div>
@@ -144,7 +143,10 @@
 
 <script setup>
 import { ref } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { vlmIntroLocale } from '../../../locales/vlm-intro/index.js'
 
+const { t } = useI18n(vlmIntroLocale)
 const stage = ref(1)
 </script>
 

@@ -1,13 +1,9 @@
-<!--
-  ApiPlayground.vue - 紧凑版
-  目标：让用户动手尝试 API 调用
--->
 <template>
   <div class="demo-root">
     <div class="demo-header">
       <span class="icon">🧪</span>
-      <span class="title">API 练手场</span>
-      <span class="subtitle">随便玩，坏了算我的</span>
+      <span class="title">{{ t('apiPlayground.title') }}</span>
+      <span class="subtitle">{{ t('apiPlayground.subtitle') }}</span>
     </div>
 
     <div class="demo-layout">
@@ -22,7 +18,7 @@
           />
         </div>
         <div class="input-row">
-          <label>方法</label>
+          <label>{{ t('apiPlayground.method') }}</label>
           <div class="method-btns">
             <button
               v-for="m in methods"
@@ -44,12 +40,12 @@
           />
         </div>
         <button class="send-btn" :disabled="loading" @click="sendRequest">
-          {{ loading ? '发送中...' : '🚀 发送' }}
+          {{ loading ? t('apiPlayground.sending') : t('apiPlayground.send') }}
         </button>
       </div>
 
       <div class="right-panel">
-        <div v-if="!response" class="empty">点击发送查看结果</div>
+        <div v-if="!response" class="empty">{{ t('apiPlayground.empty') }}</div>
         <div v-else class="response">
           <div class="status-bar" :class="getStatusClass(response.status)">
             <span class="code">{{ response.status }}</span>
@@ -66,7 +62,7 @@
     </div>
 
     <div class="quick-actions">
-      <span class="label">快速尝试：</span>
+      <span class="label">{{ t('apiPlayground.quickActions') }}</span>
       <button @click="tryEndpoint('/users')">✅ GET /users</button>
       <button @click="tryError401">❌ 401</button>
       <button @click="tryError404">❌ 404</button>
@@ -77,6 +73,10 @@
 
 <script setup>
 import { ref } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { apiIntroLocale } from '../../../locales/api-intro/index.js'
+
+const { t, messages } = useI18n(apiIntroLocale)
 
 const endpoint = ref('/users')
 const method = ref('GET')
@@ -101,28 +101,25 @@ function sendRequest() {
       response.value = {
         status: 401,
         statusText: 'Unauthorized',
-        data: { error: '缺少 API Key' },
-        explanation: '服务器不认识你，需要提供有效的身份证明'
+        data: { error: messages.value.apiPlayground.errors.missingApiKey },
+        explanation: messages.value.apiPlayground.explanations.unauthorized
       }
     } else if (endpoint.value === '/users') {
       response.value = {
         status: 200,
         statusText: 'OK',
         data: {
-          users: [
-            { id: 1, name: '张三' },
-            { id: 2, name: '李四' }
-          ],
+          users: messages.value.apiPlayground.users,
           total: 2
         },
-        explanation: '成功！服务器返回了用户列表'
+        explanation: messages.value.apiPlayground.explanations.success
       }
     } else {
       response.value = {
         status: 404,
         statusText: 'Not Found',
-        data: { error: '接口不存在' },
-        explanation: '这个地址没有对应的 API，检查一下路径'
+        data: { error: messages.value.apiPlayground.errors.notFound },
+        explanation: messages.value.apiPlayground.explanations.notFound
       }
     }
     loading.value = false
@@ -152,8 +149,8 @@ function tryError429() {
     response.value = {
       status: 429,
       statusText: 'Too Many Requests',
-      data: { error: '请求太频繁' },
-      explanation: '你请求太快了，服务器让你歇会儿'
+      data: { error: messages.value.apiPlayground.errors.tooManyRequests },
+      explanation: messages.value.apiPlayground.explanations.rateLimited
     }
     loading.value = false
   }, 300)

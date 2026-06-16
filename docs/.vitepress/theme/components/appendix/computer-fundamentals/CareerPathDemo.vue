@@ -1,8 +1,8 @@
 <template>
   <div class="career-path-demo">
     <div class="demo-header">
-      <span class="title">工程师成长路径</span>
-      <span class="subtitle">从入门到精通的技能演进</span>
+      <span class="title">{{ t('computerOrganization.vibeCodingFullstack.careerPath.title') }}</span>
+      <span class="subtitle">{{ t('computerOrganization.vibeCodingFullstack.careerPath.subtitle') }}</span>
     </div>
 
     <div class="path-container">
@@ -19,7 +19,7 @@
         <div class="stage-content">
           <div class="stage-desc">{{ stage.desc }}</div>
           <div class="stage-skills">
-            <span class="skill-label">核心技能：</span>
+            <span class="skill-label">{{ t('computerOrganization.vibeCodingFullstack.careerPath.skillLabel') }}</span>
             <div class="skill-tags">
               <span v-for="skill in stage.skills" :key="skill" class="skill-tag">
                 {{ skill }}
@@ -27,7 +27,7 @@
             </div>
           </div>
           <div class="stage-output">
-            <span class="output-label">典型产出：</span>
+            <span class="output-label">{{ t('computerOrganization.vibeCodingFullstack.careerPath.outputLabel') }}</span>
             <span class="output-text">{{ stage.output }}</span>
           </div>
         </div>
@@ -35,54 +35,18 @@
     </div>
 
     <div class="info-box">
-      <strong>成长关键点：</strong>前 1-2 年打基础，建立独立完成任务的能力；2-3 年选方向，建立深度；3-5 年横向扩展，培养架构思维；5 年+ 技术决策与团队影响力。
+      <strong>{{ t('computerOrganization.vibeCodingFullstack.careerPath.keyLabel') }}</strong>{{ t('computerOrganization.vibeCodingFullstack.careerPath.key') }}
     </div>
   </div>
 </template>
 
 <script setup>
-const stages = [
-  {
-    name: '入门期',
-    icon: '🌱',
-    time: '0-1 年',
-    desc: '学习基础语法和工具，能完成简单任务',
-    skills: ['一门语言基础', 'Git 使用', '调试技巧', '阅读文档'],
-    output: '能独立完成小功能、修复简单 Bug'
-  },
-  {
-    name: '成长期',
-    icon: '🌿',
-    time: '1-2 年',
-    desc: '熟悉常用框架和最佳实践，能独立负责模块',
-    skills: ['框架熟练', '代码规范', '单元测试', 'API 设计'],
-    output: '独立负责一个功能模块，代码质量稳定'
-  },
-  {
-    name: '进阶期',
-    icon: '🌳',
-    time: '2-3 年',
-    desc: '深入某个领域，开始有技术选型能力',
-    skills: ['领域深入', '性能优化', '架构设计', '技术选型'],
-    output: '主导技术方案设计，解决复杂问题'
-  },
-  {
-    name: '成熟期',
-    icon: '🌲',
-    time: '3-5 年',
-    desc: '全栈能力或领域专家，能带领小团队',
-    skills: ['全栈能力', '团队协作', '技术分享', '项目管理'],
-    output: '负责核心系统，指导新人成长'
-  },
-  {
-    name: '专家期',
-    icon: '🏔️',
-    time: '5 年+',
-    desc: '技术决策者，有行业影响力',
-    skills: ['技术战略', '团队建设', '行业洞察', '创新引领'],
-    output: '技术方向决策，培养技术团队'
-  }
-]
+import { computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { computerFundamentalsLocale } from '../../../locales/computer-fundamentals/index.js'
+
+const { t, messages } = useI18n(computerFundamentalsLocale)
+const stages = computed(() => messages.value.computerOrganization.vibeCodingFullstack.careerPath.stages)
 </script>
 
 <style scoped>

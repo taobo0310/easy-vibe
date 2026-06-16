@@ -27,15 +27,20 @@ export function useI18n(messages) {
   const locale = computed(() => langMap[lang.value] || 'zh-cn')
 
   const current = computed(
-    () => messages[locale.value] || messages['zh-cn'] || {}
+    () => messages[locale.value] || messages.en || messages['zh-cn'] || {}
   )
 
-  const t = (key) => {
+  const t = (key, params = {}) => {
     const keys = key.split('.')
     let val = current.value
     for (const k of keys) {
       val = val?.[k]
       if (val === undefined) return key
+    }
+    if (typeof val === 'string') {
+      return val.replace(/\{(\w+)\}/g, (_, name) =>
+        params[name] === undefined ? `{${name}}` : String(params[name])
+      )
     }
     return val
   }

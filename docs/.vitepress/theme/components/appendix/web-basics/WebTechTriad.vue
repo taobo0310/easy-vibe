@@ -1,8 +1,8 @@
 <template>
   <div class="triad">
     <div class="demo-header">
-      <span class="title">HTML / CSS / JavaScript 协作演示</span>
-      <span class="subtitle">同一段页面，切换查看三者各自的作用</span>
+      <span class="title">{{ t('layout.triad.title') }}</span>
+      <span class="subtitle">{{ t('layout.triad.subtitle') }}</span>
     </div>
 
     <div class="main-area">
@@ -28,21 +28,21 @@
             :class="{ selected: selectedPart === 'h1' }"
             @click="selectedPart = 'h1'"
           >
-            <span class="badge">①</span>欢迎来到我的网站
+            <span class="badge">①</span>{{ t('layout.triad.hero') }}
           </h1>
           <p
             class="desc"
             :class="{ selected: selectedPart === 'p' }"
             @click="selectedPart = 'p'"
           >
-            <span class="badge">②</span>这是一段描述文字
+            <span class="badge">②</span>{{ t('layout.triad.desc') }}
           </p>
           <button
             class="cta"
             :class="{ selected: selectedPart === 'btn' }"
             @click="handleBtnClick"
           >
-            <span class="badge">③</span>点我试试 ({{ clicks }})
+            <span class="badge">③</span>{{ t('layout.triad.button') }} ({{ clicks }})
           </button>
         </div>
       </div>
@@ -65,7 +65,7 @@
 
         <div class="explain-section">
           <div class="explain-label">
-            执行过程
+            {{ t('layout.triad.process') }}
           </div>
           <ol class="steps">
             <li
@@ -80,76 +80,33 @@
     </div>
 
     <div class="info-box">
-      <strong>分工原则：</strong>HTML 定义结构（是什么），CSS 定义样式（长什么样），JavaScript 定义行为（能做什么）。
+      <strong>{{ t('layout.triad.principleTitle') }}</strong>{{ t('layout.triad.principle') }}
     </div>
   </div>
 </template>
 
 <script setup>
 import { computed, ref } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { webBasicsLocale } from '../../../locales/web-basics/index.js'
 
-const modes = [
-  { id: 'html', label: 'HTML', icon: '结构' },
-  { id: 'css', label: 'CSS', icon: '样式' },
-  { id: 'js', label: 'JavaScript', icon: '行为' }
-]
+const { t, messages } = useI18n(webBasicsLocale)
+const modes = computed(() => messages.value.layout.triad.modes)
 
 const current = ref('html')
 const clicks = ref(0)
 const selectedPart = ref('h1')
 
 const codeTitle = computed(() => {
-  if (current.value === 'html') return 'HTML 代码'
-  if (current.value === 'css') return 'CSS 代码'
-  return 'JavaScript 代码'
+  return modes.value.find((mode) => mode.id === current.value)?.codeTitle ?? ''
 })
 
 const codeLines = computed(() => {
-  if (current.value === 'html') {
-    return [
-      { key: 'h1', text: '<h1>欢迎来到我的网站</h1>' },
-      { key: 'p', text: '<p>这是一段描述文字</p>' },
-      { key: 'btn', text: '<button>点我试试</button>' }
-    ]
-  }
-  if (current.value === 'css') {
-    return [
-      { key: 'h1', text: '.hero {' },
-      { key: 'h1', text: '  color: #0ea5e9;' },
-      { key: 'h1', text: '  font-size: 20px;' },
-      { key: 'h1', text: '}' },
-      { key: 'btn', text: '.cta { background: #0ea5e9; }' }
-    ]
-  }
-  return [
-    { key: 'btn', text: "const btn = document.querySelector('.cta')" },
-    { key: 'btn', text: "btn.addEventListener('click', () => {" },
-    { key: 'btn', text: '  count++' },
-    { key: 'btn', text: "  btn.textContent = '点我 (' + count + ')'" },
-    { key: 'btn', text: '})' }
-  ]
+  return messages.value.layout.triad.codeLines[current.value] ?? []
 })
 
 const steps = computed(() => {
-  if (current.value === 'html') {
-    return [
-      '浏览器解析标签，识别内容类型',
-      'h1 是标题，p 是段落，button 是按钮',
-      '按默认样式渲染（此时看起来很朴素）'
-    ]
-  }
-  if (current.value === 'css') {
-    return [
-      '解析选择器，找到对应元素',
-      '应用颜色、字号、间距等样式规则',
-      '页面外观发生变化'
-    ]
-  }
-  return [
-    '通过选择器获取按钮元素',
-    '注册 click 事件监听器',
-    '点击时执行回调函数，更新计数'
-  ]
+  return messages.value.layout.triad.steps[current.value] ?? []
 })
 
 const handleBtnClick = () => {

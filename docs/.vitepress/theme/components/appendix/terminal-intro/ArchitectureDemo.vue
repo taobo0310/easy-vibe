@@ -1,16 +1,3 @@
-<!--
-  ArchitectureDemo.vue
-  终端架构演示组件
-  
-  用途：
-  可视化展示 Terminal（终端）、Shell（壳）和 Kernel（内核）之间的交互流程。
-  通过模拟 "ls" 命令的执行过程，帮助用户理解输入传输、解析、系统调用、数据返回和渲染显示的完整链路。
-  
-  交互功能：
-  - 逐步演示 (Step-by-Step)：用户点击按钮一步步观察数据包流转。
-  - 中英双语说明：适应不同语言背景的读者。
-  - 状态反馈：实时显示各组件（终端/Shell/内核）的当前状态（空闲/忙碌）。
--->
 <template>
   <div class="arch-demo">
     <div class="analogy-header">
@@ -20,10 +7,10 @@
         </div>
         <div class="text">
           <div class="role">
-            Terminal (终端)
+            {{ t('architecture.terminalRole') }} (Terminal)
           </div>
           <div class="desc">
-            传声筒 / 窗口
+            {{ t('architecture.terminalDesc') }} / Conduit / Window
           </div>
         </div>
       </div>
@@ -33,10 +20,10 @@
         </div>
         <div class="text">
           <div class="role">
-            Shell (壳)
+            {{ t('architecture.shellRole') }} (Shell)
           </div>
           <div class="desc">
-            翻译官 / 助手
+            {{ t('architecture.shellDesc') }} / Interpreter / Assistant
           </div>
         </div>
       </div>
@@ -46,10 +33,10 @@
         </div>
         <div class="text">
           <div class="role">
-            Kernel (内核)
+            {{ t('architecture.kernelRole') }} (Kernel)
           </div>
           <div class="desc">
-            大管家 / 芯片
+            {{ t('architecture.kernelDesc') }} / Manager / Chip
           </div>
         </div>
       </div>
@@ -57,7 +44,7 @@
 
     <div
       class="diagram-container"
-      :class="{ clickable: currentStep < totalSteps }"
+      :class="{ clickable: currentStep < totalSteps.value }"
       @click="nextStep"
     >
       <!-- Click Overlay Hint -->
@@ -67,13 +54,13 @@
       >
         <div class="click-hint">
           <span class="icon">👆</span>
-          <span class="text">不断点击屏幕演示 / Keep Clicking</span>
+          <span class="text">{{ t('architecture.clickStart') }} / Keep Clicking</span>
         </div>
       </div>
 
       <!-- Completed Overlay -->
       <div
-        v-if="currentStep >= totalSteps"
+        v-if="currentStep >= totalSteps.value"
         class="completed-overlay"
       >
         <div
@@ -81,7 +68,7 @@
           @click.stop="reset"
         >
           <span class="icon">✅</span>
-          <span class="text">演示结束，点击重置 / Finished (Reset)</span>
+          <span class="text">{{ t('architecture.finishedReset') }} / Finished (Reset)</span>
         </div>
       </div>
 
@@ -89,7 +76,7 @@
       <div class="spaces-bg">
         <div class="space user-space">
           <div class="space-header">
-            User Space (用户空间)
+            {{ t('architecture.userSpace') }} / User Space
           </div>
         </div>
         <div class="barrier">
@@ -97,7 +84,7 @@
         </div>
         <div class="space kernel-space">
           <div class="space-header">
-            Kernel Space (内核空间)
+            {{ t('architecture.kernelSpace') }} / Kernel Space
           </div>
         </div>
       </div>
@@ -108,7 +95,7 @@
         :class="{ active: activeNode === 'terminal' }"
       >
         <div class="node-title">
-          TERMINAL (终端)
+          TERMINAL ({{ t('architecture.terminalLabel') }})
         </div>
         <div class="screen">
           <div
@@ -163,7 +150,7 @@
         :class="{ active: activeNode === 'shell' }"
       >
         <div class="node-title">
-          SHELL (壳)
+          SHELL ({{ t('architecture.shellLabel') }})
         </div>
         <div class="process-box">
           <div class="status-icon">
@@ -209,7 +196,7 @@
         :class="{ active: activeNode === 'kernel' }"
       >
         <div class="node-title">
-          KERNEL (内核)
+          KERNEL ({{ t('architecture.kernelRole') }})
         </div>
         <div class="process-box">
           <div class="status-icon">
@@ -229,19 +216,19 @@
       <div class="btn-group">
         <button
           class="btn primary"
-          :disabled="currentStep >= totalSteps"
+          :disabled="currentStep >= totalSteps.value"
           @click="nextStep"
         >
-          <span v-if="currentStep === 0">▶️ Start Simulation / 开始演示</span>
-          <span v-else-if="currentStep < totalSteps">Next Step / 下一步 ({{ currentStep }}/{{ totalSteps }}) ➡️</span>
-          <span v-else>✅ Done / 完成 (Reset)</span>
+          <span v-if="currentStep === 0">▶️ {{ t('architecture.startSimulation') }} / Start Simulation</span>
+          <span v-else-if="currentStep < totalSteps.value">{{ t('architecture.nextStep') }} / Next Step ({{ currentStep }}/{{ totalSteps.value }}) ➡️</span>
+          <span v-else>✅ {{ t('architecture.done') }} / Done (Reset)</span>
         </button>
         <button
           v-if="currentStep > 0"
           class="btn secondary"
           @click="reset"
         >
-          Reset / 重置
+          {{ t('architecture.reset') }} / Reset
         </button>
       </div>
 
@@ -250,26 +237,26 @@
         class="step-info"
       >
         <div class="step-title">
-          {{ steps[currentStep - 1].titleEn }}
+          {{ currentStepContent.titleEn }}
           <span class="divider">|</span>
-          {{ steps[currentStep - 1].titleZh }}
+          {{ currentStepContent.titleZh }}
         </div>
         <div class="step-desc">
           <div class="en">
-            {{ steps[currentStep - 1].descEn }}
+            {{ currentStepContent.descEn }}
           </div>
           <div class="zh">
-            {{ steps[currentStep - 1].descZh }}
+            {{ currentStepContent.descZh }}
           </div>
         </div>
         <div class="step-tech">
-          <span class="tech-label">Technical / 技术原理:</span>
+          <span class="tech-label">Technical / {{ t('architecture.step9Title').split('. ')[1] }}:</span>
           <div class="tech-content">
             <div class="en">
-              {{ steps[currentStep - 1].techEn }}
+              {{ currentStepContent.techEn }}
             </div>
             <div class="zh">
-              {{ steps[currentStep - 1].techZh }}
+              {{ currentStepContent.techZh }}
             </div>
           </div>
         </div>
@@ -284,7 +271,7 @@
             the system.
           </div>
           <div class="zh">
-            点击“开始演示”查看 'ls' 命令如何在系统中流转。
+            {{ t('architecture.clickHint') }}
           </div>
         </div>
       </div>
@@ -294,6 +281,10 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { terminalIntroLocale } from '../../../locales/terminal-intro/index.js'
+
+const { t } = useI18n(terminalIntroLocale)
 
 const currentStep = ref(0)
 const activeNode = ref('terminal')
@@ -305,15 +296,15 @@ const shellIcon = ref('💤')
 const kernelStatus = ref('Idle')
 const kernelIcon = ref('💤')
 
-const steps = [
+const steps = computed(() => [
   {
     titleEn: '1. User Input',
-    titleZh: '1. 用户输入',
+    titleZh: t('architecture.step1Title'),
     descEn:
       "You type 'ls' in the terminal window. The terminal captures your keystrokes.",
-    descZh: "你在终端窗口输入 'ls'。终端会捕获你的按键操作。",
+    descZh: t('architecture.step1Desc'),
     techEn: "Terminal buffers input in 'Cooked Mode' until you press Enter.",
-    techZh: '终端在“加工模式 (Cooked Mode)”下缓冲输入，直到你按下回车键。',
+    techZh: t('architecture.step1Tech'),
     action: async () => {
       activeNode.value = 'terminal'
       currentInput.value = 'l'
@@ -323,12 +314,12 @@ const steps = [
   },
   {
     titleEn: '2. Transmission',
-    titleZh: '2. 传输',
+    titleZh: t('architecture.step2Title'),
     descEn:
       "The Terminal sends the characters 'l', 's', and 'Enter' to the Shell.",
-    descZh: "终端将字符 'l'、's' 和 '回车' 发送给 Shell。",
+    descZh: t('architecture.step2Desc'),
     techEn: 'Data travels via standard input (stdin) as a byte stream.',
-    techZh: '数据通过标准输入 (stdin) 以字节流的形式传输。',
+    techZh: t('architecture.step2Tech'),
     action: async () => {
       packetState.value = 't-to-s'
       await wait(1000)
@@ -337,11 +328,11 @@ const steps = [
   },
   {
     titleEn: '3. Shell Parsing',
-    titleZh: '3. Shell 解析',
+    titleZh: t('architecture.step3Title'),
     descEn: 'The Shell (Waiter) translates your command for the Kernel.',
-    descZh: 'Shell（服务员）接收指令，并将其翻译成内核能听懂的请求。',
+    descZh: t('architecture.step3Desc'),
     techEn: "Shell tokenizes input, finds the 'ls' executable in $PATH.",
-    techZh: "Shell 对输入进行分词，并在 $PATH 环境变量中查找 'ls' 可执行文件。",
+    techZh: t('architecture.step3Tech'),
     action: async () => {
       activeNode.value = 'shell'
       shellIcon.value = '🧠'
@@ -350,11 +341,11 @@ const steps = [
   },
   {
     titleEn: '4. System Call',
-    titleZh: '4. 系统调用',
+    titleZh: t('architecture.step4Title'),
     descEn: 'The Shell asks the Kernel to read the file list from the disk.',
-    descZh: 'Shell 请求内核从磁盘读取文件列表。',
+    descZh: t('architecture.step4Desc'),
     techEn: 'Shell invokes `execve()` and `getdents()` system calls.',
-    techZh: 'Shell 调用 `execve()` 和 `getdents()` 等系统调用。',
+    techZh: t('architecture.step4Tech'),
     action: async () => {
       packetState.value = 's-to-k'
       await wait(1000)
@@ -363,11 +354,11 @@ const steps = [
   },
   {
     titleEn: '5. Kernel Execution',
-    titleZh: '5. 内核执行',
+    titleZh: t('architecture.step5Title'),
     descEn: 'The Kernel (Kitchen) executes the request by accessing hardware.',
-    descZh: '内核（后厨）直接操作硬件（如磁盘）来执行实际任务。',
+    descZh: t('architecture.step5Desc'),
     techEn: 'Kernel driver accesses the file system (APFS/ext4).',
-    techZh: '内核驱动程序访问文件系统 (APFS/ext4)。',
+    techZh: t('architecture.step5Tech'),
     action: async () => {
       activeNode.value = 'kernel'
       kernelIcon.value = '💾'
@@ -378,11 +369,11 @@ const steps = [
   },
   {
     titleEn: '6. Returning Data',
-    titleZh: '6. 返回数据',
+    titleZh: t('architecture.step6Title'),
     descEn: 'The Kernel gives the raw file list back to the Shell.',
-    descZh: '内核将原始文件列表数据返回给 Shell。',
+    descZh: t('architecture.step6Desc'),
     techEn: 'System call returns with file descriptors/structs.',
-    techZh: '系统调用返回文件描述符或结构体数据。',
+    techZh: t('architecture.step6Tech'),
     action: async () => {
       kernelStatus.value = 'Idle'
       kernelIcon.value = '💤'
@@ -393,12 +384,12 @@ const steps = [
   },
   {
     titleEn: '7. Formatting',
-    titleZh: '7. 格式化',
+    titleZh: t('architecture.step7Title'),
     descEn:
       'The Shell formats the raw list into text, adding colors if needed.',
-    descZh: 'Shell 将原始列表格式化为文本，并根据需要添加颜色。',
+    descZh: t('architecture.step7Desc'),
     techEn: 'Shell formats output buffer, adding ANSI color codes.',
-    techZh: 'Shell 格式化输出缓冲区，并添加 ANSI 颜色代码。',
+    techZh: t('architecture.step7Tech'),
     action: async () => {
       activeNode.value = 'shell'
       shellIcon.value = '🎨'
@@ -408,11 +399,11 @@ const steps = [
   },
   {
     titleEn: '8. Display Output',
-    titleZh: '8. 显示输出',
+    titleZh: t('architecture.step8Title'),
     descEn: 'The Shell sends the final text back to the Terminal to show you.',
-    descZh: 'Shell 将最终文本发送回终端以供显示。',
+    descZh: t('architecture.step8Desc'),
     techEn: 'Data travels via standard output (stdout) to the TTY.',
-    techZh: '数据通过标准输出 (stdout) 传输到 TTY。',
+    techZh: t('architecture.step8Tech'),
     action: async () => {
       shellStatus.value = 'Idle'
       shellIcon.value = '💤'
@@ -423,30 +414,37 @@ const steps = [
   },
   {
     titleEn: '9. Render',
-    titleZh: '9. 渲染',
+    titleZh: t('architecture.step9Title'),
     descEn: 'The Terminal draws the text on the screen grid.',
-    descZh: '终端在屏幕网格上绘制文本。',
+    descZh: t('architecture.step9Desc'),
     techEn: 'Terminal emulator renders glyphs into the frame buffer.',
-    techZh: '终端模拟器将字形渲染到帧缓冲区中。',
+    techZh: t('architecture.step9Tech'),
     action: async () => {
       activeNode.value = 'terminal'
       terminalLines.value = ['file1.txt  photo.jpg', 'notes.md']
       currentInput.value = ''
     }
   }
-]
+])
 
-const totalSteps = steps.length
+const currentStepContent = computed(() => {
+  if (currentStep.value === 0 || !steps.value[currentStep.value - 1]) {
+    return { titleEn: '', titleZh: '', descEn: '', descZh: '', techEn: '', techZh: '' }
+  }
+  return steps.value[currentStep.value - 1]
+})
+
+const totalSteps = computed(() => steps.value.length)
 
 const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
 
 const nextStep = async () => {
-  if (currentStep.value >= totalSteps) {
+  if (currentStep.value >= totalSteps.value) {
     reset()
     return
   }
 
-  const step = steps[currentStep.value]
+  const step = steps.value[currentStep.value]
   currentStep.value++
   await step.action()
 }
@@ -523,7 +521,6 @@ const reset = () => {
   justify-content: space-between;
   align-items: center;
   position: relative;
-  /* Increase padding to accommodate labels */
   padding: 40px 10px 20px 10px;
   z-index: 1;
   cursor: default;
@@ -547,7 +544,7 @@ const reset = () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 50; /* Topmost */
+  z-index: 50;
   background: rgba(0, 0, 0, 0.4);
   backdrop-filter: blur(2px);
   border-radius: 12px;
@@ -594,7 +591,7 @@ const reset = () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 50; /* Same as click overlay */
+  z-index: 50;
   background: rgba(0, 0, 0, 0.6);
   backdrop-filter: blur(2px);
   animation: fade-in 0.5s;
@@ -651,7 +648,6 @@ const reset = () => {
   border-right: 1px dashed #3f3f46;
   border-radius: 8px 0 0 8px;
   align-items: flex-start;
-  /* Ensure User Space (containing Shell) is below the Barrier Label */
   z-index: 0;
 }
 
@@ -678,7 +674,7 @@ const reset = () => {
   flex-direction: column;
   align-items: center;
   position: relative;
-  z-index: 10; /* Bring Barrier to front */
+  z-index: 10;
 }
 
 .barrier-line {
@@ -703,11 +699,10 @@ const reset = () => {
   display: flex;
   flex-direction: column;
   transition: all 0.3s;
-  z-index: 5; /* Nodes should be above spaces but below barrier label if overlapping */
+  z-index: 5;
   position: relative;
 }
 
-/* Specific z-index for Shell to prevent it from covering barrier label */
 .node.shell {
   z-index: 1;
 }
@@ -974,38 +969,6 @@ const reset = () => {
     transform: translateY(-50%);
     text-align: left;
     white-space: nowrap;
-  }
-
-  .packet {
-    top: 0;
-    left: 10px;
-    animation: travel-vertical 1s linear forwards;
-  }
-
-  .packet.reverse {
-    animation: travel-vertical-back 1s linear forwards;
-  }
-
-  @keyframes travel-vertical {
-    0% {
-      top: 0;
-      transform: translateY(0);
-    }
-    100% {
-      top: 100%;
-      transform: translateY(-100%);
-    }
-  }
-
-  @keyframes travel-vertical-back {
-    0% {
-      top: 100%;
-      transform: translateY(-100%);
-    }
-    100% {
-      top: 0;
-      transform: translateY(0);
-    }
   }
 }
 </style>

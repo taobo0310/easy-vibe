@@ -1,11 +1,23 @@
 <script setup>
 import { ref, nextTick, watch } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { browserDevtoolsLocale } from '../../../locales/browser-devtools/index.js'
+
+const { t, messages } = useI18n(browserDevtoolsLocale)
 
 const logs = ref([
-  { type: 'log', message: 'Welcome to the interactive console demo!' },
-  { type: 'info', message: 'Try typing simple JavaScript commands below.' },
-  { type: 'warn', message: 'This is a simulated environment, not a real JS engine.' }
+  { type: 'log', message: '' },
+  { type: 'info', message: '' },
+  { type: 'warn', message: '' }
 ])
+
+watch(messages, (val) => {
+  logs.value = [
+    { type: 'log', message: val.consoleDemo.welcomeLog },
+    { type: 'info', message: val.consoleDemo.infoLog },
+    { type: 'warn', message: val.consoleDemo.warnLog }
+  ]
+}, { immediate: true })
 
 const inputCommand = ref('')
 const consoleRef = ref(null)
@@ -96,7 +108,7 @@ const runShortcut = (cmd) => {
   >
     <template #header>
       <div class="header">
-        <span class="title">Console (控制台)</span>
+        <span class="title">{{ t('consoleDemo.title') }}</span>
         <el-button
           size="small"
           icon="Delete"
@@ -140,7 +152,7 @@ const runShortcut = (cmd) => {
     <div class="input-area">
       <el-input
         v-model="inputCommand"
-        placeholder="输入 JS 代码，按回车执行..."
+        :placeholder="t('consoleDemo.inputPlaceholder')"
         @keyup.enter="executeCommand"
       >
         <template #prepend>
@@ -150,7 +162,7 @@ const runShortcut = (cmd) => {
     </div>
     
     <div class="shortcuts">
-      <span class="label">快速尝试：</span>
+      <span class="label">{{ t('consoleDemo.shortcutsLabel') }}</span>
       <el-button-group>
         <el-button 
           v-for="s in shortcuts" 

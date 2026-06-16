@@ -1,16 +1,11 @@
-<!--
-  CSRFDefenseDemo.vue
-  CSRF 防护（手动推进 + “怎么做”清单）
--->
 <template>
   <div class="csrf-demo">
     <div class="header">
       <div class="title">
-        🛡️ CSRF：为什么“自动带 Cookie”会出事？
+        {{ t('csrf.title') }}
       </div>
       <div class="subtitle">
-        手动推进一个最小攻击链，再看 3 个最常用防护手段（SameSite / CSRF Token /
-        双重提交）。
+        {{ t('csrf.subtitle') }}
       </div>
     </div>
 
@@ -20,27 +15,27 @@
         :disabled="step !== 0"
         @click="start"
       >
-        开始
+        {{ t('csrf.start') }}
       </button>
       <button
         class="btn"
         :disabled="step <= 1"
         @click="prev"
       >
-        上一步
+        {{ t('csrf.prev') }}
       </button>
       <button
         class="btn primary"
         :disabled="step === 0 || step >= maxStep"
         @click="next"
       >
-        下一步
+        {{ t('csrf.next') }}
       </button>
       <button
         class="btn"
         @click="reset"
       >
-        重置
+        {{ t('csrf.reset') }}
       </button>
     </div>
 
@@ -48,22 +43,20 @@
       v-if="step > 0"
       class="progress"
     >
-      Step {{ step }} / {{ maxStep }} · {{ steps[step - 1]?.title }}
+      {{ t('csrf.progress', { step, maxStep, title: activeStep?.title }) }}
     </div>
 
     <div class="grid">
       <div class="card">
         <div class="card-title">
-          场景
+          {{ t('csrf.scenarioTitle') }}
         </div>
         <div class="desc">
-          假设你登录了 <strong>bank.com</strong>（Cookie
-          已存在）。你又打开了一个恶意网站
-          <strong>evil.com</strong>，它偷偷发起转账请求。
+          {{ t('csrf.scenario') }}
         </div>
         <div class="box">
           <div class="box-title">
-            你的 Cookie（浏览器会自动带）
+            {{ t('csrf.cookieTitle') }}
           </div>
           <code class="mono">Cookie: session_id=abc123</code>
         </div>
@@ -71,40 +64,33 @@
 
       <div class="card">
         <div class="card-title">
-          本步请求
+          {{ t('csrf.requestTitle') }}
         </div>
         <pre class="code"><code>{{ requestText }}</code></pre>
         <div class="desc">
-          {{ steps[step - 1]?.desc }}
+          {{ activeStep?.desc }}
         </div>
       </div>
     </div>
 
     <div class="card">
       <div class="card-title">
-        防护怎么选？（优先顺序）
+        {{ t('csrf.defenseTitle') }}
       </div>
       <ol class="list">
-        <li>
-          <strong>SameSite Cookie：</strong>对大多数“跨站表单/图片”请求非常有效（Lax/Strict）。
-        </li>
-        <li>
-          <strong>CSRF Token：</strong>在表单/请求头里带
-          token，服务端校验（对复杂场景最稳）。
-        </li>
-        <li>
-          <strong>双重提交 Cookie：</strong>Cookie + Header 同时带
-          token（服务端比较一致性）。
+        <li
+          v-for="item in defenses"
+          :key="item.strong"
+        >
+          <strong>{{ item.strong }}</strong>{{ item.text }}
         </li>
       </ol>
       <div class="warn">
         <div class="warn-title">
-          注意
+          {{ t('csrf.warning') }}
         </div>
         <div class="warn-text">
-          CSRF 主要针对“Cookie 自动携带”的场景。若你用 Authorization:
-          Bearer（不自动发送），CSRF 风险会显著降低，但仍要考虑 XSS/Token
-          泄露等问题。
+          {{ t('csrf.warningText') }}
         </div>
       </div>
     </div>
@@ -113,31 +99,20 @@
 
 <script setup>
 import { computed, ref } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { authDesignLocale } from '../../../locales/auth-design/index.js'
+
+const { t, messages } = useI18n(authDesignLocale)
 
 const maxStep = 4
 const step = ref(0)
 
-const steps = [
-  {
-    title: '1) 恶意站点发起跨站请求',
-    desc: 'evil.com 诱导你点击按钮/加载图片/提交表单，目标是 bank.com 的转账接口。'
-  },
-  {
-    title: '2) 浏览器自动带上 bank.com 的 Cookie',
-    desc: '关键点：Cookie 是“按域名自动携带”的，evil.com 不需要知道你的 session_id。'
-  },
-  {
-    title: '3) 服务端如果只靠 Cookie 识别用户，会误以为是你本人操作',
-    desc: '如果 bank.com 没做 CSRF 防护，转账可能被执行。'
-  },
-  {
-    title: '4) 加上 CSRF 防护后，请求会被拒绝',
-    desc: 'SameSite/CSRF Token 等会阻断这类跨站伪造请求。'
-  }
-]
+const steps = computed(() => messages.value.csrf.steps)
+const defenses = computed(() => messages.value.csrf.defenses)
+const activeStep = computed(() => steps.value[step.value - 1])
 
 const requestText = computed(() => {
-  if (step.value === 0) return '（点击开始）'
+  if (step.value === 0) return t('csrf.clickStart')
   if (step.value === 1) {
     return `POST https://bank.com/api/transfer
 Origin: https://evil.com
@@ -153,7 +128,7 @@ Cookie: session_id=abc123
 to=attacker&amount=1000`
   }
   if (step.value === 3) {
-    return `（如果服务端只校验 Cookie：可能返回 200 OK 并执行转账）`
+    return t('csrf.cookieOnlyResult')
   }
   return `POST /api/transfer
 Origin: https://evil.com

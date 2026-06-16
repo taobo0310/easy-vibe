@@ -1,31 +1,17 @@
-<!--
-  EmotionControlDemo.vue
-  情感控制演示组件
-
-  用途：
-  展示如何在 TTS 中控制情感、语速、语调等风格特征。
-
-  交互功能：
-  - 情感选择器
-  - 语速和音调滑块
-  - 实时预览
-  - 情感向量可视化
--->
 <template>
   <div class="emotion-control-demo">
     <el-card shadow="never">
       <template #header>
         <div class="header-title">
           <el-icon><MagicStick /></el-icon>
-          <span>🎭 情感与风格控制</span>
+          <span>{{ t('emotionControl.title') }}</span>
         </div>
       </template>
 
       <div class="demo-content">
-        <!-- 情感选择 -->
         <div class="emotion-selector">
           <div class="selector-title">
-            选择情感风格
+            {{ t('emotionControl.selectorTitle') }}
           </div>
           <div class="emotion-grid">
             <div
@@ -48,10 +34,9 @@
           </div>
         </div>
 
-        <!-- 情感向量可视化 -->
         <div class="emotion-embedding">
           <div class="embedding-title">
-            情感向量空间 (Emotion Embedding)
+            {{ t('emotionControl.embeddingTitle') }}
           </div>
           <canvas
             ref="emotionCanvas"
@@ -74,15 +59,14 @@
           </div>
         </div>
 
-        <!-- 参数控制 -->
         <div class="parameter-controls">
           <div class="control-title">
-            🎚️ 细粒度控制
+            {{ t('emotionControl.controlTitle') }}
           </div>
           <div class="controls-grid">
             <div class="control-item">
               <div class="control-label">
-                <span>语速</span>
+                <span>{{ t('emotionControl.speed') }}</span>
                 <el-tag size="small">
                   {{ speed }}x
                 </el-tag>
@@ -94,15 +78,15 @@
                 :step="0.1"
               />
               <div class="control-hint">
-                <span>慢</span>
-                <span>正常</span>
-                <span>快</span>
+                <span>{{ t('emotionControl.slow') }}</span>
+                <span>{{ t('emotionControl.normal') }}</span>
+                <span>{{ t('emotionControl.fast') }}</span>
               </div>
             </div>
 
             <div class="control-item">
               <div class="control-label">
-                <span>音调</span>
+                <span>{{ t('emotionControl.pitch') }}</span>
                 <el-tag size="small">
                   {{ pitch > 0 ? '+' : '' }}{{ pitch }}
                 </el-tag>
@@ -114,15 +98,15 @@
                 :step="1"
               />
               <div class="control-hint">
-                <span>低</span>
-                <span>正常</span>
-                <span>高</span>
+                <span>{{ t('emotionControl.low') }}</span>
+                <span>{{ t('emotionControl.normal') }}</span>
+                <span>{{ t('emotionControl.high') }}</span>
               </div>
             </div>
 
             <div class="control-item">
               <div class="control-label">
-                <span>音量动态</span>
+                <span>{{ t('emotionControl.energy') }}</span>
                 <el-tag size="small">
                   {{ energy }}%
                 </el-tag>
@@ -134,15 +118,15 @@
                 :step="5"
               />
               <div class="control-hint">
-                <span>柔和</span>
-                <span>适中</span>
-                <span>激昂</span>
+                <span>{{ t('emotionControl.soft') }}</span>
+                <span>{{ t('emotionControl.moderate') }}</span>
+                <span>{{ t('emotionControl.intense') }}</span>
               </div>
             </div>
 
             <div class="control-item">
               <div class="control-label">
-                <span>停顿控制</span>
+                <span>{{ t('emotionControl.pause') }}</span>
                 <el-tag size="small">
                   {{ pause }}ms
                 </el-tag>
@@ -154,24 +138,23 @@
                 :step="50"
               />
               <div class="control-hint">
-                <span>紧凑</span>
-                <span>自然</span>
-                <span>舒缓</span>
+                <span>{{ t('emotionControl.compact') }}</span>
+                <span>{{ t('emotionControl.natural') }}</span>
+                <span>{{ t('emotionControl.relaxed') }}</span>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- 文本输入和预览 -->
         <div class="preview-section">
           <div class="preview-title">
-            🎙️ 预览合成
+            {{ t('emotionControl.previewTitle') }}
           </div>
           <el-input
             v-model="previewText"
             type="textarea"
             :rows="2"
-            placeholder="输入要合成的文本..."
+            :placeholder="t('emotionControl.placeholder')"
             class="preview-input"
           />
           <div class="preview-actions">
@@ -180,41 +163,40 @@
               @click="synthesize"
             >
               <el-icon><VideoPlay /></el-icon>
-              合成预览
+              {{ t('emotionControl.synthesize') }}
             </el-button>
             <el-button @click="resetParameters">
               <el-icon><RefreshRight /></el-icon>
-              重置参数
+              {{ t('emotionControl.reset') }}
             </el-button>
           </div>
         </div>
 
-        <!-- 技术说明 -->
         <div class="tech-explanation">
           <el-collapse>
-            <el-collapse-item title="🔬 情感控制原理">
+            <el-collapse-item :title="t('emotionControl.explanationTitle')">
               <div class="tech-content">
-                <h4>全局风格 Token (Global Style Token)</h4>
+                <h4>{{ t('emotionControl.gstTitle') }}</h4>
                 <p>
-                  GST (Global Style Token) 是一种从参考音频中提取风格特征的方法。模型学习将情感、语速、语调等风格信息编码成一组 Token，
-                  在推理时可以通过选择或插值这些 Token 来控制合成风格。
+                  {{ t('emotionControl.gstText') }}
                 </p>
 
-                <h4>参考音频编码</h4>
+                <h4>{{ t('emotionControl.referenceTitle') }}</h4>
                 <p>
-                  用户提供一段带有目标情感的参考音频，编码器提取其风格特征向量。这个向量作为条件输入到 TTS 模型，
-                  指导生成相似风格的语音。
+                  {{ t('emotionControl.referenceText') }}
                 </p>
 
-                <h4>细粒度控制</h4>
+                <h4>{{ t('emotionControl.fineTitle') }}</h4>
                 <p>
-                  现代 TTS 模型（如 CosyVoice、F5-TTS）支持细粒度的风格控制，包括：
+                  {{ t('emotionControl.fineText') }}
                 </p>
                 <ul>
-                  <li><strong>速度控制：</strong>调整音频播放速度而不改变音调</li>
-                  <li><strong>音调控制：</strong>改变基频 (F0) 曲线</li>
-                  <li><strong>能量控制：</strong>调整音量包络</li>
-                  <li><strong>停顿控制：</strong>调整句间和短语间的停顿长度</li>
+                  <li
+                    v-for="item in fineItems"
+                    :key="item.strong"
+                  >
+                    <strong>{{ item.strong }}</strong>{{ item.text }}
+                  </li>
                 </ul>
               </div>
             </el-collapse-item>
@@ -225,8 +207,8 @@
       <div class="info-box">
         <p>
           <span class="icon">💡</span>
-          <strong>情感控制：</strong>
-          现代 TTS 系统不仅能合成自然的语音，还能精确控制情感、语速、语调等风格特征。这使得 AI 配音可以适应不同的应用场景，从平静的客服对话到激昂的演讲。
+          <strong>{{ t('emotionControl.infoStrong') }}</strong>
+          {{ t('emotionControl.info') }}
         </p>
       </div>
     </el-card>
@@ -234,24 +216,21 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { MagicStick, VideoPlay, RefreshRight } from '@element-plus/icons-vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { audioIntroLocale } from '../../../locales/audio-intro/index.js'
 
-const emotions = [
-  { id: 'neutral', name: '中性', emoji: '😐', description: '平稳自然', color: '#909399' },
-  { id: 'happy', name: '开心', emoji: '😊', description: '轻快愉悦', color: '#67c23a' },
-  { id: 'sad', name: '悲伤', emoji: '😢', description: '低沉缓慢', color: '#409eff' },
-  { id: 'angry', name: '愤怒', emoji: '😠', description: '激昂有力', color: '#f56c6c' },
-  { id: 'excited', name: '兴奋', emoji: '🤩', description: '热情高涨', color: '#e6a23c' },
-  { id: 'calm', name: '平静', emoji: '😌', description: '舒缓放松', color: '#13c2c2' }
-]
+const { t, messages } = useI18n(audioIntroLocale)
+const emotions = computed(() => messages.value.emotionControl.emotions)
+const fineItems = computed(() => messages.value.emotionControl.fineItems)
 
 const selectedEmotion = ref('neutral')
 const speed = ref(1.0)
 const pitch = ref(0)
 const energy = ref(100)
 const pause = ref(150)
-const previewText = ref('这是一段带有情感控制的语音合成演示。')
+const previewText = ref(t('emotionControl.defaultPreview'))
 
 const emotionCanvas = ref(null)
 
@@ -270,7 +249,6 @@ const resetParameters = () => {
 }
 
 const synthesize = () => {
-  // 模拟合成
   console.log('Synthesizing with:', {
     emotion: selectedEmotion.value,
     speed: speed.value,
@@ -280,7 +258,6 @@ const synthesize = () => {
   })
 }
 
-// 绘制情感向量空间
 const drawEmotionEmbedding = () => {
   const canvas = emotionCanvas.value
   if (!canvas) return
@@ -291,35 +268,30 @@ const drawEmotionEmbedding = () => {
 
   ctx.clearRect(0, 0, width, height)
 
-  // 绘制坐标轴
   ctx.strokeStyle = '#e0e0e0'
   ctx.lineWidth = 1
 
-  // X轴 (Valence: 消极 -> 积极)
   ctx.beginPath()
   ctx.moveTo(40, height / 2)
   ctx.lineTo(width - 20, height / 2)
   ctx.stroke()
 
-  // Y轴 (Arousal: 平静 -> 兴奋)
   ctx.beginPath()
   ctx.moveTo(width / 2, height - 30)
   ctx.lineTo(width / 2, 20)
   ctx.stroke()
 
-  // 轴标签
   ctx.fillStyle = '#666'
   ctx.font = '12px sans-serif'
   ctx.textAlign = 'center'
-  ctx.fillText('Valence (消极 → 积极)', width / 2, height - 10)
+  ctx.fillText(t('emotionControl.valenceAxis'), width / 2, height - 10)
 
   ctx.save()
   ctx.translate(15, height / 2)
   ctx.rotate(-Math.PI / 2)
-  ctx.fillText('Arousal (平静 → 兴奋)', 0, 0)
+  ctx.fillText(t('emotionControl.arousalAxis'), 0, 0)
   ctx.restore()
 
-  // 情感位置
   const emotionPositions = {
     neutral: { x: 0.5, y: 0.5 },
     happy: { x: 0.8, y: 0.7 },
@@ -329,19 +301,16 @@ const drawEmotionEmbedding = () => {
     calm: { x: 0.6, y: 0.2 }
   }
 
-  // 绘制所有情感点
-  emotions.forEach(emotion => {
+  emotions.value.forEach(emotion => {
     const pos = emotionPositions[emotion.id]
     const x = 50 + pos.x * (width - 80)
     const y = height - 40 - pos.y * (height - 60)
 
-    // 绘制点
     ctx.beginPath()
     ctx.arc(x, y, emotion.id === selectedEmotion.value ? 12 : 8, 0, Math.PI * 2)
     ctx.fillStyle = emotion.color
     ctx.fill()
 
-    // 选中效果
     if (emotion.id === selectedEmotion.value) {
       ctx.strokeStyle = emotion.color
       ctx.lineWidth = 2
@@ -350,7 +319,6 @@ const drawEmotionEmbedding = () => {
       ctx.stroke()
     }
 
-    // 标签
     ctx.fillStyle = '#333'
     ctx.font = emotion.id === selectedEmotion.value ? 'bold 12px sans-serif' : '12px sans-serif'
     ctx.textAlign = 'center'
@@ -360,6 +328,7 @@ const drawEmotionEmbedding = () => {
 
 onMounted(drawEmotionEmbedding)
 watch(selectedEmotion, drawEmotionEmbedding)
+watch(messages, drawEmotionEmbedding)
 </script>
 
 <style scoped>

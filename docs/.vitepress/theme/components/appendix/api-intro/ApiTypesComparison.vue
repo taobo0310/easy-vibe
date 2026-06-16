@@ -14,25 +14,25 @@
     <div class="display-area">
       <div class="info-grid">
         <div class="info-item">
-          <span class="label">调用对象</span>
+          <span class="label">{{ t('apiTypes.labels.target') }}</span>
           <span class="value">{{ currentType.target }}</span>
         </div>
         <div class="info-item">
-          <span class="label">通信方式</span>
+          <span class="label">{{ t('apiTypes.labels.comm') }}</span>
           <span class="value">{{ currentType.comm }}</span>
         </div>
         <div class="info-item">
-          <span class="label">延迟</span>
+          <span class="label">{{ t('apiTypes.labels.latency') }}</span>
           <span class="value">{{ currentType.latency }}</span>
         </div>
         <div class="info-item">
-          <span class="label">典型场景</span>
+          <span class="label">{{ t('apiTypes.labels.scenarios') }}</span>
           <span class="value">{{ currentType.scenarios }}</span>
         </div>
       </div>
 
       <div class="code-preview">
-        <div class="code-header">{{ currentType.name }} 示例</div>
+        <div class="code-header">{{ t('apiTypes.labels.example', { name: currentType.name }) }}</div>
         <pre><code>{{ currentType.example }}</code></pre>
       </div>
     </div>
@@ -41,52 +41,15 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { apiIntroLocale } from '../../../locales/api-intro/index.js'
 
+const { t, messages } = useI18n(apiIntroLocale)
 const active = ref('function')
-
-const types = [
-  {
-    id: 'function',
-    icon: '📦',
-    name: '函数 API',
-    target: '本地代码库',
-    comm: '函数调用',
-    latency: '纳秒级',
-    scenarios: '数据处理、文件操作',
-    example: `len("hello")           # 返回 5
-max([1, 5, 3])         # 返回 5
-open("file.txt").read() # 读取文件`
-  },
-  {
-    id: 'system',
-    icon: '⚙️',
-    name: '操作系统 API',
-    target: '操作系统内核',
-    comm: '系统调用',
-    latency: '微秒级',
-    scenarios: '文件操作、进程管理',
-    example: `with open("file.txt", "r") as f:
-    content = f.read()
-
-subprocess.run(["ls", "-l"])`
-  },
-  {
-    id: 'web',
-    icon: '🌐',
-    name: 'Web API',
-    target: '远程服务器',
-    comm: 'HTTP 请求',
-    latency: '毫秒级',
-    scenarios: 'AI 调用、数据获取',
-    example: `requests.post(
-    "https://api.deepseek.com/v1/chat/completions",
-    json={"model": "deepseek-chat", "messages": [...]}
-)`
-  }
-]
+const types = computed(() => messages.value.apiTypes.types)
 
 const currentType = computed(() => {
-  return types.find((t) => t.id === active.value) || types[0]
+  return types.value.find((type) => type.id === active.value) || types.value[0]
 })
 </script>
 

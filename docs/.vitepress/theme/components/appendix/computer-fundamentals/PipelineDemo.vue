@@ -1,17 +1,23 @@
 <template>
   <div class="pipeline-demo">
     <div class="demo-header">
-      <span class="title">CPU 指令流水线</span>
-      <span class="subtitle">五级流水线：取指 → 译码 → 执行 → 访存 → 写回</span>
+      <span class="title">{{ t('computerOrganization.pipeline.title') }}</span>
+      <span class="subtitle">{{ t('computerOrganization.pipeline.subtitle') }}</span>
     </div>
 
     <div class="control-panel">
-      <button class="btn" @click="startPipeline" :disabled="isRunning">开始执行</button>
-      <button class="btn" @click="stepPipeline" :disabled="isRunning">单步执行</button>
-      <button class="btn" @click="resetPipeline">重置</button>
+      <button class="btn" :disabled="isRunning" @click="startPipeline">
+        {{ t('computerOrganization.pipeline.start') }}
+      </button>
+      <button class="btn" :disabled="isRunning" @click="stepPipeline">
+        {{ t('computerOrganization.pipeline.step') }}
+      </button>
+      <button class="btn" @click="resetPipeline">
+        {{ t('computerOrganization.pipeline.reset') }}
+      </button>
       <select v-model="selectedMode" class="mode-select">
-        <option value="sequential">顺序执行</option>
-        <option value="pipeline">流水线执行</option>
+        <option value="sequential">{{ t('computerOrganization.pipeline.sequential') }}</option>
+        <option value="pipeline">{{ t('computerOrganization.pipeline.pipeline') }}</option>
       </select>
     </div>
 
@@ -34,11 +40,11 @@
 
     <div class="stats-panel">
       <div class="stat-item">
-        <span class="stat-label">总周期数</span>
+        <span class="stat-label">{{ t('computerOrganization.pipeline.totalCycles') }}</span>
         <span class="stat-value">{{ totalCycles }}</span>
       </div>
       <div class="stat-item">
-        <span class="stat-label">已完成指令</span>
+        <span class="stat-label">{{ t('computerOrganization.pipeline.completedInstructions') }}</span>
         <span class="stat-value">{{ completedInstructions }}</span>
       </div>
       <div class="stat-item">
@@ -48,12 +54,12 @@
     </div>
 
     <div class="pipeline-explanation">
-      <div class="explanation-title">流水线原理</div>
+      <div class="explanation-title">{{ t('computerOrganization.pipeline.explanationTitle') }}</div>
       <div class="explanation-content">
-        <p><strong>顺序执行：</strong>每条指令执行完才执行下一条，N条指令需要 N × 5 个周期</p>
-        <p><strong>流水线执行：</strong>多条指令同时处于不同阶段，理想情况下 CPI ≈ 1</p>
-        <div class="hazard-warning" v-if="showHazard">
-          ⚠️ 流水线冒险：数据冒险、控制冒险、结构冒险
+        <p>{{ t('computerOrganization.pipeline.sequentialText') }}</p>
+        <p>{{ t('computerOrganization.pipeline.pipelineText') }}</p>
+        <div v-if="showHazard" class="hazard-warning">
+          {{ t('computerOrganization.pipeline.hazardWarning') }}
         </div>
       </div>
     </div>
@@ -61,17 +67,19 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { computed, ref } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { computerFundamentalsLocale } from '../../../locales/computer-fundamentals/index.js'
 
-const stages = ['取指(IF)', '译码(ID)', '执行(EX)', '访存(MEM)', '写回(WB)']
-const instructions = ref(['ADD R1,R2,R3', 'SUB R4,R1,R5', 'LOAD R6,[R4]', 'STORE R6,[R7]', 'AND R8,R1,R6'])
+const { t, messages } = useI18n(computerFundamentalsLocale)
+
+const stages = computed(() => messages.value.computerOrganization.pipeline.stages)
+const instructions = computed(() => messages.value.computerOrganization.pipeline.instructions)
 
 const selectedMode = ref('pipeline')
 const currentCycle = ref(-1)
 const isRunning = ref(false)
 const showHazard = ref(false)
-
-const pipelineState = ref([])
 
 const startPipeline = () => {
   isRunning.value = true

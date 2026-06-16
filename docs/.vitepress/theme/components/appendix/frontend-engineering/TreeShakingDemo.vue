@@ -1,27 +1,15 @@
-<!--
-  TreeShakingDemo.vue
-  摇树优化演示
-
-  用途：
-  直观展示 Tree Shaking 如何移除未使用的代码。
-
-  交互功能：
-  - 代码选择：选择使用哪些导出
-  - 实时计算：显示包体积变化
-  - 对比视图：对比 Tree Shaking 前后
--->
 <template>
   <div class="tree-shaking-demo">
     <div class="demo-header">
-      <h3>🌳 Tree Shaking 演示</h3>
-      <p>选择你需要的功能，观察包体积变化</p>
+      <h3>🌳 {{ t('treeShaking.title') }}</h3>
+      <p>{{ t('treeShaking.subtitle') }}</p>
     </div>
 
     <div class="demo-content">
-      <!-- 源代码面板 -->
+      <!-- source code panel -->
       <div class="source-panel">
         <div class="panel-title">
-          📦 utils.js (源代码)
+          📦 {{ t('treeShaking.sourceLabel') }}
         </div>
         <div class="code-block">
           <div
@@ -36,10 +24,10 @@
         </div>
       </div>
 
-      <!-- 控制面板 -->
+      <!-- control panel -->
       <div class="control-panel">
         <div class="panel-title">
-          🎛️ 选择需要的功能
+          🎛️ {{ t('treeShaking.controlLabel') }}
         </div>
         <div class="function-toggles">
           <label
@@ -59,18 +47,18 @@
 
         <div class="stats-box">
           <div class="stat-item">
-            <span class="stat-label">原始大小</span>
+            <span class="stat-label">{{ t('treeShaking.originalSize') }}</span>
             <span class="stat-value original">{{ originalSize }}B</span>
           </div>
           <div class="stat-arrow">
             →
           </div>
           <div class="stat-item">
-            <span class="stat-label">Tree Shaking 后</span>
+            <span class="stat-label">{{ t('treeShaking.afterShaking') }}</span>
             <span class="stat-value optimized">{{ optimizedSize }}B</span>
           </div>
           <div class="stat-item savings">
-            <span class="stat-label">节省</span>
+            <span class="stat-label">{{ t('treeShaking.savings') }}</span>
             <span class="stat-value">{{ savingsPercent }}%</span>
           </div>
         </div>
@@ -80,9 +68,8 @@
     <div class="info-box">
       <p>
         <span class="icon">💡</span>
-        <strong>Tree Shaking 原理：</strong>
-        现代打包工具会分析 ES 模块的导出/导入关系，自动移除未被使用的代码。
-        前提条件：1) 使用 ES 模块 (import/export)；2) 代码无副作用；3) 打包工具支持（Webpack、Rollup 等）
+        <strong>{{ t('treeShaking.infoBoxTitle') }}</strong>
+        {{ t('treeShaking.infoBoxContent') }}
       </p>
     </div>
   </div>
@@ -90,6 +77,10 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { frontendEngineeringLocale } from '../../../locales/frontend-engineering/index.js'
+
+const { t } = useI18n(frontendEngineeringLocale)
 
 const functions = ref([
   {
@@ -140,19 +131,6 @@ const savingsPercent = computed(() => {
 const hasSelection = computed(() =>
   functions.value.some(f => f.used)
 )
-
-const getFileIcon = (type) => {
-  const icons = { js: '📜', css: '🎨', image: '🖼️', html: '📄' }
-  return icons[type] || '📄'
-}
-
-const formatSize = (size) => size > 1024 ? (size / 1024).toFixed(1) + ' MB' : size + ' KB'
-const formatTime = (timestamp) => new Date(timestamp).toLocaleDateString('zh-CN', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
-
-const selectedNode = ref(null)
-const selectedFile = computed(() => selectedNode.value)
-const cacheHits = ref(42)
-const cacheMisses = ref(8)
 </script>
 
 <style scoped>

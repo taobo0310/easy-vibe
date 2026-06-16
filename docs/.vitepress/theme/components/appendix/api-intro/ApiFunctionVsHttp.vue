@@ -1,8 +1,8 @@
 <template>
   <div class="api-compare-root">
     <div class="demo-header">
-      <span class="title">📚 函数 API vs HTTP API</span>
-      <span class="subtitle">本地调用 vs 网络请求，文档怎么看？</span>
+      <span class="title">{{ t('functionVsHttp.title') }}</span>
+      <span class="subtitle">{{ t('functionVsHttp.subtitle') }}</span>
     </div>
 
     <div class="control-panel">
@@ -17,204 +17,76 @@
     </div>
 
     <div class="visualization-area">
-      <!-- 对比视图 -->
       <div v-if="activeTab === 'compare'" class="compare-view">
         <div class="compare-cards">
-          <div class="compare-card">
-            <div class="card-header function">
-              <span class="card-icon">📦</span>
-              <span class="card-title">函数 API</span>
-            </div>
-            <div class="card-body">
-              <div class="feature-list">
-                <div class="feature-item">
-                  <span class="feature-label">调用方式</span>
-                  <span class="feature-value">直接函数调用</span>
+          <template v-for="(card, cardIdx) in compareCards" :key="card.id">
+            <div class="compare-card">
+              <div :class="['card-header', card.headerClass]">
+                <span class="card-icon">{{ card.icon }}</span>
+                <span class="card-title">{{ card.title }}</span>
+              </div>
+              <div class="card-body">
+                <div class="feature-list">
+                  <div v-for="key in featureKeys" :key="key" class="feature-item">
+                    <span class="feature-label">{{ featureLabels[key] }}</span>
+                    <span class="feature-value">{{ card.features[key] }}</span>
+                  </div>
                 </div>
-                <div class="feature-item">
-                  <span class="feature-label">参数传递</span>
-                  <span class="feature-value">括号内传参</span>
-                </div>
-                <div class="feature-item">
-                  <span class="feature-label">返回值</span>
-                  <span class="feature-value">直接获得结果</span>
-                </div>
-                <div class="feature-item">
-                  <span class="feature-label">错误处理</span>
-                  <span class="feature-value">异常/返回值</span>
+                <div class="code-block">
+                  <div class="code-label">{{ card.codeLabel }}</div>
+                  <pre><code>{{ card.code }}</code></pre>
                 </div>
               </div>
-              <div class="code-block">
-                <div class="code-label">Python 示例</div>
-                <pre><code># 调用内置函数
-length = len("hello")      # 返回 5
-
-# 调用库函数
-import math
-result = math.sqrt(16)     # 返回 4.0
-
-# 调用自定义函数
-def add(a, b):
-    return a + b
-sum = add(3, 5)            # 返回 8</code></pre>
-              </div>
             </div>
-          </div>
-
-          <div class="vs-divider">
-            <span class="vs-text">VS</span>
-          </div>
-
-          <div class="compare-card">
-            <div class="card-header http">
-              <span class="card-icon">🌐</span>
-              <span class="card-title">HTTP API</span>
+            <div v-if="cardIdx === 0" class="vs-divider">
+              <span class="vs-text">VS</span>
             </div>
-            <div class="card-body">
-              <div class="feature-list">
-                <div class="feature-item">
-                  <span class="feature-label">调用方式</span>
-                  <span class="feature-value">网络请求</span>
-                </div>
-                <div class="feature-item">
-                  <span class="feature-label">参数传递</span>
-                  <span class="feature-value">URL/Body/Header</span>
-                </div>
-                <div class="feature-item">
-                  <span class="feature-label">返回值</span>
-                  <span class="feature-value">JSON/XML 响应</span>
-                </div>
-                <div class="feature-item">
-                  <span class="feature-label">错误处理</span>
-                  <span class="feature-value">状态码判断</span>
-                </div>
-              </div>
-              <div class="code-block">
-                <div class="code-label">HTTP 请求示例</div>
-                <pre><code>POST /v1/chat/completions HTTP/1.1
-Host: api.deepseek.com
-Authorization: Bearer sk-xxx
-Content-Type: application/json
-
-{
-  "model": "deepseek-chat",
-  "messages": [
-    {"role": "user", "content": "你好"}
-  ]
-}</code></pre>
-              </div>
-            </div>
-          </div>
+          </template>
         </div>
       </div>
 
-      <!-- 文档对比视图 -->
       <div v-if="activeTab === 'docs'" class="docs-view">
         <div class="docs-cards">
-          <div class="doc-card">
+          <div v-for="card in docCards" :key="card.title" class="doc-card">
             <div class="doc-header">
-              <span class="doc-icon">📖</span>
-              <span class="doc-title">函数文档怎么看</span>
+              <span class="doc-icon">{{ card.icon }}</span>
+              <span class="doc-title">{{ card.title }}</span>
             </div>
             <div class="doc-content">
               <div class="doc-section">
-                <div class="doc-section-title">🔍 关注重点</div>
+                <div class="doc-section-title">{{ t('functionVsHttp.docFocusTitle') }}</div>
                 <ul class="doc-list">
-                  <li><strong>函数签名</strong>：函数名和参数列表</li>
-                  <li><strong>参数类型</strong>：每个参数要什么类型</li>
-                  <li><strong>返回值</strong>：函数返回什么</li>
-                  <li><strong>异常说明</strong>：可能抛出什么错误</li>
+                  <li v-for="point in card.points" :key="point.label">
+                    <strong>{{ point.label }}</strong>: {{ point.text }}
+                  </li>
                 </ul>
               </div>
               <div class="doc-example">
-                <div class="doc-example-label">Python 文档示例</div>
-                <pre><code>def open(file: str, mode: str = 'r') -> TextIO:
-    """
-    打开文件并返回文件对象
-    
-    Args:
-        file: 文件路径
-        mode: 打开模式 ('r', 'w', 'a')
-    
-    Returns:
-        文件对象
-    
-    Raises:
-        FileNotFoundError: 文件不存在
-    """</code></pre>
-              </div>
-            </div>
-          </div>
-
-          <div class="doc-card">
-            <div class="doc-header">
-              <span class="doc-icon">📡</span>
-              <span class="doc-title">HTTP API 文档怎么看</span>
-            </div>
-            <div class="doc-content">
-              <div class="doc-section">
-                <div class="doc-section-title">🔍 关注重点</div>
-                <ul class="doc-list">
-                  <li><strong>Endpoint</strong>：URL 路径和 HTTP 方法</li>
-                  <li><strong>认证方式</strong>：API Key / Token 怎么传</li>
-                  <li><strong>请求参数</strong>：Body / Query / Header</li>
-                  <li><strong>响应格式</strong>：成功和错误返回什么</li>
-                </ul>
-              </div>
-              <div class="doc-example">
-                <div class="doc-example-label">API 文档示例</div>
-                <pre><code>POST /v1/chat/completions
-
-Headers:
-  Authorization: Bearer {api_key}
-  Content-Type: application/json
-
-Body:
-{
-  "model": "deepseek-chat",
-  "messages": [...],
-  "temperature": 0.7
-}
-
-Response:
-{
-  "choices": [{
-    "message": {"content": "..."}
-  }]
-}</code></pre>
+                <div class="doc-example-label">{{ card.codeLabel }}</div>
+                <pre><code>{{ card.code }}</code></pre>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- 快速判断视图 -->
       <div v-if="activeTab === 'quick'" class="quick-view">
         <div class="quick-cards">
           <div class="quick-card">
             <div class="quick-header">
               <span class="quick-icon">⚡</span>
-              <span class="quick-title">快速判断指南</span>
+              <span class="quick-title">{{ t('functionVsHttp.quickGuideTitle') }}</span>
             </div>
             <div class="quick-content">
               <div class="decision-tree">
-                <div class="decision-item">
-                  <div class="decision-question">看到代码里有 <code>()</code> 调用？</div>
-                  <div class="decision-answer">→ 这是 <strong>函数 API</strong></div>
-                  <div class="decision-example">如：len(), print(), requests.get()</div>
-                </div>
-                <div class="decision-arrow">↓</div>
-                <div class="decision-item">
-                  <div class="decision-question">看到 URL 和 HTTP 方法？</div>
-                  <div class="decision-answer">→ 这是 <strong>HTTP API</strong></div>
-                  <div class="decision-example">如：POST /api/users, GET https://...</div>
-                </div>
-                <div class="decision-arrow">↓</div>
-                <div class="decision-item">
-                  <div class="decision-question">看到 SDK/Client 对象？</div>
-                  <div class="decision-answer">→ 这是 <strong>封装后的 HTTP API</strong></div>
-                  <div class="decision-example">如：client.chat.completions.create()</div>
-                </div>
+                <template v-for="(item, idx) in decisionItems" :key="item.question">
+                  <div class="decision-item">
+                    <div class="decision-question">{{ item.question }}</div>
+                    <div class="decision-answer">→ <strong>{{ item.answer }}</strong></div>
+                    <div class="decision-example">{{ item.example }}</div>
+                  </div>
+                  <div v-if="idx < decisionItems.length - 1" class="decision-arrow">↓</div>
+                </template>
               </div>
             </div>
           </div>
@@ -222,34 +94,21 @@ Response:
           <div class="quick-card">
             <div class="quick-header">
               <span class="quick-icon">🎯</span>
-              <span class="quick-title">使用场景对比</span>
+              <span class="quick-title">{{ t('functionVsHttp.scenarioTitle') }}</span>
             </div>
             <div class="quick-content">
               <div class="scenario-table">
                 <div class="scenario-row header">
-                  <div class="scenario-cell">场景</div>
-                  <div class="scenario-cell">推荐方式</div>
-                  <div class="scenario-cell">原因</div>
+                  <div v-for="header in scenarioHeaders" :key="header" class="scenario-cell">
+                    {{ header }}
+                  </div>
                 </div>
-                <div class="scenario-row">
-                  <div class="scenario-cell">本地数据处理</div>
-                  <div class="scenario-cell"><span class="badge function">函数 API</span></div>
-                  <div class="scenario-cell">快速、无需网络</div>
-                </div>
-                <div class="scenario-row">
-                  <div class="scenario-cell">调用 AI 模型</div>
-                  <div class="scenario-cell"><span class="badge http">HTTP API</span></div>
-                  <div class="scenario-cell">模型在远程服务器</div>
-                </div>
-                <div class="scenario-row">
-                  <div class="scenario-cell">获取天气数据</div>
-                  <div class="scenario-cell"><span class="badge http">HTTP API</span></div>
-                  <div class="scenario-cell">数据在服务商那里</div>
-                </div>
-                <div class="scenario-row">
-                  <div class="scenario-cell">文件读写操作</div>
-                  <div class="scenario-cell"><span class="badge function">函数 API</span></div>
-                  <div class="scenario-cell">直接操作本地文件</div>
+                <div v-for="item in scenarios" :key="item.scenario" class="scenario-row">
+                  <div class="scenario-cell">{{ item.scenario }}</div>
+                  <div class="scenario-cell">
+                    <span :class="['badge', item.badgeClass]">{{ item.mode }}</span>
+                  </div>
+                  <div class="scenario-cell">{{ item.reason }}</div>
                 </div>
               </div>
             </div>
@@ -259,21 +118,28 @@ Response:
     </div>
 
     <div class="info-box">
-      <strong>核心要点：</strong>函数 API 是"本地办事"，HTTP API 是"远程通信"。看文档时，函数关注参数和返回值，HTTP API 关注 Endpoint、认证和请求/响应格式。
+      <strong>{{ t('functionVsHttp.infoTitle') }}</strong>
+      <span>{{ t('functionVsHttp.infoText') }}</span>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { apiIntroLocale } from '../../../locales/api-intro/index.js'
 
+const { t, messages } = useI18n(apiIntroLocale)
 const activeTab = ref('compare')
+const featureKeys = ['call', 'params', 'result', 'errors']
 
-const tabs = [
-  { id: 'compare', name: '核心区别', icon: '🔍' },
-  { id: 'docs', name: '文档对比', icon: '📚' },
-  { id: 'quick', name: '快速判断', icon: '⚡' }
-]
+const tabs = computed(() => messages.value.functionVsHttp.tabs)
+const featureLabels = computed(() => messages.value.functionVsHttp.featureLabels)
+const compareCards = computed(() => messages.value.functionVsHttp.compareCards)
+const docCards = computed(() => messages.value.functionVsHttp.docCards)
+const decisionItems = computed(() => messages.value.functionVsHttp.decisionItems)
+const scenarioHeaders = computed(() => messages.value.functionVsHttp.scenarioHeaders)
+const scenarios = computed(() => messages.value.functionVsHttp.scenarios)
 </script>
 
 <style scoped>
@@ -342,7 +208,6 @@ const tabs = [
   background: var(--vp-c-bg);
 }
 
-/* 对比视图 */
 .compare-view {
   width: 100%;
 }
@@ -481,7 +346,6 @@ const tabs = [
   color: var(--vp-c-text-2);
 }
 
-/* 文档视图 */
 .docs-view {
   width: 100%;
 }
@@ -586,7 +450,6 @@ const tabs = [
   font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
 }
 
-/* 快速判断视图 */
 .quick-view {
   width: 100%;
 }

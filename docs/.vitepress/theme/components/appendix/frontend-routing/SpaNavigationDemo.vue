@@ -2,12 +2,12 @@
   <div class="spa-navigation-demo">
     <div class="demo-header">
       <span class="icon">🚀</span>
-      <span class="title">SPA导航流程</span>
-      <span class="subtitle">从点击到渲染的完整旅程</span>
+      <span class="title">{{ t('spaNavigation.title') }}</span>
+      <span class="subtitle">{{ t('spaNavigation.subtitle') }}</span>
     </div>
 
     <div class="intro-text">
-      想象你在<span class="highlight">餐厅点菜</span>：从看菜单、下单、厨房准备、最后上菜。SPA导航也是这样，用户触发后经过一系列步骤，最终把新"菜品"（页面）端到你面前。
+      {{ t('spaNavigation.intro.prefix') }}<span class="highlight">{{ t('spaNavigation.intro.highlight') }}</span>{{ t('spaNavigation.intro.suffix') }}
     </div>
 
     <div class="flow-container">
@@ -31,38 +31,20 @@
     </div>
 
     <div class="highlight-box">
-      <h5>⚡ 关键优化点</h5>
+      <h5>{{ t('spaNavigation.optimizationTitle') }}</h5>
       <div class="optimization-tips">
-        <div class="tip-item">
-          <span class="tip-icon">🎯</span>
+        <div
+          v-for="tip in tips"
+          :key="tip.title"
+          class="tip-item"
+        >
+          <span class="tip-icon">{{ tip.icon }}</span>
           <div class="tip-content">
             <div class="tip-title">
-              路由懒加载
+              {{ tip.title }}
             </div>
             <div class="tip-desc">
-              按需加载页面组件，减少初始包体积
-            </div>
-          </div>
-        </div>
-        <div class="tip-item">
-          <span class="tip-icon">🛡️</span>
-          <div class="tip-content">
-            <div class="tip-title">
-              守卫预加载
-            </div>
-            <div class="tip-desc">
-              在beforeEnter中预加载数据，提升用户体验
-            </div>
-          </div>
-        </div>
-        <div class="tip-item">
-          <span class="tip-icon">⚡</span>
-          <div class="tip-content">
-            <div class="tip-title">
-              过渡动画
-            </div>
-            <div class="tip-desc">
-              添加页面切换动画，让导航更流畅
+              {{ tip.desc }}
             </div>
           </div>
         </div>
@@ -71,21 +53,19 @@
 
     <div class="info-box">
       <span class="icon">💡</span>
-      <strong>核心优势：</strong>整个流程在浏览器内完成，无需服务器参与，体验如原生应用般流畅。这就是SPA相比传统MPA的最大优势。
+      <strong>{{ t('common.coreAdvantage') }}</strong>{{ t('spaNavigation.info') }}
     </div>
   </div>
 </template>
 
 <script setup>
-const steps = [
-  { title: '触发导航', desc: '用户点击链接或调用 router.push()' },
-  { title: 'URL 变化', desc: '浏览器地址栏更新，History API 记录状态' },
-  { title: '路由匹配', desc: '路由器根据URL匹配对应的路由配置' },
-  { title: '守卫验证', desc: '执行全局、路由独享、组件内守卫' },
-  { title: '组件加载', desc: '懒加载的组件异步加载并解析' },
-  { title: '组件渲染', desc: '新组件挂载到 DOM，页面更新' },
-  { title: '后置钩子', desc: '执行 afterEach 钩子，完成导航' }
-]
+import { computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { frontendRoutingLocale } from '../../../locales/frontend-routing/index.js'
+
+const { t, messages } = useI18n(frontendRoutingLocale)
+const steps = computed(() => messages.value.spaNavigation.steps)
+const tips = computed(() => messages.value.spaNavigation.tips)
 </script>
 
 <style scoped>

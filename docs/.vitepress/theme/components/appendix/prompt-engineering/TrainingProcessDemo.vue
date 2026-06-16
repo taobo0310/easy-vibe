@@ -6,7 +6,7 @@
     <template #header>
       <div class="card-header">
         <h3 class="title">
-          从训练数据看模型行为
+          {{ t('trainingProcess.title') }}
         </h3>
         <div class="mode-switch-container">
           <el-radio-group
@@ -14,10 +14,10 @@
             size="large"
           >
             <el-radio-button label="pretrain">
-              1. 预训练 (Pre-training)
+              {{ t('trainingProcess.modePretrain') }}
             </el-radio-button>
             <el-radio-button label="finetune">
-              2. 微调 (Fine-tuning)
+              {{ t('trainingProcess.modeFinetune') }}
             </el-radio-button>
           </el-radio-group>
         </div>
@@ -38,10 +38,10 @@
             📚
           </div>
           <div class="info">
-            <h4>博览群书 (Reading the Web)</h4>
-            <p>核心目标：<strong>预测下一个 Token</strong></p>
+            <h4>{{ t('trainingProcess.pretrain.conceptTitle') }}</h4>
+            <p v-html="t('trainingProcess.pretrain.coreGoal')" />
             <p class="sub">
-              模型阅读了海量文本，它的本能是"把句子接下去"。
+              {{ t('trainingProcess.pretrain.conceptDesc') }}
             </p>
           </div>
         </div>
@@ -57,7 +57,7 @@
             <span class="text-gray">Source: Wikipedia / Books</span>
             <br><br>
             <p>
-              Natural selection, proposed by Darwin in 
+              Natural selection, proposed by Darwin in
               <span class="highlight">{{ currentPrediction || '...' }}</span>
             </p>
           </div>
@@ -70,7 +70,7 @@
             :loading="isPredicting"
             @click="predictNext"
           >
-            {{ isPredicting ? '计算概率中...' : '预测下一个词 (Predict)' }}
+            {{ isPredicting ? t('trainingProcess.pretrain.calculating') : t('trainingProcess.pretrain.predictButton') }}
           </el-button>
         </div>
 
@@ -79,7 +79,7 @@
             v-if="predictions.length > 0"
             class="predictions-panel"
           >
-            <h5>概率分布 (Top 3 Candidates)</h5>
+            <h5>{{ t('trainingProcess.pretrain.predictionsTitle') }}</h5>
             <div class="chart-container">
               <div
                 v-for="(item, index) in predictions"
@@ -91,17 +91,17 @@
                   {{ item.token }}
                 </div>
                 <div class="bar-container">
-                  <el-progress 
-                    :percentage="item.prob" 
-                    :stroke-width="18" 
-                    :text-inside="true" 
+                  <el-progress
+                    :percentage="item.prob"
+                    :stroke-width="18"
+                    :text-inside="true"
                     :color="index === 0 ? '#67c23a' : '#409eff'"
                   />
                 </div>
               </div>
             </div>
             <p class="hint">
-              👆 点击预测词填入（模型只是在根据统计学规律"瞎蒙"）
+              {{ t('trainingProcess.pretrain.hint') }}
             </p>
           </div>
         </el-collapse-transition>
@@ -122,10 +122,10 @@
             🎓
           </div>
           <div class="info">
-            <h4>学习规矩 (Instruction Tuning)</h4>
-            <p>核心目标：<strong>听懂指令 (Follow Instructions)</strong></p>
+            <h4>{{ t('trainingProcess.finetune.conceptTitle') }}</h4>
+            <p v-html="t('trainingProcess.finetune.coreGoal')" />
             <p class="sub">
-              通过 (问题 → 标准答案) 数据对，教会模型"像个助手一样说话"。
+              {{ t('trainingProcess.finetune.conceptDesc') }}
             </p>
           </div>
         </div>
@@ -138,10 +138,10 @@
               👤
             </div>
             <div class="bubble">
-              我如何退货？
+              {{ t('trainingProcess.finetune.userQuestion') }}
             </div>
           </div>
-          
+
           <el-collapse-transition>
             <div
               v-if="ftState === 'base'"
@@ -156,12 +156,12 @@
                   size="small"
                   class="badge"
                 >
-                  预训练模型 (Base Model)
+                  {{ t('trainingProcess.finetune.baseModelTag') }}
                 </el-tag>
                 <div class="bubble-text">
-                  退货是指消费者将购买的商品退回给卖家的过程。在电子商务中，退货率通常在 20% 左右。根据《消费者权益保护法》...
+                  {{ t('trainingProcess.finetune.baseModelReply') }}
                   <br><br>
-                  <small>❌ (它在背书，不是在回答你)</small>
+                  <small>{{ t('trainingProcess.finetune.baseModelNote') }}</small>
                 </div>
               </div>
             </div>
@@ -181,16 +181,16 @@
                   size="small"
                   class="badge"
                 >
-                  微调模型 (Instruct Model)
+                  {{ t('trainingProcess.finetune.tunedModelTag') }}
                 </el-tag>
                 <div class="bubble-text">
-                  办理退货很简单，请按以下步骤操作：
+                  {{ t('trainingProcess.finetune.tunedModelReply') }}
                   <ol>
-                    <li>登录您的账户</li>
-                    <li>点击"我的订单"</li>
-                    <li>选择要退的商品，点击"申请售后"</li>
+                    <li>{{ t('trainingProcess.finetune.tunedModelStep1') }}</li>
+                    <li>{{ t('trainingProcess.finetune.tunedModelStep2') }}</li>
+                    <li>{{ t('trainingProcess.finetune.tunedModelStep3') }}</li>
                   </ol>
-                  <small>✅ (它学会了"回复指令"的格式)</small>
+                  <small>{{ t('trainingProcess.finetune.tunedModelNote') }}</small>
                 </div>
               </div>
             </div>
@@ -203,14 +203,14 @@
             size="large"
           >
             <el-radio-button label="base">
-              原始模型 (Base)
+              {{ t('trainingProcess.finetune.baseLabel') }}
             </el-radio-button>
             <el-radio-button label="tuned">
-              微调后 (Instruct)
+              {{ t('trainingProcess.finetune.tunedLabel') }}
             </el-radio-button>
           </el-radio-group>
           <p class="hint">
-            切换开关，观察模型行为的巨大差异
+            {{ t('trainingProcess.finetune.switchHint') }}
           </p>
         </div>
       </div>
@@ -220,6 +220,10 @@
 
 <script setup>
 import { ref } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { promptEngineeringLocale } from '../../../locales/prompt-engineering/index.js'
+
+const { t } = useI18n(promptEngineeringLocale)
 
 const mode = ref('pretrain')
 const isPredicting = ref(false)
@@ -231,7 +235,7 @@ const predictNext = () => {
   isPredicting.value = true
   predictions.value = []
   currentPrediction.value = ''
-  
+
   setTimeout(() => {
     isPredicting.value = false
     predictions.value = [
@@ -446,7 +450,7 @@ const selectPrediction = (item) => {
   .card-header {
     align-items: flex-start;
   }
-  
+
   .mode-switch-container {
     justify-content: flex-start;
     overflow-x: auto;

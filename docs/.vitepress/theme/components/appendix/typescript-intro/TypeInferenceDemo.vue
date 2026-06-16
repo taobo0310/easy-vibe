@@ -1,130 +1,62 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { computed, ref, watch } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { typescriptIntroLocale } from '../../../locales/typescript-intro/index.js'
 
-// 类型推断演示
-const codeExamples = ref([
-  {
-    id: 1,
-    code: 'let name = "张三"',
-    inferredType: 'string',
-    explanation: 'TypeScript 根据赋值的字符串推断出 name 的类型是 string'
-  },
-  {
-    id: 2,
-    code: 'let age = 25',
-    inferredType: 'number',
-    explanation: 'TypeScript 根据数字字面量推断出 age 的类型是 number'
-  },
-  {
-    id: 3,
-    code: 'let isActive = true',
-    inferredType: 'boolean',
-    explanation: 'TypeScript 根据布尔值推断出 isActive 的类型是 boolean'
-  },
-  {
-    id: 4,
-    code: 'let numbers = [1, 2, 3]',
-    inferredType: 'number[]',
-    explanation: 'TypeScript 推断出这是一个数字数组'
-  }
-])
+const { t, messages, locale } = useI18n(typescriptIntroLocale)
+const codeExamples = computed(() => messages.value.inference.examples)
+const bestPractices = computed(() => messages.value.inference.practices)
+const codeComparisons = computed(() => messages.value.inference.comparisons)
 
-const currentExample = ref(codeExamples.value[0])
+const currentExample = ref(null)
 
-// 显示类型错误
 const showError = ref(false)
 const errorMessage = ref('')
 
-const setMessage = (msg, isError = false) => {
-  errorMessage.value = msg
-  showError.value = isError
-  setTimeout(() => {
-    errorMessage.value = ''
-    showError.value = false
-  }, 3000)
-}
-
-// 切换示例
 const selectExample = (example) => {
   currentExample.value = example
   errorMessage.value = ''
   showError.value = false
 }
 
-// 尝试类型错误
 const tryTypeError = () => {
   showError.value = true
-  errorMessage.value = `❌ TypeScript 错误：不能将类型 "number" 分配给类型 "${currentExample.value.inferredType}"`
+  errorMessage.value = `❌ ${t('inference.errorMessage', { type: currentExample.value.inferredType })}`
   setTimeout(() => {
     showError.value = false
     errorMessage.value = ''
   }, 3000)
 }
 
-// 最佳实践示例
-const bestPractices = ref([
-  {
-    title: '何时使用类型推断',
-    items: [
-      '变量初始化时有明确的值',
-      '函数返回值可以明显推断',
-      '简单的字面量赋值'
-    ]
-  },
-  {
-    title: '何时需要显式注解',
-    items: [
-      '函数参数（必须）',
-      '对象或数组的复杂结构',
-      '无法从初始值推断类型',
-      '需要明确的类型约束'
-    ]
-  }
-])
+function resetCurrentExample() {
+  currentExample.value = codeExamples.value[0]
+  errorMessage.value = ''
+  showError.value = false
+}
 
-// 代码对比
-const codeComparisons = ref([
-  {
-    scenario: '函数返回值',
-    withInference:
-      'function add(a: number, b: number) {\n  return a + b  // 推断为 number\n}',
-    withAnnotation:
-      'function add(a: number, b: number): number {\n  return a + b\n}',
-    recommendation: '推荐使用推断'
-  },
-  {
-    scenario: '复杂对象',
-    withInference:
-      'const user = {\n  name: "张三",\n  age: 25,\n  email: "test@example.com"\n}  // 类型自动推断',
-    withAnnotation:
-      'interface User {\n  name: string\n  age: number\n  email: string\n}\n\nconst user: User = { ... }',
-    recommendation: '复杂结构建议用接口'
-  }
-])
+resetCurrentExample()
+watch(locale, resetCurrentExample)
 </script>
 
 <template>
   <div class="type-inference-demo">
-    <h3>🔮 类型推断演示</h3>
+    <h3>🔮 {{ t('inference.title') }}</h3>
 
     <div class="demo-container">
-      <!-- 概念说明 -->
       <div class="concept-section">
         <div class="concept-card">
           <div class="concept-icon">🧠</div>
           <div class="concept-content">
-            <h4>什么是类型推断？</h4>
+            <h4>{{ t('inference.conceptTitle') }}</h4>
             <p>
-              TypeScript
-              很聪明，它能根据你写的代码自动推断出变量的类型，不需要每次都手动标注。
+              {{ t('inference.conceptText') }}
             </p>
           </div>
         </div>
       </div>
 
-      <!-- 示例选择器 -->
       <div class="example-selector">
-        <h4>选择一个示例看看类型推断是如何工作的：</h4>
+        <h4>{{ t('inference.selectorTitle') }}</h4>
         <div class="examples-grid">
           <div
             v-for="example in codeExamples"
@@ -143,13 +75,12 @@ const codeComparisons = ref([
         </div>
       </div>
 
-      <!-- 当前示例详情 -->
-      <div class="current-example">
+      <div v-if="currentExample" class="current-example">
         <div class="example-display">
           <div class="code-panel">
             <div class="panel-header">
               <span class="code-icon">💻</span>
-              <span>代码</span>
+              <span>{{ t('inference.codeLabel') }}</span>
             </div>
             <pre><code class="typescript">{{ currentExample.code }}</code></pre>
           </div>
@@ -159,7 +90,7 @@ const codeComparisons = ref([
           <div class="type-panel">
             <div class="panel-header">
               <span class="type-icon">🏷️</span>
-              <span>推断的类型</span>
+              <span>{{ t('inference.inferredTypeLabel') }}</span>
             </div>
             <div class="inferred-type">
               {{ currentExample.inferredType }}
@@ -175,7 +106,6 @@ const codeComparisons = ref([
         </div>
       </div>
 
-      <!-- 错误消息 -->
       <div
         v-if="errorMessage"
         :class="['message-box', showError ? 'error' : 'success']"
@@ -183,17 +113,15 @@ const codeComparisons = ref([
         {{ errorMessage }}
       </div>
 
-      <!-- 操作按钮 -->
       <div class="controls">
-        <button class="btn-danger" @click="tryTypeError">尝试类型错误</button>
+        <button class="btn-danger" @click="tryTypeError">{{ t('inference.tryError') }}</button>
         <button class="btn-secondary" @click="showError = false; errorMessage = ''">
-          清除消息
+          {{ t('common.clearMessage') }}
         </button>
       </div>
 
-      <!-- 最佳实践 -->
       <div class="best-practices">
-        <h4>📚 最佳实践</h4>
+        <h4>📚 {{ t('inference.practicesTitle') }}</h4>
         <div class="practices-grid">
           <div
             v-for="(practice, index) in bestPractices"
@@ -212,9 +140,8 @@ const codeComparisons = ref([
         </div>
       </div>
 
-      <!-- 代码对比 -->
       <div class="comparisons">
-        <h4>🔄 类型推断 vs 显式注解</h4>
+        <h4>🔄 {{ t('inference.comparisonTitle') }}</h4>
         <div
           v-for="(comparison, index) in codeComparisons"
           :key="index"
@@ -225,11 +152,11 @@ const codeComparisons = ref([
           </div>
           <div class="comparison-codes">
             <div class="comparison-code">
-              <div class="code-label">使用推断</div>
+              <div class="code-label">{{ t('inference.inferenceLabel') }}</div>
               <pre><code class="typescript">{{ comparison.withInference }}</code></pre>
             </div>
             <div class="comparison-code">
-              <div class="code-label">显式注解</div>
+              <div class="code-label">{{ t('inference.annotationLabel') }}</div>
               <pre><code class="typescript">{{ comparison.withAnnotation }}</code></pre>
             </div>
           </div>

@@ -1,8 +1,8 @@
 <template>
   <div class="why-no-auto-sync-demo">
     <div class="demo-header">
-      <span class="title">变量修改时发生了什么？</span>
-      <span class="subtitle">原生 JavaScript vs 框架</span>
+      <span class="title">{{ t('whyNoAutoSync.title') }}</span>
+      <span class="subtitle">{{ t('whyNoAutoSync.subtitle') }}</span>
     </div>
 
     <div class="toggle-bar">
@@ -10,90 +10,92 @@
         :class="['toggle-btn', { active: mode === 'native' }]"
         @click="switchMode('native')"
       >
-        原生 JavaScript
+        {{ t('whyNoAutoSync.native') }}
       </button>
       <button
         :class="['toggle-btn', { active: mode === 'framework' }]"
         @click="switchMode('framework')"
       >
-        使用框架（Vue）
+        {{ t('whyNoAutoSync.framework') }}
       </button>
     </div>
 
     <div class="visualization-area">
       <div class="code-col">
-        <div class="col-title">你写的代码</div>
+        <div class="col-title">{{ t('whyNoAutoSync.codeTitle') }}</div>
         <div class="code-block">
           <div class="code-line">
-            <span class="code-comment">// 点击按钮时执行</span>
+            <span class="code-comment">{{ t('whyNoAutoSync.clickComment') }}</span>
           </div>
           <div :class="['code-line', 'code-highlight', { executing: step >= 1 }]">
             <span class="code-text">count = count + 1</span>
-            <span v-if="step >= 1" class="step-badge">{{ step >= 1 ? '✓ 执行' : '' }}</span>
+            <span v-if="step >= 1" class="step-badge">{{ t('whyNoAutoSync.executed') }}</span>
           </div>
           <template v-if="mode === 'native'">
             <div class="code-line code-gap" />
             <div class="code-line">
-              <span class="code-comment">// 你还要手动写下面这些：</span>
+              <span class="code-comment">{{ t('whyNoAutoSync.manualComment') }}</span>
             </div>
             <div :class="['code-line', 'code-manual', { executing: step >= 2, missing: step === 1 }]">
               <span class="code-text">document.getElementById('count')</span>
             </div>
             <div :class="['code-line', 'code-manual', { executing: step >= 2, missing: step === 1 }]">
               <span class="code-text">  .textContent = count</span>
-              <span v-if="step >= 2" class="step-badge">✓ 手动</span>
-              <span v-else-if="step === 1" class="step-badge miss">需要你写</span>
+              <span v-if="step >= 2" class="step-badge">{{ t('whyNoAutoSync.manualBadge') }}</span>
+              <span v-else-if="step === 1" class="step-badge miss">{{ t('whyNoAutoSync.needWrite') }}</span>
             </div>
             <div :class="['code-line', 'code-manual', { executing: step >= 3, missing: step < 3 && step >= 1 }]">
               <span class="code-text">document.getElementById('total')</span>
             </div>
             <div :class="['code-line', 'code-manual', { executing: step >= 3, missing: step < 3 && step >= 1 }]">
               <span class="code-text">  .textContent = count * 99</span>
-              <span v-if="step >= 3" class="step-badge">✓ 手动</span>
-              <span v-else-if="step >= 1" class="step-badge miss">需要你写</span>
+              <span v-if="step >= 3" class="step-badge">{{ t('whyNoAutoSync.manualBadge') }}</span>
+              <span v-else-if="step >= 1" class="step-badge miss">{{ t('whyNoAutoSync.needWrite') }}</span>
             </div>
           </template>
           <template v-else>
             <div class="code-line code-gap" />
             <div class="code-line">
-              <span class="code-comment">// 不需要写别的了</span>
+              <span class="code-comment">{{ t('whyNoAutoSync.noMoreCode') }}</span>
             </div>
             <div class="code-line">
-              <span class="code-comment">// 框架会自动完成后续步骤</span>
+              <span class="code-comment">{{ t('whyNoAutoSync.frameworkAutoComment') }}</span>
             </div>
           </template>
         </div>
       </div>
 
       <div class="flow-col">
-        <div class="col-title">执行流程</div>
+        <div class="col-title">{{ t('whyNoAutoSync.flowTitle') }}</div>
         <div class="flow-steps">
           <div :class="['flow-step', { active: step >= 1, done: step > 1 }]">
             <span class="flow-num">1</span>
             <div class="flow-content">
-              <div class="flow-title">JavaScript 修改变量</div>
-              <div class="flow-desc">count 从 {{ count - 1 }} 变成 {{ count }}</div>
+              <div class="flow-title">{{ t('whyNoAutoSync.jsModify') }}</div>
+              <div class="flow-desc">
+                {{ t('whyNoAutoSync.countChanged', { from: count - 1, to: count }) }}
+              </div>
             </div>
           </div>
 
           <div class="flow-arrow" :class="{ active: step >= 1 }">
-            <span v-if="mode === 'native'">{{ step === 1 ? '❌ 到这里就停了' : '↓' }}</span>
-            <span v-else>{{ step >= 1 ? '↓ 框架自动接管' : '↓' }}</span>
+            <span v-if="mode === 'native'">{{ step === 1 ? t('whyNoAutoSync.stopped') : '↓' }}</span>
+            <span v-else>{{ step >= 1 ? t('whyNoAutoSync.frameworkTakesOver') : '↓' }}</span>
           </div>
 
           <div :class="['flow-step', { active: step >= 2, done: step > 2, auto: mode === 'framework' }]">
             <span class="flow-num">2</span>
             <div class="flow-content">
               <div class="flow-title">
-                {{ mode === 'native' ? '找到 DOM 节点' : '框架检测到变化' }}
+                {{ mode === 'native' ? t('whyNoAutoSync.findDom') : t('whyNoAutoSync.detectChange') }}
               </div>
               <div class="flow-desc">
                 {{ mode === 'native'
-                  ? '手动调用 document.getElementById()'
-                  : 'Proxy 拦截了赋值操作，通知更新系统' }}
+                  ? t('whyNoAutoSync.manualGetDom')
+                  : t('whyNoAutoSync.proxyDetect') }}
               </div>
             </div>
-            <span v-if="mode === 'framework' && step >= 2" class="auto-badge">自动</span>
+            <span v-if="mode === 'framework' && step >= 2" class="auto-badge">{{ t('whyNoAutoSync.auto') }}</span>
           </div>
 
           <div class="flow-arrow" :class="{ active: step >= 2 }">↓</div>
@@ -102,65 +104,80 @@
             <span class="flow-num">3</span>
             <div class="flow-content">
               <div class="flow-title">
-                {{ mode === 'native' ? '修改 DOM 内容' : '框架更新所有相关 DOM' }}
+                {{ mode === 'native' ? t('whyNoAutoSync.modifyDom') : t('whyNoAutoSync.frameworkUpdateDom') }}
               </div>
               <div class="flow-desc">
                 {{ mode === 'native'
-                  ? '手动调用 .textContent = 新值'
-                  : '自动找到所有使用了 count 的位置并更新' }}
+                  ? t('whyNoAutoSync.manualTextContent')
+                  : t('whyNoAutoSync.autoUpdateCount') }}
               </div>
             </div>
-            <span v-if="mode === 'framework' && step >= 3" class="auto-badge">自动</span>
+            <span v-if="mode === 'framework' && step >= 3" class="auto-badge">{{ t('whyNoAutoSync.auto') }}</span>
           </div>
         </div>
       </div>
 
       <div class="result-col">
-        <div class="col-title">界面结果</div>
+        <div class="col-title">{{ t('whyNoAutoSync.resultTitle') }}</div>
         <div class="result-card">
           <div :class="['result-item', { updated: step >= (mode === 'native' ? 2 : 2) }]">
-            <span class="result-label">购物车</span>
-            <span class="result-value">{{ step >= (mode === 'native' ? 2 : 2) ? count : count - 1 }} 件</span>
+            <span class="result-label">{{ t('whyNoAutoSync.cart') }}</span>
+            <span class="result-value">
+              {{ t('whyNoAutoSync.itemUnit', { count: step >= (mode === 'native' ? 2 : 2) ? count : count - 1 }) }}
+            </span>
           </div>
           <div :class="['result-item', { updated: step >= (mode === 'native' ? 3 : 2), stale: mode === 'native' && step >= 1 && step < 3 }]">
-            <span class="result-label">总价</span>
+            <span class="result-label">{{ t('whyNoAutoSync.totalPrice') }}</span>
             <span class="result-value">¥{{ step >= (mode === 'native' ? 3 : 2) ? count * 99 : (count - 1) * 99 }}</span>
           </div>
         </div>
         <div v-if="mode === 'native' && step === 1" class="stale-warning">
-          变量已经改了，但界面没有任何变化
+          {{ t('whyNoAutoSync.staleAll') }}
         </div>
         <div v-if="mode === 'native' && step === 2" class="stale-warning partial">
-          购物车更新了，但总价还是旧的
+          {{ t('whyNoAutoSync.stalePartial') }}
         </div>
       </div>
     </div>
 
     <div class="controls">
       <button class="action-btn" :disabled="isAnimating" @click="runStep">
-        {{ step === 0 ? '执行 count = count + 1' : mode === 'native' && step < 3 ? '继续手动同步下一个' : '再执行一次' }}
+        {{ actionLabel }}
       </button>
-      <button class="action-btn outline" @click="reset">重置</button>
+      <button class="action-btn outline" @click="reset">{{ t('whyNoAutoSync.reset') }}</button>
     </div>
 
     <div v-if="mode === 'native'" class="info-box">
-      <strong>为什么不自动？</strong>
-      <span>JavaScript 的变量是"无感知"的。你执行 <code>count = 4</code> 时，JavaScript 引擎只是把内存中 count 的值从 3 改成 4，仅此而已。它不会通知任何人，不会触发任何回调，不会去检查页面上哪里显示了 count。所以界面不会有任何变化——除非你自己写代码去更新 DOM。</span>
+      <strong>{{ t('whyNoAutoSync.nativeInfoStrong') }}</strong>
+      <span v-html="t('whyNoAutoSync.nativeInfo')" />
     </div>
     <div v-else class="info-box">
-      <strong>框架怎么做到的？</strong>
-      <span>框架把你的数据用特殊机制包裹起来。以 Vue 为例，它用 JavaScript 的 Proxy（代理）功能拦截你对变量的赋值操作。当你写 <code>count = 4</code> 时，Proxy 会在赋值的同时自动执行一段"通知"代码，告诉框架"count 变了"，框架再去找到所有用到 count 的 DOM 节点并更新它们。整个过程你不需要写任何额外代码。</span>
+      <strong>{{ t('whyNoAutoSync.frameworkInfoStrong') }}</strong>
+      <span v-html="t('whyNoAutoSync.frameworkInfo')" />
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref } from 'vue'
+import { computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { frameworkNatureLocale } from '../../../locales/framework-nature/index.js'
+
+const { t } = useI18n(frameworkNatureLocale)
 
 const mode = ref('native')
 const step = ref(0)
 const count = ref(1)
 const isAnimating = ref(false)
+
+const actionLabel = computed(() => {
+  if (step.value === 0) return t('whyNoAutoSync.runInitial')
+  if (mode.value === 'native' && step.value < 3) {
+    return t('whyNoAutoSync.continueManual')
+  }
+  return t('whyNoAutoSync.runAgain')
+})
 
 function switchMode(m) {
   if (isAnimating.value) return

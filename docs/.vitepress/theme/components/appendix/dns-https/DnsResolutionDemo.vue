@@ -1,20 +1,20 @@
 <template>
   <div class="dns-resolution-demo">
     <h4 style="margin: 0 0 12px 0; color: #1a1a2e">
-      🔍 DNS 解析过程模拟器
+      {{ t('resolution.title') }}
     </h4>
     <div class="input-row">
       <input
         v-model="domain"
         type="text"
-        placeholder="输入域名，如 www.example.com"
+        :placeholder="t('resolution.placeholder')"
         class="domain-input"
         @keyup.enter="startResolve"
       />
       <button class="resolve-btn" :disabled="isResolving" @click="startResolve">
-        {{ isResolving ? '解析中...' : '开始解析' }}
+        {{ isResolving ? t('resolution.resolving') : t('resolution.start') }}
       </button>
-      <button class="reset-btn" @click="reset">重置</button>
+      <button class="reset-btn" @click="reset">{{ t('resolution.reset') }}</button>
     </div>
 
     <div class="resolve-flow">
@@ -47,25 +47,26 @@
     </div>
 
     <div v-if="resolved" class="result-box">
-      <div class="result-title">✅ 解析完成</div>
+      <div class="result-title">{{ t('resolution.completed') }}</div>
       <div class="result-detail">
         <span class="result-domain">{{ domain }}</span>
         →
         <span class="result-ip">{{ resolvedIp }}</span>
       </div>
-      <div class="result-time">总耗时：约 {{ totalTime }}ms（模拟）</div>
+      <div class="result-time">{{ t('resolution.totalTime', { time: totalTime }) }}</div>
     </div>
 
     <div class="info-box">
-      <strong>解析流程说明：</strong>
-      浏览器访问网站时，需要先将域名翻译成 IP
-      地址。这个过程会依次查询多级缓存和服务器，直到找到对应的 IP。
+      <strong>{{ t('resolution.infoPrefix') }}</strong>
+      {{ t('resolution.infoText') }}
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue'
+import { computed, ref } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { dnsHttpsLocale } from '../../../locales/dns-https/index.js'
 
 const domain = ref('www.example.com')
 const isResolving = ref(false)
@@ -73,39 +74,15 @@ const resolved = ref(false)
 const currentStep = ref(-1)
 const resolvedIp = ref('')
 const totalTime = ref(0)
+const { t, messages } = useI18n(dnsHttpsLocale)
 
-const steps = reactive([
-  {
-    icon: '🌐',
-    label: '浏览器缓存',
-    result: '未命中，继续查询...'
-  },
-  {
-    icon: '💻',
-    label: '操作系统缓存',
-    result: '未命中，继续查询...'
-  },
-  {
-    icon: '🔄',
-    label: '递归解析器',
-    result: '向根服务器发起查询...'
-  },
-  {
-    icon: '🌍',
-    label: '根域名服务器',
-    result: '返回 .com TLD 服务器地址'
-  },
-  {
-    icon: '📂',
-    label: 'TLD 服务器',
-    result: '返回权威服务器地址'
-  },
-  {
-    icon: '🏠',
-    label: '权威 DNS 服务器',
-    result: ''
-  }
-])
+const foundResult = ref('')
+const steps = computed(() =>
+  messages.value.resolution.steps.map((step, index) => ({
+    ...step,
+    result: index === messages.value.resolution.steps.length - 1 ? foundResult.value : step.result
+  }))
+)
 
 function generateIp() {
   const a = 93 + Math.floor(Math.random() * 60)
@@ -122,12 +99,12 @@ async function startResolve() {
   currentStep.value = -1
   const ip = generateIp()
   resolvedIp.value = ip
-  steps[5].result = `找到记录！IP = ${ip}`
+  foundResult.value = t('resolution.foundRecord', { ip })
 
   const delays = [200, 300, 400, 500, 400, 300]
   let total = 0
 
-  for (let i = 0; i < steps.length; i++) {
+  for (let i = 0; i < steps.value.length; i++) {
     currentStep.value = i
     await sleep(delays[i])
     total += delays[i]
@@ -145,6 +122,7 @@ function reset() {
   currentStep.value = -1
   resolvedIp.value = ''
   totalTime.value = 0
+  foundResult.value = ''
 }
 
 function sleep(ms) {

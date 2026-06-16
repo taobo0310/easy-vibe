@@ -1,28 +1,21 @@
-<!--
-  HotReloadDemo.vue
-  热更新机制演示
-
-  用途：
-  展示HMR（热模块替换）的工作原理。
--->
 <template>
   <div class="hot-reload-demo">
     <div class="demo-header">
-      <h3>🔥 热更新 (HMR) 演示</h3>
-      <p>修改代码无需刷新页面，即时生效</p>
+      <h3>🔥 {{ t('hotReload.title') }}</h3>
+      <p>{{ t('hotReload.subtitle') }}</p>
     </div>
 
     <div class="demo-content">
-      <!-- 对比图 -->
+      <!-- comparison -->
       <div class="comparison">
         <div class="method-card no-hmr">
           <div class="card-header">
             <span class="icon">🔄</span>
-            <span class="title">传统刷新</span>
+            <span class="title">{{ t('hotReload.traditionalRefresh') }}</span>
           </div>
           <div class="card-body">
             <div
-              v-for="(step, i) in noHmrSteps"
+              v-for="(step, i) in t('hotReload.noHmrSteps')"
               :key="i"
               class="step"
             >
@@ -31,8 +24,8 @@
             </div>
           </div>
           <div class="card-footer">
-            <span class="time">⏱️ 5-10秒</span>
-            <span class="state">页面闪烁、状态丢失</span>
+            <span class="time">⏱️ 5-10s</span>
+            <span class="state">{{ t('hotReload.noHmrFooter') }}</span>
           </div>
         </div>
 
@@ -43,11 +36,11 @@
         <div class="method-card hmr">
           <div class="card-header">
             <span class="icon">⚡</span>
-            <span class="title">HMR 热更新</span>
+            <span class="title">{{ t('hotReload.hmrLabel') }}</span>
           </div>
           <div class="card-body">
             <div
-              v-for="(step, i) in hmrSteps"
+              v-for="(step, i) in t('hotReload.hmrSteps')"
               :key="i"
               class="step"
             >
@@ -57,14 +50,14 @@
           </div>
           <div class="card-footer">
             <span class="time">⏱️ 50-200ms</span>
-            <span class="state">无刷新、状态保持</span>
+            <span class="state">{{ t('hotReload.hmrFooter') }}</span>
           </div>
         </div>
       </div>
 
-      <!-- 流程图 -->
+      <!-- workflow -->
       <div class="flow-diagram">
-        <h4>HMR 工作流程</h4>
+        <h4>{{ t('hotReload.workflowTitle') }}</h4>
         <div class="flow-steps">
           <div
             v-for="(step, i) in flowSteps"
@@ -85,28 +78,28 @@
         </div>
       </div>
 
-      <!-- 支持情况 -->
+      <!-- support table -->
       <div class="support-table">
-        <h4>各构建工具 HMR 支持</h4>
+        <h4>{{ t('hotReload.supportTitle') }}</h4>
         <table>
           <thead>
             <tr>
-              <th>构建工具</th>
-              <th>HMR 支持</th>
-              <th>更新速度</th>
-              <th>特点</th>
+              <th>{{ t('hotReload.toolHeader') }}</th>
+              <th>{{ t('hotReload.hmrSupportHeader') }}</th>
+              <th>{{ t('hotReload.speedHeader') }}</th>
+              <th>{{ t('hotReload.featureHeader') }}</th>
             </tr>
           </thead>
           <tbody>
             <tr
-              v-for="tool in hmrTools"
+              v-for="tool in t('hotReload.hmrTools')"
               :key="tool.name"
             >
               <td><strong>{{ tool.name }}</strong></td>
               <td>
                 <span
                   class="badge"
-                  :class="tool.supportClass"
+                  :class="getSupportClass(tool.support)"
                 >{{ tool.support }}</span>
               </td>
               <td>{{ tool.speed }}</td>
@@ -120,70 +113,33 @@
     <div class="info-box">
       <p>
         <span class="icon">💡</span>
-        <strong>HMR 的核心原理：</strong>
-        构建工具通过 WebSocket 与浏览器保持连接。当文件修改后，工具编译变更模块，通过 WebSocket 通知浏览器。
-        浏览器中的 HMR Runtime 接收更新，替换旧模块，同时保持应用状态不变。
-        这就像是给飞行中的飞机换引擎——不停机就能完成更新。
+        <strong>{{ t('hotReload.infoBoxTitle') }}</strong>
+        {{ t('hotReload.infoBoxContent') }}
       </p>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { frontendEngineeringLocale } from '../../../locales/frontend-engineering/index.js'
 
-const noHmrSteps = [
-  '修改代码并保存',
-  '手动刷新浏览器',
-  '页面重新加载所有资源',
-  '应用状态重置（登录丢失）'
-]
+const { t } = useI18n(frontendEngineeringLocale)
 
-const hmrSteps = [
-  '修改代码并保存',
-  '构建工具检测变更并编译',
-  'WebSocket 推送更新到浏览器',
-  '局部替换模块，状态保持'
-]
+const flowSteps = computed(() => {
+  const labels = t('hotReload.flowSteps')
+  const icons = ['👨‍💻', '🛠️', '📡', '🔄', '✨']
+  return labels.map((label, i) => ({ icon: icons[i] || '', label }))
+})
 
-const flowSteps = [
-  { icon: '👨‍💻', label: '开发者修改代码' },
-  { icon: '🛠️', label: '构建工具编译' },
-  { icon: '📡', label: 'WebSocket推送' },
-  { icon: '🔄', label: '浏览器替换模块' },
-  { icon: '✨', label: '页面即时更新' }
-]
-
-const hmrTools = [
-  {
-    name: 'Vite',
-    support: '原生支持',
-    supportClass: 'excellent',
-    speed: '极快 (<100ms)',
-    feature: '基于 ESM，HMR 速度最快'
-  },
-  {
-    name: 'Webpack',
-    support: '完全支持',
-    supportClass: 'good',
-    speed: '较快 (1-3s)',
-    feature: '最成熟的 HMR 实现'
-  },
-  {
-    name: 'Parcel',
-    support: '自动支持',
-    supportClass: 'good',
-    speed: '快 (500ms-1s)',
-    feature: '零配置，自动 HMR'
-  },
-  {
-    name: 'Rollup',
-    support: '插件支持',
-    supportClass: 'fair',
-    speed: '开发时较慢',
-    feature: '主要用于生产构建'
-  }
-]
+const getSupportClass = (support) => {
+  const excellentKeywords = ['native', 'Native']
+  const goodKeywords = ['full', 'Full', 'auto', 'Auto']
+  if (excellentKeywords.some(k => support.includes(k))) return 'excellent'
+  if (goodKeywords.some(k => support.includes(k))) return 'good'
+  return 'fair'
+}
 </script>
 
 <style scoped>

@@ -2,71 +2,69 @@
   <div class="pricing-calculator">
     <div class="config-section">
       <div class="config-row">
-        <span class="label">实例规格</span>
+        <span class="label">{{ t('pricingCalculator.spec') }}</span>
         <select v-model="config.spec">
-          <option value="small">
-            1核2G (入门)
-          </option>
-          <option value="medium">
-            2核4G (标准)
-          </option>
-          <option value="large">
-            4核8G (高性能)
+          <option
+            v-for="spec in specs"
+            :key="spec.id"
+            :value="spec.id"
+          >
+            {{ spec.label }}
           </option>
         </select>
       </div>
       <div class="config-row">
-        <span class="label">运行时长</span>
+        <span class="label">{{ t('pricingCalculator.runningHours') }}</span>
         <input
           v-model.number="config.hours"
           type="range"
           min="1"
           max="24"
         >
-        <span class="value">{{ config.hours }} 小时/天</span>
+        <span class="value">{{ t('pricingCalculator.hoursPerDay', { hours: config.hours }) }}</span>
       </div>
       <div class="config-row">
-        <span class="label">运行天数</span>
+        <span class="label">{{ t('pricingCalculator.runningDays') }}</span>
         <input
           v-model.number="config.days"
           type="range"
           min="1"
           max="31"
         >
-        <span class="value">{{ config.days }} 天/月</span>
+        <span class="value">{{ t('pricingCalculator.daysPerMonth', { days: config.days }) }}</span>
       </div>
     </div>
 
     <div class="result-section">
       <div class="result-header">
-        月度成本对比
+        {{ t('pricingCalculator.monthlyComparison') }}
       </div>
       <div class="result-cards">
         <div class="result-card">
           <div class="model">
-            按需付费
+            {{ t('pricingCalculator.models.ondemand') }}
           </div>
           <div class="price">
-            ${{ costs.ondemand }}/月
+            {{ t('pricingCalculator.perMonth', { price: `$${costs.ondemand}` }) }}
           </div>
         </div>
         <div class="result-card recommended">
           <div class="model">
-            预留实例
+            {{ t('pricingCalculator.models.reserved') }}
           </div>
           <div class="price">
-            ${{ costs.reserved }}/月
+            {{ t('pricingCalculator.perMonth', { price: `$${costs.reserved}` }) }}
           </div>
           <div class="saving">
-            省 {{ savings }}%
+            {{ t('pricingCalculator.saving', { saving: savings }) }}
           </div>
         </div>
         <div class="result-card">
           <div class="model">
-            抢占式
+            {{ t('pricingCalculator.models.spot') }}
           </div>
           <div class="price">
-            ${{ costs.spot }}/月
+            {{ t('pricingCalculator.perMonth', { price: `$${costs.spot}` }) }}
           </div>
         </div>
       </div>
@@ -81,6 +79,10 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { cloudServicesLocale } from '../../../locales/cloud-services/index.js'
+
+const { t, messages } = useI18n(cloudServicesLocale)
 
 const config = ref({
   spec: 'medium',
@@ -93,6 +95,8 @@ const specPrices = {
   medium: { ondemand: 0.16, reserved: 89, spot: 0.048 },
   large: { ondemand: 0.32, reserved: 179, spot: 0.096 }
 }
+
+const specs = computed(() => messages.value.pricingCalculator.specs)
 
 const costs = computed(() => {
   const price = specPrices[config.value.spec]
@@ -112,11 +116,11 @@ const savings = computed(() => {
 
 const recommendation = computed(() => {
   if (config.value.days < 15) {
-    return '当前使用频率较低，建议选择按需付费'
+    return t('pricingCalculator.recommendations.lowUsage')
   } else if (savings.value > 30) {
-    return `当前使用负载稳定，切换预留实例可省 ${savings.value}%`
+    return t('pricingCalculator.recommendations.stable', { saving: savings.value })
   } else {
-    return '根据当前配置，预留实例更具成本优势'
+    return t('pricingCalculator.recommendations.reserved')
   }
 })
 </script>

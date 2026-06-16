@@ -1,39 +1,25 @@
 <template>
   <div class="framework-motivation">
-    <div class="card">
+    <div v-for="card in cards" :key="card.title" class="card">
       <div class="card-title">
-        问题
+        {{ card.title }}
       </div>
       <ul>
-        <li>数据变化时，手动更新 DOM 容易遗漏</li>
-        <li>页面越复杂，需要同步的地方越多，越容易出 bug</li>
-        <li>多人协作时，DOM 操作散落各处，维护成本高</li>
-      </ul>
-    </div>
-    <div class="card">
-      <div class="card-title">
-        根本原因
-      </div>
-      <ul>
-        <li>浏览器不知道"数据"和"界面"的对应关系</li>
-        <li>原生 DOM API 只提供底层操作，没有"数据变了就更新 UI"的能力</li>
-        <li>开发者被迫充当"人肉同步器"</li>
-      </ul>
-    </div>
-    <div class="card">
-      <div class="card-title">
-        框架的解法
-      </div>
-      <ul>
-        <li>建立数据到 UI 的映射关系（UI = f(State)）</li>
-        <li>自动检测数据变化（响应式系统）</li>
-        <li>自动计算最小 DOM 更新（虚拟 DOM / 编译优化）</li>
+        <li v-for="item in card.items" :key="item">{{ item }}</li>
       </ul>
     </div>
   </div>
 </template>
 
-<script setup></script>
+<script setup>
+import { computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { frameworkNatureLocale } from '../../../locales/framework-nature/index.js'
+
+const { messages } = useI18n(frameworkNatureLocale)
+
+const cards = computed(() => messages.value.frameworkMotivation.cards)
+</script>
 
 <style scoped>
 .framework-motivation {

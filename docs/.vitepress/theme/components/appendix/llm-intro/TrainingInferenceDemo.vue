@@ -1,10 +1,5 @@
-<!--
-  TrainingInferenceDemo.vue
-  LLM 原理进阶演示：续写 -> 对话 -> 训练 -> 对齐
--->
 <template>
   <div class="ti-demo">
-    <!-- 顶部导航 -->
     <div class="nav-tabs">
       <button
         v-for="tab in tabs"
@@ -18,20 +13,19 @@
     </div>
 
     <div class="demo-content">
-      <!-- Tab 1: 基础能力 - 文本续写 -->
       <div
         v-if="currentTab === 'completion'"
         class="mode-view"
       >
         <div class="desc-box">
           <p>
-            <strong>LLM 的本能是“续写”</strong>：它并不懂对话，只是根据上文猜下一个词。
+            <strong>{{ t('training.completionDescTitle') }}</strong>{{ t('training.completionDesc') }}
           </p>
         </div>
 
         <div class="interactive-area">
           <div class="input-row">
-            <span class="prompt-label">Prompt (提示词):</span>
+            <span class="prompt-label">{{ t('training.promptLabel') }}</span>
             <input
               v-model="completionInput"
               type="text"
@@ -60,31 +54,30 @@
             v-if="completionOutput"
             class="explanation"
           >
-            💡 模型在计算概率：<code>P(blue | The sky is) = 90%</code>
+            {{ t('training.probability') }} <code>P(blue | The sky is) = 90%</code>
           </div>
         </div>
       </div>
 
-      <!-- Tab 2: 技巧 - 对话原理 (Template) -->
       <div
         v-if="currentTab === 'chat'"
         class="mode-view"
       >
         <div class="desc-box">
           <p>
-            <strong>如何让它对话？</strong>
-            我们用“剧本”包装输入，让模型以为自己在续写一段对话。
+            <strong>{{ t('training.chatDescTitle') }}</strong>
+            {{ t('training.chatDesc') }}
           </p>
         </div>
 
         <div class="chat-container">
           <div class="chat-ui-half">
             <div class="half-label">
-              用户看到的 (Chat UI)
+              {{ t('training.chatUiLabel') }}
             </div>
             <div class="chat-messages">
               <div class="msg bot">
-                我是 AI 助手，你好！
+                {{ t('training.assistantGreeting') }}
               </div>
               <div class="msg user">
                 {{ chatInput || '...' }}
@@ -112,18 +105,18 @@
           </div>
 
           <div class="arrow-divider">
-            ➡️ 转换 ➡️
+            {{ t('training.transform') }}
           </div>
 
           <div class="model-view-half">
             <div class="half-label">
-              模型看到的 (Raw Prompt)
+              {{ t('training.rawPromptLabel') }}
             </div>
             <div class="raw-prompt">
               <span class="sys-tag">&lt;|system|&gt;</span><br>
               You are a helpful assistant.<br>
               <span class="bot-tag">&lt;|assistant|&gt;</span><br>
-              我是 AI 助手，你好！<br>
+              {{ t('training.assistantGreeting') }}<br>
               <span class="user-tag">&lt;|user|&gt;</span><br>
               {{ chatInput || '...' }}<br>
               <span class="bot-tag">&lt;|assistant|&gt;</span><br>
@@ -133,21 +126,18 @@
         </div>
       </div>
 
-      <!-- Tab 3: 原理 - 训练 (Training) -->
       <div
         v-if="currentTab === 'train'"
         class="mode-view"
       >
         <div class="desc-box">
           <p>
-            <strong>Training (训练原理)</strong>:
-            模型通过大量数据的“填空题”训练。计算预测结果与真实结果的差异（Loss），并不断调整参数以降低
-            Loss。
+            <strong>{{ t('training.trainDescTitle') }}</strong>:
+            {{ t('training.trainDesc') }}
           </p>
         </div>
 
         <div class="training-dashboard">
-          <!-- 左侧：训练过程可视化 -->
           <div class="train-process-panel card-panel">
             <div class="panel-header">
               <span class="step-badge">Step {{ currentStep }}/{{ totalSteps }}</span>
@@ -155,16 +145,15 @@
             </div>
 
             <div class="data-flow">
-              <!-- Input Section -->
               <div class="flow-stage input-stage">
                 <div class="stage-label">
-                  1. Input (输入)
+                  {{ t('training.inputStage') }}
                 </div>
                 <div
                   v-if="currentStep === 0"
                   class="content-box input placeholder"
                 >
-                  <span class="text-content">点击下方按钮开始训练</span>
+                  <span class="text-content">{{ t('training.startPlaceholder') }}</span>
                 </div>
                 <div
                   v-else
@@ -199,7 +188,6 @@
                 <div class="arrow-line" />
               </div>
 
-              <!-- Prediction vs Target Section -->
               <div
                 v-if="currentStep > 0"
                 class="flow-stage comparison"
@@ -256,7 +244,6 @@
                 </div>
               </div>
 
-              <!-- Loss Section -->
               <div
                 v-if="currentStep > 0"
                 class="flow-stage loss-stage"
@@ -296,7 +283,6 @@
             </div>
           </div>
 
-          <!-- 右侧：Loss 曲线 -->
           <div class="train-metrics-panel card-panel">
             <div class="panel-header">
               <span class="panel-title">Training Metrics</span>
@@ -451,22 +437,20 @@
         </div>
       </div>
 
-      <!-- Tab 4: 进阶 - 微调与对齐 (RLHF) -->
       <div
         v-if="currentTab === 'rlhf'"
         class="mode-view"
       >
         <div class="desc-box">
           <p>
-            <strong>从“胡说”到“好助手”</strong>：通过 RLHF (人类反馈)
-            让模型学会礼貌和安全。
+            <strong>{{ t('training.rlhfDescTitle') }}</strong>{{ t('training.rlhfDesc') }}
           </p>
         </div>
 
         <div class="alignment-demo">
           <div class="controls">
             <div class="radio-group">
-              <span class="group-label">模型状态：</span>
+              <span class="group-label">{{ t('training.modelState') }}</span>
               <label
                 class="radio-option"
                 :class="{ active: alignmentState === 'base' }"
@@ -476,7 +460,7 @@
                   type="radio"
                   value="base"
                 >
-                Base Model (未对齐)
+                {{ t('training.baseModel') }}
               </label>
               <label
                 class="radio-option"
@@ -487,14 +471,14 @@
                   type="radio"
                   value="aligned"
                 >
-                Aligned Model (已对齐)
+                {{ t('training.alignedModel') }}
               </label>
             </div>
           </div>
 
           <div class="scenario">
             <div class="user-query">
-              User: "如何制造混乱？"
+              {{ t('training.harmfulQuery') }}
             </div>
 
             <div
@@ -506,10 +490,10 @@
               </div>
               <div class="bubble">
                 <div v-if="alignmentState === 'base'">
-                  哈哈！制造混乱很简单！你可以去大街上大喊大叫，或者...（此处省略1000字胡言乱语）...这太好玩了！
+                  {{ t('training.baseResponse') }}
                 </div>
                 <div v-else>
-                  对不起，我不能回答这个问题。作为一个人工智能助手，我必须遵守安全准则，不能提供有害建议。
+                  {{ t('training.alignedResponse') }}
                 </div>
               </div>
             </div>
@@ -533,16 +517,13 @@
 
 <script setup>
 import { computed, ref } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { llmIntroLocale } from '../../../locales/llm-intro/index.js'
 
+const { t, messages } = useI18n(llmIntroLocale)
 const currentTab = ref('completion')
-const tabs = [
-  { id: 'completion', label: '1. 本能：续写', icon: '✍️' },
-  { id: 'chat', label: '2. 技巧：对话', icon: '🎭' },
-  { id: 'train', label: '3. 原理：训练', icon: '🧠' },
-  { id: 'rlhf', label: '4. 进阶：对齐', icon: '🛡️' }
-]
+const tabs = computed(() => messages.value.training.tabs)
 
-// Tab 1 Logic
 const completionInput = ref('The sky is')
 const completionOutput = ref('')
 const isGenerating = ref(false)
@@ -560,7 +541,6 @@ const runCompletion = async () => {
   isGenerating.value = false
 }
 
-// Tab 2 Logic
 const chatInput = ref('Hello')
 const chatOutput = ref('')
 
@@ -583,7 +563,6 @@ const runChat = async () => {
   isGenerating.value = false
 }
 
-// Tab 3 Logic
 const currentStep = ref(0)
 const totalSteps = 10
 const currentTrainData = ref(null)
@@ -596,12 +575,7 @@ const inputEmbeddingOpacities = ref([0.7, 0.8, 0.75, 0.85, 0.8])
 const predEmbeddingOpacities = ref([0.7, 0.8, 0.75, 0.85, 0.8])
 const targetEmbeddingOpacities = ref([0.9, 0.95, 0.9, 0.95, 0.9])
 
-const trainDataset = [
-  { input: 'The sky is', target: 'blue' },
-  { input: 'I like', target: 'apples' },
-  { input: '今天天气', target: '不错' },
-  { input: 'Machine', target: 'Learning' }
-]
+const trainDataset = computed(() => messages.value.training.trainDataset)
 
 const isPredictionCorrect = computed(() => {
   if (!currentTrainData.value) return false
@@ -640,7 +614,7 @@ const handleTrainClick = () => {
 
   if (!activeTrainData.value) {
     activeTrainData.value =
-      trainDataset[Math.floor(Math.random() * trainDataset.length)]
+      trainDataset.value[Math.floor(Math.random() * trainDataset.value.length)]
   }
 
   currentStep.value += 1
@@ -711,24 +685,13 @@ const handleTrainClick = () => {
 }
 
 const trainButtonText = computed(() => {
-  if (currentStep.value === 0) return 'Start Training (开始训练)'
-  if (currentStep.value >= totalSteps) return 'Restart (重新开始)'
-  return 'Next Step (下一步)'
+  if (currentStep.value === 0) return t('training.buttons.start')
+  if (currentStep.value >= totalSteps) return t('training.buttons.restart')
+  return t('training.buttons.next')
 })
 
 const getRandomWord = () => {
-  const words = [
-    'cat',
-    'fly',
-    'run',
-    'red',
-    'table',
-    'what',
-    'bad',
-    '未知',
-    '乱码',
-    '错误'
-  ]
+  const words = messages.value.training.randomWords
   return words[Math.floor(Math.random() * words.length)]
 }
 
@@ -780,7 +743,6 @@ const getLossColor = (loss) => {
 
 seedOpacities()
 
-// Tab 4 Logic
 const alignmentState = ref('base')
 </script>
 

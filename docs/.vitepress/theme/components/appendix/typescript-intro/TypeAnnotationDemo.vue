@@ -1,7 +1,11 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, watch } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { typescriptIntroLocale } from '../../../locales/typescript-intro/index.js'
 
-const name = ref('张三')
+const { t, locale } = useI18n(typescriptIntroLocale)
+
+const name = ref(t('annotation.initialName'))
 const age = ref(25)
 const isActive = ref(true)
 const showError = ref(false)
@@ -17,16 +21,13 @@ const setMessage = (msg, isError = false) => {
 }
 
 const modifyName = () => {
-  // TypeScript 会在编译时检查类型错误
-  // name.value = 123 // 这行会在 TypeScript 中报错
-  name.value = '李四'
-  setMessage('✅ 修改成功！类型检查通过', false)
+  name.value = t('annotation.changedName')
+  setMessage(`✅ ${t('annotation.successName')}`, false)
 }
 
 const modifyAgeError = () => {
-  // 演示类型错误
   showError.value = true
-  errorMessage.value = '❌ TypeScript 错误：不能将类型 "string" 分配给类型 "number"'
+  errorMessage.value = `❌ ${t('annotation.ageError')}`
   setTimeout(() => {
     showError.value = false
     errorMessage.value = ''
@@ -35,25 +36,26 @@ const modifyAgeError = () => {
 
 const toggleActive = () => {
   isActive.value = !isActive.value
-  setMessage(`✅ 状态切换为 ${isActive.value}`, false)
+  setMessage(`✅ ${t('annotation.activeMessage', { value: isActive.value })}`, false)
 }
 
 const reset = () => {
-  name.value = '张三'
+  name.value = t('annotation.initialName')
   age.value = 25
   isActive.value = true
   errorMessage.value = ''
   showError.value = false
 }
+
+watch(locale, reset)
 </script>
 
 <template>
   <div class="type-annotation-demo">
-    <h3>📝 TypeScript 类型注解演示</h3>
+    <h3>📝 {{ t('annotation.title') }}</h3>
 
     <div class="demo-container">
       <div class="variables-grid">
-        <!-- String 类型 -->
         <div class="variable-card string-card">
           <div class="card-header">
             <span class="type-badge string">string</span>
@@ -67,7 +69,6 @@ const reset = () => {
           </div>
         </div>
 
-        <!-- Number 类型 -->
         <div class="variable-card number-card">
           <div class="card-header">
             <span class="type-badge number">number</span>
@@ -81,7 +82,6 @@ const reset = () => {
           </div>
         </div>
 
-        <!-- Boolean 类型 -->
         <div class="variable-card boolean-card">
           <div class="card-header">
             <span class="type-badge boolean">boolean</span>
@@ -97,7 +97,6 @@ const reset = () => {
         </div>
       </div>
 
-      <!-- 错误消息显示 -->
       <div
         v-if="errorMessage"
         :class="['message-box', showError ? 'error' : 'success']"
@@ -105,49 +104,45 @@ const reset = () => {
         {{ errorMessage }}
       </div>
 
-      <!-- 操作按钮 -->
       <div class="controls">
         <button
           class="btn-primary"
           @click="modifyName"
         >
-          修改 name (正确)
+          {{ t('annotation.buttons.modifyName') }}
         </button>
         <button
           class="btn-danger"
           @click="modifyAgeError"
         >
-          赋值错误类型
+          {{ t('annotation.buttons.ageError') }}
         </button>
         <button
           class="btn-secondary"
           @click="toggleActive"
         >
-          切换 isActive
+          {{ t('annotation.buttons.toggleActive') }}
         </button>
         <button
           class="btn-ghost"
           @click="reset"
         >
-          重置
+          {{ t('common.reset') }}
         </button>
       </div>
 
-      <!-- 代码对比 -->
       <div class="code-comparison">
         <div class="code-panel javascript">
           <div class="panel-header">
-            JavaScript (无类型检查)
+            {{ t('annotation.panels.javascript') }}
           </div>
-          <pre><code>let name = "张三"
-name = 123  // ✅ 运行时才会报错（可能很晚才发现）</code></pre>
+          <pre><code>{{ t('annotation.jsCode') }}</code></pre>
         </div>
         <div class="code-panel typescript">
           <div class="panel-header">
-            TypeScript (编译时检查)
+            {{ t('annotation.panels.typescript') }}
           </div>
-          <pre><code>let name: string = "张三"
-name = 123  // ❌ 编译时立即报错（写代码时就发现）</code></pre>
+          <pre><code>{{ t('annotation.tsCode') }}</code></pre>
         </div>
       </div>
     </div>

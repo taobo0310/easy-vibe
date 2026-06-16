@@ -1,22 +1,22 @@
 <template>
   <div class="instruction-format-demo">
     <div class="demo-header">
-      <span class="title">机器指令格式</span>
-      <span class="subtitle">操作码 + 操作数 = 机器指令</span>
+      <span class="title">{{ t('computerOrganization.instructionFormat.title') }}</span>
+      <span class="subtitle">{{ t('computerOrganization.instructionFormat.subtitle') }}</span>
     </div>
 
     <div class="format-selector">
       <button 
         v-for="fmt in instructionFormats" 
-        :key="fmt.type"
-        :class="['format-btn', { active: selectedFormat === fmt.type }]"
-        @click="selectedFormat = fmt.type"
+        :key="fmt.id"
+        :class="['format-btn', { active: selectedFormat === fmt.id }]"
+        @click="selectedFormat = fmt.id"
       >
         {{ fmt.type }}
       </button>
     </div>
 
-    <div class="format-visualization" v-if="selectedFormatData">
+    <div v-if="selectedFormatData" class="format-visualization">
       <div class="format-diagram">
         <div 
           v-for="(field, i) in selectedFormatData.fields" 
@@ -25,12 +25,12 @@
           :style="{ flex: field.bits }"
         >
           <span class="field-name">{{ field.name }}</span>
-          <span class="field-bits">{{ field.bits }}位</span>
+          <span class="field-bits">{{ t('computerOrganization.instructionFormat.bitLabel', { bits: field.bits }) }}</span>
         </div>
       </div>
       
       <div class="format-example">
-        <div class="example-title">示例指令</div>
+        <div class="example-title">{{ t('computerOrganization.instructionFormat.exampleTitle') }}</div>
         <div class="binary-display">
           <span 
             v-for="(bit, i) in selectedFormatData.example" 
@@ -45,11 +45,13 @@
       </div>
 
       <div class="format-explanation">
-        <div class="exp-title">{{ selectedFormatData.type }} 格式说明</div>
+        <div class="exp-title">
+          {{ t('computerOrganization.instructionFormat.formatExplanationTitle', { type: selectedFormatData.type }) }}
+        </div>
         <div class="exp-content">{{ selectedFormatData.explanation }}</div>
         
-        <div class="examples-list" v-if="selectedFormatData.examples">
-          <div class="list-title">常见指令示例</div>
+        <div v-if="selectedFormatData.examples" class="examples-list">
+          <div class="list-title">{{ t('computerOrganization.instructionFormat.commonExamples') }}</div>
           <div v-for="ex in selectedFormatData.examples" :key="ex.name" class="example-item">
             <span class="ex-name">{{ ex.name }}</span>
             <span class="ex-desc">{{ ex.desc }}</span>
@@ -59,12 +61,12 @@
     </div>
 
     <div class="opcode-table">
-      <div class="table-title">常用操作码 (Opcode)</div>
+      <div class="table-title">{{ t('computerOrganization.instructionFormat.opcodeTitle') }}</div>
       <div class="opcode-grid">
-        <div v-for="op in opcodes" :key="op.code" class="opcode-item">
-          <span class="op-code">{{ op.code }}</span>
-          <span class="op-name">{{ op.name }}</span>
-          <span class="op-desc">{{ op.desc }}</span>
+        <div v-for="op in opcodes" :key="op[0]" class="opcode-item">
+          <span class="op-code">{{ op[0] }}</span>
+          <span class="op-name">{{ op[1] }}</span>
+          <span class="op-desc">{{ op[2] }}</span>
         </div>
       </div>
     </div>
@@ -72,105 +74,26 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { computed, ref } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { computerFundamentalsLocale } from '../../../locales/computer-fundamentals/index.js'
 
-const selectedFormat = ref('three-address')
+const { t, messages } = useI18n(computerFundamentalsLocale)
 
-const instructionFormats = ref([
-  { 
-    type: '零地址', 
-    fields: [{ name: '操作码', bits: 8 }],
-    example: '01101100',
-    description: '操作数隐含在栈顶',
-    explanation: '零地址指令只有操作码，操作数隐含在操作数栈中。常用于堆栈计算机，如 ENTER、EXIT 等。',
-    examples: [
-      { name: 'POP', desc: '弹出栈顶数据' },
-      { name: 'PUSH', desc: '压入数据到栈顶' },
-      { name: 'CALL', desc: '调用子程序' }
-    ]
-  },
-  { 
-    type: '一地址', 
-    fields: [
-      { name: '操作码', bits: 8 },
-      { name: '地址', bits: 24 }
-    ],
-    example: '01101100 00000001 00000010 00000011',
-    description: '一个操作数地址，另一个隐含',
-    explanation: '一地址指令有一个操作数在内存/寄存器中，另一个操作数隐含在 ACC（累加器）中。如 INC、DEC 等单操作数指令。',
-    examples: [
-      { name: 'INC A', desc: 'A = A + 1' },
-      { name: 'DEC A', desc: 'A = A - 1' },
-      { name: 'NOT A', desc: 'A = ~A' }
-    ]
-  },
-  { 
-    type: '二地址', 
-    fields: [
-      { name: '操作码', bits: 8 },
-      { name: '目的地址', bits: 8 },
-      { name: '源地址', bits: 8 }
-    ],
-    example: '01101100 00000001 00000010',
-    description: '两个操作数地址，结果存目的地址',
-    explanation: '最常用的指令格式。两个操作数地址，结果覆盖目的操作数。如 ADD、SUB、MOV 等。',
-    examples: [
-      { name: 'MOV R1, R2', desc: 'R1 = R2' },
-      { name: 'ADD R1, R2', desc: 'R1 = R1 + R2' },
-      { name: 'SUB R1, R2', desc: 'R1 = R1 - R2' }
-    ]
-  },
-  { 
-    type: '三地址', 
-    fields: [
-      { name: '操作码', bits: 8 },
-      { name: '目的', bits: 8 },
-      { name: '源1', bits: 8 },
-      { name: '源2', bits: 8 }
-    ],
-    example: '01101100 00000001 00000010 00000011',
-    description: '结果存新地址，不破坏源操作数',
-    explanation: '三个地址分别指定目的操作数和两个源操作数。结果存入目的地址，不改变源操作数。常见于复杂指令集。',
-    examples: [
-      { name: 'ADD R1, R2, R3', desc: 'R1 = R2 + R3' },
-      { name: 'SUB R1, R2, R3', desc: 'R1 = R2 - R3' },
-      { name: 'MUL R1, R2, R3', desc: 'R1 = R2 × R3' }
-    ]
-  }
-])
+const selectedFormat = ref('three')
+
+const instructionFormats = computed(() => messages.value.computerOrganization.instructionFormat.formats)
 
 const selectedFormatData = computed(() => {
-  return instructionFormats.value.find(f => f.type === selectedFormat.value)
+  return instructionFormats.value.find(f => f.id === selectedFormat.value)
 })
 
-const isHighlight = (index, formatData) => {
+const isHighlight = (index) => {
   const opcodeBits = 8
   return index < opcodeBits
 }
 
-const opcodes = ref([
-  { code: '00000000', name: 'NOP', desc: '无操作' },
-  { code: '00000001', name: 'MOV', desc: '数据传送' },
-  { code: '00000010', name: 'ADD', desc: '加法' },
-  { code: '00000011', name: 'SUB', desc: '减法' },
-  { code: '00000100', name: 'MUL', desc: '乘法' },
-  { code: '00000101', name: 'DIV', desc: '除法' },
-  { code: '00000110', name: 'AND', desc: '逻辑与' },
-  { code: '00000111', name: 'OR', desc: '逻辑或' },
-  { code: '00001000', name: 'NOT', desc: '逻辑非' },
-  { code: '00001001', name: 'XOR', desc: '异或' },
-  { code: '00001010', name: 'SHL', desc: '左移' },
-  { code: '00001011', name: 'SHR', desc: '右移' },
-  { code: '00001100', name: 'JMP', desc: '无条件跳转' },
-  { code: '00001101', name: 'JE', desc: '相等跳转' },
-  { code: '00001110', name: 'JNE', desc: '不等跳转' },
-  { code: '00001111', name: 'CALL', desc: '调用子程序' },
-  { code: '00010000', name: 'RET', desc: '返回' },
-  { code: '00010001', name: 'PUSH', desc: '压栈' },
-  { code: '00010010', name: 'POP', desc: '出栈' },
-  { code: '00010011', name: 'LOAD', desc: '从内存加载' },
-  { code: '00010100', name: 'STORE', desc: '存入内存' }
-])
+const opcodes = computed(() => messages.value.computerOrganization.instructionFormat.opcodes)
 </script>
 
 <style scoped>

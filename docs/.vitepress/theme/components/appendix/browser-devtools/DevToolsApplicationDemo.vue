@@ -1,6 +1,10 @@
 <script setup>
 import { ref, reactive } from 'vue'
 import { ElMessage } from 'element-plus'
+import { useI18n } from '../../../composables/useI18n.js'
+import { browserDevtoolsLocale } from '../../../locales/browser-devtools/index.js'
+
+const { t } = useI18n(browserDevtoolsLocale)
 
 const activeTab = ref('local')
 
@@ -65,14 +69,14 @@ const clearAll = () => {
   >
     <template #header>
       <div class="header">
-        <span class="title">Application (应用面板)</span>
+        <span class="title">{{ t('applicationDemo.title') }}</span>
         <el-button
           type="danger"
           size="small"
           icon="Delete"
           @click="clearAll"
         >
-          Clear All
+          {{ t('applicationDemo.clearAllBtn') }}
         </el-button>
       </div>
     </template>
@@ -168,19 +172,19 @@ const clearAll = () => {
           v-if="activeTab === 'local'"
           class="info-bar"
         >
-          持久化存储：即便关闭浏览器，数据也会保留。
+          {{ t('applicationDemo.infoBars.local') }}
         </div>
         <div
           v-else-if="activeTab === 'session'"
           class="info-bar"
         >
-          临时存储：关闭标签页后，数据会被清空。
+          {{ t('applicationDemo.infoBars.session') }}
         </div>
         <div
           v-else
           class="info-bar"
         >
-          Cookies：通常用于身份验证，会随请求发送给服务器。
+          {{ t('applicationDemo.infoBars.cookies') }}
         </div>
       </div>
     </div>

@@ -1,15 +1,11 @@
-<!--
-  RoutingModeDemo.vue
-  MPA vs SPA 路由体验对比
--->
 <template>
   <div class="routing-demo">
     <div class="header">
       <div class="title">
-        路由方式：整页刷新 vs 局部切换
+        {{ t('frameworks.routingMode.title') }}
       </div>
       <div class="subtitle">
-        点击导航，感受体验差异
+        {{ t('frameworks.routingMode.subtitle') }}
       </div>
     </div>
 
@@ -19,14 +15,14 @@
         :class="{ active: mode === 'mpa' }"
         @click="mode = 'mpa'"
       >
-        传统多页 (MPA)
+        {{ t('frameworks.routingMode.mpa') }}
       </button>
       <button
         class="mode"
         :class="{ active: mode === 'spa' }"
         @click="mode = 'spa'"
       >
-        单页应用 (SPA)
+        {{ t('frameworks.routingMode.spa') }}
       </button>
     </div>
 
@@ -45,13 +41,13 @@
         v-if="loading"
         class="loading"
       >
-        页面加载中...
+        {{ t('frameworks.routingMode.loading') }}
       </div>
       <div
         v-else
         class="content"
       >
-        当前页面：<strong>{{ currentPage }}</strong>
+        {{ t('frameworks.routingMode.currentPage') }}<strong>{{ currentPage }}</strong>
       </div>
     </div>
 
@@ -62,18 +58,26 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { webBasicsLocale } from '../../../locales/web-basics/index.js'
+
+const { t, messages } = useI18n(webBasicsLocale)
 
 const mode = ref('mpa')
-const pages = ['首页', '商品', '购物车', '个人中心']
-const currentPage = ref('首页')
+const pages = computed(() => messages.value.frameworks.routingMode.pages)
+const currentPage = ref(pages.value[0])
 const loading = ref(false)
 
 const hintText = computed(() =>
   mode.value === 'mpa'
-    ? 'MPA：每次切换都要整页刷新'
-    : 'SPA：只更新内容区域，状态可保留'
+    ? t('frameworks.routingMode.hints.mpa')
+    : t('frameworks.routingMode.hints.spa')
 )
+
+watch(pages, (nextPages) => {
+  currentPage.value = nextPages[0]
+})
 
 const navigate = (page) => {
   loading.value = true

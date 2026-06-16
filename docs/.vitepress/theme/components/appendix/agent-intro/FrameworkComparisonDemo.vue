@@ -1,16 +1,12 @@
-<!--
-  FrameworkComparisonDemo.vue
-  框架对比（更直观）：选择关注点，表格高亮适配度。
--->
 <template>
   <div class="cmp">
     <div class="header">
       <div>
         <div class="title">
-          主流框架对比（先看“适配度”）
+          {{ t('frameworkComparison.title') }}
         </div>
         <div class="subtitle">
-          先选你的关注点，再看推荐。
+          {{ t('frameworkComparison.subtitle') }}
         </div>
       </div>
       <div class="focus">
@@ -27,11 +23,12 @@
 
     <div class="table">
       <div class="row head">
-        <div>框架</div>
-        <div>上手</div>
-        <div>可控</div>
-        <div>多 Agent</div>
-        <div>适合做什么</div>
+        <div
+          v-for="header in headers"
+          :key="header"
+        >
+          {{ header }}
+        </div>
       </div>
       <div
         v-for="fw in frameworks"
@@ -52,7 +49,7 @@
 
     <div class="rec">
       <div class="rec-title">
-        此刻更推荐：{{ best }}
+        {{ t('frameworkComparison.recommend', { name: best }) }}
       </div>
       <div class="rec-body">
         {{ reason }}
@@ -63,38 +60,15 @@
 
 <script setup>
 import { computed, ref } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { agentIntroLocale } from '../../../locales/agent-intro/index.js'
 
-const focuses = [
-  { id: 'start', label: '快速上手' },
-  { id: 'control', label: '可控可调试' },
-  { id: 'team', label: '多 Agent 协作' }
-]
+const { t, messages } = useI18n(agentIntroLocale)
+const focuses = computed(() => messages.value.frameworkComparison.focuses)
+const headers = computed(() => messages.value.frameworkComparison.headers)
+const frameworks = computed(() => messages.value.frameworkComparison.frameworks)
 
 const focus = ref('control')
-
-const frameworks = [
-  {
-    name: 'LangChain / LangGraph',
-    learn: '中',
-    control: '高',
-    multi: '中',
-    use: '可控的工具调用、工作流、企业集成'
-  },
-  {
-    name: 'AutoGen',
-    learn: '中',
-    control: '中',
-    multi: '高',
-    use: '多 Agent 对话协作、编程/分析助手'
-  },
-  {
-    name: 'CrewAI',
-    learn: '低',
-    control: '中',
-    multi: '高',
-    use: '角色分工清晰的团队协作任务'
-  }
-]
 
 const best = computed(() => {
   if (focus.value === 'start') return 'CrewAI'
@@ -103,11 +77,7 @@ const best = computed(() => {
 })
 
 const reason = computed(() => {
-  if (focus.value === 'start')
-    return '概念更直观（角色+任务），适合先跑通一个最小团队。'
-  if (focus.value === 'team')
-    return '多 Agent 对话与协作是强项，适合需要分工的场景。'
-  return '把流程“画成图/写成步骤”，更利于调试、上线与长期维护。'
+  return messages.value.frameworkComparison.reasons[focus.value]
 })
 </script>
 

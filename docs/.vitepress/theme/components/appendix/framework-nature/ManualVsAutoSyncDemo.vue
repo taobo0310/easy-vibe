@@ -3,12 +3,12 @@
     <div class="comparison-container">
       <div class="side manual-side">
         <div class="side-header">
-          <span class="badge manual">手动同步 / jQuery 风格</span>
+          <span class="badge manual">{{ t('manualVsAuto.manualBadge') }}</span>
         </div>
 
         <div class="cart-control">
-          <button class="action-btn" @click="addManual">添加商品</button>
-          <button class="action-btn outline" @click="resetManual">重置</button>
+          <button class="action-btn" @click="addManual">{{ t('manualVsAuto.addProduct') }}</button>
+          <button class="action-btn outline" @click="resetManual">{{ t('manualVsAuto.reset') }}</button>
         </div>
 
         <div class="sync-areas">
@@ -22,7 +22,7 @@
               <span class="area-icon">{{ area.icon }}</span>
               <span class="area-name">{{ area.name }}</span>
               <span class="sync-badge" :class="{ synced: area.synced }">
-                {{ area.synced ? '已同步' : '未同步' }}
+                {{ area.synced ? t('manualVsAuto.synced') : t('manualVsAuto.unsynced') }}
               </span>
             </div>
             <div class="area-value">{{ area.synced ? area.actual : area.stale }}</div>
@@ -31,13 +31,13 @@
               class="sync-btn"
               @click="syncArea(area)"
             >
-              手动同步
+              {{ t('manualVsAuto.syncManual') }}
             </button>
           </div>
         </div>
 
         <div class="miss-counter">
-          <span class="miss-label">遗漏次数：</span>
+          <span class="miss-label">{{ t('manualVsAuto.missLabel') }}</span>
           <span class="miss-value" :class="{ danger: missCount > 0 }">{{ missCount }}</span>
         </div>
       </div>
@@ -48,12 +48,12 @@
 
       <div class="side auto-side">
         <div class="side-header">
-          <span class="badge auto">自动同步 / 框架风格</span>
+          <span class="badge auto">{{ t('manualVsAuto.autoBadge') }}</span>
         </div>
 
         <div class="cart-control">
-          <button class="action-btn" @click="addAuto">添加商品</button>
-          <button class="action-btn outline" @click="resetAuto">重置</button>
+          <button class="action-btn" @click="addAuto">{{ t('manualVsAuto.addProduct') }}</button>
+          <button class="action-btn outline" @click="resetAuto">{{ t('manualVsAuto.reset') }}</button>
         </div>
 
         <div class="sync-areas">
@@ -65,58 +65,65 @@
             <div class="area-header">
               <span class="area-icon">{{ area.icon }}</span>
               <span class="area-name">{{ area.name }}</span>
-              <span class="sync-badge synced">已同步</span>
+              <span class="sync-badge synced">{{ t('manualVsAuto.synced') }}</span>
             </div>
             <div class="area-value">{{ area.value }}</div>
           </div>
         </div>
 
         <div class="miss-counter">
-          <span class="miss-label">遗漏次数：</span>
+          <span class="miss-label">{{ t('manualVsAuto.missLabel') }}</span>
           <span class="miss-value">0</span>
         </div>
       </div>
     </div>
 
     <div class="info-box">
-      <strong>核心思想：</strong>
-      <span>前端框架的本质价值在于"自动同步"——你只需修改数据，框架保证所有依赖该数据的 UI 自动更新，不会遗漏。</span>
+      <strong>{{ t('manualVsAuto.infoStrong') }}</strong>
+      <span>{{ t('manualVsAuto.info') }}</span>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, reactive, computed } from 'vue'
+import { ref, reactive, computed, watch } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { frameworkNatureLocale } from '../../../locales/framework-nature/index.js'
 
-const products = ['耳机 ¥99', '键盘 ¥199', '鼠标 ¥59', '显示器 ¥1299', '摄像头 ¥149', '音箱 ¥79']
+const { t, messages } = useI18n(frameworkNatureLocale)
+
+const products = computed(() => messages.value.manualVsAuto.products)
 let productIndex = ref(0)
 
 const manualCount = ref(0)
 const manualItems = ref([])
 const missCount = ref(0)
-let pendingManualCount = 0
+const areaName = (id) => messages.value.manualVsAuto.areas[id]
+const emptyValue = () => t('manualVsAuto.empty')
+const normalValue = () => t('manualVsAuto.normal')
+const countValue = (count) => t('manualVsAuto.itemUnit', { count })
 
 const manualAreas = reactive([
   {
     id: 'count',
     icon: '🔴',
-    name: '购物车数量',
+    name: areaName('count'),
     synced: true,
-    stale: '0 件',
-    actual: '0 件'
+    stale: countValue(0),
+    actual: countValue(0)
   },
   {
     id: 'list',
     icon: '📋',
-    name: '商品列表',
+    name: areaName('list'),
     synced: true,
-    stale: '（空）',
-    actual: '（空）'
+    stale: emptyValue(),
+    actual: emptyValue()
   },
   {
     id: 'total',
     icon: '💰',
-    name: '总价',
+    name: areaName('total'),
     synced: true,
     stale: '¥0',
     actual: '¥0'
@@ -124,35 +131,43 @@ const manualAreas = reactive([
   {
     id: 'status',
     icon: '⚠️',
-    name: '状态提示',
+    name: areaName('status'),
     synced: true,
-    stale: '正常',
-    actual: '正常'
+    stale: normalValue(),
+    actual: normalValue()
   }
 ])
 
+watch(messages, () => {
+  manualAreas.forEach((area) => {
+    area.name = areaName(area.id)
+  })
+})
+
+function priceOf(name) {
+  return parseInt(name.match(/¥(\d+)/)[1])
+}
+
 function addManual() {
-  const name = products[productIndex.value % products.length]
+  const name = products.value[productIndex.value % products.value.length]
   productIndex.value++
   manualCount.value++
   manualItems.value.push(name)
-  pendingManualCount = manualCount.value
 
-  const price = parseInt(name.match(/¥(\d+)/)[1])
   const totalPrice = manualItems.value.reduce((sum, item) => {
-    return sum + parseInt(item.match(/¥(\d+)/)[1])
+    return sum + priceOf(item)
   }, 0)
 
-  manualAreas[0].actual = `${manualCount.value} 件`
+  manualAreas[0].actual = countValue(manualCount.value)
   manualAreas[0].synced = false
 
-  manualAreas[1].actual = manualItems.value.join('、')
+  manualAreas[1].actual = manualItems.value.join(t('manualVsAuto.separator'))
   manualAreas[1].synced = false
 
   manualAreas[2].actual = `¥${totalPrice}`
   manualAreas[2].synced = false
 
-  manualAreas[3].actual = manualCount.value > 5 ? '⚠️ 商品过多！' : '正常'
+  manualAreas[3].actual = manualCount.value > 5 ? t('manualVsAuto.tooMany') : normalValue()
   manualAreas[3].synced = false
 
   const unsyncedBefore = manualAreas.filter(a => !a.synced).length
@@ -170,10 +185,16 @@ function resetManual() {
   manualCount.value = 0
   manualItems.value = []
   missCount.value = 0
-  pendingManualCount = 0
   manualAreas.forEach(a => {
     a.synced = true
-    a.stale = a.id === 'count' ? '0 件' : a.id === 'list' ? '（空）' : a.id === 'total' ? '¥0' : '正常'
+    a.stale =
+      a.id === 'count'
+        ? countValue(0)
+        : a.id === 'list'
+          ? emptyValue()
+          : a.id === 'total'
+            ? '¥0'
+            : normalValue()
     a.actual = a.stale
   })
 }
@@ -183,18 +204,18 @@ const autoItems = ref([])
 
 const autoAreas = computed(() => {
   const totalPrice = autoItems.value.reduce((sum, item) => {
-    return sum + parseInt(item.match(/¥(\d+)/)[1])
+    return sum + priceOf(item)
   }, 0)
   return [
-    { id: 'count', icon: '🔴', name: '购物车数量', value: `${autoCount.value} 件` },
-    { id: 'list', icon: '📋', name: '商品列表', value: autoItems.value.length ? autoItems.value.join('、') : '（空）' },
-    { id: 'total', icon: '💰', name: '总价', value: `¥${totalPrice}` },
-    { id: 'status', icon: '⚠️', name: '状态提示', value: autoCount.value > 5 ? '⚠️ 商品过多！' : '正常' }
+    { id: 'count', icon: '🔴', name: areaName('count'), value: countValue(autoCount.value) },
+    { id: 'list', icon: '📋', name: areaName('list'), value: autoItems.value.length ? autoItems.value.join(t('manualVsAuto.separator')) : emptyValue() },
+    { id: 'total', icon: '💰', name: areaName('total'), value: `¥${totalPrice}` },
+    { id: 'status', icon: '⚠️', name: areaName('status'), value: autoCount.value > 5 ? t('manualVsAuto.tooMany') : normalValue() }
   ]
 })
 
 function addAuto() {
-  const name = products[productIndex.value % products.length]
+  const name = products.value[productIndex.value % products.value.length]
   productIndex.value++
   autoCount.value++
   autoItems.value.push(name)

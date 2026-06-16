@@ -1,6 +1,6 @@
 <template>
   <div class="rendering-demo">
-    <div class="demo-title">浏览器渲染管线</div>
+    <div class="demo-title">{{ t('powerOnToWeb.rendering.title') }}</div>
     <div class="pipeline">
       <div v-for="(stage, i) in stages" :key="stage.name" class="pipe-item">
         <div class="pipe-card">
@@ -17,14 +17,12 @@
 </template>
 
 <script setup>
-const stages = [
-  { name: 'HTML 解析', desc: '将 HTML 文本解析为 DOM 树（文档对象模型）' },
-  { name: 'CSS 解析', desc: '将 CSS 规则解析为样式表，计算每个元素的最终样式' },
-  { name: '构建渲染树', desc: 'DOM 树 + 样式规则 = 渲染树（只包含可见元素）' },
-  { name: '布局计算', desc: '计算每个元素在页面上的精确位置和大小' },
-  { name: '绘制', desc: '将元素的文字、颜色、图片、边框等绘制到像素缓冲区' },
-  { name: '合成显示', desc: '将多个图层合成为最终画面，由 GPU 输出到屏幕' }
-]
+import { computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n'
+import { computerFundamentalsLocale } from '../../../locales/computer-fundamentals'
+
+const { t, messages } = useI18n(computerFundamentalsLocale)
+const stages = computed(() => messages.value.powerOnToWeb.rendering.stages)
 </script>
 
 <style scoped>

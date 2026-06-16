@@ -27,7 +27,7 @@
       class="step-detail"
     >
       <div class="detail-header">
-        <span class="detail-step">步骤 {{ currentStep + 1 }}</span>
+        <span class="detail-step">{{ t('deployWorkflow.step', { n: currentStep + 1 }) }}</span>
         <span class="detail-name">{{ currentStepData.name }}</span>
       </div>
       <div class="detail-content">
@@ -36,7 +36,7 @@
         </div>
         <div class="detail-tasks">
           <div class="tasks-title">
-            具体操作：
+            {{ t('deployWorkflow.tasksTitle') }}
           </div>
           <ul>
             <li
@@ -56,14 +56,14 @@
         :disabled="currentStep === 0"
         @click="prevStep"
       >
-        上一步
+        {{ t('deployWorkflow.previous') }}
       </button>
       <button
         class="action-btn primary"
         :disabled="currentStep >= steps.length - 1"
         @click="nextStep"
       >
-        {{ currentStep >= steps.length - 1 ? '完成' : '下一步' }}
+        {{ currentStep >= steps.length - 1 ? t('deployWorkflow.done') : t('deployWorkflow.next') }}
       </button>
     </div>
   </div>
@@ -71,70 +71,18 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { cloudServicesLocale } from '../../../locales/cloud-services/index.js'
+
+const { t, messages } = useI18n(cloudServicesLocale)
 
 const currentStep = ref(0)
+const steps = computed(() => messages.value.deployWorkflow.steps)
 
-const steps = [
-  {
-    name: '准备代码',
-    time: '5分钟',
-    description: '将网站代码打包成可部署的格式',
-    tasks: [
-      '整理 HTML/CSS/JS 文件',
-      '压缩图片和静态资源',
-      '检查文件路径是否正确'
-    ]
-  },
-  {
-    name: '创建存储桶',
-    time: '2分钟',
-    description: '在对象存储服务中创建存储空间',
-    tasks: [
-      '登录云控制台',
-      '进入对象存储 OSS/S3',
-      '点击"创建 Bucket"',
-      '设置 Bucket 名称和地域'
-    ]
-  },
-  {
-    name: '上传文件',
-    time: '3分钟',
-    description: '将网站文件上传到存储桶',
-    tasks: [
-      '进入 Bucket 管理页面',
-      '点击"上传文件"',
-      '选择本地网站文件',
-      '等待上传完成'
-    ]
-  },
-  {
-    name: '配置 CDN',
-    time: '5分钟',
-    description: '配置内容分发网络加速访问',
-    tasks: [
-      '进入 CDN 控制台',
-      '添加加速域名',
-      '配置源站为存储桶',
-      '等待 CDN 部署完成'
-    ]
-  },
-  {
-    name: '域名绑定',
-    time: '10分钟',
-    description: '将自定义域名绑定到 CDN',
-    tasks: [
-      '添加域名解析记录',
-      '配置 CNAME 到 CDN',
-      '申请 SSL 证书',
-      '测试 HTTPS 访问'
-    ]
-  }
-]
-
-const currentStepData = computed(() => steps[currentStep.value])
+const currentStepData = computed(() => steps.value[currentStep.value])
 
 function nextStep() {
-  if (currentStep.value < steps.length - 1) {
+  if (currentStep.value < steps.value.length - 1) {
     currentStep.value++
   }
 }

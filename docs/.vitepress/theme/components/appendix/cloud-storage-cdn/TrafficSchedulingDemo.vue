@@ -2,30 +2,30 @@
   <div class="traffic-scheduling-demo">
     <div class="demo-header">
       <span class="icon">🚦</span>
-      <span class="title">流量调度</span>
-      <span class="subtitle">理解 CDN 智能调度和负载均衡</span>
+      <span class="title">{{ t('placeholders.traffic.title') }}</span>
+      <span class="subtitle">{{ t('placeholders.traffic.subtitle') }}</span>
     </div>
     <div class="demo-content">
       <el-alert
         type="info"
         :closable="false"
       >
-        流量调度演示组件占位符 - 待实现具体交互
+        {{ t('placeholders.traffic.placeholder') }}
       </el-alert>
     </div>
 
     <div class="info-box">
       <span class="icon">💡</span>
-      <strong>核心思想：</strong>智能调度通过就近访问、负载均衡和故障切换，实现全球加速和高可用性。
+      <strong>{{ t('common.coreIdea') }}</strong>{{ t('placeholders.traffic.idea') }}
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { cloudStorageCdnLocale } from '../../../locales/cloud-storage-cdn/index.js'
 
-const title = ref('流量调度演示')
-const description = ref('展示CDN的智能流量调度机制，包括负载均衡、就近访问、故障切换等')
+const { t } = useI18n(cloudStorageCdnLocale)
 </script>
 
 <style scoped>

@@ -1,8 +1,3 @@
-<!--
-  PromptRobustnessDemo.vue
-  演示如何通过“允许提问”和“自我修正”让 AI 输出更稳定。
-  场景：策划团建活动
--->
 <template>
   <el-card
     class="robustness-card"
@@ -12,10 +7,10 @@
       <div class="card-header">
         <div>
           <h3 class="title">
-            让 AI 更“稳”：拒绝瞎猜，学会反问与自查
+            {{ t('robustness.title') }}
           </h3>
           <p class="subtitle">
-            面对模糊指令，AI 应该“不懂就问”而不是“一本正经胡说”。
+            {{ t('robustness.subtitle') }}
           </p>
         </div>
       </div>
@@ -31,13 +26,13 @@
           :xs="24"
         >
           <div class="input-display">
-            <span class="label">你的指令：</span>
+            <span class="label">{{ t('robustness.yourCommand') }}</span>
             <el-tag
               type="info"
               size="large"
               effect="plain"
             >
-              “帮我策划一个团建活动。”
+              {{ t('robustness.commandText') }}
             </el-tag>
           </div>
         </el-col>
@@ -51,13 +46,13 @@
               @change="resetState"
             >
               <el-radio-button label="raw">
-                直接生成
+                {{ t('robustness.modeRaw') }}
               </el-radio-button>
               <el-radio-button label="clarify">
-                允许提问
+                {{ t('robustness.modeClarify') }}
               </el-radio-button>
               <el-radio-button label="verify">
-                要求自检
+                {{ t('robustness.modeVerify') }}
               </el-radio-button>
             </el-radio-group>
           </div>
@@ -66,7 +61,7 @@
     </div>
 
     <div class="simulation-area">
-      <!-- 模式 1: 直接生成 -->
+      <!-- Mode 1: Direct Generate -->
       <div
         v-if="mode === 'raw'"
         class="scenario raw"
@@ -84,26 +79,26 @@
             shadow="never"
             class="bubble-content"
           >
-            <p>好的！为您推荐以下活动：</p>
+            <p>{{ t('robustness.rawMode.intro') }}</p>
             <ol>
-              <li>豪华游艇出海派对（人均 5000）</li>
-              <li>也就是去楼下吃个火锅（人均 100）</li>
-              <li>徒步穿越无人区（高风险）</li>
+              <li>{{ t('robustness.rawMode.item1') }}</li>
+              <li>{{ t('robustness.rawMode.item2') }}</li>
+              <li>{{ t('robustness.rawMode.item3') }}</li>
             </ol>
             <div class="note">
-              （AI 内心：你不说预算和人数，我就随便猜了...）
+              {{ t('robustness.rawMode.note') }}
             </div>
           </el-card>
         </div>
         <el-alert
-          title="结果不可控：AI 只能盲猜，方案可能完全不靠谱"
+          :title="t('robustness.rawMode.alertTitle')"
           type="error"
           show-icon
           :closable="false"
         />
       </div>
 
-      <!-- 模式 2: 澄清问题 -->
+      <!-- Mode 2: Clarify Questions -->
       <div
         v-if="mode === 'clarify'"
         class="scenario clarify"
@@ -121,7 +116,7 @@
             shadow="never"
             class="bubble-content"
           >
-            <p>收到。为了给出精准建议，我需要确认 3 点：</p>
+            <p>{{ t('robustness.clarifyMode.intro') }}</p>
             <el-form
               label-position="top"
               size="small"
@@ -132,14 +127,14 @@
                   :span="8"
                   :xs="24"
                 >
-                  <el-form-item label="1. 人数规模？">
+                  <el-form-item :label="t('robustness.clarifyMode.question1')">
                     <el-select v-model="answers.count">
                       <el-option
-                        label="10人小团队"
+                        :label="t('robustness.clarifyMode.question1Opt1')"
                         value="10"
                       />
                       <el-option
-                        label="100人大大公司"
+                        :label="t('robustness.clarifyMode.question1Opt2')"
                         value="100"
                       />
                     </el-select>
@@ -149,14 +144,14 @@
                   :span="8"
                   :xs="24"
                 >
-                  <el-form-item label="2. 人均预算？">
+                  <el-form-item :label="t('robustness.clarifyMode.question2')">
                     <el-select v-model="answers.budget">
                       <el-option
-                        label="低（<200元）"
+                        :label="t('robustness.clarifyMode.question2Opt1')"
                         value="low"
                       />
                       <el-option
-                        label="高（>1000元）"
+                        :label="t('robustness.clarifyMode.question2Opt2')"
                         value="high"
                       />
                     </el-select>
@@ -166,14 +161,14 @@
                   :span="8"
                   :xs="24"
                 >
-                  <el-form-item label="3. 偏好？">
+                  <el-form-item :label="t('robustness.clarifyMode.question3')">
                     <el-select v-model="answers.type">
                       <el-option
-                        label="轻松吃喝"
+                        :label="t('robustness.clarifyMode.question3Opt1')"
                         value="relax"
                       />
                       <el-option
-                        label="户外运动"
+                        :label="t('robustness.clarifyMode.question3Opt2')"
                         value="active"
                       />
                     </el-select>
@@ -185,12 +180,12 @@
                 style="margin-top: 8px"
                 @click="generatePlan"
               >
-                生成方案
+                {{ t('robustness.clarifyMode.generatePlan') }}
               </el-button>
             </el-form>
           </el-card>
         </div>
-        
+
         <div
           v-if="planResult"
           class="chat-bubble ai result fade-in"
@@ -207,7 +202,7 @@
             shadow="never"
             class="bubble-content plan-result"
           >
-            <p>基于您的要求（{{ answerSummary }}），推荐方案：</p>
+            <p>{{ t('robustness.clarifyMode.resultPrefix', { summary: answerSummary }) }}</p>
             <div class="plan-card">
               <h3>{{ planResult.title }}</h3>
               <p>{{ planResult.desc }}</p>
@@ -216,7 +211,7 @@
         </div>
       </div>
 
-      <!-- 模式 3: 自我修正 -->
+      <!-- Mode 3: Self-Correct -->
       <div
         v-if="mode === 'verify'"
         class="scenario verify"
@@ -228,10 +223,10 @@
           style="margin-bottom: 20px"
         >
           <template #title>
-            指令升级：策划一个活动，<strong>必须包含素食选项</strong>，且<strong>总预算不超过 2000 元</strong>。
+            <span v-html="t('robustness.verifyMode.alertTitle')" />
           </template>
         </el-alert>
-        
+
         <el-steps
           :active="verifyStep"
           align-center
@@ -239,15 +234,15 @@
           style="margin-bottom: 24px"
         >
           <el-step
-            title="初次生成"
+            :title="t('robustness.verifyMode.step1Title')"
             :icon="Edit"
           />
           <el-step
-            title="自我检查"
+            :title="t('robustness.verifyMode.step2Title')"
             :icon="View"
           />
           <el-step
-            title="修正输出"
+            :title="t('robustness.verifyMode.step3Title')"
             :icon="CircleCheck"
           />
         </el-steps>
@@ -262,9 +257,9 @@
                 size="small"
                 type="info"
               >
-                生成草稿
+                {{ t('robustness.verifyMode.draftTag') }}
               </el-tag>
-              <span class="log-text">“全牛宴烧烤，预计花费 3000 元...”</span>
+              <span class="log-text">{{ t('robustness.verifyMode.draftText') }}</span>
             </div>
           </el-collapse-transition>
           <el-collapse-transition>
@@ -276,18 +271,18 @@
                 size="small"
                 type="danger"
               >
-                自检发现
+                {{ t('robustness.verifyMode.checkTag') }}
               </el-tag>
               <div class="check-list">
                 <div class="fail-item">
                   <el-icon color="#f56c6c">
                     <Close />
-                  </el-icon> 包含素食？否（全是肉）
+                  </el-icon> {{ t('robustness.verifyMode.checkItem1') }}
                 </div>
                 <div class="fail-item">
                   <el-icon color="#f56c6c">
                     <Close />
-                  </el-icon> 预算&lt;2000？否（3000超标）
+                  </el-icon> {{ t('robustness.verifyMode.checkItem2') }}
                 </div>
               </div>
             </div>
@@ -301,13 +296,13 @@
                 size="small"
                 type="success"
               >
-                修正后
+                {{ t('robustness.verifyMode.fixedTag') }}
               </el-tag>
-              <span class="log-text">“田园蔬菜自助 + 少量烤肉，预计花费 1800 元。” ✅</span>
+              <span class="log-text">{{ t('robustness.verifyMode.fixedText') }}</span>
             </div>
           </el-collapse-transition>
         </div>
-        
+
         <div
           class="actions"
           style="text-align: center; margin-top: 20px;"
@@ -318,20 +313,20 @@
             size="large"
             @click="runVerify"
           >
-            开始运行
+            {{ t('common.startRun') }}
           </el-button>
           <el-button
             v-else-if="verifyStep === 3"
             @click="verifyStep = 0"
           >
-            重置演示
+            {{ t('common.resetDemo') }}
           </el-button>
           <el-button
             v-else
             loading
             disabled
           >
-            处理中...
+            {{ t('common.processing') }}
           </el-button>
         </div>
       </div>
@@ -342,6 +337,10 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { Edit, View, CircleCheck, Close } from '@element-plus/icons-vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { promptEngineeringLocale } from '../../../locales/prompt-engineering/index.js'
+
+const { t } = useI18n(promptEngineeringLocale)
 
 const mode = ref('raw') // raw, clarify, verify
 const answers = ref({
@@ -358,26 +357,25 @@ const resetState = () => {
 }
 
 const answerSummary = computed(() => {
-  const m = {
-    '10': '10人', '100': '100人',
-    'low': '低预算', 'high': '高预算',
-    'relax': '轻松', 'active': '运动'
-  }
-  return `${m[answers.value.count]} + ${m[answers.value.budget]} + ${m[answers.value.type]}`
+  const map = t('robustness.clarifyMode.answerMap')
+  return `${map[answers.value.count]} + ${map[answers.value.budget]} + ${map[answers.value.type]}`
 })
 
 const generatePlan = () => {
   const { count, budget, type } = answers.value
+  const plans = t('robustness.clarifyMode.plans')
   let title = ''
-  let desc = ''
-  
+
   if (budget === 'high') {
-    title = type === 'relax' ? '五星级酒店 SPA & 自助晚宴' : '高端高尔夫球体验'
+    title = type === 'relax' ? plans.highRelax : plans.highActive
   } else {
-    title = type === 'relax' ? '桌游轰趴馆 & 披萨外卖' : '城市公园定向越野'
+    title = type === 'relax' ? plans.lowRelax : plans.lowActive
   }
-  
-  desc = `适合 ${count} 人团队，${budget === 'high' ? '尽享奢华' : '性价比极高'}。`
+
+  const budgetDesc = budget === 'high'
+    ? t('robustness.clarifyMode.budgetHigh')
+    : t('robustness.clarifyMode.budgetLow')
+  const desc = t('robustness.clarifyMode.planDesc', { count, budgetDesc })
   planResult.value = { title, desc }
 }
 

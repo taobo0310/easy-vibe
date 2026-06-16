@@ -204,5 +204,69 @@ export default {
         examples: ['AI 程序员', '具身智能']
       }
     ]
+  },
+
+  expertSystemWave: {
+    successTitle: '🌟 专家系统的辉煌',
+    flows: [
+      ['人类专家经验', '转为 IF-THEN 规则库'],
+      ['特定领域问题', '推理解答 (诊断/配置)']
+    ],
+    tags: ['1965: Dendral (化学)', '1977: MYCIN (医疗)', '1980: XCON (配置)'],
+    winterArrow: '⬇️ 局限性爆发 ⬇️',
+    winterTitle: '第一次 AI 寒冬 (1974-1980)',
+    reasons: [
+      {
+        icon: '📝',
+        title: '知识获取瓶颈',
+        desc: '波兰尼悖论：人类无法说清所有规律。大量"常识"无法被人工硬编码。'
+      },
+      {
+        icon: '💥',
+        title: '组合爆炸 & 脆性问题',
+        desc: '现实情况太多，穷举极难；且缺少常识，稍微偏离规则库系统就直接崩溃。'
+      },
+      {
+        icon: '📉',
+        title: '算力不足 & 经费断层',
+        desc: '当时的硬件算力根本无法支撑爆发性的逻辑推演，遭遇 DARPA 研发经费大削减。'
+      }
+    ]
+  },
+
+  ruleBasedVsLearning: {
+    title: '关键发展路径总结',
+    path: [
+      {
+        name: '理论奠基',
+        years: '1940s-1950s',
+        desc: '图灵测试、达特茅斯会议，符号主义诞生',
+        color: '#3b82f6'
+      },
+      {
+        name: '符号主义主导',
+        years: '1960s-1980s',
+        desc: '专家系统兴起与两次 AI 寒冬',
+        color: '#059669'
+      },
+      {
+        name: '机器学习转型',
+        years: '1990s-2000s',
+        desc: '统计方法取代规则，连接主义复苏',
+        color: '#d97706'
+      },
+      {
+        name: '深度学习革命',
+        years: '2010s',
+        desc: 'AlexNet、AlphaGo、Transformer 架构，连接主义成为主流',
+        color: '#dc2626'
+      },
+      {
+        name: '大模型时代',
+        years: '2018 至今',
+        desc: 'GPT 系列、多模态融合，通用智能曙光初现',
+        color: '#7c3aed'
+      }
+    ]
   }
 }

@@ -1,12 +1,12 @@
 <template>
   <div class="tree-structure-demo">
     <div class="demo-header">
-      <span class="title">树形结构：层级关系的表示</span>
-      <span class="subtitle">像家谱一样的组织方式</span>
+      <span class="title">{{ t('dataStructures.tree.title') }}</span>
+      <span class="subtitle">{{ t('dataStructures.tree.subtitle') }}</span>
     </div>
 
     <div class="tree-selector">
-      <div class="selector-label">选择树的类型：</div>
+      <div class="selector-label">{{ t('dataStructures.tree.selectorLabel') }}</div>
       <div class="selector-buttons">
         <button
           v-for="type in treeTypes"
@@ -19,11 +19,9 @@
       </div>
     </div>
 
-    <!-- 二叉搜索树 -->
     <div v-if="activeTreeType === 'binary'" class="tree-display">
       <div class="tree-canvas">
         <svg viewBox="0 0 600 350" class="tree-svg">
-          <!-- 连接线 -->
           <line
             v-for="line in binaryTreeLines"
             :key="line.id"
@@ -35,7 +33,6 @@
             stroke-width="2"
           />
 
-          <!-- 节点 -->
           <g
             v-for="node in binaryTreeNodes"
             :key="node.id"
@@ -66,18 +63,17 @@
       </div>
     </div>
 
-    <!-- 文件系统树 -->
     <div v-if="activeTreeType === 'filesystem'" class="filesystem-tree">
       <div class="fs-root">
-        <div class="fs-node root">📁 根目录 /</div>
+        <div class="fs-node root">{{ t('dataStructures.tree.filesystem.root') }}</div>
         <div class="fs-children">
           <div class="fs-branch">
             <div class="fs-node">📁 home</div>
             <div class="fs-children">
               <div class="fs-node">👤 user</div>
               <div class="fs-children">
-                <div class="fs-node">📄 document.txt</div>
-                <div class="fs-node">🖼️ photo.jpg</div>
+                <div class="fs-node">{{ t('dataStructures.tree.filesystem.document') }}</div>
+                <div class="fs-node">{{ t('dataStructures.tree.filesystem.photo') }}</div>
               </div>
             </div>
           </div>
@@ -101,18 +97,17 @@
       </div>
     </div>
 
-    <!-- DOM 树 -->
     <div v-if="activeTreeType === 'dom'" class="dom-tree">
       <div class="dom-preview">
-        <div class="preview-title">HTML 结构</div>
+        <div class="preview-title">{{ t('dataStructures.tree.dom.htmlTitle') }}</div>
         <div class="preview-html">
           &lt;html&gt; &lt;body&gt; &lt;div class="container"&gt;
-          &lt;h1&gt;标题&lt;/h1&gt; &lt;p&gt;段落&lt;/p&gt; &lt;/div&gt;
+          &lt;h1&gt;{{ t('dataStructures.tree.dom.headingText') }}&lt;/h1&gt; &lt;p&gt;{{ t('dataStructures.tree.dom.paragraphText') }}&lt;/p&gt; &lt;/div&gt;
           &lt;/body&gt; &lt;/html&gt;
         </div>
       </div>
       <div class="dom-structure">
-        <div class="structure-title">DOM 树结构</div>
+        <div class="structure-title">{{ t('dataStructures.tree.dom.treeTitle') }}</div>
         <div class="tree-nested">
           <div class="dom-node root">
             <span class="node-tag">html</span>
@@ -126,11 +121,11 @@
                     <div class="dom-children">
                       <div class="dom-node">
                         <span class="node-tag">h1</span>
-                        <span class="node-text">"标题"</span>
+                        <span class="node-text">"{{ t('dataStructures.tree.dom.headingText') }}"</span>
                       </div>
                       <div class="dom-node">
                         <span class="node-tag">p</span>
-                        <span class="node-text">"段落"</span>
+                        <span class="node-text">"{{ t('dataStructures.tree.dom.paragraphText') }}"</span>
                       </div>
                     </div>
                   </div>
@@ -142,63 +137,25 @@
       </div>
     </div>
 
-    <!-- 树的特点 -->
     <div class="tree-features">
-      <div class="features-title">树形结构的特点</div>
+      <div class="features-title">{{ t('dataStructures.tree.featuresTitle') }}</div>
       <div class="features-grid">
-        <div class="feature-card">
-          <div class="feature-icon">🌲</div>
-          <div class="feature-title">层级关系</div>
-          <div class="feature-desc">节点之间是一对多的父子关系</div>
-        </div>
-        <div class="feature-card">
-          <div class="feature-icon">🎯</div>
-          <div class="feature-title">单一根节点</div>
-          <div class="feature-desc">除根节点外，每个节点只有一个父节点</div>
-        </div>
-        <div class="feature-card">
-          <div class="feature-icon">🔍</div>
-          <div class="feature-title">高效查找</div>
-          <div class="feature-desc">二叉搜索树的查找时间是 O(log n)</div>
-        </div>
-        <div class="feature-card">
-          <div class="feature-icon">🔄</div>
-          <div class="feature-title">多种遍历</div>
-          <div class="feature-desc">前序、中序、后序、层序遍历</div>
+        <div v-for="feature in features" :key="feature.title" class="feature-card">
+          <div class="feature-icon">{{ feature.icon }}</div>
+          <div class="feature-title">{{ feature.title }}</div>
+          <div class="feature-desc">{{ feature.desc }}</div>
         </div>
       </div>
     </div>
 
-    <!-- 应用场景 -->
     <div class="applications">
-      <div class="app-title">应用场景</div>
+      <div class="app-title">{{ t('dataStructures.tree.appTitle') }}</div>
       <div class="app-list">
-        <div class="app-item">
-          <span class="app-icon">📁</span>
+        <div v-for="app in applications" :key="app.name" class="app-item">
+          <span class="app-icon">{{ app.icon }}</span>
           <div class="app-content">
-            <div class="app-name">文件系统</div>
-            <div class="app-desc">文件夹和文件的层级组织</div>
-          </div>
-        </div>
-        <div class="app-item">
-          <span class="app-icon">🌐</span>
-          <div class="app-content">
-            <div class="app-name">HTML DOM</div>
-            <div class="app-desc">网页元素的嵌套结构</div>
-          </div>
-        </div>
-        <div class="app-item">
-          <span class="app-icon">🏢</span>
-          <div class="app-content">
-            <div class="app-name">组织架构</div>
-            <div class="app-desc">公司的管理层级关系</div>
-          </div>
-        </div>
-        <div class="app-item">
-          <span class="app-icon">🌲</span>
-          <div class="app-content">
-            <div class="app-name">决策树</div>
-            <div class="app-desc">机器学习的分类算法</div>
+            <div class="app-name">{{ app.name }}</div>
+            <div class="app-desc">{{ app.desc }}</div>
           </div>
         </div>
       </div>
@@ -208,14 +165,15 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n'
+import { computerFundamentalsLocale } from '../../../locales/computer-fundamentals'
 
+const { t, messages } = useI18n(computerFundamentalsLocale)
 const activeTreeType = ref('binary')
 
-const treeTypes = [
-  { id: 'binary', name: '二叉搜索树', icon: '🌳' },
-  { id: 'filesystem', name: '文件系统', icon: '📁' },
-  { id: 'dom', name: 'DOM 树', icon: '🌐' }
-]
+const treeTypes = computed(() => messages.value.dataStructures.tree.types)
+const features = computed(() => messages.value.dataStructures.tree.features)
+const applications = computed(() => messages.value.dataStructures.tree.applications)
 
 const binaryTreeNodes = [
   { id: 1, value: 50, x: 300, y: 40, isRoot: true },

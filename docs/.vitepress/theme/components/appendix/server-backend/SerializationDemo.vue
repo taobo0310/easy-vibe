@@ -2,7 +2,7 @@
   <div class="sd-root">
     <div class="sd-header">
       <span class="sd-icon">🔄</span>
-      <span class="sd-title">序列化演示</span>
+      <span class="sd-title">{{ t('serialization.title') }}</span>
     </div>
 
     <div class="sd-tabs">
@@ -20,17 +20,17 @@
       <div class="sd-panel sd-object">
         <div class="sd-panel-header">
           <span class="sd-panel-icon">📦</span>
-          <span class="sd-panel-title">内存对象</span>
+          <span class="sd-panel-title">{{ t('serialization.panels.object.title') }}</span>
         </div>
         <div class="sd-panel-body">
           <pre class="sd-code">{{ currentLang.objectCode }}</pre>
         </div>
-        <div class="sd-panel-desc">内存中的对象，只能在当前进程使用</div>
+        <div class="sd-panel-desc">{{ t('serialization.panels.object.desc') }}</div>
       </div>
 
       <div class="sd-arrow" :class="{ 'sd-arrow-active': step >= 1 }">
         <div class="sd-arrow-line"></div>
-        <div class="sd-arrow-label">序列化</div>
+        <div class="sd-arrow-label">{{ t('serialization.arrows.serialize') }}</div>
       </div>
 
       <div
@@ -39,18 +39,18 @@
       >
         <div class="sd-panel-header">
           <span class="sd-panel-icon">{}</span>
-          <span class="sd-panel-title">JSON 字符串</span>
+          <span class="sd-panel-title">{{ t('serialization.panels.json.title') }}</span>
           <span class="sd-panel-size">{{ currentLang.jsonSize }} bytes</span>
         </div>
         <div class="sd-panel-body">
           <pre class="sd-code">{{ currentLang.jsonString }}</pre>
         </div>
-        <div class="sd-panel-desc">可在网络传输、可跨语言</div>
+        <div class="sd-panel-desc">{{ t('serialization.panels.json.desc') }}</div>
       </div>
 
       <div class="sd-arrow" :class="{ 'sd-arrow-active': step >= 2 }">
         <div class="sd-arrow-line"></div>
-        <div class="sd-arrow-label">传输</div>
+        <div class="sd-arrow-label">{{ t('serialization.arrows.transfer') }}</div>
       </div>
 
       <div
@@ -59,7 +59,7 @@
       >
         <div class="sd-panel-header">
           <span class="sd-panel-icon">💻</span>
-          <span class="sd-panel-title">二进制</span>
+          <span class="sd-panel-title">{{ t('serialization.panels.binary.title') }}</span>
           <span class="sd-panel-size">{{ currentLang.binarySize }} bytes</span>
         </div>
         <div class="sd-panel-body">
@@ -67,7 +67,7 @@
             currentLang.binaryString
           }}</pre>
         </div>
-        <div class="sd-panel-desc">Protobuf/MessagePack，更小更快</div>
+        <div class="sd-panel-desc">{{ t('serialization.panels.binary.desc') }}</div>
       </div>
     </div>
 
@@ -79,46 +79,17 @@
       >
         {{ stepText }}
       </button>
-      <button class="sd-btn" :disabled="step === 0" @click="reset">重置</button>
+      <button class="sd-btn" :disabled="step === 0" @click="reset">{{ t('serialization.buttons.reset') }}</button>
     </div>
 
     <div class="sd-comparison">
-      <div class="sd-comparison-header">📊 格式对比</div>
+      <div class="sd-comparison-header">{{ t('serialization.comparisonTitle') }}</div>
       <div class="sd-comparison-table">
         <div class="sd-row sd-row-head">
-          <div class="sd-cell">格式</div>
-          <div class="sd-cell">大小</div>
-          <div class="sd-cell">速度</div>
-          <div class="sd-cell">可读性</div>
-          <div class="sd-cell">跨语言</div>
+          <div v-for="header in comparisonHeaders" :key="header" class="sd-cell">{{ header }}</div>
         </div>
-        <div class="sd-row">
-          <div class="sd-cell">JSON</div>
-          <div class="sd-cell sd-rating sd-rating-3">★★★☆☆</div>
-          <div class="sd-cell sd-rating sd-rating-3">★★★☆☆</div>
-          <div class="sd-cell sd-rating sd-rating-5">★★★★★</div>
-          <div class="sd-cell sd-rating sd-rating-5">★★★★★</div>
-        </div>
-        <div class="sd-row">
-          <div class="sd-cell">XML</div>
-          <div class="sd-cell sd-rating sd-rating-2">★★☆☆☆</div>
-          <div class="sd-cell sd-rating sd-rating-2">★★☆☆☆</div>
-          <div class="sd-cell sd-rating sd-rating-5">★★★★★</div>
-          <div class="sd-cell sd-rating sd-rating-5">★★★★★</div>
-        </div>
-        <div class="sd-row">
-          <div class="sd-cell">Protobuf</div>
-          <div class="sd-cell sd-rating sd-rating-5">★★★★★</div>
-          <div class="sd-cell sd-rating sd-rating-5">★★★★★</div>
-          <div class="sd-cell sd-rating sd-rating-1">★☆☆☆☆</div>
-          <div class="sd-cell sd-rating sd-rating-4">★★★★☆</div>
-        </div>
-        <div class="sd-row">
-          <div class="sd-cell">MessagePack</div>
-          <div class="sd-cell sd-rating sd-rating-4">★★★★☆</div>
-          <div class="sd-cell sd-rating sd-rating-4">★★★★☆</div>
-          <div class="sd-cell sd-rating sd-rating-2">★★☆☆☆</div>
-          <div class="sd-cell sd-rating sd-rating-5">★★★★★</div>
+        <div v-for="row in comparisonRows" :key="row[0]" class="sd-row">
+          <div v-for="(cell, i) in row" :key="i" :class="['sd-cell', { 'sd-rating': i > 0 }]">{{ cell }}</div>
         </div>
       </div>
     </div>
@@ -127,115 +98,23 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { serverBackendLocale } from '../../../locales/server-backend/index.js'
+
+const { t, messages } = useI18n(serverBackendLocale)
 
 const activeLang = ref('javascript')
 const step = ref(0)
 
-const languages = {
-  javascript: {
-    name: 'JavaScript',
-    objectCode: `const user = {
-  id: 123,
-  name: "张三",
-  email: "zhangsan@example.com",
-  age: 28
-};`,
-    jsonString: `{
-  "id": 123,
-  "name": "张三",
-  "email": "zhangsan@example.com",
-  "age": 28
-}`,
-    jsonSize: 68,
-    binaryString: `七进制编码 (MessagePack):
-\xa7 id 7b
-\xa4 name \xa3 张三
-\xa5 email \xb1 zhangsan@example.com
-\xa3 age 1c`,
-    binarySize: 52
-  },
-  python: {
-    name: 'Python',
-    objectCode: `user = {
-    "id": 123,
-    "name": "张三",
-    "email": "zhangsan@example.com",
-    "age": 28
-}`,
-    jsonString: `{
-  "id": 123,
-  "name": "张三",
-  "email": "zhangsan@example.com",
-  "age": 28
-}`,
-    jsonSize: 68,
-    binaryString: `Protobuf 二进制:
-08 7b  # field 1, varint 123
-12 06  # field 2, length 6
-e5 bc a0 e4 b8 89  # UTF-8 "张三"
-1a 11  # field 3, length 17
-7a 68 61 6e 67 73 61 6e 40 65 78 61 6d 70 6c 65 2e 63 6f 6d
-20 1c  # field 4, varint 28`,
-    binarySize: 38
-  },
-  java: {
-    name: 'Java',
-    objectCode: `User user = new User();
-user.setId(123);
-user.setName("张三");
-user.setEmail("zhangsan@example.com");
-user.setAge(28);`,
-    jsonString: `{
-  "id": 123,
-  "name": "张三",
-  "email": "zhangsan@example.com",
-  "age": 28
-}`,
-    jsonSize: 68,
-    binaryString: `Java 序列化:
-AC ED 00 05 73 72 00 04 55 73 65 72
-... (复杂元数据)
-实际大小 ~150 bytes`,
-    binarySize: 150
-  },
-  golang: {
-    name: 'Go',
-    objectCode: `type User struct {
-    ID    int
-    Name  string
-    Email string
-    Age   int
-}
+const languageMap = computed(() => messages.value.serialization.languages)
+const languages = computed(() => Object.values(languageMap.value))
+const comparisonHeaders = computed(() => messages.value.serialization.comparisonHeaders)
+const comparisonRows = computed(() => messages.value.serialization.comparisonRows)
 
-user := User{
-    ID: 123,
-    Name: "张三",
-    Email: "zhangsan@example.com",
-    Age: 28,
-}`,
-    jsonString: `{
-  "id": 123,
-  "name": "张三",
-  "email": "zhangsan@example.com",
-  "age": 28
-}`,
-    jsonSize: 68,
-    binaryString: `Gob 编码:
-0f ff 81 03 01 01 08 55 73 65 72 01
-ff 82 00 01 02 01 04 69 64 01 04 01
-02 6e 61 6d 65 01 04 05 65 6d 61 69 6c
-... (高效二进制)`,
-    binarySize: 42
-  }
-}
-
-const currentLang = computed(() => languages[activeLang.value])
+const currentLang = computed(() => languageMap.value[activeLang.value])
 
 const stepText = computed(() => {
-  if (step.value === 0) return '开始序列化 →'
-  if (step.value === 1) return '转换为二进制 →'
-  if (step.value === 2) return '传输完成 ✓'
-  return '完成'
+  return messages.value.serialization.buttons.steps[step.value]
 })
 
 function nextStep() {

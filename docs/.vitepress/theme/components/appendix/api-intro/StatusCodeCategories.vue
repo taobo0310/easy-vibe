@@ -19,47 +19,23 @@
     <div class="memory-tip">
       <span class="tip-icon">💡</span>
       <span class="tip-text">
-        <strong>记忆技巧:</strong>
-        <span class="tip-2">2️⃣ 成功</span> •
-        <span class="tip-3">3️⃣ 重定向</span> •
-        <span class="tip-4">4️⃣ 客户端错</span> •
-        <span class="tip-5">5️⃣ 服务器错</span>
+        <strong>{{ t('statusCategories.memoryTitle') }}</strong>
+        <span class="tip-2">{{ t('statusCategories.tip2') }}</span> •
+        <span class="tip-3">{{ t('statusCategories.tip3') }}</span> •
+        <span class="tip-4">{{ t('statusCategories.tip4') }}</span> •
+        <span class="tip-5">{{ t('statusCategories.tip5') }}</span>
       </span>
     </div>
   </div>
 </template>
 
 <script setup>
-const categories = [
-  {
-    id: 'success',
-    code: '2',
-    name: '成功',
-    desc: '请求被成功接收、理解并处理',
-    examples: ['200 OK', '201 Created', '204 No Content']
-  },
-  {
-    id: 'redirect',
-    code: '3',
-    name: '重定向',
-    desc: '需要进一步操作才能完成请求',
-    examples: ['301 永久移动', '304 未修改', '307 临时重定向']
-  },
-  {
-    id: 'client-error',
-    code: '4',
-    name: '客户端错误',
-    desc: '请求包含错误或无法完成',
-    examples: ['400 参数错误', '401 未认证', '403 无权限', '404 不存在']
-  },
-  {
-    id: 'server-error',
-    code: '5',
-    name: '服务器错误',
-    desc: '服务器无法处理有效请求',
-    examples: ['500 内部错误', '502 网关错误', '503 服务不可用']
-  }
-]
+import { computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { apiIntroLocale } from '../../../locales/api-intro/index.js'
+
+const { t, messages } = useI18n(apiIntroLocale)
+const categories = computed(() => messages.value.statusCategories.categories)
 </script>
 
 <style scoped>

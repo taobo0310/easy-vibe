@@ -1,31 +1,31 @@
 <template>
   <div class="logic-gate-demo">
     <div class="demo-header">
-      <span class="title">四种基本逻辑门</span>
-      <span class="subtitle">所有数字计算的基础积木</span>
+      <span class="title">{{ t('logicGate.title') }}</span>
+      <span class="subtitle">{{ t('logicGate.subtitle') }}</span>
     </div>
 
     <div class="gates-grid">
       <div v-for="gate in gates" :key="gate.name" class="gate-card">
         <div class="gate-header">
           <span class="gate-name-en">{{ gate.name }}</span>
-          <span class="gate-name-cn">{{ gate.nameCn }}</span>
+          <span class="gate-name-cn">{{ gate.nameLocalized }}</span>
         </div>
         <div class="gate-formula">
-          <span class="formula-label">运算：</span>
+          <span class="formula-label">{{ t('logicGate.operationLabel') }}</span>
           <code class="formula-code">{{ gate.formula }}</code>
         </div>
         <div class="gate-rule">{{ gate.rule }}</div>
         <div class="gate-intuition">{{ gate.intuition }}</div>
 
         <div class="truth-section">
-          <div class="truth-title">真值表</div>
+          <div class="truth-title">{{ t('logicGate.truthTable') }}</div>
           <table class="mini-truth">
             <thead>
               <tr>
                 <th>A</th>
                 <th v-if="gate.name !== 'NOT'">B</th>
-                <th>输出</th>
+                <th>{{ t('logicGate.output') }}</th>
               </tr>
             </thead>
             <tbody>
@@ -46,65 +46,19 @@
     </div>
 
     <div class="info-box">
-      <strong>核心思想：</strong>
-      逻辑门把物理电路的"通/断"变成了数学上的"真/假"运算，是硬件实现软件逻辑的桥梁。
+      <strong>{{ t('logicGate.coreIdeaLabel') }}</strong>
+      {{ t('logicGate.coreIdea') }}
     </div>
   </div>
 </template>
 
 <script setup>
-const gates = [
-  {
-    name: 'AND',
-    nameCn: '与门',
-    formula: 'A ∧ B',
-    rule: '两个都为 1，才输出 1',
-    intuition: '串联开关：两道门都开才通',
-    rows: [
-      [0, 0, 0],
-      [0, 1, 0],
-      [1, 0, 0],
-      [1, 1, 1]
-    ]
-  },
-  {
-    name: 'OR',
-    nameCn: '或门',
-    formula: 'A ∨ B',
-    rule: '有一个为 1，就输出 1',
-    intuition: '并联开关：任一道门开就通',
-    rows: [
-      [0, 0, 0],
-      [0, 1, 1],
-      [1, 0, 1],
-      [1, 1, 1]
-    ]
-  },
-  {
-    name: 'NOT',
-    nameCn: '非门',
-    formula: '¬A',
-    rule: '输入取反：0 变 1，1 变 0',
-    intuition: '反向器：开变关，关变开',
-    rows: [
-      [0, 1],
-      [1, 0]
-    ]
-  },
-  {
-    name: 'XOR',
-    nameCn: '异或门',
-    formula: 'A ⊕ B',
-    rule: '两个不同，才输出 1',
-    intuition: '差异检测器：相异为真',
-    rows: [
-      [0, 0, 0],
-      [0, 1, 1],
-      [1, 0, 1],
-      [1, 1, 0]
-    ]
-  }
-]
+import { computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { computerFundamentalsLocale } from '../../../locales/computer-fundamentals/index.js'
+
+const { t, messages } = useI18n(computerFundamentalsLocale)
+const gates = computed(() => messages.value.logicGate.gates)
 </script>
 
 <style scoped>

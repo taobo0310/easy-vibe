@@ -10,117 +10,16 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { contextEngineeringLocale } from '../../../locales/context-engineering/index.js'
 
-const scenarios = {
-  coding: {
-    name: '👨‍💻 代码助手场景',
-    steps: [
-      {
-        user: '帮我写一个 Python 贪吃蛇游戏',
-        action: '初始化',
-        layers: {
-          base: 'System: 你是资深 Python 工程师...',
-          task: 'Task: 编写贪吃蛇游戏，使用 Pygame 库...',
-          chat: [],
-          rag: []
-        },
-        desc: '初始化：装载地基(System)和任务(Task)。此时 Layer 1 & 2 建立。'
-      },
-      {
-        user: null,
-        ai_thinking: '需要查询 Pygame 的最新初始化代码...',
-        action: '检索',
-        layers: {
-          base: 'System: 你是资深 Python 工程师...',
-          task: 'Task: 编写贪吃蛇游戏，使用 Pygame 库...',
-          chat: [],
-          rag: ['Docs: Pygame.init() usage...', 'Docs: Game loop pattern...']
-        },
-        desc: '思考与检索：发现需要知识补充，临时调取 RAG 资料到 Layer 4。'
-      },
-      {
-        user: null,
-        ai: '好的，这是一个基于 Pygame 的贪吃蛇基础代码...',
-        action: '生成',
-        layers: {
-          base: 'System: 你是资深 Python 工程师...',
-          task: 'Task: 编写贪吃蛇游戏，使用 Pygame 库...',
-          chat: ['User: 写贪吃蛇', 'AI: [Code Block]'],
-          rag: [] // RAG cleared after generation to save space
-        },
-        desc: '生成回答：RAG 资料用完即扔(节省空间)，对话写入 Layer 3 (Chat)。'
-      },
-      {
-        user: '蛇移动得太快了，怎么调慢点？',
-        action: '追问',
-        layers: {
-          base: 'System: 你是资深 Python 工程师...',
-          task: 'Task: 编写贪吃蛇游戏，使用 Pygame 库...',
-          chat: ['User: 写贪吃蛇', 'AI: [Code Block]', 'User: 调慢点'],
-          rag: []
-        },
-        desc: '用户追问：新对话追加到 Layer 3。Layer 1 & 2 保持不变(0成本)。'
-      },
-      {
-        user: null,
-        ai: '你可以调整 clock.tick(15) 中的数值...',
-        action: '回复',
-        layers: {
-          base: 'System: 你是资深 Python 工程师...',
-          task: 'Task: 编写贪吃蛇游戏，使用 Pygame 库...',
-          chat: ['User: 写贪吃蛇', 'AI: [Code Block]', 'User: 调慢点', 'AI: 调整 tick 值...'],
-          rag: []
-        },
-        desc: '持续对话：Layer 3 增长。如果太长，最上面的对话会被挤出去(滑动窗口)。'
-      }
-    ]
-  },
-  support: {
-    name: '👩‍💼 客服助手场景',
-    steps: [
-      {
-        user: '我的订单发货了吗？单号 12345',
-        action: '接收',
-        layers: {
-          base: 'System: 你是电商客服，语气温柔...',
-          task: 'Task: 处理订单查询请求...',
-          chat: [],
-          rag: []
-        },
-        desc: '接收消息：加载地基(System)。'
-      },
-      {
-        user: null,
-        ai_thinking: '查询订单系统 API...',
-        action: '工具调用',
-        layers: {
-          base: 'System: 你是电商客服，语气温柔...',
-          task: 'Task: 处理订单查询请求...',
-          chat: ['User: 查单号 12345'],
-          rag: ['API_Result: {id:12345, status:"shipped", loc:"Beijing"}']
-        },
-        desc: '调用工具/RAG：获取实时订单状态，放入 Layer 4。'
-      },
-      {
-        user: null,
-        ai: '亲，查到了哦！您的包裹已经在北京中转了。',
-        action: '回复',
-        layers: {
-          base: 'System: 你是电商客服，语气温柔...',
-          task: 'Task: 处理订单查询请求...',
-          chat: ['User: 查单号 12345', 'AI: 在北京中转'],
-          rag: []
-        },
-        desc: '完成回复：Layer 4 清空，对话保留在 Layer 3。'
-      }
-    ]
-  }
-}
+const { t, messages } = useI18n(contextEngineeringLocale)
+const scenarios = computed(() => messages.value.memoryPalaceAction.scenarios)
 
 const currentScenarioKey = ref('coding')
 const currentStepIndex = ref(0)
 
-const currentScenario = computed(() => scenarios[currentScenarioKey.value])
+const currentScenario = computed(() => scenarios.value[currentScenarioKey.value])
 const currentStep = computed(() => currentScenario.value.steps[currentStepIndex.value])
 const isLastStep = computed(() => currentStepIndex.value === currentScenario.value.steps.length - 1)
 
@@ -146,7 +45,6 @@ const prevStep = () => {
 
 <template>
   <div class="action-demo">
-    <!-- Scenario Selector -->
     <div class="scenario-tabs">
       <button 
         v-for="(s, key) in scenarios" 
@@ -160,10 +58,9 @@ const prevStep = () => {
     </div>
 
     <div class="demo-grid">
-      <!-- Left: Chat Simulator -->
       <div class="chat-panel">
         <div class="panel-header">
-          📱 用户视角 (Chat)
+          {{ t('memoryPalaceAction.chatHeader') }}
         </div>
         <div class="chat-window">
           <div
@@ -189,7 +86,7 @@ const prevStep = () => {
         </div>
         <div class="controls">
           <div class="step-info">
-            步骤 {{ currentStepIndex + 1 }} / {{ currentScenario.steps.length }}
+            {{ t('memoryPalaceAction.stepInfo', { current: currentStepIndex + 1, total: currentScenario.steps.length }) }}
           </div>
           <div class="btn-group">
             <button
@@ -197,29 +94,27 @@ const prevStep = () => {
               :disabled="currentStepIndex === 0"
               @click="prevStep"
             >
-              ⬅️ 上一步
+              {{ t('memoryPalaceAction.previous') }}
             </button>
             <button
               class="nav-btn primary"
               @click="nextStep"
             >
-              {{ isLastStep ? '🔄 重新演示' : '下一步 ➡️' }}
+              {{ isLastStep ? t('memoryPalaceAction.restart') : t('memoryPalaceAction.next') }}
             </button>
           </div>
         </div>
       </div>
 
-      <!-- Right: Memory Palace Internals -->
       <div class="palace-panel">
         <div class="panel-header">
-          🧠 AI 视角 (Context Construction)
+          {{ t('memoryPalaceAction.aiHeader') }}
         </div>
         <div class="context-visualizer">
-          <!-- Layer 1: Base -->
           <div class="layer-box base">
             <div class="layer-label">
               <span class="icon">🏛️</span> 
-              <span class="title">Layer 1: 地基 (System)</span>
+              <span class="title">{{ t('memoryPalaceAction.layerBase') }}</span>
               <span class="badge">KV Cached</span>
             </div>
             <div class="layer-content">
@@ -227,11 +122,10 @@ const prevStep = () => {
             </div>
           </div>
 
-          <!-- Layer 2: Task -->
           <div class="layer-box task">
             <div class="layer-label">
               <span class="icon">📌</span> 
-              <span class="title">Layer 2: 支柱 (Task)</span>
+              <span class="title">{{ t('memoryPalaceAction.layerTask') }}</span>
               <span class="badge">Pinned</span>
             </div>
             <div class="layer-content">
@@ -239,11 +133,10 @@ const prevStep = () => {
             </div>
           </div>
 
-          <!-- Layer 3: Chat -->
           <div class="layer-box chat">
             <div class="layer-label">
               <span class="icon">💬</span> 
-              <span class="title">Layer 3: 客厅 (Chat)</span>
+              <span class="title">{{ t('memoryPalaceAction.layerChat') }}</span>
               <span class="badge">Sliding</span>
             </div>
             <div class="layer-content">
@@ -258,19 +151,18 @@ const prevStep = () => {
                 v-if="currentStep.layers.chat.length === 0"
                 class="empty-hint"
               >
-                (暂无对话历史)
+                {{ t('memoryPalaceAction.noChat') }}
               </div>
             </div>
           </div>
 
-          <!-- Layer 4: RAG -->
           <div
             class="layer-box rag"
             :class="{ active: currentStep.layers.rag.length > 0 }"
           >
             <div class="layer-label">
               <span class="icon">📚</span> 
-              <span class="title">Layer 4: 图书馆 (RAG)</span>
+              <span class="title">{{ t('memoryPalaceAction.layerRag') }}</span>
               <span class="badge ephemeral">Temp</span>
             </div>
             <div class="layer-content">
@@ -285,15 +177,14 @@ const prevStep = () => {
                 v-if="currentStep.layers.rag.length === 0"
                 class="empty-hint"
               >
-                (当前无需检索)
+                {{ t('memoryPalaceAction.noRag') }}
               </div>
             </div>
           </div>
         </div>
         
-        <!-- Explanation Footer -->
         <div class="step-desc">
-          <strong>💡 这一步发生了什么：</strong>
+          <strong>{{ t('memoryPalaceAction.whatHappened') }}</strong>
           {{ currentStep.desc }}
         </div>
       </div>

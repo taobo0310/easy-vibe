@@ -2,22 +2,22 @@
   <div class="llm-quick-start">
     <div class="header">
       <div class="title">
-        🤖 LLM 初体验：从闲聊到业务实战
+        {{ t('quickStart.title') }}
       </div>
       <div class="subtitle">
-        大模型不仅能聊天，更是生产力工具。试试看它如何处理这些业务需求：
+        {{ t('quickStart.subtitle') }}
       </div>
     </div>
 
     <div class="chat-window">
       <div
-        v-if="messages.length === 0"
+        v-if="chatMessages.length === 0"
         class="empty-state"
       >
         <div class="emoji">
           💼
         </div>
-        <p>请选择一个业务场景开始体验</p>
+        <p>{{ t('quickStart.empty') }}</p>
       </div>
 
       <div
@@ -25,7 +25,7 @@
         class="messages"
       >
         <div
-          v-for="(msg, index) in messages"
+          v-for="(msg, index) in chatMessages"
           :key="index"
           class="message"
           :class="msg.role"
@@ -47,14 +47,14 @@
               <pre v-if="msg.isCode"><code>{{ msg.content }}<span
                 v-if="
                   isGenerating &&
-                    index === messages.length - 1
+                    index === chatMessages.length - 1
                 "
                 class="cursor"
               >|</span></code></pre>
               <div v-else>
                 {{ msg.content
                 }}<span
-                  v-if="isGenerating && index === messages.length - 1"
+                  v-if="isGenerating && index === chatMessages.length - 1"
                   class="cursor"
                 >|</span>
               </div>
@@ -83,85 +83,44 @@
         v-else
         class="status-text"
       >
-        正在思考业务逻辑并生成 Token...
+        {{ t('quickStart.generating') }}
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, nextTick } from 'vue'
+import { ref, nextTick, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { llmIntroLocale } from '../../../locales/llm-intro/index.js'
 
-const questions = [
-  { icon: '🤔', text: '给我想一个请假的理由', type: 'casual' },
-  { icon: '🐍', text: '帮我写一个 Python 爬虫', type: 'code' },
-  { icon: '🎩', text: '用鲁迅的语气夸我', type: 'casual' },
-  { icon: '📊', text: '分析这份销售数据的趋势', type: 'analysis' },
-  { icon: '📝', text: '为这款咖啡杯写一段小红书文案', type: 'marketing' }
-]
+const { t, messages } = useI18n(llmIntroLocale)
+const questions = computed(() => messages.value.quickStart.questions)
 
-const answers = {
-  给我想一个请假的理由: {
-    isCode: false,
-    text: '老板，我感觉身体不适，可能是昨天写代码太投入，CPU（大脑）过热导致系统（身体）宕机了，申请重启（休息）一天。'
-  },
-  '帮我写一个 Python 爬虫': {
-    isCode: true,
-    text: `import requests
-from bs4 import BeautifulSoup
-
-def fetch_titles(url):
-    response = requests.get(url)
-    soup = BeautifulSoup(response.text, 'html.parser')
-    
-    # 提取所有 h1 标签
-    titles = [tag.text.strip() for tag in soup.find_all('h1')]
-    return titles
-
-# 使用示例
-url = "https://example.com"
-print(f"正在爬取 {url} 的标题...")
-# titles = fetch_titles(url)
-# print(titles)`
-  },
-  用鲁迅的语气夸我: {
-    isCode: false,
-    text: '我向来是不惮以最坏的恶意来推测中国人的，然而我还不料，也不信竟会遇见这样优秀的人。你的代码，很有几分风骨。'
-  },
-  分析这份销售数据的趋势: {
-    isCode: false,
-    text: '基于您提供的数据，我发现以下几个关键趋势：\n\n1. 📈 **总体增长**：Q3 销售额同比增长了 25%，主要得益于线上渠道的爆发。\n2. ⚠️ **库存预警**：热销品类 A 的周转天数已降至 5 天，建议立即补货。\n3. 💡 **潜力市场**：华南地区的转化率（3.2%）显著高于平均水平，建议加大该区域的广告投放。'
-  },
-  为这款咖啡杯写一段小红书文案: {
-    isCode: false,
-    text: '☕️ **早八人的续命神器！这款咖啡杯真的太懂我了**\n\n家人们谁懂啊！😭 作为一个每天靠咖啡续命的打工人，终于挖到了这款宝藏杯子！\n\n✨ **颜值绝绝子**：奶油白配色，拿在手里就是妥妥的 ins 风，摆在工位上心情都变好了！\n🌡️ **保温超长待机**：早上泡的冰美式，下午还是冰冰凉，这也太适合夏天了吧！\n🔒 **密封不漏水**：直接塞包里也不怕洒，挤地铁必备！\n\n👇 评论区蹲一个链接，带你一起实现咖啡自由！ #好物分享 #高颜值水杯 #打工人日常'
-  }
-}
-
-const messages = ref([])
+const chatMessages = ref([])
 const isGenerating = ref(false)
 const messagesRef = ref(null)
 
 const ask = async (qObj) => {
-  messages.value.push({ role: 'user', content: qObj.text })
+  chatMessages.value.push({ role: 'user', content: qObj.text })
   isGenerating.value = true
 
   await wait(600)
 
-  const answerData = answers[qObj.text]
-  const fullAnswer = answerData ? answerData.text : '正在思考...'
+  const answerData = qObj
+  const fullAnswer = answerData.answer || t('quickStart.fallback')
 
-  messages.value.push({
+  chatMessages.value.push({
     role: 'assistant',
     content: '',
-    isCode: answerData ? answerData.isCode : false
+    isCode: !!answerData.isCode
   })
 
-  const answerIdx = messages.value.length - 1
+  const answerIdx = chatMessages.value.length - 1
 
   // Typing animation
   for (let i = 0; i < fullAnswer.length; i++) {
-    messages.value[answerIdx].content += fullAnswer[i]
+    chatMessages.value[answerIdx].content += fullAnswer[i]
     scrollToBottom()
     // Code typing is usually faster looking
     const speed = answerData.isCode ? 10 : 30 + Math.random() * 30

@@ -1,6 +1,6 @@
 <template>
   <div class="demo">
-    <div class="title">⏱️ CPU 在疯狂切换，你感觉不出来</div>
+    <div class="title">{{ t('operatingSystems.process.title') }}</div>
     
     <div class="cpu-core">
       <div class="cpu-label">CPU</div>
@@ -8,7 +8,9 @@
         <span class="task-icon">{{ currentTask.icon }}</span>
         <span class="task-name">{{ currentTask.name }}</span>
       </div>
-      <div class="time-slice">时间片: {{ timeLeft }}ms</div>
+      <div class="time-slice">
+        {{ t('operatingSystems.process.timeSlice', { time: timeLeft }) }}
+      </div>
     </div>
 
     <div class="process-queue">
@@ -30,29 +32,35 @@
             <div class="p-fill"></div>
           </div>
         </div>
-        <span class="p-status">{{ idx === currentIdx ? '运行中' : (proc.progress >= 100 ? '完成' : '等待') }}</span>
+        <span class="p-status">{{ getProcessStatus(idx, proc) }}</span>
       </div>
     </div>
 
     <div class="explain">
-      <strong>💡 原理：</strong>CPU 每 {{ sliceTime }}ms 切换一次进程，因为太快了你感觉是"同时运行"。实际上每个进程都在断断续续地执行。
+      <strong>{{ t('operatingSystems.principleLabel') }}</strong>
+      {{ t('operatingSystems.process.explain', { sliceTime }) }}
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { computerFundamentalsLocale } from '../../../locales/computer-fundamentals/index.js'
 
-const processes = ref([
-  { id: 1, name: '微信', icon: '💬', progress: 0 },
-  { id: 2, name: '音乐', icon: '🎵', progress: 0 },
-  { id: 3, name: '浏览器', icon: '🌐', progress: 0 }
-])
+const { t, messages } = useI18n(computerFundamentalsLocale)
+
+const processes = ref(
+  messages.value.operatingSystems.process.processes.map((process) => ({
+    ...process,
+    progress: 0
+  }))
+)
 
 const currentIdx = ref(0)
 const timeLeft = ref(0)
 const isSwitching = ref(false)
-const sliceTime = 100 // 每个时间片100ms（演示用，实际是10ms左右）
+const sliceTime = 100 // Demo time slice; real systems are usually around 10ms.
 
 let timer = null
 let switchTimer = null
@@ -69,22 +77,21 @@ const switchTask = () => {
 const tick = () => {
   const current = processes.value[currentIdx.value]
   
-  // 当前进程执行
+  // Run the current process.
   if (current.progress < 100) {
     current.progress = Math.min(100, current.progress + 5)
   }
   
-  // 时间片倒计时
+  // Count down the time slice.
   timeLeft.value -= 10
   
-  // 时间片用完，切换
+  // Switch when the time slice is exhausted.
   if (timeLeft.value <= 0) {
     switchTask()
   }
   
-  // 检查是否全部完成
+  // Reset the demo after all processes finish.
   if (processes.value.every(p => p.progress >= 100)) {
-    // 重置演示
     setTimeout(() => {
       processes.value.forEach(p => p.progress = 0)
       currentIdx.value = 0
@@ -93,9 +100,15 @@ const tick = () => {
   }
 }
 
+function getProcessStatus(idx, proc) {
+  if (idx === currentIdx.value) return t('operatingSystems.process.running')
+  if (proc.progress >= 100) return t('operatingSystems.process.done')
+  return t('operatingSystems.process.waiting')
+}
+
 onMounted(() => {
   timeLeft.value = sliceTime
-  timer = setInterval(tick, 10) // 每10ms更新一次
+  timer = setInterval(tick, 10)
 })
 
 onUnmounted(() => {

@@ -1,22 +1,21 @@
 <template>
   <div class="compiler-demo">
     <div class="demo-header">
-      <span class="title">编译器的工作流程</span>
-      <span class="subtitle">从源代码到机器码的六步旅程</span>
+      <span class="title">{{ t('compilers.workflow.title') }}</span>
+      <span class="subtitle">{{ t('compilers.workflow.subtitle') }}</span>
     </div>
 
     <div class="control-panel">
-      <label>输入代码：</label>
+      <label>{{ t('compilers.workflow.inputLabel') }}</label>
       <input
         v-model="sourceCode"
         type="text"
         class="code-input"
-        placeholder="试试输入 int x = 10 + 5;"
+        :placeholder="t('compilers.workflow.placeholder')"
       />
     </div>
 
     <div class="visualization-area">
-      <!-- Pipeline -->
       <div class="pipeline">
         <div
           v-for="(stage, i) in stages"
@@ -34,12 +33,13 @@
         </div>
       </div>
 
-      <!-- Active Stage Detail -->
       <div class="stage-detail">
         <div class="detail-header">
           <span class="detail-num">{{ activeStage + 1 }}</span>
           <span class="detail-name">{{ currentStage.name }}</span>
-          <span class="detail-badge">输出：{{ currentStage.output }}</span>
+          <span class="detail-badge">
+            {{ t('compilers.workflow.outputLabel', { output: currentStage.output }) }}
+          </span>
         </div>
         <div class="detail-desc">{{ currentStage.desc }}</div>
 
@@ -56,9 +56,8 @@
         </div>
       </div>
 
-      <!-- Interactive Lexer -->
       <div class="lexer-section">
-        <div class="section-title">实时词法分析</div>
+        <div class="section-title">{{ t('compilers.workflow.lexerTitle') }}</div>
         <div class="tokens-flow">
           <div
             v-for="(token, i) in tokens"
@@ -66,17 +65,16 @@
             :class="['token-chip', token.type]"
           >
             <span class="token-value">{{ token.value }}</span>
-            <span class="token-type">{{ token.type }}</span>
+            <span class="token-type">{{ token.label }}</span>
           </div>
           <div v-if="!tokens.length" class="tokens-empty">
-            输入代码后自动分析
+            {{ t('compilers.workflow.emptyTokens') }}
           </div>
         </div>
       </div>
 
-      <!-- Execution Models -->
       <div class="exec-section">
-        <div class="section-title">三种执行方式对比</div>
+        <div class="section-title">{{ t('compilers.workflow.execTitle') }}</div>
         <div class="exec-grid">
           <div
             v-for="model in executionModels"
@@ -101,81 +99,24 @@
     </div>
 
     <div class="info-box">
-      <strong>核心思想：</strong>编译器像翻译官，把人类能读懂的代码逐步翻译成机器能执行的指令。六个阶段各司其职：识别单词
-      → 理解语法 → 检查语义 → 生成中间码 → 优化 → 生成机器码。
+      <strong>{{ t('compilers.workflow.coreIdeaLabel') }}</strong>{{ t('compilers.workflow.coreIdea') }}
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n'
+import { computerFundamentalsLocale } from '../../../locales/computer-fundamentals'
+
+const { t, messages } = useI18n(computerFundamentalsLocale)
 
 const activeStage = ref(0)
 const sourceCode = ref('int x = 10 + 5;')
 
-const stages = [
-  {
-    name: '词法分析',
-    output: 'Token 流',
-    desc: '把源代码拆成一个个"单词"（Token），就像读句子时先认出每个词',
-    tasks: ['识别关键字', '识别标识符', '识别数字', '识别运算符', '过滤空白'],
-    example: `int x = 10 + 5;
-→ [int] [x] [=] [10] [+] [5] [;]
-    关键字 标识符 运算符 数字 运算符 数字 分隔符`
-  },
-  {
-    name: '语法分析',
-    output: 'AST 语法树',
-    desc: '根据语法规则把 Token 组织成树形结构（AST），确定运算优先级',
-    tasks: ['构建语法树', '确定优先级', '检查语法错误'],
-    example: `1 + 2 * 3  →  语法树:
-       +
-      / \\
-     1   *       ← * 优先级高，先结合
-        / \\
-       2   3`
-  },
-  {
-    name: '语义分析',
-    output: '带类型的 AST',
-    desc: '检查代码的"意思"是否正确——类型对不对、变量有没有声明',
-    tasks: ['类型检查', '作用域分析', '构建符号表', '类型推断'],
-    example: `int x = "hello";  // ❌ 类型错误：int ≠ string
-int y = 10 + 5;   // ✅ 类型正确：int + int = int`
-  },
-  {
-    name: '中间代码生成',
-    output: 'IR（中间表示）',
-    desc: '生成平台无关的"中间语言"，方便后续优化和跨平台编译',
-    tasks: ['生成三地址码', '平台无关', '便于优化'],
-    example: `源码: int x = (a + b) * c;
-中间码:
-  t1 = a + b
-  t2 = t1 * c
-  x = t2`
-  },
-  {
-    name: '代码优化',
-    output: '优化后的 IR',
-    desc: '让代码跑得更快——去掉多余计算、提前算好常量',
-    tasks: ['常量折叠', '死代码消除', '内联展开', '循环优化'],
-    example: `优化前:                优化后:
-int x = 10 + 5;   →  int x = 15;   (常量折叠)
-int y = x * 2;    →  int y = 30;   (常量传播)
-if (false) {...}   →  (删除)        (死代码消除)`
-  },
-  {
-    name: '目标代码生成',
-    output: '机器码',
-    desc: '最终翻译成 CPU 能直接执行的机器指令',
-    tasks: ['指令选择', '寄存器分配', '指令调度'],
-    example: `; int x = 15;
-mov  eax, 15          ; 把 15 放入 eax 寄存器
-mov  dword ptr [x], eax ; 存到变量 x 的内存地址`
-  }
-]
+const stages = computed(() => messages.value.compilers.workflow.stages)
 
-const currentStage = computed(() => stages[activeStage.value])
+const currentStage = computed(() => stages.value[activeStage.value])
 
 const keywords = [
   'int',
@@ -201,52 +142,33 @@ const tokens = computed(() => {
 
   const result = []
   const regex =
-    /([a-zA-Z_]\w*|\d+(?:\.\d+)?|[+\-*/=<>!]=?|[;,\(\)\{\}\[\]]|"[^"]*"|'[^']*')/g
+    /([a-zA-Z_]\w*|\d+(?:\.\d+)?|[+\-*/=<>!]=?|[;,(){}[\]]|"[^"]*"|'[^']*')/g
   let match
 
   while ((match = regex.exec(code)) !== null) {
     const word = match[1]
+    const labels = messages.value.compilers.workflow.tokenLabels
     if (keywords.includes(word)) {
-      result.push({ value: word, type: 'keyword' })
+      result.push({ value: word, type: 'keyword', label: labels.keyword })
     } else if (/^\d/.test(word)) {
-      result.push({ value: word, type: 'number' })
+      result.push({ value: word, type: 'number', label: labels.number })
     } else if (/^[+\-*/=<>!]/.test(word)) {
-      result.push({ value: word, type: 'operator' })
-    } else if (/^[;,\(\)\{\}\[\]]$/.test(word)) {
-      result.push({ value: word, type: 'punctuation' })
+      result.push({ value: word, type: 'operator', label: labels.operator })
+    } else if (/^[;,(){}[\]]$/.test(word)) {
+      result.push({ value: word, type: 'punctuation', label: labels.punctuation })
     } else if (/^["']/.test(word)) {
-      result.push({ value: word, type: 'string' })
+      result.push({ value: word, type: 'string', label: labels.string })
     } else {
-      result.push({ value: word, type: 'identifier' })
+      result.push({ value: word, type: 'identifier', label: labels.identifier })
     }
   }
 
   return result
 })
 
-const executionModels = [
-  {
-    name: '编译型',
-    steps: ['源码', '编译器', '机器码', 'CPU 执行'],
-    pro: '执行速度快',
-    con: '需要编译等待',
-    langs: 'C, C++, Rust, Go'
-  },
-  {
-    name: '解释型',
-    steps: ['源码', '解释器', '逐行执行'],
-    pro: '即写即运行',
-    con: '执行速度慢',
-    langs: 'Python, Ruby, PHP'
-  },
-  {
-    name: 'JIT 即时编译',
-    steps: ['源码', '字节码', 'JIT 热点编译', '执行'],
-    pro: '兼顾性能和灵活',
-    con: '启动较慢',
-    langs: 'Java, JavaScript (V8)'
-  }
-]
+const executionModels = computed(
+  () => messages.value.compilers.workflow.executionModels
+)
 </script>
 
 <style scoped>

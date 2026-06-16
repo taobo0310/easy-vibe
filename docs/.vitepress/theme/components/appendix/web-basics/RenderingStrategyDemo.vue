@@ -1,15 +1,11 @@
-<!--
-  RenderingStrategyDemo.vue
-  CSR / SSR / SSG 对比演示
--->
 <template>
   <div class="render-demo">
     <div class="header">
       <div class="title">
-        渲染策略：CSR / SSR / SSG
+        {{ t('frameworks.renderingStrategy.title') }}
       </div>
       <div class="subtitle">
-        选择策略，观察首屏表现
+        {{ t('frameworks.renderingStrategy.subtitle') }}
       </div>
     </div>
 
@@ -36,7 +32,7 @@
       </div>
       <div class="card">
         <div class="label">
-          可交互时间
+          {{ t('frameworks.renderingStrategy.tti') }}
         </div>
         <div class="value">
           {{ metrics.tti }} ms
@@ -44,7 +40,7 @@
       </div>
       <div class="card">
         <div class="label">
-          SEO 友好
+          {{ t('frameworks.renderingStrategy.seo') }}
         </div>
         <div class="value">
           {{ metrics.seo }}
@@ -60,28 +56,16 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { webBasicsLocale } from '../../../locales/web-basics/index.js'
 
-const strategies = [
-  { key: 'csr', label: 'CSR' },
-  { key: 'ssr', label: 'SSR' },
-  { key: 'ssg', label: 'SSG' }
-]
+const { t, messages } = useI18n(webBasicsLocale)
+const strategies = computed(() => messages.value.frameworks.renderingStrategy.strategies)
 
 const current = ref('csr')
 
 const metrics = computed(() => {
-  if (current.value === 'csr') {
-    return { ttfb: 450, tti: 1600, seo: '一般', note: 'JS 拉取完成后才渲染' }
-  }
-  if (current.value === 'ssr') {
-    return {
-      ttfb: 220,
-      tti: 1100,
-      seo: '好',
-      note: '首屏更快，但服务器压力更大'
-    }
-  }
-  return { ttfb: 120, tti: 700, seo: '很好', note: '静态预渲染，适合内容站点' }
+  return strategies.value.find((strategy) => strategy.key === current.value) ?? strategies.value[0]
 })
 </script>
 

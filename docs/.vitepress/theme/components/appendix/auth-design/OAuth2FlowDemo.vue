@@ -1,16 +1,11 @@
-<!--
-  OAuth2FlowDemo.vue
-  OAuth2 / OIDC 授权码流程（手动推进，更贴近真实接入）
--->
 <template>
   <div class="oauth2-demo">
     <div class="header">
       <div class="title">
-        🔑 OAuth2：第三方登录（授权码流程）
+        {{ t('oauth2.title') }}
       </div>
       <div class="subtitle">
-        用最常见的 Authorization Code Flow（建议配合
-        PKCE）。默认手动推进，不自动下一步。
+        {{ t('oauth2.subtitle') }}
       </div>
     </div>
 
@@ -20,34 +15,34 @@
         :disabled="step !== 0"
         @click="start"
       >
-        开始
+        {{ t('oauth2.start') }}
       </button>
       <button
         class="btn"
         :disabled="step <= 1"
         @click="prev"
       >
-        上一步
+        {{ t('oauth2.prev') }}
       </button>
       <button
         class="btn primary"
         :disabled="step === 0 || step >= maxStep"
         @click="next"
       >
-        下一步
+        {{ t('oauth2.next') }}
       </button>
       <button
         class="btn"
         @click="reset"
       >
-        重置
+        {{ t('oauth2.reset') }}
       </button>
       <button
         class="btn"
         :disabled="!currentCmd"
         @click="copy(currentCmd)"
       >
-        {{ copied ? '已复制' : '复制命令' }}
+        {{ copied ? t('oauth2.copied') : t('oauth2.copyCommand') }}
       </button>
     </div>
 
@@ -55,47 +50,44 @@
       v-if="step > 0"
       class="progress"
     >
-      Step {{ step }} / {{ maxStep }} · {{ steps[step - 1]?.title }}
+      {{ t('oauth2.progress', { step, maxStep, title: activeStep?.title }) }}
     </div>
 
     <div class="grid">
       <div class="card">
         <div class="card-title">
-          角色
+          {{ t('oauth2.rolesTitle') }}
         </div>
         <div class="role">
-          <div class="pill">
-            Client（你的应用）
-          </div>
-          <div class="pill">
-            Authorization Server（微信/Google 等）
-          </div>
-          <div class="pill">
-            Resource Server（你的 API）
+          <div
+            v-for="role in roles"
+            :key="role"
+            class="pill"
+          >
+            {{ role }}
           </div>
         </div>
         <div class="desc">
-          OAuth2
-          的核心：<strong>你的应用不再保存用户在第三方的密码</strong>，而是拿到授权码/令牌后去换取用户信息。
+          {{ t('oauth2.roleDesc') }}
         </div>
       </div>
 
       <div class="card">
         <div class="card-title">
-          本步要做什么
+          {{ t('oauth2.stepTitle') }}
         </div>
         <div class="desc">
-          {{ steps[step - 1]?.desc || '点击开始' }}
+          {{ activeStep?.desc || t('oauth2.startHint') }}
         </div>
         <div
-          v-if="steps[step - 1]?.warn"
+          v-if="activeStep?.warn"
           class="warn"
         >
           <div class="warn-title">
-            注意
+            {{ t('oauth2.warning') }}
           </div>
           <div class="warn-text">
-            {{ steps[step - 1]?.warn }}
+            {{ activeStep?.warn }}
           </div>
         </div>
       </div>
@@ -103,31 +95,26 @@
 
     <div class="card">
       <div class="card-title">
-        请求/命令示例（可照抄）
+        {{ t('oauth2.commandTitle') }}
       </div>
       <pre
         class="code"
-      ><code>{{ currentCmd || '（点击开始后显示）' }}</code></pre>
+      ><code>{{ currentCmd || t('oauth2.commandPlaceholder') }}</code></pre>
       <div class="hint">
-        这是“示例请求”，不是你电脑上真实发出去的请求；你可以把参数替换成自己的
-        client_id / redirect_uri。
+        {{ t('oauth2.commandHint') }}
       </div>
     </div>
 
     <div class="card">
       <div class="card-title">
-        你真正需要记住的 4 件事
+        {{ t('oauth2.rememberTitle') }}
       </div>
       <ul class="list">
-        <li>
-          <strong>redirect_uri 必须白名单：</strong>避免被人把 code
-          劫持到自己的站。
-        </li>
-        <li><strong>state 必须校验：</strong>防 CSRF（登录也会被 CSRF）。</li>
-        <li><strong>code 只能用一次且很快过期：</strong>泄露影响有限。</li>
-        <li>
-          <strong>access token 要短 + refresh token 要保护：</strong>refresh
-          token 更像“长期钥匙”。
+        <li
+          v-for="item in remembers"
+          :key="item.strong"
+        >
+          <strong>{{ item.strong }}</strong>{{ item.text }}
         </li>
       </ul>
     </div>
@@ -136,6 +123,10 @@
 
 <script setup>
 import { computed, ref } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { authDesignLocale } from '../../../locales/auth-design/index.js'
+
+const { t, messages } = useI18n(authDesignLocale)
 
 const maxStep = 6
 const step = ref(0)
@@ -151,34 +142,10 @@ const params = {
   codeChallenge: 'pkce_challenge_...'
 }
 
-const steps = [
-  {
-    title: '1) 跳转到授权页',
-    desc: '你的应用把用户重定向到授权服务器，让用户登录并授权。',
-    warn: 'redirect_uri 必须白名单；state 用于防 CSRF。'
-  },
-  {
-    title: '2) 用户授权',
-    desc: '用户在第三方确认“允许此应用读取基本信息”。（这一步发生在第三方页面）'
-  },
-  {
-    title: '3) 带 code 回调',
-    desc: '授权服务器把用户带回 redirect_uri，并附上一次性的授权码 code。'
-  },
-  {
-    title: '4) 用 code 换 token',
-    desc: '你的后端（或移动端 + PKCE）调用 token endpoint，把 code 换成 access token。'
-  },
-  {
-    title: '5) 用 token 拉取用户信息',
-    desc: '携带 access token 请求 userinfo（或你自己业务的资源服务）。'
-  },
-  {
-    title: '6) 建立你自己的登录态',
-    desc: 'OAuth2 只解决“第三方授权”，你的系统还要创建自己的 session/JWT（并做授权）。',
-    warn: '不要把第三方 access token 当作你系统的权限 token；两者用途不同。'
-  }
-]
+const steps = computed(() => messages.value.oauth2.steps)
+const roles = computed(() => messages.value.oauth2.roles)
+const remembers = computed(() => messages.value.oauth2.remembers)
+const activeStep = computed(() => steps.value[step.value - 1])
 
 const currentCmd = computed(() => {
   if (step.value === 0) return ''
@@ -188,7 +155,7 @@ const currentCmd = computed(() => {
     )}&scope=${encodeURIComponent(params.scope)}&state=${params.state}&code_challenge=${params.codeChallenge}&code_challenge_method=S256`
   }
   if (step.value === 2) {
-    return `（用户在授权页点击“同意/授权”）`
+    return t('oauth2.userConsentCommand')
   }
   if (step.value === 3) {
     return `302 ${params.redirectUri}?code=${params.code}&state=${params.state}`
@@ -207,10 +174,7 @@ code_verifier=${params.codeVerifier}`
     return `GET https://auth.server/userinfo
 Authorization: Bearer <access_token>`
   }
-  return `你的后端：
-1) 读取 userinfo（拿到第三方 user_id）
-2) 在你系统里创建/绑定用户
-3) 返回你自己的 session cookie 或 JWT`
+  return t('oauth2.backendCommand')
 })
 
 const start = () => {

@@ -1,6 +1,6 @@
 <template>
   <div class="tdd-cycle-demo">
-    <div class="demo-label">TDD 红绿重构循环 ── 点击"下一步"推进</div>
+    <div class="demo-label">{{ t('tddCycle.title') }}</div>
 
     <div class="cycle-visual">
       <div
@@ -16,7 +16,7 @@
 
     <div class="step-card" :class="steps[step].cls">
       <div class="step-header">
-        <span class="step-badge">第 {{ step + 1 }} 步 / {{ steps.length }}</span>
+        <span class="step-badge">{{ t('tddCycle.stepBadge', { current: step + 1, total: steps.length }) }}</span>
         <span class="step-phase">{{ steps[step].phase }}</span>
       </div>
       <div class="step-desc">{{ steps[step].desc }}</div>
@@ -30,76 +30,27 @@
     </div>
 
     <div class="controls">
-      <button class="btn" :disabled="step === 0" @click="step--">上一步</button>
-      <button class="btn primary" :disabled="step === steps.length - 1" @click="step++">下一步</button>
-      <button class="btn" @click="step = 0">重置</button>
+      <button class="btn" :disabled="step === 0" @click="step--">{{ t('tddCycle.previous') }}</button>
+      <button class="btn primary" :disabled="step === steps.length - 1" @click="step++">{{ t('tddCycle.next') }}</button>
+      <button class="btn" @click="step = 0">{{ t('tddCycle.reset') }}</button>
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { engineeringExcellenceLocale } from '../../../locales/engineering-excellence/index.js'
 
+const { t, messages } = useI18n(engineeringExcellenceLocale)
 const step = ref(0)
 const current = computed(() => {
-  const s = steps[step.value]
+  const s = steps.value[step.value]
   return s.cls === 'red' ? 0 : s.cls === 'green' ? 1 : 2
 })
 
-const phases = [
-  { name: 'Red', icon: '🔴', cls: 'red' },
-  { name: 'Green', icon: '🟢', cls: 'green' },
-  { name: 'Refactor', icon: '🔵', cls: 'blue' }
-]
-
-const steps = [
-  {
-    phase: '🔴 Red — 先写一个失败的测试',
-    cls: 'red',
-    desc: '需求：实现 add(a, b) 函数。TDD 第一步不是写实现，而是先写测试。',
-    fileLabel: 'add.test.js',
-    code: `test('add(1, 2) 应该返回 3', () => {
-  expect(add(1, 2)).toBe(3)
-})`,
-    result: '❌ 测试失败 — add is not defined'
-  },
-  {
-    phase: '🟢 Green — 写最小实现让测试通过',
-    cls: 'green',
-    desc: '不追求完美，只写刚好让测试通过的代码。',
-    fileLabel: 'add.js',
-    code: `function add(a, b) {
-  return a + b
-}`,
-    result: '✅ 测试通过！'
-  },
-  {
-    phase: '🔵 Refactor — 重构优化',
-    cls: 'blue',
-    desc: '测试通过后安全地改进代码，测试是你的安全网。',
-    fileLabel: 'add.js',
-    code: `const add = (a, b) => a + b`,
-    result: '✅ 重构完成，测试仍然通过！'
-  },
-  {
-    phase: '🔴 Red — 添加新需求的测试',
-    cls: 'red',
-    desc: '新需求：add 应该能处理字符串数字。继续循环！',
-    fileLabel: 'add.test.js',
-    code: `test('add("1", "2") 应该返回 3', () => {
-  expect(add('1', '2')).toBe(3)
-})`,
-    result: '❌ 测试失败 — 返回了 "12" 而不是 3'
-  },
-  {
-    phase: '🟢 Green — 修复实现',
-    cls: 'green',
-    desc: '修改实现以处理字符串输入。',
-    fileLabel: 'add.js',
-    code: `const add = (a, b) => Number(a) + Number(b)`,
-    result: '✅ 所有测试通过！'
-  }
-]
+const phases = computed(() => messages.value.tddCycle.phases)
+const steps = computed(() => messages.value.tddCycle.steps)
 </script>
 
 <style scoped>

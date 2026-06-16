@@ -1,8 +1,8 @@
 <template>
   <div class="backend-demo">
     <div class="demo-header">
-      <span class="title">后端核心概念</span>
-      <span class="subtitle">服务器端的核心职责</span>
+      <span class="title">{{ t('computerOrganization.vibeCodingFullstack.backendCore.title') }}</span>
+      <span class="subtitle">{{ t('computerOrganization.vibeCodingFullstack.backendCore.subtitle') }}</span>
     </div>
 
     <div class="core-grid">
@@ -16,7 +16,7 @@
     </div>
 
     <div class="flow-section">
-      <div class="flow-title">请求处理流程</div>
+      <div class="flow-title">{{ t('computerOrganization.vibeCodingFullstack.backendCore.flowTitle') }}</div>
       <div class="flow-steps">
         <span v-for="(step, i) in flowSteps" :key="step">
           <span class="flow-step">{{ step }}</span>
@@ -26,24 +26,20 @@
     </div>
 
     <div class="info-box">
-      <strong>后端的核心价值：</strong>不是写代码，而是设计系统。如何让系统稳定、安全、高效、可扩展，才是后端工程师的真正能力。
+      <strong>{{ t('computerOrganization.vibeCodingFullstack.backendCore.valueLabel') }}</strong>{{ t('computerOrganization.vibeCodingFullstack.backendCore.value') }}
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { computerFundamentalsLocale } from '../../../locales/computer-fundamentals/index.js'
 
-const coreConcepts = ref([
-  { name: 'API 设计', desc: '定义客户端如何与服务端交互', examples: ['RESTful', 'GraphQL'] },
-  { name: '业务逻辑', desc: '处理核心业务规则和流程', examples: ['订单处理', '支付流程'] },
-  { name: '数据存储', desc: '数据的持久化和查询', examples: ['MySQL', 'Redis'] },
-  { name: '认证授权', desc: '用户身份验证和权限控制', examples: ['JWT', 'OAuth'] },
-  { name: '性能优化', desc: '缓存、异步、并发处理', examples: ['缓存', '消息队列'] },
-  { name: '安全防护', desc: '防止攻击和数据泄露', examples: ['SQL注入防护', 'HTTPS'] }
-])
+const { t, messages } = useI18n(computerFundamentalsLocale)
 
-const flowSteps = ref(['接收请求', '路由解析', '业务处理', '数据操作', '返回响应'])
+const coreConcepts = computed(() => messages.value.computerOrganization.vibeCodingFullstack.backendCore.coreConcepts)
+const flowSteps = computed(() => messages.value.computerOrganization.vibeCodingFullstack.backendCore.flowSteps)
 </script>
 
 <style scoped>

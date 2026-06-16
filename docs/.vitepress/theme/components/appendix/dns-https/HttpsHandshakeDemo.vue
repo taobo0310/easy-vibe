@@ -1,19 +1,19 @@
 <template>
   <div class="https-handshake-demo">
     <h4 style="margin: 0 0 12px 0; color: #1a1a2e">
-      🤝 TLS 握手过程演示
+      {{ t('handshake.title') }}
     </h4>
     <div class="control-row">
       <button class="start-btn" :disabled="isRunning" @click="startHandshake">
-        {{ isRunning ? '握手进行中...' : '开始 TLS 握手' }}
+        {{ isRunning ? t('handshake.running') : t('handshake.start') }}
       </button>
-      <button class="reset-btn" @click="reset">重置</button>
+      <button class="reset-btn" @click="reset">{{ t('handshake.reset') }}</button>
     </div>
 
     <div class="handshake-area">
       <div class="side client-side">
         <div class="side-icon">💻</div>
-        <div class="side-label">客户端（浏览器）</div>
+        <div class="side-label">{{ t('handshake.client') }}</div>
       </div>
 
       <div class="message-lane">
@@ -43,7 +43,7 @@
 
       <div class="side server-side">
         <div class="side-icon">🖥️</div>
-        <div class="side-label">服务器</div>
+        <div class="side-label">{{ t('handshake.server') }}</div>
       </div>
     </div>
 
@@ -57,55 +57,23 @@
     </div>
 
     <div v-if="handshakeDone" class="success-box">
-      ✅ TLS 握手完成！后续所有 HTTP 数据都将通过对称加密传输，第三方无法窃听。
+      {{ t('handshake.success') }}
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref } from 'vue'
+import { computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { dnsHttpsLocale } from '../../../locales/dns-https/index.js'
 
 const isRunning = ref(false)
 const currentStep = ref(-1)
 const handshakeDone = ref(false)
+const { t, messages: localeMessages } = useI18n(dnsHttpsLocale)
 
-const messages = [
-  {
-    name: 'Client Hello',
-    direction: 'right',
-    desc: '发送支持的 TLS 版本、加密套件列表、随机数',
-    detail:
-      '浏览器向服务器发起连接请求，告知自己支持的 TLS 版本（如 TLS 1.3）、可用的加密算法列表（如 AES-256-GCM）以及一个客户端随机数（Client Random）。这就像自我介绍："我会这些加密方式，你选一个吧。"'
-  },
-  {
-    name: 'Server Hello',
-    direction: 'left',
-    desc: '选定 TLS 版本、加密套件、服务器随机数',
-    detail:
-      '服务器从客户端提供的列表中选择一个最优的加密套件，并返回自己的随机数（Server Random）。相当于回应："好的，我们就用 TLS 1.3 + AES-256-GCM 来通信。"'
-  },
-  {
-    name: 'Certificate',
-    direction: 'left',
-    desc: '服务器发送数字证书（含公钥）',
-    detail:
-      '服务器将自己的数字证书发送给浏览器。证书中包含服务器的公钥、域名信息以及 CA 的签名。浏览器会验证证书是否由受信任的 CA 签发、是否过期、域名是否匹配。'
-  },
-  {
-    name: 'Key Exchange',
-    direction: 'right',
-    desc: '双方协商生成会话密钥',
-    detail:
-      '在 TLS 1.3 中，客户端和服务器通过 ECDHE（椭圆曲线 Diffie-Hellman）算法交换密钥材料。双方各自生成临时密钥对，交换公钥后独立计算出相同的"预主密钥"，再结合之前的随机数推导出最终的对称会话密钥。'
-  },
-  {
-    name: 'Finished',
-    direction: 'right',
-    desc: '双方确认握手成功，开始加密通信',
-    detail:
-      '双方各自发送 Finished 消息，其中包含之前所有握手消息的摘要（用刚协商好的密钥加密）。如果对方能正确解密并验证，说明密钥协商成功，后续所有数据都将使用对称加密传输。'
-  }
-]
+const messages = computed(() => localeMessages.value.handshake.messages)
 
 async function startHandshake() {
   if (isRunning.value) return
@@ -113,7 +81,7 @@ async function startHandshake() {
   handshakeDone.value = false
   currentStep.value = -1
 
-  for (let i = 0; i < messages.length; i++) {
+  for (let i = 0; i < messages.value.length; i++) {
     currentStep.value = i
     await sleep(1200)
   }

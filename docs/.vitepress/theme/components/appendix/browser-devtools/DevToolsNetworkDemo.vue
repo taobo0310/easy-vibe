@@ -1,5 +1,9 @@
 <script setup>
 import { ref, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { browserDevtoolsLocale } from '../../../locales/browser-devtools/index.js'
+
+const { t } = useI18n(browserDevtoolsLocale)
 
 const requests = ref([
   { name: 'index.html', method: 'GET', status: 200, type: 'document', size: '12KB', time: 120, start: 0 },
@@ -66,7 +70,7 @@ const addFailedRequest = () => {
   >
     <template #header>
       <div class="header">
-        <span class="title">Network (网络面板)</span>
+        <span class="title">{{ t('networkDemo.title') }}</span>
         <div class="actions">
           <el-button
             type="primary"
@@ -74,7 +78,7 @@ const addFailedRequest = () => {
             icon="Refresh"
             @click="refresh"
           >
-            刷新页面
+            {{ t('networkDemo.refreshBtn') }}
           </el-button>
           <el-button
             type="danger"
@@ -82,7 +86,7 @@ const addFailedRequest = () => {
             icon="Warning"
             @click="addFailedRequest"
           >
-            模拟请求失败
+            {{ t('networkDemo.simulateFailBtn') }}
           </el-button>
         </div>
       </div>
@@ -153,7 +157,7 @@ const addFailedRequest = () => {
     </el-table>
 
     <div class="footer-tip">
-      💡 点击某一行可以查看请求详情
+      {{ t('networkDemo.footerTip') }}
     </div>
 
     <!-- Detail Drawer -->

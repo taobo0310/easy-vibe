@@ -1,12 +1,8 @@
-<!--
-  LinuxFileSystemDemo.vue
-  Linux 文件系统层级演示
--->
 <template>
   <div class="linux-fs-demo">
     <div class="header">
-      <div class="title">Linux 文件系统层级</div>
-      <div class="subtitle">点击目录查看用途说明</div>
+      <div class="title">{{ t('fileSystem.title') }}</div>
+      <div class="subtitle">{{ t('fileSystem.subtitle') }}</div>
     </div>
 
     <div class="tree">
@@ -26,7 +22,7 @@
       <div class="detail-title">{{ current.path }}</div>
       <div class="detail-desc">{{ current.desc }}</div>
       <div v-if="current.examples.length" class="examples">
-        <div class="ex-label">常见内容：</div>
+        <div class="ex-label">{{ t('fileSystem.examplesLabel') }}</div>
         <div class="ex-list">
           <span v-for="(ex, i) in current.examples" :key="i" class="ex-tag">{{ ex }}</span>
         </div>
@@ -37,22 +33,15 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { linuxBasicsLocale } from '../../../locales/linux-basics/index.js'
+
+const { t, messages } = useI18n(linuxBasicsLocale)
 
 const activeDir = ref('/')
 
-const dirs = [
-  { path: '/', icon: '📁', brief: '根目录', desc: '整个文件系统的起点，所有目录和文件都从这里开始。Linux 中一切皆文件，所有设备、进程信息都以文件形式存在于这棵目录树中。', examples: [] },
-  { path: '/bin', icon: '⚙️', brief: '基础命令', desc: '存放系统启动和单用户模式下必需的基础命令二进制文件。这些命令所有用户都可以使用。', examples: ['ls', 'cp', 'mv', 'cat', 'grep', 'chmod'] },
-  { path: '/etc', icon: '📋', brief: '配置文件', desc: '存放系统和应用的配置文件。几乎所有软件的配置都在这里，修改配置是 Linux 运维的日常。', examples: ['nginx.conf', 'hosts', 'passwd', 'ssh/sshd_config', 'crontab'] },
-  { path: '/home', icon: '🏠', brief: '用户目录', desc: '普通用户的家目录。每个用户在这里有一个以用户名命名的子目录，存放个人文件和配置。', examples: ['/home/alice', '/home/bob', '~/.bashrc', '~/.ssh/'] },
-  { path: '/var', icon: '📊', brief: '可变数据', desc: '存放运行时会变化的数据：日志、缓存、邮件、数据库文件等。排查问题时经常需要查看这里的日志。', examples: ['/var/log/', '/var/cache/', '/var/lib/mysql/', '/var/www/'] },
-  { path: '/tmp', icon: '🗑️', brief: '临时文件', desc: '存放临时文件，系统重启后通常会被清空。所有用户都有写权限，适合存放不需要持久化的中间文件。', examples: ['编译中间文件', '下载缓存', '会话临时数据'] },
-  { path: '/usr', icon: '📦', brief: '用户程序', desc: '存放用户安装的程序、库和文档。可以理解为 "Unix System Resources"，是最大的目录之一。', examples: ['/usr/bin/', '/usr/lib/', '/usr/local/', '/usr/share/'] },
-  { path: '/proc', icon: '🔍', brief: '进程信息', desc: '虚拟文件系统，不占磁盘空间。内核将进程和系统信息以文件形式暴露在这里，是监控和调试的重要数据源。', examples: ['/proc/cpuinfo', '/proc/meminfo', '/proc/[pid]/status'] },
-  { path: '/dev', icon: '🔌', brief: '设备文件', desc: '存放设备文件。Linux 中硬件设备也是文件，通过读写这些文件与硬件交互。', examples: ['/dev/sda', '/dev/null', '/dev/zero', '/dev/tty'] }
-]
-
-const current = computed(() => dirs.find(d => d.path === activeDir.value))
+const dirs = computed(() => messages.value.fileSystem.dirs)
+const current = computed(() => dirs.value.find(d => d.path === activeDir.value))
 </script>
 
 <style scoped>

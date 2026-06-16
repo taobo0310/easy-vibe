@@ -1,17 +1,13 @@
-<!--
-  LinuxPermissionsDemo.vue
-  Linux 权限系统演示
--->
 <template>
   <div class="linux-perm-demo">
     <div class="header">
-      <div class="title">Linux 权限解读器</div>
-      <div class="subtitle">输入权限字符串或数字，查看含义</div>
+      <div class="title">{{ t('permissions.title') }}</div>
+      <div class="subtitle">{{ t('permissions.subtitle') }}</div>
     </div>
 
     <div class="input-row">
       <div class="input-group">
-        <label>权限数字（如 755）</label>
+        <label>{{ t('permissions.inputLabel') }}</label>
         <input v-model="permNum" type="text" maxlength="3" placeholder="755" @input="onNumInput" />
       </div>
       <div class="perm-string">{{ permString }}</div>
@@ -22,7 +18,11 @@
         <div class="group-label">{{ group.label }}</div>
         <div class="bits">
           <label v-for="(bit, bi) in group.bits" :key="bi" class="bit-label">
-            <input type="checkbox" v-model="bit.on" @change="onBitChange" />
+            <input
+              type="checkbox"
+              :checked="bit.on"
+              @change="setBit(gi, bi, $event.target.checked)"
+            />
             <span :class="['bit-char', bit.char]">{{ bit.char }}</span>
             <span class="bit-name">{{ bit.name }}</span>
           </label>
@@ -31,7 +31,7 @@
     </div>
 
     <div class="examples">
-      <div class="ex-title">常见权限组合</div>
+      <div class="ex-title">{{ t('permissions.examplesTitle') }}</div>
       <div class="ex-grid">
         <div v-for="ex in examples" :key="ex.num" class="ex-item" @click="setPermNum(ex.num)">
           <code>{{ ex.num }}</code>
@@ -44,48 +44,51 @@
 
 <script setup>
 import { ref, computed, reactive } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { linuxBasicsLocale } from '../../../locales/linux-basics/index.js'
 
-const groups = reactive([
-  {
-    label: '所有者（Owner）',
-    bits: [
-      { char: 'r', name: '读', on: true },
-      { char: 'w', name: '写', on: true },
-      { char: 'x', name: '执行', on: true }
-    ]
-  },
-  {
-    label: '所属组（Group）',
-    bits: [
-      { char: 'r', name: '读', on: true },
-      { char: 'w', name: '写', on: false },
-      { char: 'x', name: '执行', on: true }
-    ]
-  },
-  {
-    label: '其他人（Others）',
-    bits: [
-      { char: 'r', name: '读', on: true },
-      { char: 'w', name: '写', on: false },
-      { char: 'x', name: '执行', on: true }
-    ]
-  }
+const { t, messages } = useI18n(linuxBasicsLocale)
+
+const bitState = reactive([
+  [
+    { char: 'r', on: true },
+    { char: 'w', on: true },
+    { char: 'x', on: true }
+  ],
+  [
+    { char: 'r', on: true },
+    { char: 'w', on: false },
+    { char: 'x', on: true }
+  ],
+  [
+    { char: 'r', on: true },
+    { char: 'w', on: false },
+    { char: 'x', on: true }
+  ]
 ])
 
 const permNum = ref('755')
 
+const groups = computed(() => messages.value.permissions.groups.map((group, i) => ({
+  ...group,
+  bits: bitState[i].map(bit => ({
+    ...bit,
+    name: messages.value.permissions.bitNames[bit.char]
+  }))
+})))
+
 const permString = computed(() => {
-  return '-' + groups.map(g =>
-    g.bits.map(b => b.on ? b.char : '-').join('')
+  return '-' + bitState.map(g =>
+    g.map(b => b.on ? b.char : '-').join('')
   ).join('')
 })
 
 function bitsToNum() {
-  return groups.map(g => {
+  return bitState.map(g => {
     let n = 0
-    if (g.bits[0].on) n += 4
-    if (g.bits[1].on) n += 2
-    if (g.bits[2].on) n += 1
+    if (g[0].on) n += 4
+    if (g[1].on) n += 2
+    if (g[2].on) n += 1
     return n
   }).join('')
 }
@@ -94,15 +97,20 @@ function onBitChange() {
   permNum.value = bitsToNum()
 }
 
+function setBit(groupIndex, bitIndex, checked) {
+  bitState[groupIndex][bitIndex].on = checked
+  onBitChange()
+}
+
 function onNumInput() {
   const s = permNum.value.replace(/[^0-7]/g, '').slice(0, 3)
   permNum.value = s
   if (s.length === 3) {
     s.split('').forEach((ch, gi) => {
       const n = parseInt(ch)
-      groups[gi].bits[0].on = !!(n & 4)
-      groups[gi].bits[1].on = !!(n & 2)
-      groups[gi].bits[2].on = !!(n & 1)
+      bitState[gi][0].on = !!(n & 4)
+      bitState[gi][1].on = !!(n & 2)
+      bitState[gi][2].on = !!(n & 1)
     })
   }
 }
@@ -112,12 +120,7 @@ function setPermNum(num) {
   onNumInput()
 }
 
-const examples = [
-  { num: '644', desc: '普通文件（owner 读写，其他只读）' },
-  { num: '755', desc: '可执行文件/目录（owner 全权限）' },
-  { num: '600', desc: '私密文件（仅 owner 读写）' },
-  { num: '777', desc: '完全开放（不推荐）' }
-]
+const examples = computed(() => messages.value.permissions.examples)
 </script>
 
 <style scoped>

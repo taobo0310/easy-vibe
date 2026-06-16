@@ -4,7 +4,7 @@
       <!-- Input Feature -->
       <div class="grid-wrapper">
         <div class="grid-title">
-          Feature Vectors
+          {{ t('positionalEmbedding.featureTitle') }}
         </div>
         <div class="grid-box feature-grid">
           <div
@@ -24,7 +24,7 @@
       <!-- Positional Embedding -->
       <div class="grid-wrapper">
         <div class="grid-title">
-          Position Embeddings
+          {{ t('positionalEmbedding.positionTitle') }}
         </div>
         <div class="grid-box pos-grid">
           <div
@@ -44,7 +44,7 @@
       <!-- Result -->
       <div class="grid-wrapper">
         <div class="grid-title">
-          Input to Transformer
+          {{ t('positionalEmbedding.resultTitle') }}
         </div>
         <div class="grid-box result-grid">
           <div
@@ -57,12 +57,16 @@
         </div>
       </div>
     </div>
-    <div class="caption">
-      位置编码 (Position Embedding)
-      是一组可学习的向量，直接<b>加</b>在图像特征上。
-    </div>
+    <div class="caption" v-html="t('positionalEmbedding.caption')" />
   </div>
 </template>
+
+<script setup>
+import { useI18n } from '../../../composables/useI18n.js'
+import { vlmIntroLocale } from '../../../locales/vlm-intro/index.js'
+
+const { t } = useI18n(vlmIntroLocale)
+</script>
 
 <style scoped>
 .pos-demo {

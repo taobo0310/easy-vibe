@@ -2,23 +2,27 @@
   <div class="declarative-formula-demo">
     <div class="formula-row">
       <div class="formula-box state-box">
-        <div class="formula-label">State（数据）</div>
+        <div class="formula-label">{{ t('declarativeFormula.stateLabel') }}</div>
       </div>
       <div class="formula-arrow">→ f →</div>
       <div class="formula-box ui-box">
-        <div class="formula-label">UI（界面）</div>
+        <div class="formula-label">{{ t('declarativeFormula.uiLabel') }}</div>
       </div>
     </div>
 
     <div class="demo-body">
       <div class="input-panel">
-        <div class="panel-title">修改数据（State）</div>
+        <div class="panel-title">{{ t('declarativeFormula.inputTitle') }}</div>
         <div class="input-group">
-          <label>用户名</label>
-          <input v-model="username" type="text" placeholder="输入名字" />
+          <label>{{ t('declarativeFormula.username') }}</label>
+          <input
+            v-model="username"
+            type="text"
+            :placeholder="t('declarativeFormula.namePlaceholder')"
+          />
         </div>
         <div class="input-group">
-          <label>商品数量</label>
+          <label>{{ t('declarativeFormula.productCount') }}</label>
           <div class="stepper">
             <button @click="count = Math.max(0, count - 1)">-</button>
             <span class="stepper-value">{{ count }}</span>
@@ -26,7 +30,7 @@
           </div>
         </div>
         <div class="input-group">
-          <label>深色模式</label>
+          <label>{{ t('declarativeFormula.darkMode') }}</label>
           <label class="toggle-switch">
             <input v-model="darkMode" type="checkbox" />
             <span class="slider" />
@@ -35,49 +39,67 @@
       </div>
 
       <div class="output-panel" :class="{ dark: darkMode }">
-        <div class="panel-title">渲染结果（UI）</div>
+        <div class="panel-title">{{ t('declarativeFormula.outputTitle') }}</div>
         <div class="preview-card">
           <div class="preview-greeting">
-            {{ username ? `你好，${username}！` : '你好，访客！' }}
+            {{ greetingText }}
           </div>
           <div class="preview-cart">
-            购物车：{{ count }} 件商品
+            {{ t('declarativeFormula.cartLine', { count }) }}
           </div>
           <div class="preview-total">
-            总价：¥{{ count * 99 }}
+            {{ t('declarativeFormula.totalLine', { total: count * 99 }) }}
           </div>
           <div v-if="count > 5" class="preview-warning">
-            商品数量较多，请确认订单
+            {{ t('declarativeFormula.warning') }}
           </div>
           <div class="preview-theme">
-            当前主题：{{ darkMode ? '深色' : '浅色' }}
+            {{ t('declarativeFormula.themeLine', { theme: themeText }) }}
           </div>
         </div>
       </div>
     </div>
 
     <div class="state-snapshot">
-      <div class="snapshot-title">当前 State 快照</div>
+      <div class="snapshot-title">{{ t('declarativeFormula.snapshotTitle') }}</div>
       <code class="snapshot-code">{{ stateSnapshot }}</code>
     </div>
 
     <div class="info-box">
-      <strong>核心思想：</strong>
-      <span>你只需要修改数据（State），框架会根据数据自动渲染出对应的界面（UI）。同样的数据永远渲染出同样的界面，这就是 UI = f(State)。</span>
+      <strong>{{ t('declarativeFormula.infoStrong') }}</strong>
+      <span>{{ t('declarativeFormula.info') }}</span>
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { frameworkNatureLocale } from '../../../locales/framework-nature/index.js'
+
+const { t } = useI18n(frameworkNatureLocale)
 
 const username = ref('')
 const count = ref(2)
 const darkMode = ref(false)
 
+const greetingText = computed(() =>
+  username.value
+    ? t('declarativeFormula.greetingUser', { name: username.value })
+    : t('declarativeFormula.greetingGuest')
+)
+
+const themeText = computed(() =>
+  darkMode.value ? t('declarativeFormula.dark') : t('declarativeFormula.light')
+)
+
 const stateSnapshot = computed(() =>
   JSON.stringify(
-    { username: username.value || '(空)', count: count.value, darkMode: darkMode.value },
+    {
+      username: username.value || t('declarativeFormula.empty'),
+      count: count.value,
+      darkMode: darkMode.value
+    },
     null,
     2
   )

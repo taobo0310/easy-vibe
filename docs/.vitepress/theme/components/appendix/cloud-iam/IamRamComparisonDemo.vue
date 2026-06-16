@@ -2,8 +2,8 @@
   <div class="iam-ram-comparison-demo">
     <div class="demo-header">
       <span class="icon">🔐</span>
-      <span class="title">IAM vs RAM 对比</span>
-      <span class="subtitle">不同云厂商权限管理服务</span>
+      <span class="title">{{ t('comparison.title') }}</span>
+      <span class="subtitle">{{ t('comparison.subtitle') }}</span>
     </div>
 
     <div class="main-area">
@@ -45,7 +45,7 @@
             </div>
             <div class="comp-item ram">
               <div class="comp-label">
-                阿里云 RAM
+                {{ t('comparison.ramLabel') }}
               </div>
               <div class="comp-desc">
                 {{ selectedFeatureData.ramDetail }}
@@ -57,7 +57,7 @@
 
       <div class="platform-col ram">
         <div class="platform-header">
-          阿里云 RAM
+          {{ t('comparison.ramLabel') }}
         </div>
         <div
           v-for="(feature, index) in features"
@@ -74,35 +74,22 @@
 
     <div class="info-box">
       <span class="icon">💡</span>
-      <strong>核心思想：</strong>IAM 和 RAM 核心概念基本一致，只是术语和实现细节略有不同。
+      <strong>{{ t('common.coreIdea') }}</strong>{{ t('comparison.info') }}
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { cloudIamLocale } from '../../../locales/cloud-iam/index.js'
 
+const { t, messages } = useI18n(cloudIamLocale)
 const selectedFeature = ref(0)
+const features = computed(() => messages.value.comparison.features)
+const featureDetails = computed(() => messages.value.comparison.featureDetails)
 
-const features = [
-  { icon: '👤', name: '用户管理' },
-  { icon: '👥', name: '用户组' },
-  { icon: '🎭', name: '角色扮演' },
-  { icon: '📋', name: '权限策略' },
-  { icon: '🔗', name: '身份联合' },
-  { icon: '🔑', name: '访问密钥' }
-]
-
-const featureDetails = [
-  { name: '用户管理', awsDetail: 'IAM User，支持编程访问和控制台访问', ramDetail: 'RAM 用户，功能类似，支持子账号登录' },
-  { name: '用户组管理', awsDetail: 'IAM Group 批量管理用户权限', ramDetail: 'RAM 用户组，按部门分组管理' },
-  { name: '角色与扮演', awsDetail: 'IAM Role + STS AssumeRole', ramDetail: 'RAM 角色 + STS AssumeRole' },
-  { name: '权限策略', awsDetail: 'JSON 格式 Policy', ramDetail: '语法类似的权限策略' },
-  { name: '身份联合', awsDetail: 'SAML 2.0 / OIDC，支持 AD/Okta', ramDetail: 'SAML 2.0，支持钉钉等' },
-  { name: '访问密钥', awsDetail: 'AK/SK，支持轮换和分析', ramDetail: 'AccessKey，提供安全建议' }
-]
-
-const selectedFeatureData = computed(() => featureDetails[selectedFeature.value])
+const selectedFeatureData = computed(() => featureDetails.value[selectedFeature.value])
 </script>
 
 <style scoped>

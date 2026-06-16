@@ -1,8 +1,8 @@
 <template>
   <div class="regex-demo">
     <div class="demo-header">
-      <span class="title">正则表达式：文本的搜索引擎</span>
-      <span class="subtitle">模式匹配 · 分组捕获 · 实时预览</span>
+      <span class="title">{{ t('regex.title') }}</span>
+      <span class="subtitle">{{ t('regex.subtitle') }}</span>
     </div>
 
     <div class="control-panel">
@@ -22,13 +22,13 @@
       <!-- Mode 1: Live Playground -->
       <div v-if="activeMode === 'playground'" class="playground-section">
         <div class="input-group">
-          <label>正则表达式</label>
+          <label>{{ t('regex.patternLabel') }}</label>
           <div class="regex-input-wrapper">
             <span class="regex-slash">/</span>
             <input
               v-model="regexPattern"
               type="text"
-              placeholder="输入正则..."
+              :placeholder="t('regex.patternPlaceholder')"
               class="regex-input"
             />
             <span class="regex-slash">/</span>
@@ -42,23 +42,23 @@
         </div>
 
         <div class="input-group">
-          <label>测试文本</label>
+          <label>{{ t('regex.textLabel') }}</label>
           <textarea
             v-model="testText"
             rows="3"
-            placeholder="输入要匹配的文本..."
+            :placeholder="t('regex.textPlaceholder')"
             class="test-input"
           />
         </div>
 
         <div class="match-results">
           <div class="results-header">
-            <span class="results-title">匹配结果</span>
+            <span class="results-title">{{ t('regex.resultsTitle') }}</span>
             <span
               class="match-count"
               :class="{ 'has-match': matches.length > 0 }"
             >
-              {{ matches.length }} 个匹配
+              {{ t('regex.matchCount', { count: matches.length }) }}
             </span>
           </div>
           <div class="highlighted-text" v-html="highlightedText" />
@@ -72,7 +72,7 @@
         </div>
 
         <div class="preset-btns">
-          <span class="preset-label">试试预设：</span>
+          <span class="preset-label">{{ t('regex.presetLabel') }}</span>
           <button
             v-for="p in presets"
             :key="p.name"
@@ -121,7 +121,7 @@
               >
                 <span class="ex-text">{{ ex.text }}</span>
                 <span :class="['ex-result', ex.match ? 'pass' : 'fail']">
-                  {{ ex.match ? '✓ 匹配' : '✗ 不匹配' }}
+                  {{ ex.match ? t('regex.pass') : t('regex.fail') }}
                 </span>
               </div>
             </div>
@@ -132,7 +132,7 @@
       <!-- Mode 4: Visual Breakdown -->
       <div v-if="activeMode === 'visual'" class="visual-section">
         <div class="visual-example">
-          <div class="visual-title">正则解剖：拆解一个邮箱匹配模式</div>
+          <div class="visual-title">{{ t('regex.visualTitle') }}</div>
           <div class="visual-regex">
             <span
               v-for="(part, i) in regexParts"
@@ -159,7 +159,7 @@
         </div>
 
         <div class="visual-flow">
-          <div class="flow-title">正则引擎的工作过程</div>
+          <div class="flow-title">{{ t('regex.flowTitle') }}</div>
           <div class="flow-steps">
             <div v-for="(step, i) in engineSteps" :key="i" class="flow-step">
               <div class="flow-num">{{ i + 1 }}</div>
@@ -174,33 +174,29 @@
     </div>
 
     <div class="info-box">
-      <strong>核心思想：</strong>
-      <span v-if="activeMode === 'playground'">正则表达式是一种用特殊符号描述文本模式的语言，在搜索、替换、数据验证中无处不在。</span>
-      <span v-else-if="activeMode === 'cheatsheet'">记住几个核心符号（. * + ? \d \w [] ()）就能覆盖 80%
-        的使用场景。点击任意符号可直接试验。</span>
-      <span v-else-if="activeMode === 'patterns'">不需要自己从零写正则——常见场景（邮箱、手机号、URL）都有成熟的模式可以直接复用。</span>
-      <span v-else>正则引擎从左到右逐字符匹配，遇到量词会"贪婪"地尽量多匹配，失败时"回溯"尝试其他路径。</span>
+      <strong>{{ t('regex.coreStrong') }}</strong>
+      <span v-if="activeMode === 'playground'">{{ t('regex.core.playground') }}</span>
+      <span v-else-if="activeMode === 'cheatsheet'">{{ t('regex.core.cheatsheet') }}</span>
+      <span v-else-if="activeMode === 'patterns'">{{ t('regex.core.patterns') }}</span>
+      <span v-else>{{ t('regex.core.visual') }}</span>
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { developmentToolsLocale } from '../../../locales/development-tools/index.js'
+
+const { t, messages } = useI18n(developmentToolsLocale)
 
 const activeMode = ref('playground')
 
-const modes = [
-  { id: 'playground', label: '实时试验' },
-  { id: 'cheatsheet', label: '速查表' },
-  { id: 'patterns', label: '常用模式' },
-  { id: 'visual', label: '可视化解析' }
-]
+const modes = computed(() => messages.value.regex.modes)
 
 const regexPattern = ref('\\d+')
 const regexFlags = ref('g')
-const testText = ref(
-  '我的手机号是 13812345678，座机是 010-12345678，邮箱是 test@example.com'
-)
+const testText = ref(t('regex.defaultText'))
 
 function buildRegex(pattern, flags) {
   try {
@@ -256,38 +252,7 @@ function escapeHtml(str) {
   return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
 }
 
-const presets = [
-  {
-    name: '找数字',
-    pattern: '\\d+',
-    flags: 'g',
-    text: '价格是 99 元，优惠 20 元，共 79 元'
-  },
-  {
-    name: '找邮箱',
-    pattern: '[\\w.+-]+@[\\w-]+\\.[\\w.]+',
-    flags: 'g',
-    text: 'admin@test.com 和 user@example.org 是有效邮箱'
-  },
-  {
-    name: '找手机号',
-    pattern: '1[3-9]\\d{9}',
-    flags: 'g',
-    text: '联系我：13812345678 或 15099887766'
-  },
-  {
-    name: '找 URL',
-    pattern: 'https?://[^\\s]+',
-    flags: 'g',
-    text: '访问 https://github.com 或 http://example.com/path'
-  },
-  {
-    name: '找中文',
-    pattern: '[\\u4e00-\\u9fa5]+',
-    flags: 'g',
-    text: 'Hello世界，你好World！'
-  }
-]
+const presets = computed(() => messages.value.regex.presets)
 
 function applyPreset(p) {
   regexPattern.value = p.pattern
@@ -295,49 +260,7 @@ function applyPreset(p) {
   testText.value = p.text
 }
 
-const cheatsheet = [
-  {
-    category: '字符类',
-    items: [
-      { pattern: '.', desc: '任意字符（除换行）', example: 'a.c → abc, a1c' },
-      { pattern: '\\d', desc: '数字 [0-9]', example: '\\d → 3, 7' },
-      { pattern: '\\w', desc: '字母数字下划线', example: '\\w → a, 5, _' },
-      { pattern: '\\s', desc: '空白字符', example: '空格、Tab、换行' },
-      { pattern: '[abc]', desc: '字符集合', example: '[aeiou] → 元音' },
-      { pattern: '[^abc]', desc: '否定集合', example: '[^0-9] → 非数字' }
-    ]
-  },
-  {
-    category: '量词',
-    items: [
-      { pattern: '*', desc: '0 或多次', example: 'ab* → a, ab, abb' },
-      { pattern: '+', desc: '1 或多次', example: 'ab+ → ab, abb' },
-      { pattern: '?', desc: '0 或 1 次', example: 'colou?r → color, colour' },
-      { pattern: '{n}', desc: '恰好 n 次', example: '\\d{4} → 2024' },
-      { pattern: '{n,m}', desc: 'n 到 m 次', example: '\\d{2,4} → 12, 123' }
-    ]
-  },
-  {
-    category: '位置',
-    items: [
-      { pattern: '^', desc: '行首', example: '^Hello → 以 Hello 开头' },
-      { pattern: '$', desc: '行尾', example: 'end$ → 以 end 结尾' },
-      {
-        pattern: '\\b',
-        desc: '单词边界',
-        example: '\\bcat\\b → cat（不匹配 catch）'
-      }
-    ]
-  },
-  {
-    category: '分组与引用',
-    items: [
-      { pattern: '(abc)', desc: '捕获组', example: '(\\d+)-(\\d+) → 分别捕获' },
-      { pattern: 'a|b', desc: '或', example: 'cat|dog → cat 或 dog' },
-      { pattern: '(?:abc)', desc: '非捕获组', example: '(?:ab)+ → abab' }
-    ]
-  }
-]
+const cheatsheet = computed(() => messages.value.regex.cheatsheet)
 
 function tryCheat(item) {
   activeMode.value = 'playground'
@@ -345,109 +268,13 @@ function tryCheat(item) {
   regexFlags.value = 'g'
 }
 
-const commonPatterns = [
-  {
-    name: '邮箱',
-    regex: '^[\\w.+-]+@[\\w-]+\\.[\\w.]+$',
-    examples: [
-      { text: 'user@example.com', match: true },
-      { text: 'a.b+c@test.org', match: true },
-      { text: 'invalid@', match: false },
-      { text: '@no-user.com', match: false }
-    ]
-  },
-  {
-    name: '手机号（中国）',
-    regex: '^1[3-9]\\d{9}$',
-    examples: [
-      { text: '13812345678', match: true },
-      { text: '15099887766', match: true },
-      { text: '12345678901', match: false },
-      { text: '1381234567', match: false }
-    ]
-  },
-  {
-    name: 'URL',
-    regex: '^https?://[^\\s]+$',
-    examples: [
-      { text: 'https://github.com', match: true },
-      { text: 'http://example.com/path?q=1', match: true },
-      { text: 'ftp://not-http.com', match: false },
-      { text: 'just-text', match: false }
-    ]
-  },
-  {
-    name: 'IPv4 地址',
-    regex: '^(\\d{1,3}\\.){3}\\d{1,3}$',
-    examples: [
-      { text: '192.168.1.1', match: true },
-      { text: '10.0.0.255', match: true },
-      { text: '999.999.999.999', match: true },
-      { text: '1.2.3', match: false }
-    ]
-  },
-  {
-    name: '日期 (YYYY-MM-DD)',
-    regex: '^\\d{4}-\\d{2}-\\d{2}$',
-    examples: [
-      { text: '2024-01-15', match: true },
-      { text: '2023-12-31', match: true },
-      { text: '24-1-5', match: false },
-      { text: '2024/01/15', match: false }
-    ]
-  },
-  {
-    name: '强密码',
-    regex: '^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{8,}$',
-    examples: [
-      { text: 'Passw0rd', match: true },
-      { text: 'MyP@ss123', match: true },
-      { text: 'password', match: false },
-      { text: 'SHORT1a', match: false }
-    ]
-  }
-]
+const commonPatterns = computed(() => messages.value.regex.commonPatterns)
 
 const activePart = ref(-1)
 
-const regexParts = [
-  { text: '[', type: 'bracket', desc: '字符集合开始' },
-  { text: '\\w', type: 'char-class', desc: '字母、数字或下划线' },
-  { text: '.+-', type: 'literal', desc: '点号、加号、横杠（字面量）' },
-  { text: ']', type: 'bracket', desc: '字符集合结束' },
-  { text: '+', type: 'quantifier', desc: '一个或多个（贪婪匹配）' },
-  { text: '@', type: 'literal', desc: '字面量 @ 符号' },
-  { text: '[', type: 'bracket', desc: '字符集合开始' },
-  { text: '\\w', type: 'char-class', desc: '字母、数字或下划线' },
-  { text: '-', type: 'literal', desc: '横杠（字面量）' },
-  { text: ']', type: 'bracket', desc: '字符集合结束' },
-  { text: '+', type: 'quantifier', desc: '一个或多个' },
-  { text: '\\.', type: 'escape', desc: '转义的点号（匹配字面量 .）' },
-  { text: '[', type: 'bracket', desc: '字符集合开始' },
-  { text: '\\w', type: 'char-class', desc: '字母、数字或下划线' },
-  { text: '.', type: 'literal', desc: '点号（在字符集中是字面量）' },
-  { text: ']', type: 'bracket', desc: '字符集合结束' },
-  { text: '+', type: 'quantifier', desc: '一个或多个' }
-]
-
-const legend = [
-  { type: 'char-class', label: '字符类' },
-  { type: 'quantifier', label: '量词' },
-  { type: 'literal', label: '字面量' },
-  { type: 'bracket', label: '集合边界' },
-  { type: 'escape', label: '转义字符' }
-]
-
-const engineSteps = [
-  {
-    action: '从左到右扫描',
-    detail: '正则引擎从文本第一个字符开始，逐个尝试匹配'
-  },
-  { action: '贪婪匹配', detail: '遇到 * + 等量词时，尽量多匹配字符' },
-  { action: '回溯', detail: '如果贪婪匹配失败，退回一步尝试更少的字符' },
-  { action: '捕获分组', detail: '遇到 () 时，记录匹配的子串供后续引用' },
-  { action: '返回结果', detail: '全部匹配完成，返回所有匹配项和捕获组' }
-]
+const regexParts = computed(() => messages.value.regex.regexParts)
+const legend = computed(() => messages.value.regex.legend)
+const engineSteps = computed(() => messages.value.regex.engineSteps)
 </script>
 
 <style scoped>

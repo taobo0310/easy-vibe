@@ -1,8 +1,8 @@
 <template>
   <div class="demo-root">
     <div class="demo-header">
-      <span class="title">生产环境如何注入密钥</span>
-      <span class="subtitle">.env 是开发工具，服务器上不能靠它</span>
+      <span class="title">{{ t('serverSecret.title') }}</span>
+      <span class="subtitle">{{ t('serverSecret.subtitle') }}</span>
     </div>
 
     <div class="tab-bar">
@@ -41,89 +41,24 @@
     </div>
 
     <div class="info-box">
-      <strong>原则：</strong>.env 文件是本地开发便利工具，生产环境应由运行平台负责注入环境变量——代码完全不感知密钥存在哪、怎么来的。
+      <strong>{{ t('serverSecret.principleStrong') }}</strong>{{ t('serverSecret.principle') }}
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { developmentToolsLocale } from '../../../locales/development-tools/index.js'
+
+const { t, messages } = useI18n(developmentToolsLocale)
 
 const current = ref('systemd')
 
-const scenarios = [
-  { id: 'systemd', icon: '🖥️', label: '服务器 (systemd)' },
-  { id: 'cloud', icon: '☁️', label: '云平台 (Vercel 等)' },
-  { id: 'docker', icon: '🐳', label: 'Docker' }
-]
+const scenarios = computed(() => messages.value.serverSecret.scenarios)
+const scenarioData = computed(() => messages.value.serverSecret.scenarioData)
 
-const scenarioData = {
-  systemd: {
-    codeTitle: '/etc/systemd/system/myapp.service',
-    lines: [
-      { type: 'comment', text: '# 推荐：用独立密钥文件，权限可控' },
-      { type: 'normal', text: '[Service]' },
-      { type: 'highlight', text: 'EnvironmentFile=/etc/myapp/secrets.env' },
-      { type: 'normal', text: 'ExecStart=/usr/bin/node /app/index.js' },
-      { type: 'normal', text: '' },
-      { type: 'comment', text: '# 设置文件权限：只有所有者可读' },
-      { type: 'good', text: 'sudo chmod 600 /etc/myapp/secrets.env' },
-      { type: 'good', text: 'sudo chown deploy:deploy /etc/myapp/secrets.env' },
-      { type: 'normal', text: '' },
-      { type: 'comment', text: '# 应用配置后重启服务' },
-      { type: 'normal', text: 'sudo systemctl daemon-reload' },
-      { type: 'normal', text: 'sudo systemctl restart myapp' }
-    ],
-    tips: [
-      { level: 'safe', text: '密钥文件 chmod 600 后，只有 deploy 用户可读，其他账号无法访问' },
-      { level: 'safe', text: '密钥和代码完全分离，更新密钥不需要重新部署代码' },
-      { level: 'warn', text: '不要直接在 systemd 文件里写 Environment="KEY=val"——改动需要 reload，且明文在配置里' }
-    ]
-  },
-  cloud: {
-    codeTitle: '云平台控制台（Vercel / Railway / Render / Netlify）',
-    lines: [
-      { type: 'comment', text: '# 在平台控制台界面操作，无需写配置文件' },
-      { type: 'normal', text: '' },
-      { type: 'comment', text: '# 平台会自动将变量注入到运行时环境' },
-      { type: 'normal', text: '# 代码不变，照常读取：' },
-      { type: 'highlight', text: 'const key = process.env.OPENAI_API_KEY' },
-      { type: 'highlight', text: 'api_key = os.environ.get("OPENAI_API_KEY")' },
-      { type: 'normal', text: '' },
-      { type: 'comment', text: '# 通常支持按环境设置不同的值：' },
-      { type: 'normal', text: '# Preview  → OPENAI_API_KEY = sk-test-...' },
-      { type: 'normal', text: '# Production → OPENAI_API_KEY = sk-prod-...' }
-    ],
-    tips: [
-      { level: 'safe', text: '平台加密存储密钥，你自己都不能再次查看原始值（只能重新生成）' },
-      { level: 'safe', text: '支持 Preview / Production 分环境设置，测试和生产用不同密钥' },
-      { level: 'info', text: '不要把 .env 文件提交到 Git 再让平台读取——这样密钥就进代码仓库了' }
-    ]
-  },
-  docker: {
-    codeTitle: 'docker run / docker-compose.yml',
-    lines: [
-      { type: 'comment', text: '# ❌ 错误：写在 Dockerfile ENV 里会固化到镜像层' },
-      { type: 'bad', text: 'ENV OPENAI_API_KEY=sk-xxx  <span class="warn-inline">← 任何人都能 docker inspect 取到</span>' },
-      { type: 'normal', text: '' },
-      { type: 'comment', text: '# ✅ 正确：运行时从宿主机环境注入' },
-      { type: 'highlight', text: 'docker run \\' },
-      { type: 'highlight', text: '  -e OPENAI_API_KEY="$OPENAI_API_KEY" \\' },
-      { type: 'highlight', text: '  -e DATABASE_URL="$DATABASE_URL" \\' },
-      { type: 'highlight', text: '  myapp:latest' },
-      { type: 'normal', text: '' },
-      { type: 'comment', text: '# 或用 --env-file（文件不进 Git）' },
-      { type: 'good', text: 'docker run --env-file .env myapp:latest' }
-    ],
-    tips: [
-      { level: 'safe', text: '镜像本身不含任何密钥，可以安全上传到公开 Registry' },
-      { level: 'safe', text: '--env-file 在运行时读取，文件不需要进入镜像' },
-      { level: 'warn', text: 'docker history 可以查看所有镜像层内容——写在 Dockerfile ENV 里就永远泄露了' }
-    ]
-  }
-}
-
-const currentScenario = computed(() => scenarioData[current.value])
+const currentScenario = computed(() => scenarioData.value[current.value])
 </script>
 
 <style scoped>

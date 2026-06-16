@@ -1,17 +1,13 @@
-<!--
-  SearchRelevanceDemo.vue
-  搜索相关性评分演示：展示 TF-IDF 和 BM25 评分原理
--->
 <template>
   <div class="relevance-demo">
     <div class="header">
-      <div class="title">搜索相关性评分</div>
-      <div class="subtitle">输入查询词，观察不同文档的相关性得分</div>
+      <div class="title">{{ t('relevance.title') }}</div>
+      <div class="subtitle">{{ t('relevance.subtitle') }}</div>
     </div>
 
     <div class="search-box">
-      <input v-model="query" placeholder="输入搜索词，如：数据库" class="search-input" />
-      <button class="search-btn" @click="calcScores">计算得分</button>
+      <input v-model="query" :placeholder="t('relevance.placeholder')" class="search-input" />
+      <button class="search-btn" @click="calcScores">{{ t('relevance.button') }}</button>
     </div>
 
     <div v-if="results.length > 0" class="results">
@@ -35,19 +31,11 @@
     </div>
 
     <div class="scoring-info">
-      <div class="info-title">BM25 评分因子</div>
+      <div class="info-title">{{ t('relevance.infoTitle') }}</div>
       <div class="factor-grid">
-        <div class="factor">
-          <div class="factor-name">词频 (TF)</div>
-          <div class="factor-desc">关键词在文档中出现的次数越多，得分越高（但有上限）</div>
-        </div>
-        <div class="factor">
-          <div class="factor-name">逆文档频率 (IDF)</div>
-          <div class="factor-desc">越稀有的词权重越高，"的"这种常见词权重很低</div>
-        </div>
-        <div class="factor">
-          <div class="factor-name">文档长度</div>
-          <div class="factor-desc">较短文档中出现关键词，比长文档中出现更有意义</div>
+        <div v-for="factor in factors" :key="factor.name" class="factor">
+          <div class="factor-name">{{ factor.name }}</div>
+          <div class="factor-desc">{{ factor.desc }}</div>
         </div>
       </div>
     </div>
@@ -55,27 +43,27 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { searchEnginesLocale } from '../../../locales/search-engines/index.js'
+
+const { t, messages } = useI18n(searchEnginesLocale)
 
 const query = ref('')
 const results = ref([])
 
-const documents = [
-  { title: 'MySQL 数据库入门', snippet: '数据库是存储和管理数据的系统，MySQL 是最流行的关系型数据库之一', keywords: { '数据库': 3, '数据': 2, 'MySQL': 2, '存储': 1 } },
-  { title: 'Redis 缓存设计', snippet: 'Redis 是内存数据库，常用作缓存层，提升数据读取性能', keywords: { 'Redis': 2, '缓存': 2, '数据库': 1, '数据': 1, '性能': 1 } },
-  { title: 'Python 数据分析', snippet: '使用 Python 进行数据清洗、分析和可视化', keywords: { 'Python': 2, '数据': 3, '分析': 2, '可视化': 1 } },
-  { title: '分布式数据库架构', snippet: '分布式数据库通过分片和复制实现高可用和水平扩展', keywords: { '分布式': 2, '数据库': 2, '分片': 1, '高可用': 1 } },
-  { title: 'API 接口设计', snippet: 'RESTful API 设计规范与最佳实践', keywords: { 'API': 3, '设计': 2, 'RESTful': 1 } }
-]
+const documents = computed(() => messages.value.relevance.documents)
+const factors = computed(() => messages.value.relevance.factors)
 
 function calcScores() {
   if (!query.value.trim()) { results.value = []; return }
-  const q = query.value.trim()
-  const scored = documents.map(doc => {
+  const q = query.value.trim().toLowerCase()
+  const scored = documents.value.map(doc => {
     let score = 0
     for (const [word, tf] of Object.entries(doc.keywords)) {
-      if (word.includes(q) || q.includes(word)) {
-        const idf = Math.log(documents.length / (1 + documents.filter(d => d.keywords[word]).length))
+      const normalizedWord = word.toLowerCase()
+      if (normalizedWord.includes(q) || q.includes(normalizedWord)) {
+        const idf = Math.log(documents.value.length / (1 + documents.value.filter(d => d.keywords[word]).length))
         score += tf * (idf + 1)
       }
     }

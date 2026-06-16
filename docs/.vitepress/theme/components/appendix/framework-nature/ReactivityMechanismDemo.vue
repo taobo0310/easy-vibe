@@ -25,10 +25,10 @@
         :disabled="isAnimating"
         @click="modifyData"
       >
-        修改数据
+        {{ t('reactivityMechanism.modify') }}
       </button>
 
-      <div class="steps-title">引擎盖下</div>
+      <div class="steps-title">{{ t('reactivityMechanism.underHood') }}</div>
       <div class="steps-list">
         <div
           v-for="(step, idx) in currentSteps"
@@ -44,7 +44,7 @@
     </div>
 
     <div class="info-box">
-      <strong>核心思想：</strong>
+      <strong>{{ t('reactivityMechanism.infoStrong') }}</strong>
       {{ infoMessage }}
     </div>
   </div>
@@ -52,54 +52,21 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { frameworkNatureLocale } from '../../../locales/framework-nature/index.js'
 
-const TABS = {
-  vue: {
-    id: 'vue',
-    label: 'Vue (Proxy)',
-    color: 'var(--vp-c-green-1)',
-    steps: [
-      'count = 1 → Proxy 的 set 陷阱被触发',
-      '通知依赖收集器："count 变了"',
-      '找到所有依赖 count 的组件',
-      '自动更新 DOM'
-    ],
-    info: 'Vue 通过 Proxy 自动拦截数据读写，开发者无需额外操作——写法最自然。'
-  },
-  react: {
-    id: 'react',
-    label: 'React (setState)',
-    color: 'var(--vp-c-brand)',
-    steps: [
-      '调用 setCount(count + 1)',
-      'React 将更新加入队列',
-      '批量处理队列，触发 re-render',
-      '虚拟 DOM Diff → 更新真实 DOM'
-    ],
-    info: 'React 要求显式调用 setState，虽然多一步，但数据流更可预测。'
-  },
-  svelte: {
-    id: 'svelte',
-    label: 'Svelte (编译器)',
-    color: 'var(--vp-c-warning-1)',
-    steps: [
-      'count += 1 被编译器识别为赋值',
-      '编译时已生成 $$invalidate(count)',
-      '直接更新对应的 DOM 节点（无 Diff）',
-      '零运行时开销'
-    ],
-    info: 'Svelte 在编译时完成分析，运行时零开销——但依赖编译器魔法。'
-  }
-}
+const { t, messages } = useI18n(frameworkNatureLocale)
 
 const activeTab = ref('vue')
 const count = ref(0)
 const currentStepIndex = ref(-1)
 const isAnimating = ref(false)
 
-const tabs = computed(() => Object.values(TABS))
+const tabsMap = computed(() => messages.value.reactivityMechanism.tabs)
 
-const currentTab = computed(() => TABS[activeTab.value])
+const tabs = computed(() => Object.values(tabsMap.value))
+
+const currentTab = computed(() => tabsMap.value[activeTab.value])
 
 const currentSteps = computed(() => currentTab.value?.steps ?? [])
 

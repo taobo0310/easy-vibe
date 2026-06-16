@@ -1,8 +1,8 @@
 <template>
   <div class="full-adder-demo">
     <div class="demo-header">
-      <span class="title">全加器 (Full Adder) — 交互演示</span>
-      <span class="subtitle">比半加器多一个输入：来自低位的进位 (Cin)。点击三个输入试试</span>
+      <span class="title">{{ t('fullAdder.title') }}</span>
+      <span class="subtitle">{{ t('fullAdder.subtitle') }}</span>
     </div>
 
     <!-- 主交互区 -->
@@ -27,11 +27,11 @@
           <span class="il spacer"></span>
           <span class="il">B</span>
           <span class="il spacer"></span>
-          <span class="il cin-label">低位进位</span>
+          <span class="il cin-label">{{ t('fullAdder.lowCarry') }}</span>
           <span class="il spacer"></span>
           <span class="result-labels">
-            <span class="rl" :class="{ lit: carryOut }">进位</span>
-            <span class="rl" :class="{ lit: sumOut }">本位</span>
+            <span class="rl" :class="{ lit: carryOut }">{{ t('fullAdder.carry') }}</span>
+            <span class="rl" :class="{ lit: sumOut }">{{ t('fullAdder.sum') }}</span>
           </span>
         </div>
 
@@ -40,16 +40,19 @@
         </div>
 
         <div class="vs-half">
-          <strong>和半加器相比：</strong>全加器多了第三个输入「低位进位 (Cin)」。在多位加法中，每一列不仅要加 A 和 B，还要加上右边那一列传来的进位。
+          <strong>{{ t('fullAdder.vsHalfLabel') }}</strong>
+          {{ t('fullAdder.vsHalf') }}
         </div>
       </div>
 
       <!-- 右：真值表 -->
       <div class="right-panel">
-        <div class="table-title">所有 8 种情况（3个输入 → 2³ = 8）</div>
+        <div class="table-title">{{ t('fullAdder.tableTitle') }}</div>
         <div class="truth-table">
           <div class="tr header">
-            <span>A</span><span>B</span><span>Cin</span><span class="sum-col">本位</span><span class="carry-col">进位</span>
+            <span>A</span><span>B</span><span>Cin</span>
+            <span class="sum-col">{{ t('fullAdder.sum') }}</span>
+            <span class="carry-col">{{ t('fullAdder.carry') }}</span>
           </div>
           <div
             v-for="row in cases"
@@ -69,12 +72,12 @@
 
     <!-- 内部结构：用两个半加器来理解 -->
     <div class="structure-section">
-      <div class="structure-label">全加器的内部 = 两个半加器串联</div>
+      <div class="structure-label">{{ t('fullAdder.structureLabel') }}</div>
       <div class="structure-row">
         <!-- 半加器 1 -->
         <div class="ha-block">
-          <div class="ha-title">第一步：半加器 ①</div>
-          <div class="ha-desc">先算 A + B</div>
+          <div class="ha-title">{{ t('fullAdder.firstStep') }}</div>
+          <div class="ha-desc">{{ t('fullAdder.firstStepDesc') }}</div>
           <div class="ha-io">
             <div class="ha-in">
               <span class="io-tag a">A = {{ inputA ? '1' : '0' }}</span>
@@ -82,8 +85,8 @@
             </div>
             <div class="ha-arrow">→</div>
             <div class="ha-out">
-              <span class="io-result" :class="{ lit: xor1 }">中间和: {{ xor1 ? '1' : '0' }}</span>
-              <span class="io-result carry" :class="{ lit: carry1 }">进位①: {{ carry1 ? '1' : '0' }}</span>
+              <span class="io-result" :class="{ lit: xor1 }">{{ t('fullAdder.intermediateSum') }}: {{ xor1 ? '1' : '0' }}</span>
+              <span class="io-result carry" :class="{ lit: carry1 }">{{ t('fullAdder.carryOne') }}: {{ carry1 ? '1' : '0' }}</span>
             </div>
           </div>
         </div>
@@ -92,17 +95,17 @@
 
         <!-- 半加器 2 -->
         <div class="ha-block">
-          <div class="ha-title">第二步：半加器 ②</div>
-          <div class="ha-desc">把中间和 + 低位进位</div>
+          <div class="ha-title">{{ t('fullAdder.secondStep') }}</div>
+          <div class="ha-desc">{{ t('fullAdder.secondStepDesc') }}</div>
           <div class="ha-io">
             <div class="ha-in">
-              <span class="io-tag mid">中间和 = {{ xor1 ? '1' : '0' }}</span>
+              <span class="io-tag mid">{{ t('fullAdder.intermediateSum') }} = {{ xor1 ? '1' : '0' }}</span>
               <span class="io-tag cin">Cin = {{ carryIn ? '1' : '0' }}</span>
             </div>
             <div class="ha-arrow">→</div>
             <div class="ha-out">
-              <span class="io-result sum" :class="{ lit: sumOut }">本位: {{ sumOut ? '1' : '0' }}</span>
-              <span class="io-result carry" :class="{ lit: carry2 }">进位②: {{ carry2 ? '1' : '0' }}</span>
+              <span class="io-result sum" :class="{ lit: sumOut }">{{ t('fullAdder.sum') }}: {{ sumOut ? '1' : '0' }}</span>
+              <span class="io-result carry" :class="{ lit: carry2 }">{{ t('fullAdder.carryTwo') }}: {{ carry2 ? '1' : '0' }}</span>
             </div>
           </div>
         </div>
@@ -111,16 +114,16 @@
 
         <!-- OR 合并 -->
         <div class="or-block">
-          <div class="ha-title">第三步：合并进位</div>
-          <div class="ha-desc">两路进位只要有一个是 1，就向高位进 1</div>
+          <div class="ha-title">{{ t('fullAdder.thirdStep') }}</div>
+          <div class="ha-desc">{{ t('fullAdder.thirdStepDesc') }}</div>
           <div class="ha-io">
             <div class="ha-in">
-              <span class="io-tag c1">进位① = {{ carry1 ? '1' : '0' }}</span>
-              <span class="io-tag c2">进位② = {{ carry2 ? '1' : '0' }}</span>
+              <span class="io-tag c1">{{ t('fullAdder.carryOne') }} = {{ carry1 ? '1' : '0' }}</span>
+              <span class="io-tag c2">{{ t('fullAdder.carryTwo') }} = {{ carry2 ? '1' : '0' }}</span>
             </div>
             <div class="ha-arrow">→</div>
             <div class="ha-out">
-              <span class="io-result cout" :class="{ lit: carryOut }">最终进位: {{ carryOut ? '1' : '0' }}</span>
+              <span class="io-result cout" :class="{ lit: carryOut }">{{ t('fullAdder.finalCarry') }}: {{ carryOut ? '1' : '0' }}</span>
             </div>
           </div>
         </div>
@@ -131,6 +134,10 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { computerFundamentalsLocale } from '../../../locales/computer-fundamentals/index.js'
+
+const { t, messages } = useI18n(computerFundamentalsLocale)
 
 const inputA = ref(true)
 const inputB = ref(false)
@@ -163,10 +170,14 @@ const explainText = computed(() => {
   const b = +inputB.value
   const c = +carryIn.value
   const total = a + b + c
-  if (total === 0) return '0 + 0 + 0 = 0。本位写 0，不进位。'
-  if (total === 1) return `${a} + ${b} + ${c} = 1。本位写 1，不进位。`
-  if (total === 2) return `${a} + ${b} + ${c} = 2。二进制里 2 就是 "10"，所以本位写 0，向左进 1。`
-  return `${a} + ${b} + ${c} = 3。二进制里 3 就是 "11"，所以本位写 1，向左进 1。`
+  if (total === 0) return messages.value.fullAdder.explanations.total0
+  if (total === 1) {
+    return `${a} + ${b} + ${c} = 1. ${messages.value.fullAdder.explanations.total1}`
+  }
+  if (total === 2) {
+    return `${a} + ${b} + ${c} = 2. ${messages.value.fullAdder.explanations.total2}`
+  }
+  return `${a} + ${b} + ${c} = 3. ${messages.value.fullAdder.explanations.total3}`
 })
 </script>
 

@@ -1,24 +1,11 @@
-<!--
-  MelSpectrogramDemo.vue
-  梅尔频谱图交互演示组件
-
-  用途：
-  让用户直观理解音频如何从波形转换为梅尔频谱图，以及梅尔刻度的原理。
-
-  交互功能：
-  - 选择不同音频类型（语音/音乐/噪声）
-  - 实时查看波形和频谱对比
-  - 调整 FFT 参数观察变化
-  - 理解梅尔刻度 vs 线性刻度
--->
 <template>
   <div class="mel-spec-demo">
     <div class="header">
       <div class="title">
-        📊 梅尔频谱：AI 如何"看懂"声音
+        {{ t('melSpectrogram.title') }}
       </div>
       <div class="subtitle">
-        声音是波，但 AI 看到的是频谱图。探索波形如何变成 AI 能理解的"图像"
+        {{ t('melSpectrogram.subtitle') }}
       </div>
     </div>
 
@@ -38,7 +25,7 @@
 
       <div class="param-controls">
         <div class="param">
-          <label>FFT 窗口</label>
+          <label>{{ t('melSpectrogram.fftWindow') }}</label>
           <input
             v-model="fftSize"
             type="range"
@@ -49,7 +36,7 @@
           <span class="value">{{ fftSize }}</span>
         </div>
         <div class="param">
-          <label>梅尔滤波器</label>
+          <label>{{ t('melSpectrogram.melFilters') }}</label>
           <input
             v-model="melBins"
             type="range"
@@ -63,11 +50,10 @@
     </div>
 
     <div class="visualization">
-      <!-- 波形图 -->
       <div class="viz-section">
         <div class="viz-header">
-          <span class="viz-title">🔊 波形 (时域)</span>
-          <span class="viz-desc">原始音频振幅随时间变化</span>
+          <span class="viz-title">{{ t('melSpectrogram.waveformTitle') }}</span>
+          <span class="viz-desc">{{ t('melSpectrogram.waveformDesc') }}</span>
         </div>
         <canvas
           ref="waveformCanvas"
@@ -77,16 +63,15 @@
       </div>
 
       <div class="transform-arrow">
-        <span>STFT 变换</span>
+        <span>{{ t('melSpectrogram.stft') }}</span>
         <span class="arrow">⬇</span>
       </div>
 
-      <!-- 频谱对比 -->
       <div class="spec-comparison">
         <div class="viz-section">
           <div class="viz-header">
-            <span class="viz-title">📈 线性频谱</span>
-            <span class="viz-tag">高频分辨率低</span>
+            <span class="viz-title">{{ t('melSpectrogram.linearTitle') }}</span>
+            <span class="viz-tag">{{ t('melSpectrogram.linearTag') }}</span>
           </div>
           <canvas
             ref="linearCanvas"
@@ -101,8 +86,8 @@
 
         <div class="viz-section highlight">
           <div class="viz-header">
-            <span class="viz-title">🎯 梅尔频谱</span>
-            <span class="viz-tag success">符合人耳感知</span>
+            <span class="viz-title">{{ t('melSpectrogram.melTitle') }}</span>
+            <span class="viz-tag success">{{ t('melSpectrogram.melTag') }}</span>
           </div>
           <canvas
             ref="melCanvas"
@@ -115,7 +100,7 @@
 
     <div class="explanation">
       <div class="exp-title">
-        🎧 为什么用梅尔刻度？
+        {{ t('melSpectrogram.whyTitle') }}
       </div>
       <div class="exp-content">
         <div class="exp-item">
@@ -140,8 +125,8 @@
             </div>
           </div>
           <div class="exp-text">
-            <strong>人耳感知</strong><br>
-            100Hz→200Hz 与 10000Hz→10100Hz 感知差异相同
+            <strong>{{ t('melSpectrogram.humanStrong') }}</strong><br>
+            {{ t('melSpectrogram.humanText') }}
           </div>
         </div>
         <div class="exp-item">
@@ -166,8 +151,8 @@
             </div>
           </div>
           <div class="exp-text">
-            <strong>线性刻度</strong><br>
-            等距频率间隔，不符合人耳感知
+            <strong>{{ t('melSpectrogram.linearStrong') }}</strong><br>
+            {{ t('melSpectrogram.linearText') }}
           </div>
         </div>
       </div>
@@ -176,22 +161,21 @@
     <div class="info-box">
       <span class="icon">💡</span>
       <p>
-        <strong>梅尔频谱原理：</strong>
-        梅尔刻度模拟了人耳对频率的非线性感知。人耳对低频变化更敏感，对高频变化较迟钝。
-        梅尔频谱将频率映射到梅尔刻度，使 AI 更关注人耳敏感的部分。
+        <strong>{{ t('melSpectrogram.infoStrong') }}</strong>
+        {{ t('melSpectrogram.info') }}
       </p>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { audioIntroLocale } from '../../../locales/audio-intro/index.js'
 
-const audioTypes = [
-  { id: 'speech', name: '语音', icon: '🗣️' },
-  { id: 'music', name: '音乐', icon: '🎵' },
-  { id: 'noise', name: '噪声', icon: '📢' }
-]
+const { t, messages } = useI18n(audioIntroLocale)
+
+const audioTypes = computed(() => messages.value.melSpectrogram.audioTypes)
 
 const selectedType = ref('speech')
 const fftSize = ref(1024)
@@ -205,7 +189,6 @@ const selectType = (type) => {
   selectedType.value = type
 }
 
-// 生成波形数据
 const generateWaveform = (type) => {
   const samples = 600
   const data = []
@@ -233,7 +216,6 @@ const generateWaveform = (type) => {
   return data
 }
 
-// 绘制波形
 const drawWaveform = () => {
   const canvas = waveformCanvas.value
   if (!canvas) return
@@ -261,7 +243,6 @@ const drawWaveform = () => {
 
   ctx.stroke()
 
-  // 中心线
   ctx.strokeStyle = '#e0e0e0'
   ctx.lineWidth = 1
   ctx.beginPath()
@@ -270,7 +251,6 @@ const drawWaveform = () => {
   ctx.stroke()
 }
 
-// 生成频谱数据
 const generateSpectrogram = (isMel = false) => {
   const timeBins = 60
   const freqBins = isMel ? melBins.value : 80
@@ -305,7 +285,6 @@ const generateSpectrogram = (isMel = false) => {
   return data
 }
 
-// 绘制频谱图
 const drawSpectrogram = (canvas, data) => {
   if (!canvas) return
 

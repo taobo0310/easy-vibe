@@ -1,6 +1,6 @@
 <template>
   <div class="demo-container">
-    <h4>Go 协程 (Goroutine) 与 GMP 调度演示</h4>
+    <h4>{{ t('goroutineGreenThread.title') }}</h4>
 
     <div class="controls">
       <el-radio-group
@@ -8,13 +8,13 @@
         size="small"
       >
         <el-radio-button label="overview">
-          整体视图
+          {{ t('goroutineGreenThread.overview') }}
         </el-radio-button>
         <el-radio-button label="gmp">
-          GMP 调度
+          {{ t('goroutineGreenThread.gmp') }}
         </el-radio-button>
         <el-radio-button label="channel">
-          Channel 通信
+          {{ t('goroutineGreenThread.channel') }}
         </el-radio-button>
       </el-radio-group>
 
@@ -24,7 +24,7 @@
         :disabled="isRunning"
         @click="startDemo"
       >
-        {{ isRunning ? '运行中...' : '开始演示' }}
+        {{ isRunning ? t('common.running') : t('goroutineGreenThread.startDemo') }}
       </el-button>
 
       <el-button
@@ -39,11 +39,11 @@
         size="small"
         @click="reset"
       >
-        重置
+        {{ t('common.reset') }}
       </el-button>
     </div>
 
-    <!-- GMP 调度视图 -->
+    <!-- GMP Scheduling View -->
     <div
       v-if="viewMode === 'gmp' || viewMode === 'overview'"
       class="gmp-view"
@@ -52,7 +52,7 @@
         <!-- Global Queue -->
         <div class="queue-section global-queue">
           <div class="queue-header">
-            <span class="queue-name">Global Queue (G)</span>
+            <span class="queue-name">{{ t('goroutineGreenThread.globalQueue') }}</span>
             <el-tag
               size="small"
               type="info"
@@ -73,7 +73,7 @@
               v-if="globalQueue.length === 0"
               class="empty-queue"
             >
-              空
+              {{ t('common.empty') }}
             </div>
           </div>
         </div>
@@ -81,7 +81,7 @@
         <!-- P (Processors) -->
         <div class="processors-section">
           <div class="section-header">
-            <span class="section-name">P (Processors) - {{ processors.length }} 个</span>
+            <span class="section-name">{{ t('goroutineGreenThread.processorsLabel', { count: processors.length }) }}</span>
           </div>
 
           <div class="processors-grid">
@@ -97,12 +97,12 @@
                 <span
                   class="processor-status"
                   :class="{ 'running': p.active }"
-                >{{ p.active ? '运行中' : '空闲' }}</span>
+                >{{ p.active ? t('common.runningState') : t('common.idleState') }}</span>
               </div>
 
               <div class="local-queue">
                 <div class="queue-label">
-                  本地队列
+                  {{ t('goroutineGreenThread.localQueue') }}
                 </div>
                 <div class="local-g-list">
                   <div
@@ -126,7 +126,7 @@
                 v-if="p.m"
                 class="m-binding"
               >
-                <span class="m-label">绑定 M{{ p.m.id }}</span>
+                <span class="m-label">{{ t('goroutineGreenThread.bindM', { id: p.m.id }) }}</span>
               </div>
             </div>
           </div>
@@ -135,7 +135,7 @@
         <!-- M (Machine Threads) -->
         <div class="machines-section">
           <div class="section-header">
-            <span class="section-name">M (Machine Threads) - {{ machines.length }} 个</span>
+            <span class="section-name">{{ t('goroutineGreenThread.machinesLabel', { count: machines.length }) }}</span>
           </div>
 
           <div class="machines-list">
@@ -147,7 +147,7 @@
               :style="{ borderColor: m.active ? '#67c23a' : '#e4e7ed' }"
             >
               <span class="machine-id">M{{ m.id }}</span>
-              <span class="machine-status">{{ m.active ? '运行中' : '休眠' }}</span>
+              <span class="machine-status">{{ m.active ? t('common.runningState') : t('common.sleeping') }}</span>
             </div>
           </div>
         </div>
@@ -156,9 +156,9 @@
 
     <div class="explanation">
       <el-alert
-        title="GMP 调度模型"
+        :title="t('goroutineGreenThread.alertTitle')"
         type="success"
-        :description="gmpDescription"
+        :description="t('goroutineGreenThread.alertDescription')"
         show-icon
         :closable="false"
       />
@@ -168,21 +168,20 @@
 
 <script setup>
 import { ref, watch } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { concurrencyModelsLocale } from '../../../locales/concurrency-models/index.js'
 
-const gmpDescription = 'G (Goroutine): 待执行的任务。M (Machine): 操作系统线程，执行 G 的载体。P (Processor): 逻辑处理器，提供执行上下文。G 先放入 P 的本地队列，P 与 M 绑定后，M 从 P 获取 G 执行。当本地队列空时，会从全局队列或其他 P 偷任务。'
+const { t } = useI18n(concurrencyModelsLocale)
 
 const viewMode = ref('gmp')
 const isRunning = ref(false)
 const goroutines = ref([])
 
-// GMP 数据结构
 const globalQueue = ref([])
 const processors = ref([])
 const machines = ref([])
 
-// 初始化数据
 function initGMP() {
-  // 创建一些 Goroutines
   const colors = ['#409eff', '#67c23a', '#e6a23c', '#f56c6c', '#909399', '#b3d8ff', '#c2e7b0', '#f5dab1']
   const goroutinesData = []
 
@@ -196,10 +195,8 @@ function initGMP() {
 
   goroutines.value = goroutinesData
 
-  // 分配全局队列
   globalQueue.value = goroutinesData.slice(0, 3)
 
-  // 初始化 Processors (P)
   processors.value = [
     { id: 0, active: true, color: '#409eff', localQueue: goroutinesData.slice(3, 6), m: { id: 0 } },
     { id: 1, active: false, color: '#67c23a', localQueue: goroutinesData.slice(6, 9), m: null },
@@ -207,7 +204,6 @@ function initGMP() {
     { id: 3, active: false, color: '#f56c6c', localQueue: [], m: null }
   ]
 
-  // 初始化 Machines (M)
   machines.value = [
     { id: 0, active: true },
     { id: 1, active: false },
@@ -216,7 +212,6 @@ function initGMP() {
   ]
 }
 
-// 添加 Goroutine
 function addGoroutine() {
   if (goroutines.value.length >= 20) return
 
@@ -231,7 +226,6 @@ function addGoroutine() {
 
   goroutines.value.push(newG)
 
-  // 添加到第一个有空位的 P
   for (const p of processors.value) {
     if (p.localQueue.length < 5) {
       p.localQueue.push(newG)
@@ -240,21 +234,17 @@ function addGoroutine() {
   }
 }
 
-// 开始演示
 function startDemo() {
   isRunning.value = true
 
-  // 模拟调度过程
   let step = 0
   const interval = setInterval(() => {
     step++
 
-    // 轮流激活 P
     processors.value.forEach((p, idx) => {
       p.active = (idx === step % processors.value.length)
     })
 
-    // 对应的 M 也激活
     machines.value.forEach((m, idx) => {
       m.active = processors.value[idx]?.active || false
     })
@@ -266,20 +256,17 @@ function startDemo() {
   }, 500)
 }
 
-// 重置
 function reset() {
   isRunning.value = false
   initGMP()
 }
 
-// 监听视图模式变化
 watch(viewMode, () => {
   if (viewMode.value === 'gmp') {
     initGMP()
   }
 })
 
-// 初始化
 initGMP()
 </script>
 

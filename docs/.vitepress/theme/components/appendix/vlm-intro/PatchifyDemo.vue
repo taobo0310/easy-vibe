@@ -1,7 +1,3 @@
-<!--
-  PatchifyDemo.vue
-  视觉分词（Patchify）演示
--->
 <template>
   <div class="patchify-demo">
     <div class="control-panel">
@@ -11,7 +7,7 @@
           :disabled="currentStep === 0"
           @click="prevStep"
         >
-          ⬅ 上一步 (Prev)
+          {{ t('patchify.prev') }}
         </button>
         <span class="step-indicator">Step {{ currentStep + 1 }} / 4</span>
         <button
@@ -19,7 +15,7 @@
           :disabled="currentStep === 3"
           @click="nextStep"
         >
-          {{ currentStep === 3 ? '完成 (Done)' : '下一步 (Next) ➡' }}
+          {{ currentStep === 3 ? t('patchify.done') : t('patchify.next') }}
         </button>
       </div>
       <div class="step-desc">
@@ -28,7 +24,6 @@
     </div>
 
     <div class="visual-area">
-      <!-- 原始/切分视图容器 -->
       <!-- 
         Step 0: Show container background, cells hidden
         Step 1: Show container background, grid overlay visible (cells with border)
@@ -73,13 +68,12 @@
         ⬇
       </div>
 
-      <!-- 线性序列视图 -->
       <div
         v-if="currentStep >= 3"
         class="sequence-container"
       >
         <div class="sequence-label">
-          Token Sequence: 196×D (每个 Token 是 D 维向量)
+          {{ t('patchify.sequenceLabel') }}
         </div>
         <div class="token-stream">
           <div
@@ -96,15 +90,13 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { vlmIntroLocale } from '../../../locales/vlm-intro/index.js'
 
+const { t, messages } = useI18n(vlmIntroLocale)
 const currentStep = ref(0)
 
-const stepDescriptions = [
-  '1. 原始图片 (Original Image): 计算机看到的原始输入。',
-  '2. 数字化 (Digitization): 图片本质上是一个数字矩阵 (H x W x C)。',
-  '3. 切块 (Patchify): 典型设置：224×224 按 16×16 切成 14×14=196 个 Patch（此处等比示意）。',
-  '4. 序列化 (Serialize): 将二维分布的 Patch “拍扁”成一维序列 (Spatial Flatten)。现在它看起来就像一串“视觉单词”，可以被 Transformer 逐个读取。'
-]
+const stepDescriptions = computed(() => messages.value.patchify.stepDescriptions)
 
 const nextStep = () => {
   if (currentStep.value < 3) currentStep.value++
@@ -114,10 +106,6 @@ const prevStep = () => {
   if (currentStep.value > 0) currentStep.value--
 }
 
-// 模拟一张风景图的 CSS 渐变
-// Sky (Blue) -> Mountains (Green/Grey) -> Sun (Yellow)
-const bgImage =
-  'linear-gradient(to bottom, #87CEEB 0%, #87CEEB 50%, #228B22 50%, #228B22 100%)'
 // Add a sun using radial gradient
 const complexBg =
   'radial-gradient(circle at 70% 20%, #FFD700 0%, #FFD700 10%, transparent 10.5%), linear-gradient(to bottom, #87CEEB 0%, #87CEEB 60%, #4CA1AF 60%, #2C3E50 100%)'

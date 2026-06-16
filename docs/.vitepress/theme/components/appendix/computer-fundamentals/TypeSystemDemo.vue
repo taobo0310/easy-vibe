@@ -1,8 +1,8 @@
 <template>
   <div class="type-system-demo">
     <div class="demo-header">
-      <span class="title">类型系统探索器</span>
-      <span class="subtitle">静态 vs 动态 · 强类型 vs 弱类型 · 类型推断</span>
+      <span class="title">{{ t('typeSystems.explorer.title') }}</span>
+      <span class="subtitle">{{ t('typeSystems.explorer.subtitle') }}</span>
     </div>
 
     <div class="control-panel">
@@ -19,14 +19,13 @@
     </div>
 
     <div class="visualization-area">
-      <!-- Tab 1: 四象限 -->
       <div v-if="activeTab === 'quadrant'" class="quadrant-section">
         <div class="quadrant-grid">
           <div class="quadrant-axes">
-            <span class="axis-label top">强类型</span>
-            <span class="axis-label bottom">弱类型</span>
-            <span class="axis-label left">静态</span>
-            <span class="axis-label right">动态</span>
+            <span class="axis-label top">{{ t('typeSystems.explorer.axes.strong') }}</span>
+            <span class="axis-label bottom">{{ t('typeSystems.explorer.axes.weak') }}</span>
+            <span class="axis-label left">{{ t('typeSystems.explorer.axes.static') }}</span>
+            <span class="axis-label right">{{ t('typeSystems.explorer.axes.dynamic') }}</span>
           </div>
           <div class="quadrant-cells">
             <div
@@ -49,18 +48,17 @@
           <div class="detail-desc">{{ selectedQuadrant.desc }}</div>
           <div class="detail-traits">
             <span
-              v-for="t in selectedQuadrant.traits"
-              :key="t"
+              v-for="trait in selectedQuadrant.traits"
+              :key="trait"
               class="trait-tag"
-              >{{ t }}</span>
+              >{{ trait }}</span>
           </div>
         </div>
       </div>
 
-      <!-- Tab 2: 类型检查对比 -->
       <div v-if="activeTab === 'check'" class="check-section">
         <div class="check-scenario">
-          <div class="scenario-title">场景：给变量赋不同类型的值</div>
+          <div class="scenario-title">{{ t('typeSystems.explorer.checkScenarioTitle') }}</div>
           <div class="scenario-code">
             <code>name = "Alice" → name = 123</code>
           </div>
@@ -81,7 +79,6 @@
         </div>
       </div>
 
-      <!-- Tab 3: 类型转换实验 -->
       <div v-if="activeTab === 'convert'" class="convert-section">
         <div class="convert-picker">
           <button
@@ -110,17 +107,15 @@
           </div>
         </div>
         <div class="convert-summary">
-          <span v-if="activeLang === 'JavaScript'" class="summary-tag weak">弱类型：隐式转换，结果常出人意料</span>
-          <span v-else-if="activeLang === 'Python'" class="summary-tag strong">强类型：拒绝隐式转换，必须显式指定</span>
-          <span v-else-if="activeLang === 'Java'" class="summary-tag strong">强类型：字符串拼接是特例，其余严格</span>
-          <span v-else class="summary-tag strong">强类型：类型不匹配就报错，零容忍</span>
+          <span :class="['summary-tag', currentLang.summaryClass]">
+            {{ currentLang.summary }}
+          </span>
         </div>
       </div>
 
-      <!-- Tab 4: 类型推断 -->
       <div v-if="activeTab === 'infer'" class="infer-section">
         <div class="infer-intro">
-          现代语言的类型推断：<strong>写着像动态语言，保护像静态语言</strong>
+          {{ t('typeSystems.explorer.inferIntroPrefix') }}<strong>{{ t('typeSystems.explorer.inferIntroStrong') }}</strong>
         </div>
         <div class="infer-grid">
           <div
@@ -132,7 +127,7 @@
             <div class="infer-code">
               <code>{{ example.code }}</code>
             </div>
-            <div class="infer-arrow">↓ 编译器自动推断</div>
+            <div class="infer-arrow">{{ t('typeSystems.explorer.inferArrow') }}</div>
             <div class="infer-type">{{ example.type }}</div>
           </div>
         </div>
@@ -145,217 +140,43 @@
     </div>
 
     <div class="info-box">
-      <strong>核心思想：</strong>
-      <span v-if="activeTab === 'quadrant'">类型系统在两个维度上做选择——何时检查（静态/动态）和是否允许隐式转换（强/弱）。没有最好的组合，只有最适合的场景。</span>
-      <span v-else-if="activeTab === 'check'">静态类型在编译时就能发现错误，动态类型要到运行时才知道——越早发现
-        bug，修复成本越低。</span>
-      <span v-else-if="activeTab === 'convert'">弱类型语言会"猜"你的意思做隐式转换（常出错），强类型语言要求你明确表达意图（更安全）。</span>
-      <span v-else>类型推断让你两全其美：代码像动态语言一样简洁，编译器像静态语言一样严格检查。</span>
+      <strong>{{ t('typeSystems.explorer.coreIdeaLabel') }}</strong>
+      <span>{{ coreIdea }}</span>
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n'
+import { computerFundamentalsLocale } from '../../../locales/computer-fundamentals'
 
+const { t, messages } = useI18n(computerFundamentalsLocale)
 const activeTab = ref('quadrant')
 
-const tabs = [
-  { id: 'quadrant', label: '四象限' },
-  { id: 'check', label: '类型检查' },
-  { id: 'convert', label: '类型转换' },
-  { id: 'infer', label: '类型推断' }
-]
+const explorer = computed(() => messages.value.typeSystems.explorer)
+const tabs = computed(() => explorer.value.tabs)
 
 const activeQuadrant = ref('strong-static')
 
-const quadrants = [
-  {
-    id: 'strong-static',
-    title: '强 + 静态',
-    langs: ['Java', 'Rust', 'Haskell'],
-    desc: '编译期严格检查，不允许隐式转换。最安全，IDE 支持最好，但写起来相对"啰嗦"。',
-    traits: ['编译期检查', '无隐式转换', '自动补全友好', '重构安全']
-  },
-  {
-    id: 'weak-static',
-    title: '弱 + 静态',
-    langs: ['C', 'C++'],
-    desc: '编译期检查类型，但允许指针强转等隐式转换。性能极高，但容易踩坑。',
-    traits: ['编译期检查', '允许指针转换', '性能极高', '需要小心使用']
-  },
-  {
-    id: 'strong-dynamic',
-    title: '强 + 动态',
-    langs: ['Python', 'Ruby'],
-    desc: '运行时检查类型，不允许隐式转换。灵活且安全，但性能较低。',
-    traits: ['运行时检查', '拒绝隐式转换', '开发快速', '性能受限']
-  },
-  {
-    id: 'weak-dynamic',
-    title: '弱 + 动态',
-    langs: ['JavaScript', 'PHP'],
-    desc: '运行时检查，允许隐式转换。最灵活但最容易出错，"1" + 1 可能让你抓狂。',
-    traits: ['运行时检查', '隐式转换', '灵活自由', '容易出意外']
-  }
-]
+const quadrants = computed(() => explorer.value.quadrants)
 
 const selectedQuadrant = computed(() =>
-  quadrants.find((q) => q.id === activeQuadrant.value)
+  quadrants.value.find((q) => q.id === activeQuadrant.value)
 )
 
-const typeChecks = [
-  {
-    lang: 'Java（静态）',
-    code: 'String name = "Alice";\nname = 123; // ❌ 编译错误',
-    result: 'error',
-    badge: '编译期报错',
-    verdict: '还没运行就发现了问题，0 成本修复'
-  },
-  {
-    lang: 'Python（动态强类型）',
-    code: 'name = "Alice"\nname = 123  # ✅ 运行正常\nname + " test"  # ❌ 运行时 TypeError',
-    result: 'warning',
-    badge: '运行时报错',
-    verdict: '赋值没问题，但后续操作可能出错'
-  },
-  {
-    lang: 'JavaScript（动态弱类型）',
-    code: 'let name = "Alice"\nname = 123  // ✅ 运行正常\nname + " test"  // "123 test" 🤔',
-    result: 'success',
-    badge: '静默通过',
-    verdict: '不报错但结果可能不是你想要的'
-  }
-]
+const typeChecks = computed(() => explorer.value.typeChecks)
 
 const activeLang = ref('JavaScript')
-
-const convertLangs = [
-  {
-    name: 'JavaScript',
-    conversions: [
-      { expr: '"1" + 1', result: '"11"', explain: '字符串拼接', error: false },
-      { expr: '"1" - 1', result: '0', explain: '自动转数字', error: false },
-      {
-        expr: '[] + []',
-        result: '""',
-        explain: '空数组转空字符串',
-        error: false
-      },
-      {
-        expr: '[] + {}',
-        result: '"[object Object]"',
-        explain: '对象转字符串',
-        error: false
-      },
-      { expr: 'true + true', result: '2', explain: '布尔转数字', error: false },
-      { expr: 'null + 1', result: '1', explain: 'null 变成 0', error: false }
-    ]
-  },
-  {
-    name: 'Python',
-    conversions: [
-      {
-        expr: '"1" + 1',
-        result: 'TypeError',
-        explain: '不允许隐式转换',
-        error: true
-      },
-      {
-        expr: '"1" + str(1)',
-        result: '"11"',
-        explain: '显式转换',
-        error: false
-      },
-      { expr: 'int("1") + 1', result: '2', explain: '显式转换', error: false },
-      {
-        expr: 'True + True',
-        result: '2',
-        explain: '布尔是整数子类（特殊）',
-        error: false
-      },
-      {
-        expr: '[1] + [2]',
-        result: '[1, 2]',
-        explain: '列表拼接（同类型操作）',
-        error: false
-      }
-    ]
-  },
-  {
-    name: 'Java',
-    conversions: [
-      {
-        expr: '"1" + 1',
-        result: '"11"',
-        explain: '字符串拼接（特殊规则）',
-        error: false
-      },
-      {
-        expr: '(String) 1',
-        result: '编译错误',
-        explain: '不允许转换',
-        error: true
-      },
-      {
-        expr: '(int) 1.5',
-        result: '1',
-        explain: '强制类型转换（丢精度）',
-        error: false
-      },
-      {
-        expr: 'Integer.parseInt("1")',
-        result: '1',
-        explain: '显式解析',
-        error: false
-      }
-    ]
-  },
-  {
-    name: 'Rust',
-    conversions: [
-      {
-        expr: '1_i32 + 1_i64',
-        result: '编译错误',
-        explain: '类型不匹配',
-        error: true
-      },
-      {
-        expr: '1_i32 as i64 + 1_i64',
-        result: '2',
-        explain: '显式 as 转换',
-        error: false
-      },
-      {
-        expr: '"1".parse::<i32>()',
-        result: 'Ok(1)',
-        explain: '显式解析（返回 Result）',
-        error: false
-      },
-      { expr: '1 as f64', result: '1.0', explain: '显式转换', error: false }
-    ]
-  }
-]
+const convertLangs = computed(() => explorer.value.convertLangs)
 
 const currentLang = computed(() =>
-  convertLangs.find((l) => l.name === activeLang.value)
+  convertLangs.value.find((l) => l.name === activeLang.value)
 )
 
-const inferenceExamples = [
-  { lang: 'TypeScript', code: 'let x = 1', type: 'number' },
-  { lang: 'TypeScript', code: 'let arr = [1, 2, 3]', type: 'number[]' },
-  { lang: 'Rust', code: 'let x = 1', type: 'i32' },
-  { lang: 'Rust', code: 'let s = "hello"', type: '&str' },
-  { lang: 'Kotlin', code: 'val x = 1', type: 'Int' },
-  { lang: 'Go', code: 'x := 1', type: 'int' }
-]
-
-const inferBenefits = [
-  '✅ 少写类型声明',
-  '✅ 编译器仍然严格检查',
-  '✅ IDE 自动补全照样工作',
-  '✅ 重构时编译器帮你找错'
-]
+const inferenceExamples = computed(() => explorer.value.inferenceExamples)
+const inferBenefits = computed(() => explorer.value.inferBenefits)
+const coreIdea = computed(() => explorer.value.coreIdeas[activeTab.value])
 </script>
 
 <style scoped>

@@ -1,8 +1,8 @@
 <template>
   <div class="sorting-algorithm-demo">
     <div class="demo-header">
-      <span class="title">排序算法</span>
-      <span class="subtitle">把数据按顺序排列</span>
+      <span class="title">{{ t('algorithmThinking.sorting.title') }}</span>
+      <span class="subtitle">{{ t('algorithmThinking.sorting.subtitle') }}</span>
     </div>
 
     <div class="visual-array">
@@ -22,57 +22,46 @@
     </div>
 
     <div class="controls">
-      <button class="control-btn" @click="generateArray">生成新数组</button>
-      <button class="control-btn" @click="startBubbleSort">冒泡排序</button>
-      <button class="control-btn" @click="startQuickSort">快速排序</button>
+      <button class="control-btn" @click="generateArray">
+        {{ t('algorithmThinking.sorting.generateArray') }}
+      </button>
+      <button class="control-btn" @click="startBubbleSort">
+        {{ t('algorithmThinking.sorting.bubbleSort') }}
+      </button>
+      <button class="control-btn" @click="startQuickSort">
+        {{ t('algorithmThinking.sorting.quickSort') }}
+      </button>
     </div>
 
     <div class="algorithm-info">
       <div class="info-title">{{ currentAlgo }}</div>
       <div class="info-desc">{{ currentAlgoDesc }}</div>
-      <div class="info-complexity">时间复杂度：{{ complexity }}</div>
+      <div class="info-complexity">
+        {{ t('algorithmThinking.sorting.timeComplexity', { value: complexity }) }}
+      </div>
     </div>
 
     <div class="comparison">
-      <div class="comparison-title">算法对比</div>
+      <div class="comparison-title">
+        {{ t('algorithmThinking.sorting.comparisonTitle') }}
+      </div>
       <table class="comparison-table">
         <thead>
           <tr>
-            <th>算法</th>
-            <th>平均时间</th>
-            <th>最坏时间</th>
-            <th>空间</th>
-            <th>稳定</th>
+            <th>{{ t('algorithmThinking.sorting.algorithm') }}</th>
+            <th>{{ t('algorithmThinking.sorting.averageTime') }}</th>
+            <th>{{ t('algorithmThinking.sorting.worstTime') }}</th>
+            <th>{{ t('algorithmThinking.sorting.space') }}</th>
+            <th>{{ t('algorithmThinking.sorting.stable') }}</th>
           </tr>
         </thead>
         <tbody>
-          <tr>
-            <td>冒泡排序</td>
-            <td>O(n²)</td>
-            <td>O(n²)</td>
-            <td>O(1)</td>
-            <td>✓</td>
-          </tr>
-          <tr>
-            <td>快速排序</td>
-            <td>O(n log n)</td>
-            <td>O(n²)</td>
-            <td>O(log n)</td>
-            <td>✗</td>
-          </tr>
-          <tr>
-            <td>归并排序</td>
-            <td>O(n log n)</td>
-            <td>O(n log n)</td>
-            <td>O(n)</td>
-            <td>✓</td>
-          </tr>
-          <tr>
-            <td>插入排序</td>
-            <td>O(n²)</td>
-            <td>O(n²)</td>
-            <td>O(1)</td>
-            <td>✓</td>
+          <tr v-for="row in comparisonRows" :key="row.name">
+            <td>{{ row.name }}</td>
+            <td>{{ row.average }}</td>
+            <td>{{ row.worst }}</td>
+            <td>{{ row.space }}</td>
+            <td>{{ row.stable }}</td>
           </tr>
         </tbody>
       </table>
@@ -81,15 +70,23 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
+import { useI18n } from '../../../composables/useI18n'
+import { computerFundamentalsLocale } from '../../../locales/computer-fundamentals'
+
+const { t, messages } = useI18n(computerFundamentalsLocale)
 
 const array = ref([50, 30, 70, 40, 90, 20, 60, 80, 10, 55])
 const comparingIndices = ref([])
 const swappingIndices = ref([])
 const sortedCount = ref(0)
-const currentAlgo = ref('请选择排序算法')
-const currentAlgoDesc = ref('选择一个排序算法开始演示')
+const currentAlgo = ref(t('algorithmThinking.sorting.initialAlgo'))
+const currentAlgoDesc = ref(t('algorithmThinking.sorting.initialDesc'))
 const complexity = ref('')
+
+const comparisonRows = computed(
+  () => messages.value.algorithmThinking.sorting.comparisonRows
+)
 
 const generateArray = () => {
   array.value = Array.from(
@@ -104,8 +101,8 @@ const generateArray = () => {
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
 
 const startBubbleSort = async () => {
-  currentAlgo.value = '冒泡排序'
-  currentAlgoDesc.value = '重复遍历数组，比较相邻元素并交换'
+  currentAlgo.value = t('algorithmThinking.sorting.bubbleSort')
+  currentAlgoDesc.value = t('algorithmThinking.sorting.bubbleDesc')
   complexity.value = 'O(n²)'
 
   sortedCount.value = 0
@@ -133,8 +130,8 @@ const startBubbleSort = async () => {
 }
 
 const startQuickSort = async () => {
-  currentAlgo.value = '快速排序'
-  currentAlgoDesc.value = '选择基准，将数组分成小于和大于基准的两部分'
+  currentAlgo.value = t('algorithmThinking.sorting.quickSort')
+  currentAlgoDesc.value = t('algorithmThinking.sorting.quickDesc')
   complexity.value = 'O(n log n)'
 
   sortedCount.value = 0

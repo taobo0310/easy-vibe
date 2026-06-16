@@ -5,13 +5,13 @@
         :class="{ active: mode === 'cli' }"
         @click="mode = 'cli'"
       >
-        🖥️ CLI (命令行界面)
+        🖥️ CLI ({{ t('terminalDefinition.cliLabel') }})
       </button>
       <button
         :class="{ active: mode === 'gui' }"
         @click="mode = 'gui'"
       >
-        🖱️ GUI (图形用户界面)
+        🖱️ GUI ({{ t('terminalDefinition.guiLabel') }})
       </button>
     </div>
 
@@ -58,7 +58,7 @@
             Input (Keyboard)
           </div>
           <div class="sub-label">
-            发送指令 (字符信号)
+            {{ t('terminalDefinition.sendDesc') }}
           </div>
         </div>
 
@@ -66,7 +66,7 @@
         <div class="stream-path">
           <div class="stream-line" />
           <div class="stream-label">
-            Character Stream / 字符流
+            Character Stream / {{ t('terminalDefinition.charStream') }}
           </div>
           <div
             v-for="char in activeChars"
@@ -90,7 +90,7 @@
             Output (Text Grid)
           </div>
           <div class="sub-label">
-            文本网格反馈
+            {{ t('terminalDefinition.textGrid') }}
           </div>
         </div>
       </div>
@@ -98,7 +98,7 @@
       <div class="desc-box">
         <p>
           <strong>CLI (Command Line Interface)</strong>:
-          这种模式下，计算机只认识字符。你的每一次按键都会被转换成编码发送给系统，系统处理后返回文字结果。它不关心你在哪里点击，只关心你输入了什么。
+          {{ t('terminalDefinition.cliModeDesc') }}
         </p>
       </div>
 
@@ -107,8 +107,8 @@
           :disabled="isAnimating"
           @click="startSimulation"
         >
-          <span v-if="!isAnimating">▶ Play Simulation / 演示输入流</span>
-          <span v-else>Simulating... / 演示中...</span>
+          <span v-if="!isAnimating">▶ {{ t('terminalDefinition.playSimulation') }}</span>
+          <span v-else>{{ t('terminalDefinition.simulating') }}</span>
         </button>
       </div>
     </div>
@@ -144,7 +144,7 @@
             Input (Mouse)
           </div>
           <div class="sub-label">
-            发送事件 (坐标/点击)
+            {{ t('terminalDefinition.sendEvent') }}
           </div>
         </div>
 
@@ -152,7 +152,7 @@
         <div class="stream-path">
           <div class="stream-line dashed" />
           <div class="stream-label">
-            Event Loop / 事件循环
+            Event Loop / {{ t('terminalDefinition.eventLoop') }}
           </div>
           <div
             v-for="ev in guiEvents"
@@ -203,7 +203,7 @@
             Output (Graphics)
           </div>
           <div class="sub-label">
-            像素图形渲染
+            {{ t('terminalDefinition.pixelRender') }}
           </div>
         </div>
       </div>
@@ -211,8 +211,7 @@
       <div class="desc-box">
         <p>
           <strong>GUI (Graphical User Interface)</strong>:
-          这种模式下，计算机实时追踪鼠标坐标和点击事件，并每秒刷新 60
-          次屏幕像素。它更直观，但需要消耗大量资源来处理图形渲染。
+          {{ t('terminalDefinition.guiModeDesc') }}
         </p>
       </div>
 
@@ -221,8 +220,8 @@
           :disabled="isGuiAnimating"
           @click="startGuiSimulation"
         >
-          <span v-if="!isGuiAnimating">▶ Play Interaction / 演示交互</span>
-          <span v-else>Simulating... / 演示中...</span>
+          <span v-if="!isGuiAnimating">▶ {{ t('terminalDefinition.playInteraction') }}</span>
+          <span v-else>{{ t('terminalDefinition.simulating') }}</span>
         </button>
       </div>
     </div>
@@ -231,6 +230,10 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { terminalIntroLocale } from '../../../locales/terminal-intro/index.js'
+
+const { t } = useI18n(terminalIntroLocale)
 
 const mode = ref('cli') // 'cli' | 'gui'
 

@@ -2,11 +2,10 @@
   <div class="memory-demo">
     <div class="header">
       <div class="title">
-        💾 Agent 的记忆系统
+        {{ t('memory.title') }}
       </div>
     </div>
 
-    <!-- 快捷操作 -->
     <div class="quick-actions">
       <button
         v-for="action in quickActions"
@@ -21,16 +20,14 @@
         class="action-btn reset"
         @click="resetConversation"
       >
-        🔄 重置
+        {{ t('memory.reset') }}
       </button>
     </div>
 
-    <!-- 主区域 -->
     <div class="main-area">
-      <!-- 对话区 -->
       <div class="chat-box">
         <div class="box-header">
-          💬 对话
+          {{ t('memory.chat') }}
         </div>
         <div
           ref="chatContainer"
@@ -56,16 +53,15 @@
             v-if="messages.length === 0"
             class="empty-msg"
           >
-            点击上方按钮开始对话
+            {{ t('memory.emptyChat') }}
           </div>
         </div>
       </div>
 
-      <!-- 三种记忆并排 -->
       <div class="memory-row">
         <div class="memory-card">
           <div class="card-header">
-            <span>⏱️ 短期记忆</span>
+            <span>{{ t('memory.shortTerm') }}</span>
             <span class="count">{{ shortTermMemory.length }}</span>
           </div>
           <div class="card-body">
@@ -81,14 +77,14 @@
               v-if="shortTermMemory.length === 0"
               class="empty"
             >
-              空
+              {{ t('memory.empty') }}
             </div>
           </div>
         </div>
 
         <div class="memory-card">
           <div class="card-header">
-            <span>📝 工作记忆</span>
+            <span>{{ t('memory.working') }}</span>
             <span class="count">{{ Object.keys(workingMemory).length }}</span>
           </div>
           <div class="card-body">
@@ -104,14 +100,14 @@
               v-if="Object.keys(workingMemory).length === 0"
               class="empty"
             >
-              空
+              {{ t('memory.empty') }}
             </div>
           </div>
         </div>
 
         <div class="memory-card">
           <div class="card-header">
-            <span>🗄️ 长期记忆</span>
+            <span>{{ t('memory.longTerm') }}</span>
             <span class="count">{{ longTermMemory.length }}</span>
           </div>
           <div class="card-body">
@@ -127,14 +123,13 @@
               v-if="longTermMemory.length === 0"
               class="empty"
             >
-              空
+              {{ t('memory.empty') }}
             </div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- 记忆操作提示 -->
     <div
       v-if="lastOp"
       class="op-bar"
@@ -143,16 +138,19 @@
       <span>{{ lastOp.text }}</span>
     </div>
 
-    <!-- 提示 -->
     <div class="tip-bar">
       <span>💡</span>
-      <span><strong>短期</strong>=当前对话，<strong>工作</strong>=临时变量，<strong>长期</strong>=跨会话知识</span>
+      <span><strong>{{ t('memory.tipShort') }}</strong>{{ t('memory.tip') }}<strong>{{ t('memory.tipWorking') }}</strong>{{ t('memory.tip2') }}<strong>{{ t('memory.tipLong') }}</strong>{{ t('memory.tip3') }}</span>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, nextTick } from 'vue'
+import { computed, ref, nextTick } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { agentIntroLocale } from '../../../locales/agent-intro/index.js'
+
+const { t, messages: localeMessages } = useI18n(agentIntroLocale)
 
 const messages = ref([])
 const shortTermMemory = ref([])
@@ -161,36 +159,8 @@ const longTermMemory = ref([])
 const isTyping = ref(false)
 const lastOp = ref(null)
 
-const quickActions = [
-  '我叫张三',
-  '我喜欢 Python',
-  '推荐编程书',
-  '我叫什么？'
-]
-
-const responses = {
-  '我叫张三': {
-    reply: '好的，我记住了你叫张三。',
-    op: { icon: '💾', text: '长期记忆: 姓名=张三' },
-    update: () => longTermMemory.value.push({ category: '身份', content: '姓名: 张三' })
-  },
-  '我喜欢 Python': {
-    reply: '收到！记录了你偏好 Python。',
-    op: { icon: '💾', text: '工作记忆: 偏好=Python | 长期记忆: 技术偏好' },
-    update: () => {
-      workingMemory.value['偏好'] = 'Python'
-      longTermMemory.value.push({ category: '偏好', content: '编程语言: Python' })
-    }
-  },
-  '推荐编程书': {
-    reply: '基于你偏好 Python，推荐《流畅的Python》。',
-    op: { icon: '🔍', text: '检索工作记忆: 偏好=Python → 生成推荐' }
-  },
-  '我叫什么？': {
-    reply: '你叫张三。',
-    op: { icon: '🔍', text: '检索长期记忆: 姓名=张三' }
-  }
-}
+const quickActions = computed(() => localeMessages.value.memory.quickActions)
+const responses = computed(() => localeMessages.value.memory.responses)
 
 const sendMessage = async (text) => {
   messages.value.push({ role: 'user', content: text })
@@ -200,8 +170,13 @@ const sendMessage = async (text) => {
 
   await wait(600)
 
-  const config = responses[text] || { reply: '收到', op: null, update: () => {} }
-  config.update()
+  const config = responses.value[text] || { reply: t('memory.fallbackReply'), op: null }
+  if (config.workingKey) {
+    workingMemory.value[config.workingKey] = config.workingValue
+  }
+  if (config.longTerm) {
+    longTermMemory.value.push(config.longTerm)
+  }
   lastOp.value = config.op
 
   messages.value.push({ role: 'assistant', content: config.reply })
@@ -252,7 +227,6 @@ const wait = (ms) => new Promise(r => setTimeout(r, ms))
   -webkit-text-fill-color: transparent;
 }
 
-/* 快捷操作 */
 .quick-actions {
   display: flex;
   gap: 8px;
@@ -284,7 +258,6 @@ const wait = (ms) => new Promise(r => setTimeout(r, ms))
 
 .action-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-/* 主区域 */
 .main-area {
   display: grid;
   grid-template-columns: 1fr 2fr;
@@ -296,7 +269,6 @@ const wait = (ms) => new Promise(r => setTimeout(r, ms))
   .main-area { grid-template-columns: 1fr; }
 }
 
-/* 对话区 */
 .chat-box {
   background: var(--vp-c-bg);
   border: 1px solid var(--vp-c-divider);
@@ -379,7 +351,6 @@ const wait = (ms) => new Promise(r => setTimeout(r, ms))
   font-size: 12px;
 }
 
-/* 记忆行 */
 .memory-row {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -470,7 +441,6 @@ const wait = (ms) => new Promise(r => setTimeout(r, ms))
   font-size: 12px;
 }
 
-/* 操作提示 */
 .op-bar {
   display: flex;
   gap: 8px;
@@ -482,7 +452,6 @@ const wait = (ms) => new Promise(r => setTimeout(r, ms))
   color: #166534;
 }
 
-/* 提示 */
 .tip-bar {
   display: flex;
   gap: 8px;

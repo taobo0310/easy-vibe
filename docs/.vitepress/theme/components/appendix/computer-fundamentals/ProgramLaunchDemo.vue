@@ -1,6 +1,6 @@
 <template>
   <div class="demo">
-    <div class="title">🚀 双击图标后，电脑在忙什么？</div>
+    <div class="title">{{ t('operatingSystems.programLaunch.title') }}</div>
     
     <div class="timeline">
       <div 
@@ -19,13 +19,13 @@
         </div>
         <div class="step-content">
           <div class="step-title">{{ step.title }}</div>
-          <div class="step-desc" v-if="currentStep === idx">{{ step.desc }}</div>
+          <div v-if="currentStep === idx" class="step-desc">{{ step.desc }}</div>
         </div>
-        <div class="step-arrow" v-if="idx < steps.length - 1">→</div>
+        <div v-if="idx < steps.length - 1" class="step-arrow">→</div>
       </div>
     </div>
 
-    <div class="visualization" v-if="currentStep >= 0">
+    <div v-if="currentStep >= 0" class="visualization">
       <div class="viz-box" :class="vizClass">
         <div class="viz-icon">{{ currentViz.icon }}</div>
         <div class="viz-text">{{ currentViz.text }}</div>
@@ -40,42 +40,16 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { computerFundamentalsLocale } from '../../../locales/computer-fundamentals/index.js'
 
-const steps = [
-  { 
-    icon: '👆', 
-    title: '你双击图标', 
-    desc: '操作系统收到"启动浏览器"的请求' 
-  },
-  { 
-    icon: '📋', 
-    title: '创建进程', 
-    desc: '建立"户口本"，记录进程ID和状态' 
-  },
-  { 
-    icon: '🧠', 
-    title: '分配内存', 
-    desc: '划分虚拟内存空间，让程序以为独占内存' 
-  },
-  { 
-    icon: '📁', 
-    title: '加载文件', 
-    desc: '从硬盘读取程序代码到内存' 
-  },
-  { 
-    icon: '▶️', 
-    title: '开始运行', 
-    desc: 'CPU开始执行，窗口出现在屏幕上！' 
-  }
-]
+const { t, messages } = useI18n(computerFundamentalsLocale)
 
-const vizStates = [
-  { icon: '🖱️', text: '点击中...' },
-  { icon: '📋', text: '创建进程...' },
-  { icon: '💾', text: '分配内存...' },
-  { icon: '💿', text: '读取文件...' },
-  { icon: '🖥️', text: '运行中！' }
-]
+const steps = computed(() => messages.value.operatingSystems.programLaunch.steps)
+
+const vizStates = computed(
+  () => messages.value.operatingSystems.programLaunch.vizStates
+)
 
 const currentStep = ref(0)
 let timer = null
@@ -85,15 +59,15 @@ const vizClass = computed(() => {
   return classes[currentStep.value] || ''
 })
 
-const currentViz = computed(() => vizStates[currentStep.value] || vizStates[0])
+const currentViz = computed(() => vizStates.value[currentStep.value] || vizStates.value[0])
 
 const progressPercent = computed(() => {
-  return ((currentStep.value + 1) / steps.length) * 100
+  return ((currentStep.value + 1) / steps.value.length) * 100
 })
 
 onMounted(() => {
   timer = setInterval(() => {
-    currentStep.value = (currentStep.value + 1) % steps.length
+    currentStep.value = (currentStep.value + 1) % steps.value.length
   }, 2000)
 })
 

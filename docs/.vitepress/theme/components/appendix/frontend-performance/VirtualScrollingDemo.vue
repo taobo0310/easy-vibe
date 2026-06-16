@@ -1,24 +1,23 @@
-<!--
-  VirtualScrollingDemo.vue
-  虚拟滚动演示
--->
 <script setup>
 import { ref, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { frontendPerformanceLocale } from '../../../locales/frontend-performance/index.js'
 
 const TOTAL_ITEMS = 10000
 const ITEM_HEIGHT = 50
 const CONTAINER_HEIGHT = 280
+const { t } = useI18n(frontendPerformanceLocale)
 
-// Generate mock data
-const items = Array.from({ length: TOTAL_ITEMS }, (_, i) => ({
-  id: i,
-  content: `Item #${i + 1} - 虚拟滚动列表项内容`
-}))
+const items = computed(() =>
+  Array.from({ length: TOTAL_ITEMS }, (_, i) => ({
+    id: i,
+    content: `Item #${i + 1} - ${t('virtualScrolling.itemContent')}`
+  }))
+)
 
 const scrollTop = ref(0)
 const containerRef = ref(null)
 
-// Virtual scrolling calculations
 const startIndex = computed(() => Math.floor(scrollTop.value / ITEM_HEIGHT))
 const endIndex = computed(() =>
   Math.min(
@@ -27,7 +26,7 @@ const endIndex = computed(() =>
   )
 )
 const visibleItems = computed(() => {
-  return items.slice(startIndex.value, endIndex.value).map((item) => ({
+  return items.value.slice(startIndex.value, endIndex.value).map((item) => ({
     ...item,
     top: item.id * ITEM_HEIGHT
   }))
@@ -39,7 +38,6 @@ const onScroll = (e) => {
   scrollTop.value = e.target.scrollTop
 }
 
-// Stats
 const renderedCount = computed(() => visibleItems.value.length)
 </script>
 
@@ -47,14 +45,14 @@ const renderedCount = computed(() => visibleItems.value.length)
   <div class="demo-container">
     <div class="demo-header">
       <span class="icon">📜</span>
-      <span class="title">虚拟滚动</span>
-      <span class="subtitle">只渲染可见区域的列表项</span>
+      <span class="title">{{ t('virtualScrolling.title') }}</span>
+      <span class="subtitle">{{ t('virtualScrolling.subtitle') }}</span>
     </div>
 
     <div class="controls">
       <div class="stat-box">
         <div class="stat-label">
-          总数据量
+          {{ t('virtualScrolling.totalLabel') }}
         </div>
         <div class="stat-value">
           {{ TOTAL_ITEMS.toLocaleString() }}
@@ -62,7 +60,7 @@ const renderedCount = computed(() => visibleItems.value.length)
       </div>
       <div class="stat-box highlight">
         <div class="stat-label">
-          实际渲染
+          {{ t('virtualScrolling.renderedLabel') }}
         </div>
         <div class="stat-value">
           {{ renderedCount }}
@@ -70,7 +68,7 @@ const renderedCount = computed(() => visibleItems.value.length)
       </div>
       <div class="stat-box">
         <div class="stat-label">
-          节省内存
+          {{ t('virtualScrolling.memorySavedLabel') }}
         </div>
         <div class="stat-value">
           ~{{ ((1 - renderedCount / TOTAL_ITEMS) * 100).toFixed(1) }}%
@@ -106,7 +104,8 @@ const renderedCount = computed(() => visibleItems.value.length)
 
     <div class="info-box">
       <span class="icon">💡</span>
-      <strong>工作原理：</strong>不渲染全部 {{ TOTAL_ITEMS }} 项，只渲染视口中可见的项（加上少量缓冲）。滚动时计算应该显示哪些项，并使用绝对定位创建完整列表的错觉。性能从 O(n) 优化到 O(1)。
+      <strong>{{ t('virtualScrolling.infoPrefix') }}</strong>
+      {{ t('virtualScrolling.infoTextBefore') }} {{ TOTAL_ITEMS }} {{ t('virtualScrolling.infoTextAfter') }}
     </div>
   </div>
 </template>

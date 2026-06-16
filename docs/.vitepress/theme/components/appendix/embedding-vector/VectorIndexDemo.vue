@@ -1,20 +1,8 @@
-<!--
-  VectorIndexDemo.vue
-  向量索引策略可视化组件
-
-  用途：
-  展示暴力搜索与近似最近邻(ANN)搜索的对比，可视化不同索引策略的工作原理。
-
-  交互功能：
-  - 切换暴力搜索和ANN搜索模式
-  - 点击查询点触发搜索动画
-  - 展示搜索过程中访问的节点数量对比
--->
 <template>
   <div class="index-demo">
     <div class="demo-header">
-      <h4>向量索引策略对比</h4>
-      <p class="desc">对比暴力搜索与近似最近邻搜索的效率差异</p>
+      <h4>{{ t('index.title') }}</h4>
+      <p class="desc">{{ t('index.desc') }}</p>
     </div>
 
     <div class="controls">
@@ -28,13 +16,12 @@
         {{ mode.label }}
       </button>
       <button class="search-btn" @click="runSearch">
-        {{ searching ? '搜索中...' : '开始搜索' }}
+        {{ searching ? t('index.searching') : t('index.startSearch') }}
       </button>
     </div>
 
     <div class="canvas-area">
       <svg viewBox="0 0 500 380" class="index-svg">
-        <!-- 数据点 -->
         <circle
           v-for="(p, i) in points"
           :key="'p' + i"
@@ -46,7 +33,6 @@
           class="data-pt"
         />
 
-        <!-- ANN 分区线 (仅 ANN 模式) -->
         <template v-if="activeMode === 'ann'">
           <line
             v-for="(line, i) in partitionLines"
@@ -60,7 +46,6 @@
           />
         </template>
 
-        <!-- 查询点 -->
         <g>
           <circle
             :cx="query.x" :cy="query.y" r="9"
@@ -70,10 +55,9 @@
           <text
             :x="query.x + 14" :y="query.y + 4"
             fill="#ef4444" font-size="12" font-weight="600"
-          >查询点</text>
+          >{{ t('index.queryPoint') }}</text>
         </g>
 
-        <!-- 搜索连线 -->
         <line
           v-for="(idx, i) in visitedOrder"
           :key="'visit' + i"
@@ -84,7 +68,6 @@
           :opacity="resultIndices.includes(idx) ? 0.8 : 0.25"
         />
 
-        <!-- 结果高亮 -->
         <circle
           v-for="idx in resultIndices"
           :key="'res' + idx"
@@ -94,27 +77,14 @@
       </svg>
     </div>
 
-    <!-- 统计面板 -->
     <div class="stats-row">
-      <div class="stat-card">
-        <div class="stat-label">数据点总数</div>
-        <div class="stat-val">{{ points.length }}</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">访问节点数</div>
-        <div class="stat-val" :class="{ good: visitedOrder.length < points.length }">
-          {{ visitedOrder.length }}
-        </div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">搜索效率</div>
-        <div class="stat-val efficiency">
-          {{ points.length > 0 ? ((visitedOrder.length / points.length) * 100).toFixed(0) : 0 }}%
-        </div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">找到最近 K 个</div>
-        <div class="stat-val">{{ resultIndices.length }}</div>
+      <div
+        v-for="stat in statItems"
+        :key="stat.label"
+        class="stat-card"
+      >
+        <div class="stat-label">{{ stat.label }}</div>
+        <div class="stat-val" :class="stat.class">{{ stat.value }}</div>
       </div>
     </div>
 
@@ -122,30 +92,24 @@
       <table>
         <thead>
           <tr>
-            <th>策略</th>
-            <th>时间复杂度</th>
-            <th>精确度</th>
-            <th>适用场景</th>
+            <th
+              v-for="header in headers"
+              :key="header"
+            >
+              {{ header }}
+            </th>
           </tr>
         </thead>
         <tbody>
-          <tr :class="{ 'row-active': activeMode === 'brute' }">
-            <td>暴力搜索</td>
-            <td><code>O(n)</code></td>
-            <td>100%</td>
-            <td>小数据集 (&lt;10K)</td>
-          </tr>
-          <tr :class="{ 'row-active': activeMode === 'ann' }">
-            <td>ANN (IVF)</td>
-            <td><code>O(n/k)</code></td>
-            <td>~95%</td>
-            <td>大数据集 (>100K)</td>
-          </tr>
-          <tr>
-            <td>HNSW</td>
-            <td><code>O(log n)</code></td>
-            <td>~98%</td>
-            <td>高性能检索</td>
+          <tr
+            v-for="row in rows"
+            :key="row[0]"
+            :class="{ 'row-active': activeMode === row[4] }"
+          >
+            <td>{{ row[0] }}</td>
+            <td><code>{{ row[1] }}</code></td>
+            <td>{{ row[2] }}</td>
+            <td>{{ row[3] }}</td>
           </tr>
         </tbody>
       </table>
@@ -154,21 +118,21 @@
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue'
+import { ref, reactive, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { embeddingVectorLocale } from '../../../locales/embedding-vector/index.js'
 
+const { t, messages } = useI18n(embeddingVectorLocale)
 const activeMode = ref('brute')
 const searching = ref(false)
 const visitedOrder = ref([])
 const resultIndices = ref([])
-
-const modes = [
-  { key: 'brute', label: '暴力搜索' },
-  { key: 'ann', label: 'ANN 近似搜索' }
-]
+const modes = computed(() => messages.value.index.modes)
+const headers = computed(() => messages.value.index.headers)
+const rows = computed(() => messages.value.index.rows)
 
 const query = reactive({ x: 250, y: 190 })
 
-// 生成随机数据点
 function generatePoints() {
   const pts = []
   const rng = (seed) => {
@@ -186,6 +150,23 @@ function generatePoints() {
 }
 
 const points = ref(generatePoints())
+const statItems = computed(() => {
+  const labels = messages.value.index.stats
+  return [
+    { label: labels[0], value: points.value.length },
+    {
+      label: labels[1],
+      value: visitedOrder.value.length,
+      class: { good: visitedOrder.value.length < points.value.length }
+    },
+    {
+      label: labels[2],
+      value: `${points.value.length > 0 ? ((visitedOrder.value.length / points.value.length) * 100).toFixed(0) : 0}%`,
+      class: 'efficiency'
+    },
+    { label: labels[3], value: resultIndices.value.length }
+  ]
+})
 
 const partitionLines = [
   { x1: 250, y1: 10, x2: 250, y2: 370 },
@@ -216,7 +197,6 @@ function runSearch() {
   const trueTopK = allDists.slice(0, K).map((x) => x.i)
 
   if (activeMode.value === 'brute') {
-    // 暴力搜索：逐个访问
     const order = allDists.map((x) => x.i)
     let step = 0
     const timer = setInterval(() => {
@@ -230,7 +210,6 @@ function runSearch() {
       }
     }, 30)
   } else {
-    // ANN：只搜索查询点所在分区附近
     const qPartX = query.x < 140 ? 0 : query.x < 250 ? 1 : query.x < 360 ? 2 : 3
     const qPartY = query.y < 190 ? 0 : 1
     const nearby = points.value

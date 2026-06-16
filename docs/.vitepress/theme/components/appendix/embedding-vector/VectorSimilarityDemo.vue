@@ -1,20 +1,8 @@
-<!--
-  VectorSimilarityDemo.vue
-  向量相似度交互演示组件
-
-  用途：
-  交互式展示余弦相似度和欧氏距离的计算过程，用户可拖动点观察相似度变化。
-
-  交互功能：
-  - 拖动两个向量端点
-  - 实时计算余弦相似度和欧氏距离
-  - 切换度量方式查看差异
--->
 <template>
   <div class="similarity-demo">
     <div class="demo-header">
-      <h4>向量相似度计算器</h4>
-      <p class="desc">拖动向量端点，观察不同相似度指标的实时变化</p>
+      <h4>{{ t('similarity.title') }}</h4>
+      <p class="desc">{{ t('similarity.desc') }}</p>
     </div>
 
     <div class="metric-tabs">
@@ -38,7 +26,6 @@
         @mouseup="stopDrag"
         @mouseleave="stopDrag"
       >
-        <!-- 网格 -->
         <defs>
           <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
             <path d="M 40 0 L 0 0 0 40" fill="none" stroke="var(--vp-c-divider)" stroke-width="0.5" opacity="0.5" />
@@ -46,11 +33,9 @@
         </defs>
         <rect x="30" y="10" width="400" height="320" fill="url(#grid)" />
 
-        <!-- 坐标轴 -->
         <line x1="230" y1="10" x2="230" y2="330" stroke="var(--vp-c-divider)" stroke-width="1" />
         <line x1="30" y1="170" x2="430" y2="170" stroke="var(--vp-c-divider)" stroke-width="1" />
 
-        <!-- 夹角弧线 (余弦相似度模式) -->
         <path
           v-if="activeMetric === 'cosine'"
           :d="anglePath"
@@ -61,7 +46,6 @@
           opacity="0.6"
         />
 
-        <!-- 距离线 (欧氏距离模式) -->
         <line
           v-if="activeMetric === 'euclidean'"
           :x1="vecA.x" :y1="vecA.y"
@@ -72,7 +56,6 @@
           opacity="0.7"
         />
 
-        <!-- 向量 A -->
         <line x1="230" y1="170" :x2="vecA.x" :y2="vecA.y" stroke="#3b82f6" stroke-width="2.5" />
         <polygon :points="arrowHead(230, 170, vecA.x, vecA.y)" fill="#3b82f6" />
         <circle
@@ -83,7 +66,6 @@
         />
         <text :x="vecA.x + 14" :y="vecA.y - 8" fill="#3b82f6" font-size="13" font-weight="600">A</text>
 
-        <!-- 向量 B -->
         <line x1="230" y1="170" :x2="vecB.x" :y2="vecB.y" stroke="#10b981" stroke-width="2.5" />
         <polygon :points="arrowHead(230, 170, vecB.x, vecB.y)" fill="#10b981" />
         <circle
@@ -94,40 +76,38 @@
         />
         <text :x="vecB.x + 14" :y="vecB.y - 8" fill="#10b981" font-size="13" font-weight="600">B</text>
 
-        <!-- 原点标记 -->
         <circle cx="230" cy="170" r="3" fill="var(--vp-c-text-3)" />
       </svg>
     </div>
 
-    <!-- 结果面板 -->
     <div class="results">
       <div class="result-card" :class="{ highlight: activeMetric === 'cosine' }">
-        <div class="result-label">余弦相似度</div>
+        <div class="result-label">{{ t('similarity.cosine') }}</div>
         <div class="result-value">{{ cosineSim.toFixed(4) }}</div>
         <div class="result-bar">
           <div class="bar-fill cosine-bar" :style="{ width: ((cosineSim + 1) / 2 * 100) + '%' }"></div>
         </div>
-        <div class="result-range">-1 (相反) ~ 1 (相同)</div>
+        <div class="result-range">{{ t('similarity.cosineRange') }}</div>
       </div>
       <div class="result-card" :class="{ highlight: activeMetric === 'euclidean' }">
-        <div class="result-label">欧氏距离</div>
+        <div class="result-label">{{ t('similarity.euclidean') }}</div>
         <div class="result-value">{{ euclideanDist.toFixed(2) }}</div>
         <div class="result-bar">
           <div class="bar-fill euclidean-bar" :style="{ width: Math.min(euclideanDist / 5 * 100, 100) + '%' }"></div>
         </div>
-        <div class="result-range">0 (完全重合) ~ &#x221E; (无穷远)</div>
+        <div class="result-range">{{ t('similarity.euclideanRange') }}</div>
       </div>
       <div class="result-card">
-        <div class="result-label">点积</div>
+        <div class="result-label">{{ t('similarity.dot') }}</div>
         <div class="result-value">{{ dotProduct.toFixed(2) }}</div>
-        <div class="result-hint">dot(A, B) = |A||B|cos&#x3B8;</div>
+        <div class="result-hint">{{ t('similarity.dotHint') }}</div>
       </div>
     </div>
 
     <div class="info-box">
       <p>
         <span class="icon">&#x1F4A1;</span>
-        <strong>余弦相似度</strong>只关注方向，不关注长度，适合文本语义比较；<strong>欧氏距离</strong>同时考虑方向和大小，适合需要绝对距离的场景。
+        <strong>{{ t('similarity.infoCosine') }}</strong>{{ t('similarity.infoText') }}<strong>{{ t('similarity.infoEuclidean') }}</strong>{{ t('similarity.infoText2') }}
       </p>
     </div>
   </div>
@@ -135,14 +115,13 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { embeddingVectorLocale } from '../../../locales/embedding-vector/index.js'
 
+const { t, messages } = useI18n(embeddingVectorLocale)
 const activeMetric = ref('cosine')
 const dragging = ref(null)
-
-const metrics = [
-  { key: 'cosine', label: '余弦相似度' },
-  { key: 'euclidean', label: '欧氏距离' }
-]
+const metrics = computed(() => messages.value.similarity.metrics)
 
 const vecA = ref({ x: 350, y: 80 })
 const vecB = ref({ x: 370, y: 250 })

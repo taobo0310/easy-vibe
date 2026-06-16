@@ -8,7 +8,7 @@
           icon="VideoPlay"
           @click="playDemo"
         >
-          开始对比演示
+          {{ t('autoregressiveAudio.start') }}
         </el-button>
       </div>
 
@@ -26,7 +26,7 @@
               >
                 <Timer />
               </el-icon>
-              <span class="method-title">自回归 (Autoregressive)</span>
+              <span class="method-title">{{ t('autoregressiveAudio.arTitle') }}</span>
             </div>
           </template>
           <div class="method-body">
@@ -51,15 +51,15 @@
                 size="small"
                 border
               >
-                <el-descriptions-item label="生成方式">
-                  串行 (Serial)
+                <el-descriptions-item :label="t('autoregressiveAudio.generationMode')">
+                  {{ t('autoregressiveAudio.serial') }}
                 </el-descriptions-item>
-                <el-descriptions-item label="速度">
+                <el-descriptions-item :label="t('autoregressiveAudio.speed')">
                   <el-tag
                     type="danger"
                     size="small"
                   >
-                    慢 (Slow)
+                    {{ t('autoregressiveAudio.slow') }}
                   </el-tag>
                 </el-descriptions-item>
               </el-descriptions>
@@ -80,7 +80,7 @@
               >
                 <Lightning />
               </el-icon>
-              <span class="method-title">流匹配 (Flow Matching)</span>
+              <span class="method-title">{{ t('autoregressiveAudio.flowTitle') }}</span>
             </div>
           </template>
           <div class="method-body">
@@ -115,15 +115,15 @@
                 size="small"
                 border
               >
-                <el-descriptions-item label="生成方式">
-                  并行 (Parallel)
+                <el-descriptions-item :label="t('autoregressiveAudio.generationMode')">
+                  {{ t('autoregressiveAudio.parallel') }}
                 </el-descriptions-item>
-                <el-descriptions-item label="速度">
+                <el-descriptions-item :label="t('autoregressiveAudio.speed')">
                   <el-tag
                     type="success"
                     size="small"
                   >
-                    极快 (Fast)
+                    {{ t('autoregressiveAudio.fast') }}
                   </el-tag>
                 </el-descriptions-item>
               </el-descriptions>
@@ -135,18 +135,18 @@
       <el-divider />
 
       <el-alert
-        title="技术演进"
+        :title="t('autoregressiveAudio.evolutionTitle')"
         type="success"
         :closable="false"
         show-icon
       >
         <template #default>
           <p>
-            <strong>自回归</strong> (如 VALL-E)
-            像人说话一样，必须说完上一个字才能说下一个字，所以很慢。
+            <strong>{{ t('autoregressiveAudio.arStrong') }}</strong> (VALL-E)
+            {{ t('autoregressiveAudio.arInfo') }}
             <br>
-            <strong>流匹配</strong> (如 F5-TTS)
-            像画画一样，可以同时在画布的所有角落开始上色，效率提升了 10-20 倍。
+            <strong>{{ t('autoregressiveAudio.flowStrong') }}</strong> (F5-TTS)
+            {{ t('autoregressiveAudio.flowInfo') }}
           </p>
         </template>
       </el-alert>
@@ -155,9 +155,12 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
-import { Timer, Lightning, VideoPlay, Loading } from '@element-plus/icons-vue'
+import { ref } from 'vue'
+import { Timer, Lightning, Loading } from '@element-plus/icons-vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { audioIntroLocale } from '../../../locales/audio-intro/index.js'
 
+const { t } = useI18n(audioIntroLocale)
 const arTokensSource = [1024, 2048, 3072, 4096, 5120, 6144, 7168, 8192]
 const displayedArTokens = ref([])
 const flowProgress = ref(0)

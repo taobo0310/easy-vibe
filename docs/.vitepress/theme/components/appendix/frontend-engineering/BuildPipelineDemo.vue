@@ -2,12 +2,12 @@
   <div class="build-pipeline-demo">
     <div class="demo-header">
       <span class="icon">🏭</span>
-      <span class="title">构建流水线</span>
-      <span class="subtitle">从源代码到产物的完整旅程</span>
+      <span class="title">{{ t('buildPipeline.title') }}</span>
+      <span class="subtitle">{{ t('buildPipeline.subtitle') }}</span>
     </div>
 
     <div class="intro-text">
-      想象你在开一家<span class="highlight">面包店</span>：面粉要过筛、搅拌、发酵、烘烤，最后才能变成香喷喷的面包。代码也一样，需要经过一道道"加工工序"，才能变成浏览器能运行的程序。
+      {{ t('buildPipeline.introPrefix') }}<span class="highlight">{{ t('buildPipeline.introHighlight') }}</span>{{ t('buildPipeline.introSuffix') }}
     </div>
 
     <div class="pipeline">
@@ -51,7 +51,7 @@
           </p>
           <div class="detail-example">
             <div class="example-label">
-              🌰 举个例子：
+              🌰 {{ t('buildPipeline.exampleLabel') }}
             </div>
             <div class="example-content">
               {{ currentStage?.example }}
@@ -65,61 +65,65 @@
       v-if="!activeStage"
       class="hint-text"
     >
-      👆 点击上方任意阶段，查看详细解释
+      👆 {{ t('buildPipeline.hint') }}
     </div>
 
     <div class="info-box">
       <span class="icon">💡</span>
-      <strong>核心思想：</strong>就像工厂流水线一样，代码经过一道道工序，最终变成可以在浏览器运行的产物。每个阶段各司其职，环环相扣。
+      <strong>{{ t('common.coreIdea') }}</strong>{{ t('buildPipeline.infoBoxContent') }}
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { frontendEngineeringLocale } from '../../../locales/frontend-engineering/index.js'
+
+const { t } = useI18n(frontendEngineeringLocale)
 
 const activeStage = ref(null)
 
-const stages = ref([
+const stages = computed(() => [
   {
     id: 1,
     icon: '🔍',
-    name: '代码检查',
-    simple: '找错误',
-    detailDesc: '就像写作文前先检查有没有错别字和语法错误。代码检查工具会自动发现你的代码问题，比如变量名拼写错误、漏写了分号、使用了未定义的变量等。',
-    example: '你写了 const mesage = "hello"，检查工具会提醒："mesage 是不是想写 message？这个变量名看起来有拼写错误。"'
+    name: t('buildPipeline.stages.lint.name'),
+    simple: t('buildPipeline.stages.lint.simple'),
+    detailDesc: t('buildPipeline.stages.lint.detailDesc'),
+    example: t('buildPipeline.stages.lint.example')
   },
   {
     id: 2,
     icon: '⚙️',
-    name: '代码转换',
-    simple: '翻译官',
-    detailDesc: '就像把中文翻译成英文让外国人能看懂。你写的可能是 TypeScript 或新版 JavaScript 语法，但老浏览器"看不懂"，需要转换成它们能理解的旧版本。',
-    example: '你写了 const name = user?.name（新版语法），转换后变成 var name = user && user.name ? user.name : undefined（老浏览器能懂的写法）'
+    name: t('buildPipeline.stages.transform.name'),
+    simple: t('buildPipeline.stages.transform.simple'),
+    detailDesc: t('buildPipeline.stages.transform.detailDesc'),
+    example: t('buildPipeline.stages.transform.example')
   },
   {
     id: 3,
     icon: '📦',
-    name: '依赖解析',
-    simple: '理关系',
-    detailDesc: '就像整理食谱，搞清楚做一道菜需要哪些食材。你的代码可能引用了很多其他文件，这个阶段会分析"谁依赖谁"，画出一张完整的关系图。',
-    example: 'main.js 引用了 utils.js，utils.js 又引用了 helper.js，解析后会生成一张"依赖地图"，告诉打包工具按什么顺序处理这些文件。'
+    name: t('buildPipeline.stages.dependency.name'),
+    simple: t('buildPipeline.stages.dependency.simple'),
+    detailDesc: t('buildPipeline.stages.dependency.detailDesc'),
+    example: t('buildPipeline.stages.dependency.example')
   },
   {
     id: 4,
     icon: '📚',
-    name: '模块打包',
-    simple: '装箱子',
-    detailDesc: '就像搬家时把零散的东西装进几个大箱子。你的项目可能有上百个文件，浏览器加载太多小文件会很慢，打包就是把它们合并成少数几个文件。',
-    example: '原来有 100 个 .js 文件，打包后变成 2 个文件：app.js（你的代码）和 vendor.js（第三方库）。浏览器只需请求 2 次而不是 100 次。'
+    name: t('buildPipeline.stages.bundle.name'),
+    simple: t('buildPipeline.stages.bundle.simple'),
+    detailDesc: t('buildPipeline.stages.bundle.detailDesc'),
+    example: t('buildPipeline.stages.bundle.example')
   },
   {
     id: 5,
     icon: '✨',
-    name: '代码优化',
-    simple: '瘦身',
-    detailDesc: '就像压缩行李箱，把不必要的东西扔掉。删除代码中的空格和注释、去掉没用到代码（Tree Shaking）、压缩变量名，让文件体积更小。',
-    example: '原来 100KB 的代码，优化后变成 30KB。比如把 function getUserName() { return name } 压缩成 function a(){return n}'
+    name: t('buildPipeline.stages.optimize.name'),
+    simple: t('buildPipeline.stages.optimize.simple'),
+    detailDesc: t('buildPipeline.stages.optimize.detailDesc'),
+    example: t('buildPipeline.stages.optimize.example')
   }
 ])
 

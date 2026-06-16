@@ -1,20 +1,16 @@
 <template>
   <div class="gcc-root">
-    <p class="gcc-desc">把这张表存起来，遇到忘了的命令随时查：</p>
+    <p class="gcc-desc">{{ t('cheatsheet.desc') }}</p>
     <div class="gcc-chart-wrap">
       <div class="chart-header">
-        <span class="y-axis-label">使用频率</span>
+        <span class="y-axis-label">{{ t('cheatsheet.yAxis') }}</span>
         <div class="chart-area">
           <svg class="chart-svg" :viewBox="`0 0 ${chartWidth} ${height}`" preserveAspectRatio="none" :width="chartWidth" :height="height">
-            <!-- Grid lines (horizontal) -->
             <line v-for="y in gridY" :key="y" :x1="padding.left" :y1="y" :x2="chartWidth - padding.right" :y2="y" class="grid-line" />
-            <!-- Y axis labels (1-5) -->
             <text v-for="label in yLabels" :key="label.val" :x="padding.left - 8" :y="label.y" class="y-label">{{ label.val }}</text>
-            <!-- Bars -->
             <rect v-for="(row, i) in rows" :key="i" :x="barX(i)" :y="barY(row)" :width="barW" :height="barHeight(row)" class="bar-rect">
               <title>{{ row.cmd }} — {{ row.freqLabel || levelLabel(row.level) }}</title>
             </rect>
-            <!-- X axis: 命令名 + 下方一行简短功能描述，旋转 -45° -->
             <g v-for="(row, i) in rows" :key="'label-'+i">
               <text
                 :x="barX(i) + barW / 2"
@@ -37,7 +33,7 @@
             </g>
           </svg>
         </div>
-        <div class="x-axis-label">命令 <span class="scroll-hint">（可左右滑动查看）</span></div>
+        <div class="x-axis-label">{{ t('cheatsheet.xAxis') }} <span class="scroll-hint">{{ t('cheatsheet.scrollHint') }}</span></div>
       </div>
     </div>
   </div>
@@ -45,39 +41,21 @@
 
 <script setup>
 import { computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { gitIntroLocale } from '../../../locales/git-intro/index.js'
 
-const rawRows = [
-  { cmd: 'git init', desc: '在当前目录初始化 Git 仓库', level: 0, freqLabel: '项目开始时一次' },
-  { cmd: 'git status', desc: '查看工作区和暂存区的状态', level: 5, freqLabel: '极高频' },
-  { cmd: 'git add <文件>', desc: '把指定文件放入暂存区', level: 5, freqLabel: '每次提交前' },
-  { cmd: 'git add .', desc: '把所有修改放入暂存区', level: 5, freqLabel: '' },
-  { cmd: 'git commit -m "..."', desc: '提交暂存区内容，附上说明', level: 5, freqLabel: '' },
-  { cmd: 'git push', desc: '推送到远程仓库', level: 5, freqLabel: '' },
-  { cmd: 'git pull', desc: '拉取远程最新内容', level: 5, freqLabel: '' },
-  { cmd: 'git log --oneline', desc: '查看简洁的提交历史', level: 4, freqLabel: '' },
-  { cmd: 'git checkout -b <分支名>', desc: '创建并切换到新分支', level: 4, freqLabel: '' },
-  { cmd: 'git checkout <分支名>', desc: '切换到已有分支', level: 4, freqLabel: '' },
-  { cmd: 'git clone <url>', desc: '克隆远程仓库到本地', level: 4, freqLabel: '' },
-  { cmd: 'git branch', desc: '查看所有本地分支', level: 3, freqLabel: '' },
-  { cmd: 'git merge <分支名>', desc: '将指定分支合并到当前分支', level: 3, freqLabel: '' },
-  { cmd: 'git stash', desc: '临时保存未提交的改动（切换任务时用）', level: 3, freqLabel: '' },
-  { cmd: 'git stash pop', desc: '恢复之前 stash 的改动', level: 3, freqLabel: '' },
-  { cmd: 'git reset HEAD~1', desc: '撤销最近一次提交（保留改动）', level: 3, freqLabel: '' },
-  { cmd: 'git diff', desc: '查看工作区和暂存区的具体差异', level: 3, freqLabel: '' },
-  { cmd: 'git branch -d <分支名>', desc: '删除已合并的分支', level: 2, freqLabel: '' },
-  { cmd: 'git remote add origin <url>', desc: '关联远程仓库（只做一次）', level: 0, freqLabel: '项目初始时' },
-]
+const { t, messages } = useI18n(gitIntroLocale)
 
-const rows = computed(() => [...rawRows].sort((a, b) => b.level - a.level))
+const rawRows = computed(() => messages.value.cheatsheet.rows)
+const rows = computed(() => [...rawRows.value].sort((a, b) => b.level - a.level))
 
 function levelLabel(level) {
-  const map = { 5: '极高频', 4: '高频', 3: '中频', 2: '低频', 1: '很少', 0: '一次性' }
-  return map[level] || ''
+  return messages.value.cheatsheet.levelLabels[level] || ''
 }
 
 const barW = 24
 const slotWidth = 88
-const chartWidth = computed(() => rawRows.length * slotWidth + 44 + 24)
+const chartWidth = computed(() => rawRows.value.length * slotWidth + 44 + 24)
 const height = 320
 const padding = { top: 12, right: 24, bottom: 150, left: 44 }
 const labelY = height - padding.bottom + 16
@@ -90,7 +68,6 @@ function barHeight(row) {
   return Math.max(4, (row.level / 5) * plotHeight)
 }
 function barY(row) {
-  const plotHeight = height - padding.top - padding.bottom
   return height - padding.bottom - barHeight(row)
 }
 

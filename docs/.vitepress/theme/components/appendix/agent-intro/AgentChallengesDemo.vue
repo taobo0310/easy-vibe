@@ -1,25 +1,19 @@
-<!--
-  AgentChallengesDemo.vue
-  挑战不是“列清单”，而是“能感受到风险”：
-  - 开关护栏（步数上限/预算/确认/沙箱）
-  - 看风险分数怎么变化
--->
 <template>
   <div class="risk">
     <div class="header">
       <div>
         <div class="title">
-          Agent 的挑战：没护栏就容易“翻车”
+          {{ t('challenges.title') }}
         </div>
         <div class="subtitle">
-          打开这些护栏，风险会明显下降。
+          {{ t('challenges.subtitle') }}
         </div>
       </div>
       <div
         class="score"
         :class="scoreClass"
       >
-        风险分数：{{ score }}/100
+        {{ t('challenges.score', { score }) }}
       </div>
     </div>
 
@@ -28,47 +22,49 @@
         v-model="maxSteps"
         type="checkbox"
       >
-        最大迭代次数（防死循环）</label>
+        {{ t('challenges.toggles.maxSteps') }}</label>
       <label class="toggle"><input
         v-model="budget"
         type="checkbox"
-      > 预算上限（防烧钱）</label>
+      > {{ t('challenges.toggles.budget') }}</label>
       <label class="toggle"><input
         v-model="confirm"
         type="checkbox"
-      > 危险操作二次确认</label>
+      > {{ t('challenges.toggles.confirm') }}</label>
       <label class="toggle"><input
         v-model="sandbox"
         type="checkbox"
-      > 沙箱执行（隔离系统）</label>
+      > {{ t('challenges.toggles.sandbox') }}</label>
     </div>
 
     <div class="grid">
       <div class="card">
         <div class="k">
-          常见风险
+          {{ t('challenges.risksTitle') }}
         </div>
         <ul>
-          <li>重复尝试 → 死循环</li>
-          <li>乱用工具 → 误删/误发</li>
-          <li>外部内容注入 → 被带偏</li>
-          <li>调用太多 → 成本失控</li>
+          <li
+            v-for="risk in risks"
+            :key="risk"
+          >
+            {{ risk }}
+          </li>
         </ul>
       </div>
       <div class="card">
         <div class="k">
-          你现在开启了什么？
+          {{ t('challenges.enabledTitle') }}
         </div>
         <div class="v">
           {{ enabledList }}
         </div>
         <div class="note">
-          建议：最少也要有“最大步数 + 确认”。
+          {{ t('challenges.note') }}
         </div>
       </div>
       <div class="card">
         <div class="k">
-          一句话建议
+          {{ t('challenges.adviceTitle') }}
         </div>
         <div class="v">
           {{ advice }}
@@ -80,11 +76,15 @@
 
 <script setup>
 import { computed, ref } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { agentIntroLocale } from '../../../locales/agent-intro/index.js'
 
+const { t, messages } = useI18n(agentIntroLocale)
 const maxSteps = ref(true)
 const budget = ref(false)
 const confirm = ref(true)
 const sandbox = ref(false)
+const risks = computed(() => messages.value.challenges.risks)
 
 const score = computed(() => {
   let s = 85
@@ -103,20 +103,23 @@ const scoreClass = computed(() => {
 
 const enabledList = computed(() => {
   const items = []
-  if (maxSteps.value) items.push('最大步数')
-  if (budget.value) items.push('预算上限')
-  if (confirm.value) items.push('二次确认')
-  if (sandbox.value) items.push('沙箱')
-  return items.length ? items.join('、') : '（都没开）'
+  const names = messages.value.challenges.enabledNames
+  if (maxSteps.value) items.push(names.maxSteps)
+  if (budget.value) items.push(names.budget)
+  if (confirm.value) items.push(names.confirm)
+  if (sandbox.value) items.push(names.sandbox)
+  return items.length
+    ? items.join(messages.value.challenges.joiner)
+    : messages.value.challenges.noneEnabled
 })
 
 const advice = computed(() => {
+  const adviceText = messages.value.challenges.advice
   if (!maxSteps.value && !confirm.value)
-    return '先加“最大步数”和“二次确认”，这是最低成本的安全感。'
-  if (score.value <= 35)
-    return '很稳了：可以开始做更复杂的任务，但记得加日志与监控。'
-  if (score.value <= 60) return '还不错：建议再加预算或沙箱，避免极端情况。'
-  return '风险偏高：建议优先补护栏，再让 Agent 真去执行。'
+    return adviceText.baseline
+  if (score.value <= 35) return adviceText.good
+  if (score.value <= 60) return adviceText.mid
+  return adviceText.bad
 })
 </script>
 

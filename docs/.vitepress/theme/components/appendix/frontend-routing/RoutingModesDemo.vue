@@ -2,12 +2,12 @@
   <div class="routing-modes-demo">
     <div class="demo-header">
       <span class="icon">🔀</span>
-      <span class="title">路由模式</span>
-      <span class="subtitle">不同的URL管理方式</span>
+      <span class="title">{{ t('routingModes.title') }}</span>
+      <span class="subtitle">{{ t('routingModes.subtitle') }}</span>
     </div>
 
     <div class="intro-text">
-      想象你在<span class="highlight">寄快递</span>：可以选择平邮（Hash，简单但慢）、快递（History，快速但需要配合）、或者专人送达（Memory，特殊场景）。不同模式适合不同需求。
+      {{ t('routingModes.intro.prefix') }}<span class="highlight">{{ t('routingModes.intro.highlight') }}</span>{{ t('routingModes.intro.suffix') }}
     </div>
 
     <div class="mode-selector">
@@ -32,7 +32,7 @@
 
       <div class="mode-features">
         <div class="feature-section">
-          <h6>✅ 优点</h6>
+          <h6>{{ t('routingModes.prosTitle') }}</h6>
           <ul>
             <li
               v-for="pro in getCurrentMode().pros"
@@ -43,7 +43,7 @@
           </ul>
         </div>
         <div class="feature-section">
-          <h6>❌ 缺点</h6>
+          <h6>{{ t('routingModes.consTitle') }}</h6>
           <ul>
             <li
               v-for="con in getCurrentMode().cons"
@@ -56,7 +56,7 @@
       </div>
 
       <div class="url-example">
-        <h6>🌐 URL 示例</h6>
+        <h6>{{ t('routingModes.urlExample') }}</h6>
         <div class="url-bar">
           <span class="url-prefix">https://example.com</span>
           <span class="url-suffix">{{ getUrlSuffix() }}</span>
@@ -66,49 +66,26 @@
 
     <div class="info-box">
       <span class="icon">💡</span>
-      <strong>选择建议：</strong>现代Web应用优先选History模式，老项目或特殊场景用Hash，移动端App或测试环境可用Memory模式。
+      <strong>{{ t('common.choiceAdvice') }}</strong>{{ t('routingModes.info') }}
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { frontendRoutingLocale } from '../../../locales/frontend-routing/index.js'
 
+const { t, messages } = useI18n(frontendRoutingLocale)
 const currentMode = ref('history')
-
-const modes = [
-  {
-    key: 'hash',
-    name: 'Hash 模式',
-    icon: '#',
-    description: '使用URL的hash部分（#）来模拟路由，兼容性最好',
-    pros: ['兼容IE8+', '无需服务端配置', '部署简单'],
-    cons: ['URL带有#号', 'SEO不友好', '分享可能丢失hash']
-  },
-  {
-    key: 'history',
-    name: 'History 模式',
-    icon: '/',
-    description: '使用HTML5 History API实现URL管理，最常用的模式',
-    pros: ['URL美观', 'SEO友好', '符合用户习惯'],
-    cons: ['需要服务端配置', '兼容性IE10+', '刷新返回404']
-  },
-  {
-    key: 'memory',
-    name: 'Memory 模式',
-    icon: 'M',
-    description: '将路由信息保存在内存中，不修改浏览器URL',
-    pros: ['无需浏览器环境', '适用于测试', '移动端App内嵌'],
-    cons: ['不支持刷新', 'URL不变化', '仅限特定场景']
-  }
-]
+const modes = computed(() => messages.value.routingModes.modes)
 
 const switchMode = (mode) => {
   currentMode.value = mode
 }
 
 const getCurrentMode = () => {
-  return modes.find(m => m.key === currentMode.value) || modes[0]
+  return modes.value.find(m => m.key === currentMode.value) || modes.value[0]
 }
 
 const getUrlSuffix = () => {
@@ -119,7 +96,7 @@ const getUrlSuffix = () => {
     case 'history':
       return path
     case 'memory':
-      return ' (URL不变)'
+      return t('routingModes.memorySuffix')
     default:
       return path
   }

@@ -1,10 +1,9 @@
 <template>
   <div class="vit-output-demo">
     <div class="pipeline">
-      <!-- 1. Transformer Output Grid -->
       <div class="stage">
         <div class="stage-label">
-          1. Patch Tokens (Shown as Grid) (Patch Token 网格示意)
+          {{ t('vitOutput.gridLabel') }}
         </div>
         <div class="grid-container">
           <div
@@ -22,14 +21,13 @@
       <div class="arrow-section">
         <div class="arrow-line" />
         <div class="arrow-text">
-          Reshape for View: Grid ⇄ Sequence (重排显示：网格⇄序列)
+          {{ t('vitOutput.reshapeLabel') }}
         </div>
       </div>
 
-      <!-- 2. Feature Vector Sequence -->
       <div class="stage">
         <div class="stage-label">
-          2. Output Token Sequence (N×D) (输出序列)
+          {{ t('vitOutput.sequenceLabel') }}
         </div>
         <div class="vector-sequence">
           <div
@@ -84,12 +82,14 @@
           <div class="title-group">
             <span class="title">Token #{{ activeIndex + 1 }}:
               {{ items[activeIndex].label }}</span>
-            <span class="subtitle">Type: {{ items[activeIndex].type }}</span>
+            <span class="subtitle">
+              {{ t('vitOutput.typeLabel', { type: items[activeIndex].type }) }}
+            </span>
           </div>
         </div>
         <div class="desc">
           <div class="vector-repr">
-            <span class="label">Vector Value:</span>
+            <span class="label">{{ t('vitOutput.vectorValue') }}</span>
             <span
               class="code"
               :style="{ color: items[activeIndex].color }"
@@ -100,7 +100,7 @@
             </span>
           </div>
           <div class="meaning">
-            <strong>🤖 What ViT sees (Semantic):</strong>
+            <strong>{{ t('vitOutput.semanticStrong') }}</strong>
             <p>{{ items[activeIndex].desc }}</p>
           </div>
         </div>
@@ -110,82 +110,21 @@
         class="placeholder"
       >
         <span class="hint-icon">👆</span>
-        <span class="hint-text">悬停在上方方块或向量上，查看 ViT 输出的“语义特征”</span>
+        <span class="hint-text">{{ t('vitOutput.placeholder') }}</span>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { vlmIntroLocale } from '../../../locales/vlm-intro/index.js'
 
+const { t, messages } = useI18n(vlmIntroLocale)
 const activeIndex = ref(-1)
 
-const items = [
-  {
-    icon: '🌲',
-    label: 'Background',
-    type: 'Environment',
-    color: '#4caf50',
-    desc: 'Recognized as outdoor nature elements (Trees/Greenery). Low relevance to main subject.'
-  },
-  {
-    icon: '🌲',
-    label: 'Background',
-    type: 'Environment',
-    color: '#4caf50',
-    desc: 'Redundant background info. Contextualizes the scene as "Outdoors".'
-  },
-  {
-    icon: '☁️',
-    label: 'Sky',
-    type: 'Environment',
-    color: '#2196f3',
-    desc: 'Spatial context: Upper region, open area.'
-  },
-  {
-    icon: '👂',
-    label: 'Cat Ear',
-    type: 'Subject Part',
-    color: '#ff9800',
-    desc: 'High Importance. Identified as "Feline Feature". Strongly linked to "Cat Face".'
-  },
-  {
-    icon: '😼',
-    label: 'Cat Face',
-    type: 'Subject Core',
-    color: '#ff5722',
-    desc: 'Global Focus Center. Contains "Eyes", "Whiskers". Aggregates info from surrounding patches.'
-  },
-  {
-    icon: '🌲',
-    label: 'Background',
-    type: 'Environment',
-    color: '#4caf50',
-    desc: 'Background noise.'
-  },
-  {
-    icon: '🐾',
-    label: 'Cat Paw',
-    type: 'Subject Part',
-    color: '#ff9800',
-    desc: 'Action component. Suggests "Standing" or "Walking" posture.'
-  },
-  {
-    icon: '🧶',
-    label: 'Yarn',
-    type: 'Object',
-    color: '#e91e63',
-    desc: 'Interacting Object. Semantically linked to "Play" or "Toy".'
-  },
-  {
-    icon: '🌱',
-    label: 'Grass',
-    type: 'Environment',
-    color: '#8bc34a',
-    desc: 'Ground context. Confirms "Ground level" view.'
-  }
-]
+const items = computed(() => messages.value.vitOutput.items)
 </script>
 
 <style scoped>

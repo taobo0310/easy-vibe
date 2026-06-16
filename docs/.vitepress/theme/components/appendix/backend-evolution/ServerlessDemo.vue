@@ -1,8 +1,8 @@
 <template>
   <div class="serverless-demo">
     <div class="demo-header">
-      <h4>⚡ Serverless 架构演示</h4>
-      <p>观察 Serverless 如何按需执行函数、自动扩缩容</p>
+      <h4>{{ t('serverless.title') }}</h4>
+      <p>{{ t('serverless.subtitle') }}</p>
     </div>
 
     <div class="serverless-visualization">
@@ -30,27 +30,27 @@
             v-if="func.invocations > 0"
             class="function-metrics"
           >
-            <span>调用: {{ func.invocations }}</span>
-            <span>平均: {{ func.avgDuration }}ms</span>
+            <span>{{ t('serverless.invocations', { count: func.invocations }) }}</span>
+            <span>{{ t('serverless.average', { duration: func.avgDuration }) }}</span>
           </div>
         </div>
       </div>
 
       <div class="auto-scaling-panel">
         <div class="scaling-title">
-          自动扩缩容状态
+          {{ t('serverless.scalingTitle') }}
         </div>
         <div class="scaling-metrics">
           <div class="metric">
-            <span class="metric-label">并发请求:</span>
+            <span class="metric-label">{{ t('serverless.concurrent') }}</span>
             <span class="metric-value">{{ concurrentRequests }}</span>
           </div>
           <div class="metric">
-            <span class="metric-label">运行实例:</span>
+            <span class="metric-label">{{ t('serverless.runningInstances') }}</span>
             <span class="metric-value">{{ runningInstances }}</span>
           </div>
           <div class="metric">
-            <span class="metric-label">冷启动:</span>
+            <span class="metric-label">{{ t('serverless.coldStarts') }}</span>
             <span class="metric-value">{{ coldStarts }}</span>
           </div>
         </div>
@@ -68,7 +68,7 @@
 
     <div class="traffic-simulator">
       <div class="simulator-title">
-        流量模拟器
+        {{ t('serverless.simulatorTitle') }}
       </div>
       <div class="traffic-patterns">
         <button
@@ -86,43 +86,46 @@
     </div>
 
     <div class="demo-explanation">
-      <h5>💡 Serverless 核心特性</h5>
+      <h5>{{ t('serverless.explanationTitle') }}</h5>
       <ul>
-        <li><strong>按需执行</strong>：函数只在被调用时运行，不调用不产生费用</li>
-        <li><strong>自动扩缩容</strong>：从 0 到数千实例自动扩展，无需人工干预</li>
-        <li><strong>冷启动</strong>：长时间未调用后首次调用会有延迟，需要预热策略</li>
-        <li><strong>事件驱动</strong>：响应 HTTP 请求、消息队列、定时任务等多种事件源</li>
+        <li
+          v-for="item in explanation"
+          :key="item.term"
+        >
+          <strong>{{ item.term }}</strong>: {{ item.desc }}
+        </li>
       </ul>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, onUnmounted } from 'vue'
+import { computed, ref, reactive, onMounted, onUnmounted } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { backendEvolutionLocale } from '../../../locales/backend-evolution/index.js'
 
-const functions = reactive([
-  { name: '用户登录', icon: '🔐', state: 'cold', invocations: 0, avgDuration: 0 },
-  { name: '订单处理', icon: '📦', state: 'cold', invocations: 0, avgDuration: 0 },
-  { name: '图片处理', icon: '🖼️', state: 'cold', invocations: 0, avgDuration: 0 },
-  { name: '数据备份', icon: '💾', state: 'cold', invocations: 0, avgDuration: 0 }
-])
+const { t, messages } = useI18n(backendEvolutionLocale)
+
+const functions = reactive(
+  messages.value.serverless.functions.map((fn) => ({
+    ...fn,
+    state: 'cold',
+    invocations: 0,
+    avgDuration: 0
+  }))
+)
 
 const concurrentRequests = ref(0)
 const runningInstances = ref(0)
 const coldStarts = ref(0)
 const scalingHistory = ref([10, 15, 20, 25, 30, 35, 40, 35, 30, 25, 20, 15])
 const currentPattern = ref(null)
-const isFlowRunning = ref(false)
 
-const trafficPatterns = [
-  { name: '正常流量', icon: '📊', desc: '平稳的请求速率' },
-  { name: '突发流量', icon: '🚀', desc: '突然的流量激增' },
-  { name: '潮汐流量', icon: '🌊', desc: '周期性的高低峰' }
-]
+const trafficPatterns = computed(() => messages.value.serverless.trafficPatterns)
+const explanation = computed(() => messages.value.serverless.explanation)
 
 const stateText = (state) => {
-  const map = { cold: '冷状态', warming: '预热中', running: '运行中' }
-  return map[state] || state
+  return messages.value.serverless.states[state] || state
 }
 
 const triggerFunction = async (name) => {
@@ -159,15 +162,16 @@ const triggerFunction = async (name) => {
 
 const applyPattern = (pattern) => {
   currentPattern.value = pattern.name
-  // 模拟流量模式
-  if (pattern.name === '突发流量') {
+  // Simulate traffic pattern.
+  const patternIndex = trafficPatterns.value.findIndex((item) => item.name === pattern.name)
+  if (patternIndex === 1) {
     for (let i = 0; i < 5; i++) {
       setTimeout(() => {
         const fn = functions[Math.floor(Math.random() * functions.length)]
         triggerFunction(fn.name)
       }, i * 200)
     }
-  } else if (pattern.name === '潮汐流量') {
+  } else if (patternIndex === 2) {
     const interval = setInterval(() => {
       const fn = functions[Math.floor(Math.random() * functions.length)]
       triggerFunction(fn.name)

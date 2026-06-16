@@ -1,26 +1,22 @@
-<!--
-  CacheLifecycleDemo.vue
-  缓存生命周期演示 - 展示缓存条目的写入、命中、过期、淘汰过程
--->
 <template>
   <div class="cache-lifecycle-demo">
     <div class="header">
       <div class="title">
-        缓存生命周期演示
+        {{ t('lifecycle.title') }}
       </div>
       <div class="subtitle">
-        观察缓存条目从创建到淘汰的完整过程
+        {{ t('lifecycle.subtitle') }}
       </div>
     </div>
 
     <div class="cache-container">
       <div class="cache-header">
         <div class="cache-title">
-          缓存存储 (容量: {{ cacheSize }}/{{ maxCacheSize }})
+          {{ t('lifecycle.storage') }} ({{ t('lifecycle.capacity') }}: {{ cacheSize }}/{{ maxCacheSize }})
         </div>
         <div class="cache-stats">
-          <span>命中率: {{ hitRate }}%</span>
-          <span>淘汰: {{ evictionCount }}</span>
+          <span>{{ t('lifecycle.hitRate') }}: {{ hitRate }}%</span>
+          <span>{{ t('lifecycle.evictions') }}: {{ evictionCount }}</span>
         </div>
       </div>
 
@@ -67,12 +63,12 @@
               />
             </div>
             <div class="ttl-text">
-              TTL: {{ entry.ttl }}s
+              {{ t('lifecycle.ttl') }}: {{ entry.ttl }}s
             </div>
           </div>
           <div class="entry-meta">
-            <span>命中: {{ entry.hits }}</span>
-            <span>访问: {{ entry.lastAccess }}s前</span>
+            <span>{{ t('lifecycle.hits') }}: {{ entry.hits }}</span>
+            <span>{{ t('lifecycle.access') }}: {{ entry.lastAccess }}{{ t('lifecycle.secondsAgo') }}</span>
           </div>
         </div>
       </div>
@@ -80,36 +76,36 @@
 
     <div class="controls">
       <div class="control-group">
-        <label>操作</label>
+        <label>{{ t('lifecycle.operation') }}</label>
         <button
           class="action-btn read"
           @click="readData"
         >
-          读取数据
+          {{ t('lifecycle.read') }}
         </button>
         <button
           class="action-btn write"
           @click="writeData"
         >
-          写入新数据
+          {{ t('lifecycle.write') }}
         </button>
       </div>
 
       <div class="control-group">
-        <label>自动模拟</label>
+        <label>{{ t('lifecycle.auto') }}</label>
         <button
           class="action-btn auto"
           :class="{ active: autoMode }"
           @click="toggleAuto"
         >
-          {{ autoMode ? '停止' : '开始' }}自动模拟
+          {{ autoMode ? t('lifecycle.stop') : t('lifecycle.start') }}{{ t('lifecycle.autoSimulation') }}
         </button>
       </div>
     </div>
 
     <div class="timeline">
       <div class="timeline-title">
-        事件时间线
+        {{ t('lifecycle.timeline') }}
       </div>
       <div class="timeline-events">
         <div
@@ -132,19 +128,19 @@
     <div class="legend">
       <div class="legend-item">
         <span class="legend-color new" />
-        <span>新写入</span>
+        <span>{{ t('lifecycle.legend.new') }}</span>
       </div>
       <div class="legend-item">
         <span class="legend-color hit" />
-        <span>缓存命中</span>
+        <span>{{ t('lifecycle.legend.hit') }}</span>
       </div>
       <div class="legend-item">
         <span class="legend-color expiring" />
-        <span>即将过期</span>
+        <span>{{ t('lifecycle.legend.expiring') }}</span>
       </div>
       <div class="legend-item">
         <span class="legend-color evicting" />
-        <span>淘汰中</span>
+        <span>{{ t('lifecycle.legend.evicting') }}</span>
       </div>
     </div>
   </div>
@@ -152,6 +148,10 @@
 
 <script setup>
 import { ref, computed, onUnmounted } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { cacheDesignLocale } from '../../../locales/cache-design/index.js'
+
+const { t } = useI18n(cacheDesignLocale)
 
 const maxCacheSize = 6
 const cacheEntries = ref([])
@@ -197,7 +197,7 @@ const writeData = () => {
 
     const evicting = cacheEntries.value[lruIndex]
     evicting.status = 'evicting'
-    addEvent('eviction', '🗑️', `淘汰 ${evicting.key} (LRU)`)
+    addEvent('eviction', '🗑️', t('lifecycle.events.evict', { key: evicting.key }))
 
     setTimeout(() => {
       cacheEntries.value.splice(lruIndex, 1)
@@ -215,7 +215,7 @@ const writeData = () => {
   }
 
   cacheEntries.value.push(newEntry)
-  addEvent('write', '✨', `写入 ${newId}`)
+  addEvent('write', '✨', t('lifecycle.events.write', { key: newId }))
 
   setTimeout(() => {
     newEntry.status = null
@@ -226,7 +226,7 @@ const writeData = () => {
 
 const readData = () => {
   if (cacheEntries.value.length === 0) {
-    addEvent('miss', '❌', '缓存为空，未命中')
+    addEvent('miss', '❌', t('lifecycle.events.emptyMiss'))
     return
   }
 
@@ -239,7 +239,7 @@ const readData = () => {
   entry.ttl = Math.min(entry.ttl + 5, 30) // Refresh TTL on hit
   entry.ttlPercent = (entry.ttl / 30) * 100
 
-  addEvent('hit', '✅', `命中 ${entry.key} (第${entry.hits}次)`)
+  addEvent('hit', '✅', t('lifecycle.events.hit', { key: entry.key, hits: entry.hits }))
 
   setTimeout(() => {
     entry.status = null
@@ -262,7 +262,7 @@ const startTTLDecay = (entry) => {
     }
 
     if (entry.ttl <= 0) {
-      addEvent('expiration', '⏰', `${entry.key} 过期`)
+      addEvent('expiration', '⏰', t('lifecycle.events.expired', { key: entry.key }))
       const idx = cacheEntries.value.indexOf(entry)
       if (idx !== -1) {
         cacheEntries.value.splice(idx, 1)

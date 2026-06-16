@@ -1,22 +1,10 @@
-<!--
-  AssetFingerprintDemo.vue
-  资源指纹(hash)演示
-
-  用途：
-  展示前端构建中如何通过 hash 实现长期缓存策略。
-
-  交互功能：
-  - 构建对比：对比无 hash 和带 hash 的文件名
-  - 缓存演示：模拟浏览器缓存行为
-  - 版本对比：展示文件变更对缓存的影响
--->
 <template>
   <div class="asset-fingerprint-demo">
     <div class="control-panel">
       <div class="title-section">
         <span class="icon">🔖</span>
-        <span class="title">资源指纹 (Hash)</span>
-        <span class="subtitle">长期缓存与版本控制</span>
+        <span class="title">{{ t('assetFingerprint.title') }}</span>
+        <span class="subtitle">{{ t('assetFingerprint.subtitle') }}</span>
       </div>
 
       <div class="controls">
@@ -24,7 +12,7 @@
           class="control-btn"
           @click="simulateBuild"
         >
-          🔄 重新构建
+          🔄 {{ t('assetFingerprint.rebuild') }}
         </button>
 
         <div class="toggle-group">
@@ -34,18 +22,18 @@
               type="checkbox"
               @change="updateFileNames"
             >
-            <span class="toggle-text">启用 Hash</span>
+            <span class="toggle-text">{{ t('assetFingerprint.enableHash') }}</span>
           </label>
         </div>
       </div>
     </div>
 
     <div class="main-content">
-      <!-- 文件列表 -->
+      <!-- file list -->
       <div class="files-panel">
         <div class="panel-header">
-          <span class="panel-title">📁 构建产物</span>
-          <span class="panel-stats">{{ files.length }} 个文件</span>
+          <span class="panel-title">📁 {{ t('assetFingerprint.buildOutput') }}</span>
+          <span class="panel-stats">{{ t('assetFingerprint.fileCount', { count: files.length }) }}</span>
         </div>
 
         <div class="files-list">
@@ -78,7 +66,7 @@
                 <span
                   v-if="file.changed"
                   class="changed-badge"
-                >更新</span>
+                >{{ t('assetFingerprint.updated') }}</span>
               </div>
               <div class="file-meta">
                 <span class="file-size">{{ formatSize(file.size) }}</span>
@@ -90,12 +78,12 @@
         </div>
       </div>
 
-      <!-- 浏览器缓存模拟 -->
+      <!-- browser cache simulation -->
       <div class="cache-panel">
         <div class="panel-header">
-          <span class="panel-title">🌐 浏览器缓存</span>
+          <span class="panel-title">🌐 {{ t('assetFingerprint.browserCache') }}</span>
           <span class="cache-stats">
-            命中: {{ cacheHits }} | 未命中: {{ cacheMisses }}
+            {{ t('assetFingerprint.cacheHitMiss', { hits: cacheHits, misses: cacheMisses }) }}
           </span>
         </div>
 
@@ -103,15 +91,15 @@
           <div class="cache-legend">
             <div class="legend-item">
               <span class="legend-color hit" />
-              <span>缓存命中 (Hash 匹配)</span>
+              <span>{{ t('assetFingerprint.cacheHit') }}</span>
             </div>
             <div class="legend-item">
               <span class="legend-color miss" />
-              <span>缓存未命中 (Hash 变化)</span>
+              <span>{{ t('assetFingerprint.cacheMiss') }}</span>
             </div>
             <div class="legend-item">
               <span class="legend-color new" />
-              <span>新文件 (无缓存)</span>
+              <span>{{ t('assetFingerprint.cacheNew') }}</span>
             </div>
           </div>
 
@@ -140,14 +128,14 @@
         </div>
 
         <div class="cache-summary">
-          <h4>📊 缓存策略效果</h4>
+          <h4>📊 {{ t('assetFingerprint.cacheEffect') }}</h4>
           <div class="stats-grid">
             <div class="stat-item">
               <div class="stat-value">
                 {{ cacheHitRate }}%
               </div>
               <div class="stat-label">
-                缓存命中率
+                {{ t('assetFingerprint.hitRate') }}
               </div>
             </div>
             <div class="stat-item">
@@ -155,7 +143,7 @@
                 {{ bandwidthSaved }}
               </div>
               <div class="stat-label">
-                节省带宽
+                {{ t('assetFingerprint.bandwidthSaved') }}
               </div>
             </div>
             <div class="stat-item">
@@ -163,7 +151,7 @@
                 {{ loadTime }}
               </div>
               <div class="stat-label">
-                平均加载时间
+                {{ t('assetFingerprint.avgLoadTime') }}
               </div>
             </div>
           </div>
@@ -171,7 +159,7 @@
       </div>
     </div>
 
-    <!-- 文件详情 -->
+    <!-- file details -->
     <div
       v-if="selectedFile"
       class="file-details"
@@ -197,22 +185,22 @@
 
       <div class="detail-content">
         <div class="detail-section">
-          <h4>📋 文件信息</h4>
+          <h4>📋 {{ t('assetFingerprint.fileInfo') }}</h4>
           <div class="info-grid">
             <div class="info-item">
-              <span class="info-label">大小:</span>
+              <span class="info-label">{{ t('assetFingerprint.size') }}</span>
               <span class="info-value">{{ formatSize(selectedFile.size) }}</span>
             </div>
             <div class="info-item">
-              <span class="info-label">类型:</span>
+              <span class="info-label">{{ t('assetFingerprint.type') }}</span>
               <span class="info-value">{{ selectedFile.type.toUpperCase() }}</span>
             </div>
             <div class="info-item">
-              <span class="info-label">修改时间:</span>
+              <span class="info-label">{{ t('assetFingerprint.modifyTime') }}</span>
               <span class="info-value">{{ formatTime(selectedFile.mtime) }}</span>
             </div>
             <div class="info-item">
-              <span class="info-label">Hash:</span>
+              <span class="info-label">{{ t('assetFingerprint.hash') }}</span>
               <span class="info-value hash">{{ selectedFile.hash }}</span>
             </div>
           </div>
@@ -222,7 +210,7 @@
           v-if="selectedFile.dependencies?.length"
           class="detail-section"
         >
-          <h4>🔗 依赖的模块 ({{ selectedFile.dependencies.length }})</h4>
+          <h4>🔗 {{ t('assetFingerprint.dependentModules', { count: selectedFile.dependencies.length }) }}</h4>
           <div class="deps-tags">
             <span
               v-for="depId in selectedFile.dependencies"
@@ -237,17 +225,13 @@
         </div>
 
         <div class="detail-section">
-          <h4>💡 缓存策略</h4>
+          <h4>💡 {{ t('assetFingerprint.cacheStrategy') }}</h4>
           <div class="cache-strategy">
             <p v-if="showHash">
-              ✅ <strong>启用 Hash</strong>：文件名包含内容哈希 ({{ selectedFile.hash }})。
-              文件内容变化时，URL 会改变，浏览器会重新请求。
-              适合配置 <code>Cache-Control: immutable</code> 长期缓存。
+              ✅ <strong>{{ t('assetFingerprint.hashEnabled') }}</strong>{{ t('assetFingerprint.hashEnabledDesc', { hash: selectedFile.hash }) }}<code>Cache-Control: immutable</code>{{ t('assetFingerprint.cacheControlImmutable') }}
             </p>
             <p v-else>
-              ⚠️ <strong>无 Hash</strong>：文件名固定为 <code>{{ selectedFile.baseName }}.{{ selectedFile.ext }}</code>。
-              更新文件后，需要手动刷新缓存或使用版本号查询参数。
-              容易遇到"缓存不更新"的问题。
+              ⚠️ <strong>{{ t('assetFingerprint.hashDisabled') }}</strong>{{ t('assetFingerprint.hashDisabledDesc') }}<code>{{ selectedFile.baseName }}.{{ selectedFile.ext }}</code>{{ t('assetFingerprint.hashDisabledDesc2') }}
             </p>
           </div>
         </div>
@@ -257,18 +241,21 @@
     <div class="info-box">
       <p>
         <span class="icon">💡</span>
-        <strong>资源指纹的作用：</strong>
-        通过给文件名添加内容哈希（如 main.a3f7b2c.js），可以实现
-        <strong>永久缓存</strong>策略。
-        只有文件内容变化时哈希才会改变，浏览器才会重新下载。
-        这样用户每次访问都能享受极速加载，同时又能及时获取最新代码。
+        <strong>{{ t('assetFingerprint.infoBoxTitle') }}</strong>
+        {{ t('assetFingerprint.infoBoxContent') }}
+        <strong>{{ t('assetFingerprint.infoBoxContent2') }}</strong>
+        {{ t('assetFingerprint.infoBoxContent3') }}
       </p>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { frontendEngineeringLocale } from '../../../locales/frontend-engineering/index.js'
+
+const { t, locale } = useI18n(frontendEngineeringLocale)
 
 const showHash = ref(true)
 const selectedNode = ref(null)
@@ -276,7 +263,6 @@ const selectedFile = computed(() => selectedNode.value)
 const cacheHits = ref(42)
 const cacheMisses = ref(8)
 
-// 模拟文件数据
 const generateFiles = () => {
   const files = [
     { id: 'main', name: 'main.a3f7b2c.js', baseName: 'main', ext: 'js', type: 'js', size: 125, hash: 'a3f7b2c', mtime: Date.now() - 86400000, dependencies: ['vendor', 'utils'] },
@@ -294,7 +280,7 @@ const files = ref(generateFiles())
 const cacheBlocks = computed(() => {
   return files.value
     .filter(f => f.type !== 'html')
-    .map((f, i) => ({
+    .map((f) => ({
       name: f.baseName,
       icon: getFileIcon(f.type),
       hash: showHash.value ? f.hash : null,
@@ -337,22 +323,25 @@ const formatSize = (size) => {
 
 const formatTime = (timestamp) => {
   const date = new Date(timestamp)
-  return date.toLocaleDateString('zh-CN', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
+  return date.toLocaleDateString(locale.value === 'en' ? 'en-US' : 'zh-CN', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
 }
 
 const simulateBuild = () => {
   files.value = generateFiles()
-  // 随机标记一些文件为已更改
   files.value.forEach(f => {
     f.changed = Math.random() > 0.7
   })
 }
 
 const updateFileNames = () => {
-  // 更新文件名显示
+  // update file name display
 }
 
 const getNode = (id) => files.value.find(f => f.id === id)
+
+const selectFile = (file) => {
+  selectedNode.value = file
+}
 
 onMounted(() => {
   simulateBuild()
@@ -486,7 +475,7 @@ onMounted(() => {
 
 .files-list {
   max-height: 300px;
-  
+
 }
 
 .file-item {

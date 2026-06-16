@@ -1,8 +1,8 @@
 <template>
   <div class="strategy-demo">
     <div class="demo-header">
-      <span class="title">Vibe Coding 学习策略</span>
-      <span class="subtitle">AI 时代怎么学更高效</span>
+      <span class="title">{{ t('computerOrganization.vibeCodingFullstack.learningStrategy.title') }}</span>
+      <span class="subtitle">{{ t('computerOrganization.vibeCodingFullstack.learningStrategy.subtitle') }}</span>
     </div>
 
     <div class="strategy-list">
@@ -16,36 +16,18 @@
     </div>
 
     <div class="info-box">
-      <strong>核心原则：</strong>AI 是你的编程助手，但决策者永远是你。学会提问、学会判断、学会整合，比学会写代码更重要。
+      <strong>{{ t('computerOrganization.vibeCodingFullstack.learningStrategy.principleLabel') }}</strong>{{ t('computerOrganization.vibeCodingFullstack.learningStrategy.principle') }}
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { computerFundamentalsLocale } from '../../../locales/computer-fundamentals/index.js'
 
-const strategies = ref([
-  {
-    title: '先理解，再让 AI 写',
-    desc: '不要一上来就让 AI 写代码。先理解问题是什么，想清楚解决方案，再用 AI 加速实现。'
-  },
-  {
-    title: '把 AI 当结对编程伙伴',
-    desc: '遇到不懂的概念，问 AI 解释。遇到复杂问题，和 AI 讨论方案。AI 是你的知识渊博的同事。'
-  },
-  {
-    title: '学会审核 AI 的输出',
-    desc: 'AI 生成的代码不一定对。你需要有能力判断：逻辑对不对？有没有安全隐患？性能如何？'
-  },
-  {
-    title: '建立自己的知识体系',
-    desc: 'AI 能帮你查漏补缺，但核心知识框架要自己建立。知道"有什么"，才能问出"怎么用"。'
-  },
-  {
-    title: '在实践中学习',
-    desc: '做真实的项目，解决真实的问题。AI 帮你扫清语法障碍，你专注于解决业务问题。'
-  }
-])
+const { t, messages } = useI18n(computerFundamentalsLocale)
+const strategies = computed(() => messages.value.computerOrganization.vibeCodingFullstack.learningStrategy.strategies)
 </script>
 
 <style scoped>

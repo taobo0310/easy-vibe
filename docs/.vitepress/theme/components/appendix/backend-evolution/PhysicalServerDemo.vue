@@ -2,14 +2,14 @@
   <div class="physical-server-demo">
     <div class="demo-header">
       <span class="icon">🖥️</span>
-      <span class="title">物理服务器时代演示</span>
-      <span class="subtitle">观察早期 CGI 服务器的处理瓶颈</span>
+      <span class="title">{{ t('physicalServer.title') }}</span>
+      <span class="subtitle">{{ t('physicalServer.subtitle') }}</span>
     </div>
 
     <div class="demo-stage">
       <div class="client-zone">
         <div class="zone-title">
-          👤 用户浏览器
+          {{ t('physicalServer.client') }}
         </div>
         <div class="request-queue">
           <div
@@ -27,7 +27,7 @@
           :disabled="isProcessing"
           @click="sendRequest"
         >
-          {{ isProcessing ? '处理中...' : '🚀 发起请求' }}
+          {{ isProcessing ? t('physicalServer.processing') : t('physicalServer.send') }}
         </button>
       </div>
 
@@ -58,7 +58,7 @@
 
       <div class="server-zone">
         <div class="zone-title">
-          🖥️ CGI 服务器
+          {{ t('physicalServer.server') }}
         </div>
         <div class="server-status">
           <div
@@ -101,13 +101,17 @@
 
     <div class="info-box">
       <span class="icon">💡</span>
-      <strong>核心思想：</strong>进程级隔离带来了稳定性，但也带来了巨大的性能开销。
+      <strong>{{ t('common.ideaTitle') }}</strong>{{ t('physicalServer.idea') }}
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { backendEvolutionLocale } from '../../../locales/backend-evolution/index.js'
+
+const { t } = useI18n(backendEvolutionLocale)
 
 const isProcessing = ref(false)
 const currentLatency = ref(0)
@@ -119,8 +123,8 @@ const requestCounter = ref(0)
 const packetCounter = ref(0)
 
 const serverStatus = computed(() => {
-  if (isProcessing.value) return '处理中...'
-  return '等待请求'
+  if (isProcessing.value) return t('physicalServer.processing')
+  return t('physicalServer.waiting')
 })
 
 const sendRequest = async () => {
@@ -154,7 +158,7 @@ const sendRequest = async () => {
   // Add process to queue
   processQueue.value.push({
     id: requestId,
-    name: `CGI Process #${requestId}`,
+    name: t('physicalServer.processName', { id: requestId }),
     progress: 0
   })
 

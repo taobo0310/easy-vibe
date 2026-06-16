@@ -2,16 +2,16 @@
   <div class="demo-wrapper">
     <div class="demo-header" dir="ltr">
       <span class="icon">🌍</span> 
-      <span>浏览器原生的本地化转换 (i18n) 演示</span>
+      <span>{{ t('internationalization.title') }}</span>
     </div>
     
     <div class="intro-text" dir="ltr">
-      请在下方切换用户的本地化偏好（环境代号）。体验浏览器引擎在不修改任何底层数据逻辑的前提下，是如何同时处理**语言字典**、**弹性换行**、**排版反转 (RTL)** 以及**原生数据格式转换**的。
+      {{ t('internationalization.intro') }}
     </div>
 
-    <!-- 顶层控制面板 -->
+    
     <div class="controls-panel" dir="ltr">
-      <label for="env-selector" class="control-label">🌐 模拟操作系统/浏览器偏好环境：</label>
+      <label for="env-selector" class="control-label">{{ t('internationalization.envLabel') }}</label>
       <select id="env-selector" v-model="currentLocale" class="env-select">
         <option value="zh-CN">🇨🇳 zh-CN (简体中文)</option>
         <option value="en-US">🇺🇸 en-US (美国英语)</option>
@@ -22,14 +22,14 @@
 
     <div class="lab-container">
       
-      <!-- 实验室 1：排版与字典 -->
+      
       <div class="lab-section">
-        <h3 class="lab-title" dir="ltr">实战区 1：依赖 Flex 面向字典与排版进行重构</h3>
+        <h3 class="lab-title" dir="ltr">{{ t('internationalization.lab1Title') }}</h3>
         <p class="lab-desc" dir="ltr">
-          由于我们在 CSS 中使用了弹性的 Flex 布局，并且没有写死 `margin-left` 而是用了 `gap` 与 `justify-content`，当切换到阿拉伯语时，`dir="rtl"` 属性会指挥浏览器**完美镜像反转**整个布局。当切换到德语时，超长的按钮文字会自动引发弹性换行，而不会溢出。
+          {{ t('internationalization.lab1Desc') }}
         </p>
         
-        <!-- 核心演示区域，响应 RTL -->
+        
         <div class="lab-window" :dir="layoutDirection">
           <header class="app-nav">
             <div class="logo-area">
@@ -54,40 +54,40 @@
         </div>
       </div>
 
-      <!-- 实验室 2：Intl API 底层转换 -->
+      
       <div class="lab-section rtl-ignore-section">
-        <h3 class="lab-title" dir="ltr">实战区 2：使用 Intl 引擎接管数据呈现</h3>
-        <p class="lab-desc" dir="ltr">
-          彻底抛弃正则表达式的截取与拼接！看看原生的 <code>Intl.NumberFormat</code> 和 <code>Intl.DateTimeFormat</code> 是如何根据我们上方选择的“环境代号”将下方固定不变的底层二进制数据无缝格式化的。
+        <h3 class=”lab-title” dir=”ltr”>{{ t('internationalization.lab2Title') }}</h3>
+        <p class=”lab-desc” dir=”ltr”>
+          {{ t('internationalization.lab2Desc') }}
         </p>
 
         <div class="data-compare-window" dir="ltr">
-          <!-- 金钱数据对比 -->
+          
           <div class="data-row">
             <div class="raw-data">
-              <span class="data-label">底层内存数值 (Float):</span>
+              <span class="data-label">{{ t('internationalization.rawMoney') }}</span>
               <code class="data-code">1459800.5</code>
             </div>
             <div class="data-arrow">
-              引擎介入<br/> ➔
+              {{ t('internationalization.engineIntervene') }}
             </div>
             <div class="intl-data">
-              <span class="data-label">DOM 最终呈现:</span>
+              <span class="data-label">{{ t('internationalization.finalDisplay') }}</span>
               <span class="formatted-val highlight-money">{{ formattedAmount }}</span>
             </div>
           </div>
 
-          <!-- 日期数据对比 -->
+          
           <div class="data-row">
             <div class="raw-data">
-              <span class="data-label">底层内存数值 (Timestamp):</span>
+              <span class="data-label">{{ t('internationalization.rawTime') }}</span>
               <code class="data-code">1757430000000</code>
             </div>
             <div class="data-arrow">
-              引擎介入<br/> ➔
+              {{ t('internationalization.engineIntervene') }}
             </div>
             <div class="intl-data">
-              <span class="data-label">DOM 最终呈现:</span>
+              <span class="data-label">{{ t('internationalization.finalDisplay') }}</span>
               <span class="formatted-val highlight-date">{{ formattedDate }}</span>
             </div>
           </div>
@@ -100,10 +100,14 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { browserFrontendLocale } from '../../../locales/browser-frontend/index.js'
+
+const { t } = useI18n(browserFrontendLocale)
 
 const currentLocale = ref('zh-CN')
 
-// 极其简易的本地化字典
+
 const dictionary = {
   'zh-CN': {
     appName: '企业云服务',
@@ -126,7 +130,7 @@ const dictionary = {
     navIndex: 'Startseite',
     navMe: 'Kontoeinstellungen',
     alertDesc: 'Sie haben eine ausstehende Rechnung für Ihre Cloud-Server-Instanz. Bitte verlängern Sie innerhalb von 24 Stunden, um eine Aussetzung zu vermeiden.',
-    btnPay: 'Bestätigen und sofortigen Zahlungsvorgang abschließen', // 故意设置的德语超长合成词
+    btnPay: 'Bestätigen und sofortigen Zahlungsvorgang abschließen',
     btnBack: 'Abbrechen'
   },
   'ar-SA': {
@@ -139,16 +143,16 @@ const dictionary = {
   }
 }
 
-// 固定的底层原始数据
-const RAW_TIMESTAMP = 1757430000000 // 模拟某个固定时间 2025-09-09(近似)
+
+const RAW_TIMESTAMP = 1757430000000
 const RAW_MONEY = 1459800.5
 
-// 计算布局方向 (核心知识点：处理 RTL)
+
 const layoutDirection = computed(() => {
   return currentLocale.value === 'ar-SA' ? 'rtl' : 'ltr'
 })
 
-// 原生 Intl 货币格式化
+
 const formattedAmount = computed(() => {
   let currency = 'CNY'
   if (currentLocale.value === 'en-US') currency = 'USD'
@@ -162,7 +166,7 @@ const formattedAmount = computed(() => {
   }).format(RAW_MONEY)
 })
 
-// 原生 Intl 日期格式化
+
 const formattedDate = computed(() => {
   return new Intl.DateTimeFormat(currentLocale.value, {
     year: 'numeric',
@@ -238,7 +242,6 @@ const formattedDate = computed(() => {
   min-width: 280px;
 }
 
-/* 两个实战区的公共样式 */
 .lab-container {
   display: flex;
   flex-direction: column;
@@ -277,7 +280,6 @@ const formattedDate = computed(() => {
   border-radius: 4px;
 }
 
-/* 实验室 1 的内部排版沙盒 */
 .lab-window {
   border: 1px solid var(--vp-c-divider);
   border-radius: 8px;
@@ -335,7 +337,6 @@ const formattedDate = computed(() => {
   line-height: 1.5;
 }
 
-/* RTL 环境下，警告框的彩色边框需要自动镜像到了右侧！这通过 CSS 的逻辑属性来实现最佳！但我们还是直接利用 dir 的流式特性。我们把 border-left 改为 border-inline-start */
 [dir="rtl"] .alert-box {
   border-left: none;
   border-right: 4px solid #f59e0b;
@@ -345,7 +346,6 @@ const formattedDate = computed(() => {
 .action-bar {
   display: flex;
   gap: 1rem;
-  flex-wrap: wrap; /* 核心知识点：弹性拉伸保护 */
 }
 
 .btn {
@@ -355,7 +355,6 @@ const formattedDate = computed(() => {
   border: none;
   border-radius: 6px;
   cursor: pointer;
-  flex: 1; /* 弹性填满剩余空间，对抗超长德语 */
   min-width: 150px;
   display: inline-flex;
   align-items: center;
@@ -373,7 +372,6 @@ const formattedDate = computed(() => {
 .dark .btn-ghost { background: var(--vp-c-bg-soft); color: var(--vp-c-text-1); border-color: var(--vp-c-divider); }
 .dark .btn-ghost:hover { background: var(--vp-c-divider); }
 
-/* 实验室 2 的转换展示面板 */
 .data-compare-window {
   display: flex;
   flex-direction: column;
@@ -458,8 +456,6 @@ const formattedDate = computed(() => {
   letter-spacing: -0.5px;
 }
 
-.highlight-money { color: #f59e0b; } /* 显眼的金色/橙色代表金钱 */
-.highlight-date { color: #3b82f6; } /* 蓝色代表日期体系 */
 
 .dark .data-code { background: #000; color: #10b981; border: 1px solid #333; }
 </style>

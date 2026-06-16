@@ -1,6 +1,6 @@
 <template>
   <div class="demo-container">
-    <h4>事件循环 (Event Loop) 演示</h4>
+    <h4>{{ t('eventLoop.title') }}</h4>
 
     <div class="controls">
       <el-button
@@ -9,27 +9,27 @@
         :disabled="isRunning"
         @click="startSimulation"
       >
-        {{ isRunning ? '运行中...' : '开始模拟' }}
+        {{ isRunning ? t('common.running') : t('eventLoop.startSimulation') }}
       </el-button>
       <el-button
         size="small"
         :disabled="tasks.length >= 10"
         @click="addTask"
       >
-        添加任务
+        {{ t('eventLoop.addTask') }}
       </el-button>
       <el-button
         size="small"
         :disabled="microtasks.length >= 5"
         @click="addMicrotask"
       >
-        添加微任务
+        {{ t('eventLoop.addMicrotask') }}
       </el-button>
       <el-button
         size="small"
         @click="reset"
       >
-        重置
+        {{ t('common.reset') }}
       </el-button>
 
       <el-select
@@ -39,32 +39,32 @@
       >
         <el-option
           :value="1"
-          label="慢速"
+          :label="t('eventLoop.speedSlow')"
         />
         <el-option
           :value="2"
-          label="正常"
+          :label="t('eventLoop.speedNormal')"
         />
         <el-option
           :value="3"
-          label="快速"
+          :label="t('eventLoop.speedFast')"
         />
         <el-option
           :value="4"
-          label="极快"
+          :label="t('eventLoop.speedVeryFast')"
         />
         <el-option
           :value="5"
-          label="即时"
+          :label="t('eventLoop.speedInstant')"
         />
       </el-select>
     </div>
 
     <div class="event-loop-container">
-      <!-- 调用栈 -->
+      <!-- Call Stack -->
       <div class="section">
         <div class="section-title">
-          调用栈 (Call Stack)
+          {{ t('eventLoop.callStack') }}
         </div>
         <div class="stack-container">
           <div
@@ -81,22 +81,22 @@
               v-if="frame.line"
               class="frame-line"
             >
-              第 {{ frame.line }} 行
+              {{ t('eventLoop.lineLabel', { line: frame.line }) }}
             </div>
           </div>
           <div
             v-if="callStack.length === 0"
             class="empty-stack"
           >
-            栈为空
+            {{ t('eventLoop.stackEmpty') }}
           </div>
         </div>
       </div>
 
-      <!-- 事件循环 -->
+      <!-- Event Loop -->
       <div class="section event-loop">
         <div class="section-title">
-          事件循环 (Event Loop)
+          {{ t('eventLoop.eventLoopTitle') }}
         </div>
         <div class="loop-container">
           <div
@@ -126,7 +126,7 @@
             </svg>
           </div>
           <div class="loop-label">
-            检查
+            {{ t('eventLoop.checkLabel') }}
           </div>
         </div>
 
@@ -136,41 +136,41 @@
             :class="{ active: currentStep === 1 }"
           >
             <span class="step-num">1</span>
-            <span class="step-text">执行调用栈中的同步代码</span>
+            <span class="step-text">{{ t('eventLoop.step1') }}</span>
           </div>
           <div
             class="step"
             :class="{ active: currentStep === 2 }"
           >
             <span class="step-num">2</span>
-            <span class="step-text">执行所有微任务 (microtasks)</span>
+            <span class="step-text">{{ t('eventLoop.step2') }}</span>
           </div>
           <div
             class="step"
             :class="{ active: currentStep === 3 }"
           >
             <span class="step-num">3</span>
-            <span class="step-text">渲染 UI (如果需要)</span>
+            <span class="step-text">{{ t('eventLoop.step3') }}</span>
           </div>
           <div
             class="step"
             :class="{ active: currentStep === 4 }"
           >
             <span class="step-num">4</span>
-            <span class="step-text">执行宏任务 (macrotask)</span>
+            <span class="step-text">{{ t('eventLoop.step4') }}</span>
           </div>
         </div>
       </div>
 
-      <!-- 任务队列 -->
+      <!-- Task Queue -->
       <div class="section">
         <div class="section-title">
-          任务队列
+          {{ t('eventLoop.taskQueue') }}
         </div>
 
         <div class="queue microtask-queue">
           <div class="queue-title">
-            微任务队列 (Microtasks)
+            {{ t('eventLoop.microtaskQueue') }}
           </div>
           <div class="queue-items">
             <div
@@ -180,20 +180,20 @@
               :style="{ animationDelay: idx * 0.1 + 's' }"
             >
               <span class="task-name">{{ task.name }}</span>
-              <span class="task-priority">高优先级</span>
+              <span class="task-priority">{{ t('eventLoop.highPriority') }}</span>
             </div>
             <div
               v-if="microtasks.length === 0"
               class="empty-queue"
             >
-              队列为空
+              {{ t('eventLoop.queueEmpty') }}
             </div>
           </div>
         </div>
 
         <div class="queue macrotask-queue">
           <div class="queue-title">
-            宏任务队列 (Macrotasks)
+            {{ t('eventLoop.macrotaskQueue') }}
           </div>
           <div class="queue-items">
             <div
@@ -209,7 +209,7 @@
               v-if="tasks.length === 0"
               class="empty-queue"
             >
-              队列为空
+              {{ t('eventLoop.queueEmpty') }}
             </div>
           </div>
         </div>
@@ -220,6 +220,10 @@
 
 <script setup>
 import { ref } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { concurrencyModelsLocale } from '../../../locales/concurrency-models/index.js'
+
+const { t } = useI18n(concurrencyModelsLocale)
 
 const isRunning = ref(false)
 const simulationSpeed = ref(2)
@@ -232,11 +236,12 @@ let microtaskIdCounter = 1
 
 function addTask() {
   if (tasks.value.length >= 10) return
-  const types = ['setTimeout', 'setInterval', 'I/O', 'DOM事件']
+  const typeKeys = ['setTimeout', 'setInterval', 'io', 'domEvent']
+  const randomKey = typeKeys[Math.floor(Math.random() * typeKeys.length)]
   tasks.value.push({
     id: taskIdCounter++,
-    name: `任务 ${taskIdCounter - 1}`,
-    type: types[Math.floor(Math.random() * types.length)]
+    name: t('eventLoop.taskName', { id: taskIdCounter - 1 }),
+    type: t('eventLoop.taskTypes.' + randomKey)
   })
 }
 
@@ -244,14 +249,13 @@ function addMicrotask() {
   if (microtasks.value.length >= 5) return
   microtasks.value.push({
     id: microtaskIdCounter++,
-    name: `微任务 ${microtaskIdCounter - 1}`
+    name: t('eventLoop.microtaskName', { id: microtaskIdCounter - 1 })
   })
 }
 
 function startSimulation() {
   if (isRunning.value) return
 
-  // 确保有任务
   if (tasks.value.length === 0) {
     addTask()
     addTask()
@@ -263,15 +267,13 @@ function startSimulation() {
   isRunning.value = true
   currentStep.value = 1
 
-  // 模拟执行过程
   runSimulationStep()
 }
 
 function runSimulationStep() {
   if (!isRunning.value) return
 
-  // 模拟步骤执行
-  const speed = 6 - simulationSpeed.value // 转换为延迟
+  const speed = 6 - simulationSpeed.value
   const delay = speed * 200
 
   setTimeout(() => {
@@ -279,17 +281,14 @@ function runSimulationStep() {
 
     currentStep.value = (currentStep.value % 4) + 1
 
-    // 更新调用栈
     updateCallStack()
 
-    // 消耗任务
     if (currentStep.value === 2 && microtasks.value.length > 0) {
       microtasks.value.shift()
     } else if (currentStep.value === 4 && tasks.value.length > 0) {
       tasks.value.shift()
     }
 
-    // 检查是否完成
     if (tasks.value.length === 0 && microtasks.value.length === 0) {
       isRunning.value = false
       callStack.value = []

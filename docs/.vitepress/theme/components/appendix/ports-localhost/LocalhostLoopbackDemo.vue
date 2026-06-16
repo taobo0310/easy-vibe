@@ -1,24 +1,28 @@
 <script setup>
-import { ref, reactive } from 'vue'
+import { ref, reactive, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { portsLocalhostLocale } from '../../../locales/ports-localhost/index.js'
+
+const { t } = useI18n(portsLocalhostLocale)
 
 const requestUrl = ref('http://localhost:3000/api/hello')
 const isRequesting = ref(false)
 const requestStep = ref(0)
 const responseText = ref('')
 
-const steps = [
-  { label: '浏览器', desc: '你在地址栏输入 URL', icon: '🌐' },
-  { label: 'DNS 解析', desc: 'localhost → 127.0.0.1（不出网）', icon: '📖' },
-  { label: '网络层', desc: '数据包发往 127.0.0.1（环回接口）', icon: '🔄' },
-  { label: '本机服务', desc: '端口 3000 上的程序接收请求', icon: '⚙️' },
-  { label: '返回响应', desc: '{ "message": "Hello!" }', icon: '📨' }
-]
+const steps = computed(() => [
+  { label: t('localhostLoopback.browserStep'), desc: t('localhostLoopback.browserDesc'), icon: '🌐' },
+  { label: t('localhostLoopback.dnsStep'), desc: t('localhostLoopback.dnsDesc'), icon: '📖' },
+  { label: t('localhostLoopback.networkStep'), desc: t('localhostLoopback.networkDesc'), icon: '🔄' },
+  { label: t('localhostLoopback.localServiceStep'), desc: t('localhostLoopback.localServiceDesc'), icon: '⚙️' },
+  { label: t('localhostLoopback.responseStep'), desc: t('localhostLoopback.responseDesc'), icon: '📨' }
+])
 
 const aliases = reactive([
-  { name: 'localhost', ip: '127.0.0.1', desc: '标准域名别名', active: false },
-  { name: '127.0.0.1', ip: '127.0.0.1', desc: 'IPv4 环回地址', active: false },
-  { name: '::1', ip: '::1', desc: 'IPv6 环回地址', active: false },
-  { name: '0.0.0.0', ip: '0.0.0.0', desc: '监听所有网卡', active: false }
+  { name: 'localhost', ip: '127.0.0.1', desc: t('localhostLoopback.aliasDesc0'), active: false },
+  { name: '127.0.0.1', ip: '127.0.0.1', desc: t('localhostLoopback.aliasDesc1'), active: false },
+  { name: '::1', ip: '::1', desc: t('localhostLoopback.aliasDesc2'), active: false },
+  { name: '0.0.0.0', ip: '0.0.0.0', desc: t('localhostLoopback.aliasDesc3'), active: false }
 ])
 
 const selectedAlias = ref(0)
@@ -61,7 +65,7 @@ function selectAlias(index) {
           :disabled="isRequesting"
           @click="simulateRequest"
         >
-          {{ isRequesting ? '请求中...' : '发送请求' }}
+          {{ isRequesting ? t('localhostLoopback.requesting') : t('localhostLoopback.sendRequest') }}
         </button>
       </div>
     </div>
@@ -87,7 +91,7 @@ function selectAlias(index) {
 
       <transition name="fade">
         <div v-if="responseText" class="response-box">
-          <span class="response-label">响应结果：</span>
+          <span class="response-label">{{ t('localhostLoopback.responseLabel') }}</span>
           <code>{{ responseText }}</code>
         </div>
       </transition>
@@ -95,11 +99,11 @@ function selectAlias(index) {
       <div class="loopback-explain">
         <div class="loopback-diagram">
           <div class="loopback-node app">
-            <span>你的应用</span>
-            <span class="small">（浏览器）</span>
+            <span>{{ t('localhostLoopback.yourApp') }}</span>
+            <span class="small">{{ t('localhostLoopback.browserSuffix') }}</span>
           </div>
           <div class="loopback-arrow">
-            <span class="arrow-text">请求不离开本机</span>
+            <span class="arrow-text">{{ t('localhostLoopback.noLeave') }}</span>
             <svg width="80" height="60" viewBox="0 0 80 60">
               <path d="M10 10 Q40 55 70 10" stroke="var(--vp-c-brand)" stroke-width="2" fill="none" marker-end="url(#arrowhead)" />
               <defs>
@@ -110,15 +114,15 @@ function selectAlias(index) {
             </svg>
           </div>
           <div class="loopback-node server">
-            <span>本地服务</span>
-            <span class="small">（:3000）</span>
+            <span>{{ t('localhostLoopback.localService') }}</span>
+            <span class="small">{{ t('localhostLoopback.portSuffix') }}</span>
           </div>
         </div>
       </div>
     </div>
 
     <div class="alias-section">
-      <div class="alias-title">localhost 的"马甲"们（点击查看说明）</div>
+      <div class="alias-title">{{ t('localhostLoopback.aliasTitle') }}</div>
       <div class="alias-grid">
         <div
           v-for="(alias, i) in aliases"
@@ -148,7 +152,7 @@ function selectAlias(index) {
     </div>
 
     <div class="info-box">
-      <strong>核心概念：</strong>localhost 就是"自己找自己"。数据包通过环回接口（loopback interface）在本机内部折返，不经过网线、不经过路由器，速度极快且完全安全。
+      <strong>{{ t('localhostLoopback.coreConcept') }}</strong>localhost 就是"自己找自己"。数据包通过环回接口（loopback interface）在本机内部折返，不经过网线、不经过路由器，速度极快且完全安全。
     </div>
   </div>
 </template>

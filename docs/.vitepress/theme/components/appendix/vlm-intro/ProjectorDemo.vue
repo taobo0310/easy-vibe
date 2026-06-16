@@ -1,7 +1,3 @@
-<!--
-  ProjectorDemo.vue
-  投射器（Projector）原理演示
--->
 <template>
   <div class="projector-demo">
     <div class="mode-switch">
@@ -48,7 +44,7 @@
             {{ mode === 'linear' ? 'Linear Layer' : 'Q-Former' }}
           </div>
           <div class="desc">
-            {{ mode === 'linear' ? '直接映射 (1:1)' : '查询提取 (N:M)' }}
+            {{ mode === 'linear' ? t('projector.linearDesc') : t('projector.qformerDesc') }}
           </div>
           <div
             v-if="mode === 'qformer'"
@@ -77,8 +73,8 @@
         <div class="count">
           {{
             mode === 'linear'
-              ? '256 Tokens (保留全部细节)'
-              : '32 Tokens (只保留关键信息)'
+              ? t('projector.linearCount')
+              : t('projector.qformerCount')
           }}
         </div>
       </div>
@@ -86,14 +82,12 @@
 
     <div class="explanation">
       <div v-if="mode === 'linear'">
-        <strong>Linear Projector:</strong>
-        简单高效。它像一个直译器，保留了所有的视觉信息，虽然 Token
-        数量多（计算量大），但对细节的把控更好。
+        <strong>{{ t('projector.linearStrong') }}</strong>
+        {{ t('projector.linearExplanation') }}
       </div>
       <div v-else>
-        <strong>Q-Former:</strong>
-        精细优雅。它使用一组“查询向量”主动去图像中提取与文本相关的信息。大大压缩了
-        Token 数量，让 LLM 跑得更快。
+        <strong>{{ t('projector.qformerStrong') }}</strong>
+        {{ t('projector.qformerExplanation') }}
       </div>
     </div>
   </div>
@@ -101,7 +95,10 @@
 
 <script setup>
 import { ref } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { vlmIntroLocale } from '../../../locales/vlm-intro/index.js'
 
+const { t } = useI18n(vlmIntroLocale)
 const mode = ref('linear')
 </script>
 

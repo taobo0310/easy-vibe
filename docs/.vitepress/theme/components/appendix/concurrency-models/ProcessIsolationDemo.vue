@@ -1,6 +1,6 @@
 <template>
   <div class="demo-container">
-    <h4>进程内存隔离演示</h4>
+    <h4>{{ t('processIsolation.title') }}</h4>
 
     <div class="controls">
       <el-button
@@ -9,7 +9,7 @@
         :disabled="processes.length >= 4"
         @click="addProcess"
       >
-        创建进程
+        {{ t('processIsolation.createProcess') }}
       </el-button>
       <el-button
         type="danger"
@@ -17,25 +17,25 @@
         :disabled="processes.length === 0"
         @click="killProcess"
       >
-        结束进程
+        {{ t('processIsolation.killProcess') }}
       </el-button>
       <el-button
         size="small"
         @click="simulateCrash"
       >
-        模拟进程崩溃
+        {{ t('processIsolation.simulateCrash') }}
       </el-button>
       <el-button
         size="small"
         @click="reset"
       >
-        重置
+        {{ t('common.reset') }}
       </el-button>
     </div>
 
     <div class="memory-view">
       <div class="memory-label">
-        系统内存
+        {{ t('processIsolation.systemMemory') }}
       </div>
       <div class="memory-blocks">
         <div
@@ -46,24 +46,24 @@
           :style="{ width: process.size + '%', backgroundColor: process.color }"
         >
           <div class="process-header">
-            <span class="process-name">进程 {{ process.id }}</span>
+            <span class="process-name">{{ t('processIsolation.processLabel', { id: process.id }) }}</span>
             <span class="process-pid">PID: {{ process.pid }}</span>
           </div>
           <div class="process-memory">
             <div class="memory-section code">
-              <span class="section-label">代码段</span>
+              <span class="section-label">{{ t('processIsolation.codeSegment') }}</span>
               <span class="section-size">{{ process.codeSize }}MB</span>
             </div>
             <div class="memory-section data">
-              <span class="section-label">数据段</span>
+              <span class="section-label">{{ t('processIsolation.dataSegment') }}</span>
               <span class="section-size">{{ process.dataSize }}MB</span>
             </div>
             <div class="memory-section heap">
-              <span class="section-label">堆</span>
+              <span class="section-label">{{ t('processIsolation.heapSegment') }}</span>
               <span class="section-size">{{ process.heapSize }}MB</span>
             </div>
             <div class="memory-section stack">
-              <span class="section-label">栈</span>
+              <span class="section-label">{{ t('processIsolation.stackSegment') }}</span>
               <span class="section-size">{{ process.stackSize }}MB</span>
             </div>
           </div>
@@ -71,8 +71,8 @@
             v-if="process.crashed"
             class="crash-overlay"
           >
-            <span class="crash-text">💥 已崩溃</span>
-            <span class="crash-info">不影响其他进程</span>
+            <span class="crash-text">{{ t('processIsolation.crashed') }}</span>
+            <span class="crash-info">{{ t('processIsolation.crashNotAffectOthers') }}</span>
           </div>
         </div>
       </div>
@@ -82,7 +82,7 @@
         class="shared-memory"
       >
         <div class="shared-label">
-          共享内存区域 (IPC)
+          {{ t('processIsolation.sharedMemory') }}
         </div>
         <div class="shared-content">
           <div
@@ -94,7 +94,7 @@
               class="access-indicator"
               :style="{ backgroundColor: process.color }"
             />
-            <span>进程 {{ process.id }} 可以访问</span>
+            <span>{{ t('processIsolation.processCanAccess', { id: process.id }) }}</span>
           </div>
         </div>
       </div>
@@ -102,9 +102,9 @@
 
     <div class="info-panel">
       <el-alert
-        :title="currentInfo.title"
-        :type="currentInfo.type"
-        :description="currentInfo.description"
+        :title="infoTitle"
+        :type="infoType"
+        :description="infoDescription"
         show-icon
         :closable="false"
       />
@@ -114,36 +114,57 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { concurrencyModelsLocale } from '../../../locales/concurrency-models/index.js'
+
+const { t } = useI18n(concurrencyModelsLocale)
 
 const processes = ref([])
 const showSharedMemory = ref(false)
 const colors = ['#409eff', '#67c23a', '#e6a23c', '#f56c6c']
 let pidCounter = 1000
 
-const currentInfo = computed(() => {
-  if (processes.value.length === 0) {
-    return {
-      title: '进程隔离',
-      type: 'info',
-      description: '每个进程拥有独立的虚拟地址空间，一个进程崩溃不会影响其他进程。点击"创建进程"开始演示。'
-    }
-  }
+const infoTitle = computed(() => {
+  if (processes.value.length === 0) return t('processIsolation.infoTitles.empty')
+  const crashed = processes.value.filter(p => p.crashed).length
+  if (crashed > 0) return t('processIsolation.infoTitles.crashed')
+  return t('processIsolation.infoTitles.running')
+})
 
+const infoType = computed(() => {
+  if (processes.value.length === 0) return 'info'
+  const crashed = processes.value.filter(p => p.crashed).length
+  if (crashed > 0) return 'success'
+  return 'info'
+})
+
+const infoDescription = computed(() => {
+  if (processes.value.length === 0) {
+    return t('processIsolation.infoDescriptions.empty')
+  }
   const crashed = processes.value.filter(p => p.crashed).length
   if (crashed > 0) {
-    return {
-      title: '隔离性验证',
-      type: 'success',
-      description: `进程已崩溃但其他进程正常运行，证明进程间内存隔离有效。崩溃的进程会被操作系统回收资源。`
-    }
+    return t('processIsolation.infoDescriptions.crashed')
   }
-
-  return {
-    title: '内存布局',
-    type: 'info',
-    description: `当前有 ${processes.value.length} 个进程在运行。每个进程的内存分为代码段、数据段、堆和栈，相互隔离不可访问。`
-  }
+  return t('processIsolation.infoDescriptions.running', { count: processes.value.length })
 })
+
+function addProcess() {
+  if (processes.value.length >= 4) return
+  const id = processes.value.length + 1
+  processes.value.push({
+    id,
+    pid: ++pidCounter,
+    color: colors[id - 1],
+    crashed: false,
+    active: true,
+    size: 25,
+    codeSize: Math.floor(Math.random() * 10) + 5,
+    dataSize: Math.floor(Math.random() * 20) + 10,
+    heapSize: Math.floor(Math.random() * 50) + 20,
+    stackSize: Math.floor(Math.random() * 8) + 1
+  })
+}
 
 function killProcess() {
   if (processes.value.length === 0) return
@@ -153,7 +174,6 @@ function killProcess() {
 function simulateCrash() {
   if (processes.value.length === 0) return
 
-  // 随机让一个未崩溃的进程崩溃
   const candidates = processes.value.filter(p => !p.crashed)
   if (candidates.length > 0) {
     const victim = candidates[Math.floor(Math.random() * candidates.length)]

@@ -2,8 +2,8 @@
   <div class="identity-provider-demo">
     <div class="demo-header">
       <span class="icon">🔐</span>
-      <span class="title">身份提供商集成</span>
-      <span class="subtitle">企业 SSO 单点登录流程</span>
+      <span class="title">{{ t('identityProvider.title') }}</span>
+      <span class="subtitle">{{ t('identityProvider.subtitle') }}</span>
     </div>
 
     <div class="flow-steps">
@@ -38,37 +38,22 @@
 
     <div class="info-box">
       <span class="icon">💡</span>
-      <strong>核心思想：</strong>通过企业 IdP 统一管理用户身份，避免在每个云平台单独创建账号。
+      <strong>{{ t('common.coreIdea') }}</strong>{{ t('identityProvider.info') }}
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { cloudIamLocale } from '../../../locales/cloud-iam/index.js'
 
+const { t, messages } = useI18n(cloudIamLocale)
 const currentStep = ref(0)
+const steps = computed(() => messages.value.identityProvider.steps)
+const stepDetails = computed(() => messages.value.identityProvider.stepDetails)
 
-const steps = [
-  { title: '访问应用' },
-  { title: '重定向 IdP' },
-  { title: '用户登录' },
-  { title: '颁发令牌' },
-  { title: '返回应用' },
-  { title: '换取凭证' },
-  { title: '访问资源' }
-]
-
-const stepDetails = [
-  { title: '用户访问企业应用', detail: '用户打开浏览器访问企业业务系统，应用检测到用户没有有效会话。', flow: [{ from: { name: '用户' }, action: '访问 →', to: { name: '企业应用' } }] },
-  { title: '应用重定向到 IdP', detail: '应用生成 SAML Request，将用户重定向到企业身份提供商。', flow: [{ from: { name: '应用' }, action: '重定向 →', to: { name: 'IdP' } }] },
-  { title: '用户在 IdP 登录', detail: '用户在 IdP 登录页面输入企业账号密码，可能需要 MFA 认证。', flow: [{ from: { name: '用户' }, action: '登录 →', to: { name: 'IdP' } }] },
-  { title: 'IdP 颁发 SAML 令牌', detail: '用户认证成功后，IdP 生成包含用户身份的 SAML Assertion。', flow: [{ from: { name: 'IdP' }, action: '颁发 →', to: { name: '令牌' } }] },
-  { title: '返回企业应用', detail: 'IdP 通过浏览器将 SAML Response POST 到企业应用。', flow: [{ from: { name: '浏览器' }, action: 'POST →', to: { name: '应用' } }] },
-  { title: '换取云临时凭证', detail: '应用使用 SAML 向云 STS 服务请求临时安全凭证。', flow: [{ from: { name: '应用' }, action: 'AssumeRole →', to: { name: '云 STS' } }] },
-  { title: '访问云资源', detail: '应用使用临时凭证调用云服务 API 访问资源。', flow: [{ from: { name: '应用' }, action: '访问 →', to: { name: '云服务' } }] }
-]
-
-const currentStepData = computed(() => stepDetails[currentStep.value])
+const currentStepData = computed(() => stepDetails.value[currentStep.value])
 </script>
 
 <style scoped>

@@ -2,11 +2,10 @@
   <div class="tool-use-demo">
     <div class="header">
       <div class="title">
-        🔧 揭秘：Agent 如何调用工具？
+        {{ t('toolUse.title') }}
       </div>
     </div>
 
-    <!-- 场景选择 -->
     <div class="scenario-tabs">
       <button
         v-for="s in scenarios"
@@ -19,18 +18,15 @@
       </button>
     </div>
 
-    <!-- 用户输入 -->
     <div class="user-input-bar">
       <span class="label">👤</span>
       <span class="text">"{{ currentData.userInput }}"</span>
     </div>
 
-    <!-- 横向流程 -->
     <div
       ref="flowRowRef"
       class="flow-row"
     >
-      <!-- 步骤1: 理解 -->
       <div
         class="flow-card"
         :class="{ active: currentStep >= 1 }"
@@ -40,7 +36,7 @@
         </div>
         <div class="card-body">
           <div class="card-title">
-            分析需求
+            {{ t('toolUse.steps.analyze') }}
           </div>
           <div
             v-if="currentStep >= 1"
@@ -48,7 +44,7 @@
           >
             <div class="intent-box">
               <div class="intent-label">
-                用户想要：
+                {{ t('toolUse.labels.userWants') }}
               </div>
               <div class="intent-value">
                 {{ currentData.intent.type }}
@@ -56,7 +52,7 @@
             </div>
             <div class="extract-box">
               <div class="extract-label">
-                提取信息：
+                {{ t('toolUse.labels.extracted') }}
               </div>
               <div class="extract-tags">
                 <span
@@ -77,7 +73,6 @@
         →
       </div>
 
-      <!-- 步骤2: 选工具 -->
       <div
         class="flow-card"
         :class="{ active: currentStep >= 2 }"
@@ -87,7 +82,7 @@
         </div>
         <div class="card-body">
           <div class="card-title">
-            选择工具
+            {{ t('toolUse.steps.choose') }}
           </div>
           <div
             v-if="currentStep >= 2"
@@ -119,7 +114,6 @@
         →
       </div>
 
-      <!-- 步骤3: 构造参数 -->
       <div
         class="flow-card"
         :class="{ active: currentStep >= 3 }"
@@ -129,7 +123,7 @@
         </div>
         <div class="card-body">
           <div class="card-title">
-            构造参数
+            {{ t('toolUse.steps.params') }}
           </div>
           <div
             v-if="currentStep >= 3"
@@ -147,7 +141,6 @@
         →
       </div>
 
-      <!-- 步骤4: 执行 -->
       <div
         class="flow-card"
         :class="{ active: currentStep >= 4 }"
@@ -157,7 +150,7 @@
         </div>
         <div class="card-body">
           <div class="card-title">
-            执行返回
+            {{ t('toolUse.steps.execute') }}
           </div>
           <div
             v-if="currentStep >= 4"
@@ -168,44 +161,42 @@
               <span class="arrow">→</span>
               <span class="to">{{ currentData.selectedTool }}</span>
               <span class="arrow">→</span>
-              <span class="from">结果</span>
+              <span class="from">{{ t('toolUse.labels.result') }}</span>
             </div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- 最终结果 -->
     <div
       v-if="currentStep >= 4"
       class="final-result"
     >
-      <span class="result-label">💬 回复：</span>
+      <span class="result-label">{{ t('toolUse.labels.response') }}</span>
       <span class="result-text">{{ currentData.finalResponse }}</span>
     </div>
 
-    <!-- 控制栏 -->
     <div class="control-bar">
       <button
         v-if="currentStep === 0"
         class="ctrl-btn primary"
         @click="nextStep"
       >
-        ▶ 开始演示
+        {{ t('toolUse.buttons.start') }}
       </button>
       <button
         v-else-if="currentStep < 4"
         class="ctrl-btn primary"
         @click="nextStep"
       >
-        下一步 →
+        {{ t('toolUse.buttons.next') }}
       </button>
       <button
         v-else
         class="ctrl-btn"
         @click="reset"
       >
-        🔄 重置
+        {{ t('toolUse.buttons.reset') }}
       </button>
       
       <div class="step-dots">
@@ -217,66 +208,26 @@
       </div>
     </div>
 
-    <!-- 提示 -->
     <div class="tip-bar">
       <span>💡</span>
-      <span>Tool Calling 本质：LLM 生成结构化文本（JSON），外部系统执行后返回结果</span>
+      <span>{{ t('toolUse.tip') }}</span>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, watch, nextTick } from 'vue'
+import { ref, computed, nextTick } from 'vue'
 
-const scenarios = [
-  {
-    id: 'weather',
-    icon: '🌤️',
-    name: '查天气',
-    userInput: '明天上海需要带伞吗？',
-    intent: { type: '天气查询', entities: ['明天', '上海'], confidence: 95 },
-    availableTools: [
-      { name: 'weather_api', icon: '🌤️', description: '获取天气', selected: true, score: 95 },
-      { name: 'calculator', icon: '🧮', description: '数学计算', selected: false, score: 10 },
-    ],
-    selectedTool: 'weather_api',
-    finalParams: { tool: 'weather_api', params: { city: '上海', date: 'tomorrow' } },
-    finalResponse: '明天上海有小雨，建议带伞。气温 8-15°C。'
-  },
-  {
-    id: 'calculate',
-    icon: '🧮',
-    name: '计算',
-    userInput: '1250 除以 25 乘以 8 等于多少',
-    intent: { type: '数学计算', entities: ['1250', '25', '8'], confidence: 98 },
-    availableTools: [
-      { name: 'weather_api', icon: '🌤️', description: '获取天气', selected: false, score: 5 },
-      { name: 'calculator', icon: '🧮', description: '数学计算', selected: true, score: 98 },
-    ],
-    selectedTool: 'calculator',
-    finalParams: { tool: 'calculator', params: { expression: '(1250/25)*8' } },
-    finalResponse: '计算结果：400。'
-  },
-  {
-    id: 'search',
-    icon: '🔍',
-    name: '搜索',
-    userInput: '搜索最近关于人工智能的新闻',
-    intent: { type: '信息检索', entities: ['AI', '新闻'], confidence: 92 },
-    availableTools: [
-      { name: 'web_search', icon: '🔍', description: '网络搜索', selected: true, score: 92 },
-      { name: 'calculator', icon: '🧮', description: '数学计算', selected: false, score: 5 },
-    ],
-    selectedTool: 'web_search',
-    finalParams: { tool: 'web_search', params: { query: 'AI news', max: 5 } },
-    finalResponse: '为您找到 5 条最新 AI 新闻...'
-  }
-]
+import { useI18n } from '../../../composables/useI18n.js'
+import { agentIntroLocale } from '../../../locales/agent-intro/index.js'
+
+const { t, messages } = useI18n(agentIntroLocale)
+const scenarios = computed(() => messages.value.toolUse.scenarios)
 
 const currentScenario = ref('weather')
 const currentStep = ref(0)
 
-const currentData = computed(() => scenarios.find(s => s.id === currentScenario.value))
+const currentData = computed(() => scenarios.value.find(s => s.id === currentScenario.value))
 
 const selectScenario = (id) => {
   currentScenario.value = id
@@ -288,7 +239,6 @@ const flowRowRef = ref(null)
 const nextStep = () => {
   if (currentStep.value < 4) {
     currentStep.value++
-    // 自动滚动到当前步骤
     nextTick(() => {
       if (flowRowRef.value) {
         const cards = flowRowRef.value.querySelectorAll('.flow-card')
@@ -326,7 +276,6 @@ const reset = () => { currentStep.value = 0 }
   -webkit-text-fill-color: transparent;
 }
 
-/* 场景标签 */
 .scenario-tabs {
   display: flex;
   gap: 8px;
@@ -354,7 +303,6 @@ const reset = () => { currentStep.value = 0 }
   color: var(--vp-c-brand-dark);
 }
 
-/* 用户输入 */
 .user-input-bar {
   background: var(--vp-c-bg);
   border: 1px solid var(--vp-c-divider);
@@ -367,7 +315,6 @@ const reset = () => { currentStep.value = 0 }
 .user-input-bar .label { margin-right: 8px; }
 .user-input-bar .text { font-weight: 600; color: var(--vp-c-text-1); }
 
-/* 横向流程 */
 .flow-row {
   display: flex;
   align-items: stretch;
@@ -433,7 +380,6 @@ const reset = () => { currentStep.value = 0 }
   font-size: 12px;
 }
 
-/* 意图内容 */
 .intent-box {
   margin-bottom: 8px;
 }
@@ -480,7 +426,6 @@ const reset = () => { currentStep.value = 0 }
   font-weight: 500;
 }
 
-/* 工具列表 */
 .tool-list {
   display: flex;
   flex-direction: column;
@@ -505,7 +450,6 @@ const reset = () => { currentStep.value = 0 }
 .tool-name { flex: 1; }
 .check { color: #16a34a; font-weight: 700; }
 
-/* 参数代码 */
 .params-code {
   display: block;
   background: #1e1e1e;
@@ -517,7 +461,6 @@ const reset = () => { currentStep.value = 0 }
   white-space: nowrap;
 }
 
-/* 执行流程 */
 .exec-flow {
   display: flex;
   align-items: center;
@@ -536,7 +479,6 @@ const reset = () => { currentStep.value = 0 }
 .to { background: #fef3c7; color: #92400e; }
 .arrow { color: var(--vp-c-text-3); }
 
-/* 箭头 */
 .flow-arrow {
   display: flex;
   align-items: center;
@@ -548,7 +490,6 @@ const reset = () => { currentStep.value = 0 }
 
 .flow-arrow.active { color: var(--vp-c-brand); }
 
-/* 最终结果 */
 .final-result {
   background: var(--vp-c-brand-soft);
   border-left: 3px solid var(--vp-c-brand);
@@ -561,7 +502,6 @@ const reset = () => { currentStep.value = 0 }
 .result-label { font-weight: 600; margin-right: 8px; }
 .result-text { color: var(--vp-c-text-1); }
 
-/* 控制栏 */
 .control-bar {
   display: flex;
   justify-content: space-between;
@@ -599,7 +539,6 @@ const reset = () => { currentStep.value = 0 }
 
 .dot.active { background: var(--vp-c-brand); }
 
-/* 提示 */
 .tip-bar {
   display: flex;
   gap: 8px;

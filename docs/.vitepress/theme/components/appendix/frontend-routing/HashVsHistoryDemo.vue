@@ -2,12 +2,12 @@
   <div class="hash-vs-history-demo">
     <div class="demo-header">
       <span class="icon">⚖️</span>
-      <span class="title">路由模式对比</span>
-      <span class="subtitle">Hash vs History</span>
+      <span class="title">{{ t('hashVsHistory.title') }}</span>
+      <span class="subtitle">{{ t('hashVsHistory.subtitle') }}</span>
     </div>
 
     <div class="intro-text">
-      想象你在<span class="highlight">邮寄包裹</span>：Hash模式像是把地址写在<span class="highlight">便签条</span>上（#后面），History模式则是直接写在<span class="highlight">信封</span>上。前者简单但不够正式，后者美观但需要服务端配合。
+      {{ t('hashVsHistory.intro.prefix') }}<span class="highlight">{{ t('hashVsHistory.intro.highlight1') }}</span>{{ t('hashVsHistory.intro.middle1') }}<span class="highlight">{{ t('hashVsHistory.intro.highlight2') }}</span>{{ t('hashVsHistory.intro.middle2') }}<span class="highlight">{{ t('hashVsHistory.intro.highlight3') }}</span>{{ t('hashVsHistory.intro.suffix') }}
     </div>
 
     <div class="comparison-container">
@@ -15,7 +15,7 @@
       <div class="mode-column">
         <div class="mode-header hash">
           <span class="mode-icon">#</span>
-          <span class="mode-title">Hash 模式</span>
+          <span class="mode-title">{{ t('hashVsHistory.hashMode') }}</span>
         </div>
 
         <div class="browser-mockup">
@@ -52,16 +52,16 @@
 
         <div class="characteristics">
           <div class="char-item">
-            <span class="char-label">兼容性</span>
+            <span class="char-label">{{ t('hashVsHistory.compatibility') }}</span>
             <span class="badge good">IE8+</span>
           </div>
           <div class="char-item">
-            <span class="char-label">服务端配置</span>
-            <span class="badge good">无需配置</span>
+            <span class="char-label">{{ t('hashVsHistory.serverConfig') }}</span>
+            <span class="badge good">{{ t('hashVsHistory.noConfig') }}</span>
           </div>
           <div class="char-item">
-            <span class="char-label">SEO友好度</span>
-            <span class="badge bad">较差</span>
+            <span class="char-label">{{ t('hashVsHistory.seo') }}</span>
+            <span class="badge bad">{{ t('hashVsHistory.poor') }}</span>
           </div>
         </div>
       </div>
@@ -70,7 +70,7 @@
       <div class="mode-column">
         <div class="mode-header history">
           <span class="mode-icon">/</span>
-          <span class="mode-title">History 模式</span>
+          <span class="mode-title">{{ t('hashVsHistory.historyMode') }}</span>
         </div>
 
         <div class="browser-mockup">
@@ -107,16 +107,16 @@
 
         <div class="characteristics">
           <div class="char-item">
-            <span class="char-label">兼容性</span>
+            <span class="char-label">{{ t('hashVsHistory.compatibility') }}</span>
             <span class="badge medium">IE10+</span>
           </div>
           <div class="char-item">
-            <span class="char-label">服务端配置</span>
-            <span class="badge warn">需要配置</span>
+            <span class="char-label">{{ t('hashVsHistory.serverConfig') }}</span>
+            <span class="badge warn">{{ t('hashVsHistory.needConfig') }}</span>
           </div>
           <div class="char-item">
-            <span class="char-label">SEO友好度</span>
-            <span class="badge good">良好</span>
+            <span class="char-label">{{ t('hashVsHistory.seo') }}</span>
+            <span class="badge good">{{ t('hashVsHistory.good') }}</span>
           </div>
         </div>
       </div>
@@ -124,39 +124,28 @@
 
     <div class="info-box">
       <span class="icon">💡</span>
-      <strong>选择建议：</strong>现代项目优先选History模式（URL美观、SEO友好），如果需要兼容老浏览器或无法修改服务端配置，再用Hash模式。
+      <strong>{{ t('common.choiceAdvice') }}</strong>{{ t('hashVsHistory.info') }}
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { frontendRoutingLocale } from '../../../locales/frontend-routing/index.js'
 
+const { t, messages } = useI18n(frontendRoutingLocale)
 const hashPath = ref('home')
 const historyPath = ref('home')
 
-const navItems = [
-  { name: '首页', path: 'home' },
-  { name: '产品', path: 'products' },
-  { name: '关于', path: 'about' }
-]
+const navItems = computed(() => messages.value.hashVsHistory.navItems)
 
 const getPageTitle = (path) => {
-  const titles = {
-    home: '首页',
-    products: '产品中心',
-    about: '关于我们'
-  }
-  return titles[path] || '首页'
+  return messages.value.hashVsHistory.pages[path]?.title || messages.value.hashVsHistory.pages.home.title
 }
 
 const getPageContent = (path) => {
-  const contents = {
-    home: '欢迎来到我们的网站！这是SPA的首页，所有页面切换都在前端完成，无需刷新。',
-    products: '这里展示了我们的核心产品系列。SPA让浏览体验更流畅，切换更快。',
-    about: '了解更多关于我们的故事。SPA模式下，页面间跳转几乎没有延迟。'
-  }
-  return contents[path] || contents.home
+  return messages.value.hashVsHistory.pages[path]?.content || messages.value.hashVsHistory.pages.home.content
 }
 </script>
 

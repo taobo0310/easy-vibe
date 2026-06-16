@@ -11,17 +11,20 @@
         type="info"
         :closable="false"
       >
-        边缘节点分布演示组件占位符 - 待实现具体交互
+        {{ t('placeholders.edge.placeholder') }}
       </el-alert>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { cloudStorageCdnLocale } from '../../../locales/cloud-storage-cdn/index.js'
 
-const title = ref('边缘节点分布演示')
-const description = ref('展示CDN边缘节点在全球的分布情况和调度策略')
+const { t } = useI18n(cloudStorageCdnLocale)
+const title = computed(() => t('placeholders.edge.title'))
+const description = computed(() => t('placeholders.edge.subtitle'))
 </script>
 
 <style scoped>

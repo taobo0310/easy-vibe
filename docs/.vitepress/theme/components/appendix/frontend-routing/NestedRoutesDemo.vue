@@ -2,16 +2,15 @@
   <div class="nested-routes-demo">
     <div class="demo-header">
       <span class="icon">🪆</span>
-      <span class="title">嵌套路由</span>
-      <span class="subtitle">层层嵌套的视图容器</span>
+      <span class="title">{{ t('nestedRoutes.title') }}</span>
+      <span class="subtitle">{{ t('nestedRoutes.subtitle') }}</span>
     </div>
 
     <div class="intro-text">
-      想象<span class="highlight">俄罗斯套娃</span>：每个大娃娃里都有小娃娃，小娃娃里还有更小的。嵌套路由就是这样，父组件的<span class="highlight">RouterView</span>里可以渲染子组件，一层套一层。
+      {{ t('nestedRoutes.intro.prefix') }}<span class="highlight">{{ t('nestedRoutes.intro.highlight1') }}</span>{{ t('nestedRoutes.intro.middle') }}<span class="highlight">{{ t('nestedRoutes.intro.highlight2') }}</span>{{ t('nestedRoutes.intro.suffix') }}
     </div>
 
     <div class="demo-content">
-      <!-- 路由层级可视化 -->
       <div class="routes-hierarchy">
         <div class="tree-view">
           <div
@@ -34,10 +33,9 @@
         </div>
       </div>
 
-      <!-- 渲染区域预览 -->
       <div class="render-preview">
         <div class="preview-header">
-          <h5>🔲 渲染视图</h5>
+          <h5>{{ t('nestedRoutes.renderView') }}</h5>
           <span class="current-path">{{ currentPath || '/' }}</span>
         </div>
 
@@ -79,14 +77,17 @@
 
     <div class="info-box">
       <span class="icon">💡</span>
-      <strong>核心概念：</strong>嵌套路由通过在父组件中放置 RouterView 来实现子路由的渲染。每个路由层级都有自己的 RouterView，就像套娃一样一层层展示。
+      <strong>{{ t('common.coreConcept') }}</strong>{{ t('nestedRoutes.info') }}
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { frontendRoutingLocale } from '../../../locales/frontend-routing/index.js'
 
+const { t } = useI18n(frontendRoutingLocale)
 const currentPath = ref('/dashboard')
 
 const routeConfig = [

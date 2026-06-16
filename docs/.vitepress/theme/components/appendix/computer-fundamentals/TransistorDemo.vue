@@ -1,11 +1,14 @@
 <template>
   <div class="transistor-demo">
-    <div class="demo-label">MOSFET 晶体管示意 ── 点击切换 Gate 电压</div>
+    <div class="demo-label">{{ t('transistor.label') }}</div>
 
     <div class="schematic" @click="gateOn = !gateOn">
       <!-- Source terminal -->
       <div class="terminal-box source">
-        <span class="pin-label">源极<br /><span class="en">Source</span></span>
+        <span class="pin-label">
+          {{ t('transistor.source') }}<br />
+          <span class="en">{{ t('transistor.sourceEn') }}</span>
+        </span>
         <div class="pin-wire" :class="{ active: gateOn }"></div>
       </div>
 
@@ -24,23 +27,32 @@
           <span v-else class="block-mark">✕</span>
         </div>
         <div class="channel-status">
-          {{ gateOn ? '导通 → 输出 1' : '断开 → 输出 0' }}
+          {{
+            gateOn ? t('transistor.onStatus') : t('transistor.offStatus')
+          }}
         </div>
       </div>
 
       <!-- Drain terminal -->
       <div class="terminal-box drain">
         <div class="pin-wire" :class="{ active: gateOn }"></div>
-        <span class="pin-label">漏极<br /><span class="en">Drain</span></span>
+        <span class="pin-label">
+          {{ t('transistor.drain') }}<br />
+          <span class="en">{{ t('transistor.drainEn') }}</span>
+        </span>
       </div>
     </div>
 
-    <div class="tap-hint">👆 点击切换 Gate 电压</div>
+    <div class="tap-hint">👆 {{ t('transistor.hint') }}</div>
   </div>
 </template>
 
 <script setup>
 import { ref } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { computerFundamentalsLocale } from '../../../locales/computer-fundamentals/index.js'
+
+const { t } = useI18n(computerFundamentalsLocale)
 const gateOn = ref(false)
 </script>
 

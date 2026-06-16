@@ -1,15 +1,11 @@
-<!--
-  AuthEvolutionDemo.vue
-  鉴权方案演进（更可用：给出“什么时候用”）
--->
 <template>
   <div class="auth-evolution-demo">
     <div class="header">
       <div class="title">
-        🧭 鉴权方案演进：从 Basic 到 OAuth2
+        {{ t('evolution.title') }}
       </div>
       <div class="subtitle">
-        点击卡片，快速建立“场景 → 方案”的直觉。
+        {{ t('evolution.subtitle') }}
       </div>
     </div>
 
@@ -42,7 +38,7 @@
       <div class="grid">
         <div class="box">
           <div class="box-title">
-            ✅ 适合
+            {{ t('evolution.suitable') }}
           </div>
           <ul class="list">
             <li
@@ -55,7 +51,7 @@
         </div>
         <div class="box">
           <div class="box-title">
-            ⚠️ 主要风险
+            {{ t('evolution.risks') }}
           </div>
           <ul class="list">
             <li
@@ -75,75 +71,15 @@
 
 <script setup>
 import { computed, ref } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { authDesignLocale } from '../../../locales/auth-design/index.js'
 
-const stages = [
-  {
-    id: 'basic',
-    icon: '🪪',
-    name: 'HTTP Basic',
-    when: '内部工具/调试',
-    desc: '最早期的方案：每次请求都带 username/password（或等价凭证）。',
-    pros: ['实现最简单', '不需要额外存储'],
-    cons: ['每次请求都带“高价值凭证”', '不适合公网生产', '很难做细粒度授权'],
-    example: `GET /api/profile
-Authorization: Basic <base64(username:password)>`
-  },
-  {
-    id: 'session',
-    icon: '🍪',
-    name: 'Session + Cookie',
-    when: '传统 Web / SSR',
-    desc: '服务端存 Session，浏览器存 cookie(session_id)。后续请求自动带 Cookie。',
-    pros: ['服务端可主动注销', '很适合同域 SSR', '工程落地成熟'],
-    cons: [
-      '服务端有状态，需要共享/扩展',
-      'CSRF 风险更高（必须防）',
-      '跨域更麻烦'
-    ],
-    example: `POST /login
-→ Set-Cookie: session_id=abc; HttpOnly; Secure; SameSite=Lax
+const { t, messages } = useI18n(authDesignLocale)
+const stages = computed(() => messages.value.evolution.stages)
 
-GET /api/profile
-Cookie: session_id=abc`
-  },
-  {
-    id: 'jwt',
-    icon: '🎫',
-    name: 'JWT Access Token',
-    when: 'API / 移动端 / 多服务',
-    desc: '服务端不存状态，把声明编码为 token；请求携带 Authorization: Bearer。',
-    pros: ['无状态易扩展', '跨域友好', '多服务常用'],
-    cons: [
-      '难以全局注销（要额外机制）',
-      'token 体积大',
-      'payload 可读（别放敏感信息）'
-    ],
-    example: `GET /api/profile
-Authorization: Bearer <access_token>`
-  },
-  {
-    id: 'oauth2',
-    icon: '🔑',
-    name: 'OAuth2 / OIDC',
-    when: '第三方登录/授权',
-    desc: '解决“第三方授权/登录”，让应用无需保存第三方账号密码。',
-    pros: [
-      '用户体验好（扫码/一键登录）',
-      '安全边界更清晰',
-      '可扩展到 OIDC（登录）'
-    ],
-    cons: [
-      '接入复杂度更高',
-      '必须正确处理 redirect_uri/state',
-      'token 生命周期设计很关键'
-    ],
-    example: `GET /authorize?response_type=code&client_id=...&redirect_uri=...&state=...`
-  }
-]
-
-const activeId = ref(stages[1].id)
+const activeId = ref('session')
 const active = computed(
-  () => stages.find((s) => s.id === activeId.value) || stages[0]
+  () => stages.value.find((s) => s.id === activeId.value) || stages.value[0]
 )
 </script>
 

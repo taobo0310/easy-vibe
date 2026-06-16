@@ -1,18 +1,12 @@
-<!--
-  AgentWorkflowDemo.vue
-  Agent 核心循环（更像“先玩后讲”的演示）：
-  - 点步骤：看这一轮 Agent “在干什么”
-  - 点“下一轮”：看它如何反复迭代直到完成
--->
 <template>
   <div class="workflow">
     <div class="header">
       <div>
         <div class="title">
-          先玩一下：Agent 不是“聊天”，是“循环行动”
+          {{ t('workflow.title') }}
         </div>
         <div class="subtitle">
-          它会反复：观察 → 计划 → 用工具 → 检查结果。
+          {{ t('workflow.subtitle') }}
         </div>
       </div>
       <div class="actions">
@@ -20,13 +14,13 @@
           class="btn"
           @click="reset"
         >
-          重置
+          {{ t('workflow.reset') }}
         </button>
         <button
           class="btn primary"
           @click="nextRound"
         >
-          下一轮 ({{ round }}/3)
+          {{ t('workflow.nextRound', { round }) }}
         </button>
       </div>
     </div>
@@ -46,15 +40,15 @@
     <div class="panels">
       <div class="panel">
         <div class="panel-title">
-          任务
+          {{ t('workflow.taskTitle') }}
         </div>
         <div class="panel-body">
-          帮我找 3 篇 “Agent” 入门文章，并输出：标题 + 一句话总结。
+          {{ t('workflow.task') }}
         </div>
       </div>
       <div class="panel">
         <div class="panel-title">
-          这一轮发生了什么？
+          {{ t('workflow.roundTitle') }}
         </div>
         <div class="panel-body">
           {{ detail }}
@@ -64,7 +58,7 @@
 
     <div class="log">
       <div class="log-title">
-        Agent 运行日志（示意）
+        {{ t('workflow.logTitle') }}
       </div>
       <pre><code>{{ logText }}</code></pre>
     </div>
@@ -73,39 +67,17 @@
 
 <script setup>
 import { computed, ref } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { agentIntroLocale } from '../../../locales/agent-intro/index.js'
 
-const steps = [
-  { id: 'observe', name: '观察', icon: '👀' },
-  { id: 'plan', name: '计划', icon: '🧩' },
-  { id: 'act', name: '行动', icon: '🔧' },
-  { id: 'check', name: '检查', icon: '✅' }
-]
+const { t, messages } = useI18n(agentIntroLocale)
+const steps = computed(() => messages.value.workflow.steps)
+const scenarios = computed(() => messages.value.workflow.scenarios)
 
 const round = ref(1)
 const currentStep = ref('observe')
 
-const scenarios = [
-  {
-    observe: '看到用户目标：要 3 篇入门文章 + 简短总结。',
-    plan: '计划：1) 搜索关键词 2) 打开前几条 3) 抽取标题与要点。',
-    act: '调用工具：web_search(query="agent introduction")。',
-    check: '检查：结果里有 3 条可用链接，还缺“每条一句话总结”。'
-  },
-  {
-    observe: '拿到链接列表，准备逐条打开并提取要点。',
-    plan: '计划：依次 read_page 3 次，把内容压缩成一句话。',
-    act: '调用工具：read_page(url=...) × 3。',
-    check: '检查：信息够了，但标题格式不统一，需要整理输出。'
-  },
-  {
-    observe: '材料齐全：标题 + 文章要点都已提取。',
-    plan: '计划：统一格式，输出 Markdown 列表。',
-    act: '组织输出：每条“标题 - 一句话总结”。',
-    check: '完成：满足“3 条 + 一句话总结 + 可直接复制”。'
-  }
-]
-
-const current = computed(() => scenarios[round.value - 1])
+const current = computed(() => scenarios.value[round.value - 1])
 
 const detail = computed(() => current.value[currentStep.value])
 
@@ -113,10 +85,10 @@ const logText = computed(() => {
   const logs = []
   for (let i = 0; i < round.value; i++) {
     logs.push(`--- Round ${i + 1} ---`)
-    logs.push(`OBS: ${scenarios[i].observe}`)
-    logs.push(`PLAN: ${scenarios[i].plan}`)
-    logs.push(`ACT: ${scenarios[i].act}`)
-    logs.push(`CHECK: ${scenarios[i].check}`)
+    logs.push(`OBS: ${scenarios.value[i].observe}`)
+    logs.push(`PLAN: ${scenarios.value[i].plan}`)
+    logs.push(`ACT: ${scenarios.value[i].act}`)
+    logs.push(`CHECK: ${scenarios.value[i].check}`)
     logs.push('')
   }
   return logs.join('\n')

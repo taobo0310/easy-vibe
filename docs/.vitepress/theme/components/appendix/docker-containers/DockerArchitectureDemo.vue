@@ -1,12 +1,8 @@
-<!--
-  DockerArchitectureDemo.vue
-  Docker 架构对比演示：虚拟机 vs 容器
--->
 <template>
   <div class="docker-arch-demo">
     <div class="header">
-      <div class="title">虚拟机 vs 容器</div>
-      <div class="subtitle">点击切换查看两种虚拟化方式的架构差异</div>
+      <div class="title">{{ t('architecture.title') }}</div>
+      <div class="subtitle">{{ t('architecture.subtitle') }}</div>
     </div>
 
     <div class="tabs">
@@ -48,47 +44,16 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { dockerContainersLocale } from '../../../locales/docker-containers/index.js'
+
+const { t, messages } = useI18n(dockerContainersLocale)
 
 const activeTab = ref('container')
 
-const tabs = [
-  { key: 'vm', label: '虚拟机' },
-  { key: 'container', label: '容器' }
-]
-
-const vmLayers = [
-  { label: '应用 A / 应用 B / 应用 C', type: 'app', items: ['App A + Bins/Libs', 'App B + Bins/Libs', 'App C + Bins/Libs'] },
-  { label: '客户操作系统（Guest OS）', type: 'os', items: ['Ubuntu', 'CentOS', 'Debian'] },
-  { label: 'Hypervisor（VMware / KVM）', type: 'hypervisor' },
-  { label: '宿主操作系统（Host OS）', type: 'host' },
-  { label: '物理硬件', type: 'hardware' }
-]
-
-const containerLayers = [
-  { label: '应用 A / 应用 B / 应用 C', type: 'app', items: ['App A + Bins/Libs', 'App B + Bins/Libs', 'App C + Bins/Libs'] },
-  { label: 'Docker Engine', type: 'docker' },
-  { label: '宿主操作系统（Host OS）', type: 'host' },
-  { label: '物理硬件', type: 'hardware' }
-]
-
-const vmInfo = [
-  { label: '启动速度', value: '分钟级', highlight: false },
-  { label: '资源占用', value: '每个 VM 需要完整 OS（GB 级）', highlight: false },
-  { label: '隔离性', value: '强（硬件级隔离）', highlight: true },
-  { label: '密度', value: '单机通常 10-20 个 VM', highlight: false },
-  { label: '镜像大小', value: 'GB 级', highlight: false }
-]
-
-const containerInfo = [
-  { label: '启动速度', value: '秒级', highlight: true },
-  { label: '资源占用', value: '共享宿主 OS 内核（MB 级）', highlight: true },
-  { label: '隔离性', value: '较强（进程级隔离）', highlight: false },
-  { label: '密度', value: '单机可运行数百个容器', highlight: true },
-  { label: '镜像大小', value: 'MB 级', highlight: true }
-]
-
-const currentLayers = computed(() => activeTab.value === 'vm' ? vmLayers : containerLayers)
-const currentInfo = computed(() => activeTab.value === 'vm' ? vmInfo : containerInfo)
+const tabs = computed(() => messages.value.architecture.tabs)
+const currentLayers = computed(() => messages.value.architecture.layers[activeTab.value])
+const currentInfo = computed(() => messages.value.architecture.info[activeTab.value])
 </script>
 
 <style scoped>

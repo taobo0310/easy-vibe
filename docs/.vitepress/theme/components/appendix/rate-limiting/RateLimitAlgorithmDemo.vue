@@ -1,12 +1,8 @@
-<!--
-  RateLimitAlgorithmDemo.vue
-  限流算法演示：令牌桶、漏桶、滑动窗口
--->
 <template>
   <div class="rate-limit-demo">
     <div class="header">
-      <div class="title">限流算法对比</div>
-      <div class="subtitle">选择算法，点击"发送请求"观察效果</div>
+      <div class="title">{{ t('algorithmDemo.title') }}</div>
+      <div class="subtitle">{{ t('algorithmDemo.subtitle') }}</div>
     </div>
 
     <div class="algo-tabs">
@@ -20,30 +16,30 @@
 
     <div class="sim-area">
       <div class="controls">
-        <button class="send-btn" @click="sendRequest">发送请求</button>
-        <button class="burst-btn" @click="burstRequests">突发 10 个请求</button>
-        <button class="reset-btn" @click="reset">重置</button>
+        <button class="send-btn" @click="sendRequest">{{ t('algorithmDemo.buttons.send') }}</button>
+        <button class="burst-btn" @click="burstRequests">{{ t('algorithmDemo.buttons.burst') }}</button>
+        <button class="reset-btn" @click="reset">{{ t('algorithmDemo.buttons.reset') }}</button>
       </div>
 
       <div class="stats">
         <div class="stat">
-          <span class="stat-label">通过</span>
+          <span class="stat-label">{{ t('algorithmDemo.stats.passed') }}</span>
           <span class="stat-value ok">{{ passed }}</span>
         </div>
         <div class="stat">
-          <span class="stat-label">拒绝</span>
+          <span class="stat-label">{{ t('algorithmDemo.stats.rejected') }}</span>
           <span class="stat-value reject">{{ rejected }}</span>
         </div>
-        <div class="stat" v-if="algo === 'token'">
-          <span class="stat-label">剩余令牌</span>
+        <div v-if="algo === 'token'" class="stat">
+          <span class="stat-label">{{ t('algorithmDemo.stats.tokens') }}</span>
           <span class="stat-value">{{ tokens }}</span>
         </div>
-        <div class="stat" v-if="algo === 'leaky'">
-          <span class="stat-label">桶中排队</span>
+        <div v-if="algo === 'leaky'" class="stat">
+          <span class="stat-label">{{ t('algorithmDemo.stats.queued') }}</span>
           <span class="stat-value">{{ bucketQueue }}</span>
         </div>
-        <div class="stat" v-if="algo === 'sliding'">
-          <span class="stat-label">窗口内请求</span>
+        <div v-if="algo === 'sliding'" class="stat">
+          <span class="stat-label">{{ t('algorithmDemo.stats.window') }}</span>
           <span class="stat-value">{{ windowCount }}</span>
         </div>
       </div>
@@ -69,6 +65,10 @@
 
 <script setup>
 import { ref, computed, onUnmounted } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { rateLimitingLocale } from '../../../locales/rate-limiting/index.js'
+
+const { t, messages } = useI18n(rateLimitingLocale)
 
 const algo = ref('token')
 const passed = ref(0)
@@ -78,13 +78,8 @@ const bucketQueue = ref(0)
 const windowCount = ref(0)
 const logs = ref([])
 
-const algorithms = [
-  { key: 'token', label: '令牌桶', desc: '以固定速率往桶里放令牌，每个请求消耗一个令牌。桶满时多余令牌丢弃。允许一定程度的突发流量（桶里有存量令牌时）。' },
-  { key: 'leaky', label: '漏桶', desc: '请求先进入桶中排队，以固定速率从桶底"漏出"处理。桶满时新请求被拒绝。输出速率恒定，完全平滑流量。' },
-  { key: 'sliding', label: '滑动窗口', desc: '统计最近 N 秒内的请求数，超过阈值则拒绝。比固定窗口更精确，避免窗口边界的突发问题。' }
-]
-
-const currentAlgo = computed(() => algorithms.find(a => a.key === algo.value))
+const algorithms = computed(() => messages.value.algorithms)
+const currentAlgo = computed(() => algorithms.value.find(a => a.key === algo.value))
 
 // Token bucket: refill 1 token per second, max 5
 let tokenTimer = null
@@ -103,7 +98,7 @@ function startLeakyDrain() {
     if (bucketQueue.value > 0) {
       bucketQueue.value--
       passed.value++
-      addLog('ok', '漏桶处理了一个排队请求')
+      addLog('ok', t('algorithmDemo.logs.leakyProcessed'))
     }
   }, 1000)
 }
@@ -135,19 +130,19 @@ function sendRequest() {
     if (tokens.value > 0) {
       tokens.value--
       passed.value++
-      addLog('ok', `请求通过（剩余令牌: ${tokens.value}）`)
+      addLog('ok', t('algorithmDemo.logs.tokenPassed', { tokens: tokens.value }))
     } else {
       rejected.value++
-      addLog('reject', '令牌不足，请求被拒绝 (429)')
+      addLog('reject', t('algorithmDemo.logs.tokenRejected'))
     }
     if (!tokenTimer) startTokenRefill()
   } else if (algo.value === 'leaky') {
     if (bucketQueue.value < 5) {
       bucketQueue.value++
-      addLog('ok', `请求进入排队（队列: ${bucketQueue.value}/5）`)
+      addLog('ok', t('algorithmDemo.logs.leakyQueued', { queue: bucketQueue.value }))
     } else {
       rejected.value++
-      addLog('reject', '桶已满，请求被拒绝 (429)')
+      addLog('reject', t('algorithmDemo.logs.leakyRejected'))
     }
     if (!leakyTimer) startLeakyDrain()
   } else {
@@ -158,10 +153,10 @@ function sendRequest() {
       windowRequests.value.push(now)
       windowCount.value++
       passed.value++
-      addLog('ok', `请求通过（窗口内: ${windowCount.value}/5）`)
+      addLog('ok', t('algorithmDemo.logs.slidingPassed', { count: windowCount.value }))
     } else {
       rejected.value++
-      addLog('reject', '窗口内请求数超限 (429)')
+      addLog('reject', t('algorithmDemo.logs.slidingRejected'))
     }
   }
 }

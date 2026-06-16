@@ -1,16 +1,3 @@
-<!--
-  SignalsDemo.vue
-  信号机制演示组件
-  
-  用途：
-  演示进程控制信号（Signals）如何工作，特别是 `Ctrl+C` 和 `Ctrl+Z`。
-  说明这些组合键不是发送字符，而是触发操作系统级别的中断信号。
-  
-  交互功能：
-  - 模拟运行：点击按钮启动一个模拟进程（如 `sleep 100`）。
-  - 发送信号：点击按钮或快捷键发送 SIGINT/SIGTSTP。
-  - 状态反馈：展示进程状态的变化（运行中 -> 被杀死/被挂起）。
--->
 <template>
   <div class="signals-demo">
     <div class="left-panel">
@@ -227,7 +214,7 @@ reset()
   grid-template-columns: repeat(
     auto-fit,
     minmax(280px, 1fr)
-  ); /* 自动适应宽度，不够时换行 */
+  );
   gap: 30px;
   background: #09090b;
   padding: 30px;
@@ -235,14 +222,14 @@ reset()
   border: 1px solid #27272a;
   font-family: 'JetBrains Mono', 'Menlo', monospace;
   color: #e4e4e7;
-  overflow: hidden; /* 防止溢出 */
+  overflow: hidden;
 }
 
 .left-panel {
   display: flex;
   flex-direction: column;
   gap: 20px;
-  min-width: 0; /* 防止 flex 子项溢出 */
+  min-width: 0;
 }
 
 .signal-item {
@@ -332,7 +319,7 @@ reset()
   display: flex;
   flex-direction: column;
   gap: 20px;
-  min-width: 0; /* 防止 flex 子项溢出 */
+  min-width: 0;
 }
 
 .terminal-window {
@@ -399,7 +386,7 @@ reset()
 .controls {
   display: flex;
   gap: 10px;
-  flex-wrap: wrap; /* 允许按钮换行 */
+  flex-wrap: wrap;
 }
 
 .btn {
@@ -410,8 +397,8 @@ reset()
   border-radius: 4px;
   cursor: pointer;
   flex: 1;
-  white-space: nowrap; /* 防止文字换行 */
-  min-width: 80px; /* 最小宽度 */
+  white-space: nowrap;
+  min-width: 80px;
   transition: all 0.2s;
   font-size: 13px;
 }

@@ -1,37 +1,23 @@
-<!--
-  EmbeddingPipelineDemo.vue
-  嵌入生成流水线演示组件
-
-  用途：
-  展示从原始文本到向量存储的完整嵌入流水线：
-  Text → Tokenize → Model → Vector → Store → Query
-
-  交互功能：
-  - 输入自定义文本
-  - 逐步执行流水线
-  - 每一步展示中间结果
--->
 <template>
   <div class="pipeline-demo">
     <div class="demo-header">
-      <h4>嵌入生成流水线</h4>
-      <p class="desc">逐步体验从文本到向量的完整转换过程</p>
+      <h4>{{ t('pipeline.title') }}</h4>
+      <p class="desc">{{ t('pipeline.desc') }}</p>
     </div>
 
     <div class="input-area">
-      <label>输入文本</label>
+      <label>{{ t('pipeline.inputLabel') }}</label>
       <input
         v-model="inputText"
         type="text"
-        placeholder="输入一段文本，观察嵌入生成过程..."
+        :placeholder="t('pipeline.placeholder')"
         class="text-input"
       />
       <button class="run-btn" @click="runPipeline">
-        {{ running ? '处理中...' : '开始处理' }}
+        {{ running ? t('pipeline.processing') : t('pipeline.start') }}
       </button>
     </div>
 
-    <!-- 流水线步骤 -->
     <div class="pipeline-steps">
       <div
         v-for="(step, idx) in steps"
@@ -52,21 +38,19 @@
 
         <div v-if="currentStep >= idx" class="step-content">
           <div class="step-desc">{{ step.desc }}</div>
-          <div class="step-output" v-if="stepOutputs[step.key]">
+          <div v-if="stepOutputs[step.key]" class="step-output">
             <code>{{ stepOutputs[step.key] }}</code>
           </div>
         </div>
 
-        <!-- 箭头连接 -->
         <div v-if="idx < steps.length - 1" class="step-arrow">
           <span :class="{ visible: currentStep > idx }">&#x2193;</span>
         </div>
       </div>
     </div>
 
-    <!-- 最终结果 -->
     <div v-if="currentStep >= steps.length - 1 && !running" class="final-result">
-      <div class="result-title">嵌入向量已生成</div>
+      <div class="result-title">{{ t('pipeline.finalTitle') }}</div>
       <div class="vector-viz">
         <div
           v-for="(val, i) in finalVector"
@@ -82,58 +66,27 @@
         </div>
       </div>
       <p class="vec-note">
-        实际嵌入向量通常有 768~1536 个维度，这里仅展示前 16 维的模拟值
+        {{ t('pipeline.vectorNote') }}
       </p>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue'
+import { ref, reactive, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { embeddingVectorLocale } from '../../../locales/embedding-vector/index.js'
 
-const inputText = ref('今天天气真不错，适合出去散步')
+const { t, messages } = useI18n(embeddingVectorLocale)
+const inputText = ref(messages.value.pipeline.defaultText)
 const currentStep = ref(-1)
 const running = ref(false)
 const stepOutputs = reactive({})
 const finalVector = ref([])
-
-const steps = [
-  {
-    key: 'tokenize',
-    title: '分词 (Tokenize)',
-    desc: '将文本拆分为模型可处理的 Token 序列',
-    color: '#3b82f6'
-  },
-  {
-    key: 'encode',
-    title: '编码 (Encode)',
-    desc: '将 Token 映射为数字 ID',
-    color: '#8b5cf6'
-  },
-  {
-    key: 'model',
-    title: '模型推理 (Model)',
-    desc: '通过 Transformer 模型生成上下文感知的向量表示',
-    color: '#10b981'
-  },
-  {
-    key: 'pool',
-    title: '池化 (Pooling)',
-    desc: '将多个 Token 向量聚合为单一句子向量',
-    color: '#f59e0b'
-  },
-  {
-    key: 'normalize',
-    title: '归一化 (Normalize)',
-    desc: '将向量缩放到单位长度，便于余弦相似度计算',
-    color: '#ef4444'
-  }
-]
+const steps = computed(() => messages.value.pipeline.steps)
 
 function simulateTokenize(text) {
   const tokens = []
-  const zhRegex = /[\u4e00-\u9fa5]/g
-  const enRegex = /[a-zA-Z]+/g
   let i = 0
   while (i < text.length) {
     if (/[\u4e00-\u9fa5]/.test(text[i])) {
@@ -170,7 +123,6 @@ function generateVector(text, dim = 16) {
     const seed = hashCode(text + i)
     vec.push(((seed % 2000) - 1000) / 1000)
   }
-  // 归一化
   const mag = Math.sqrt(vec.reduce((s, v) => s + v * v, 0))
   return vec.map((v) => v / (mag || 1))
 }
@@ -182,35 +134,30 @@ async function runPipeline() {
   Object.keys(stepOutputs).forEach((k) => delete stepOutputs[k])
   finalVector.value = []
 
-  const text = inputText.value || '你好世界'
+  const text = inputText.value || t('pipeline.fallbackText')
 
-  // Step 1: Tokenize
   await delay(400)
   currentStep.value = 0
   const tokens = simulateTokenize(text)
   stepOutputs.tokenize = `[${tokens.map((t) => '"' + t + '"').join(', ')}]`
 
-  // Step 2: Encode
   await delay(500)
   currentStep.value = 1
   const ids = tokens.map((t) => hashCode(t) % 50000)
   stepOutputs.encode = `[${ids.join(', ')}]`
 
-  // Step 3: Model
   await delay(600)
   currentStep.value = 2
-  stepOutputs.model = `${tokens.length} 个 Token -> ${tokens.length} x 768 维隐藏状态矩阵`
+  stepOutputs.model = t('pipeline.modelOutput', { count: tokens.length })
 
-  // Step 4: Pool
   await delay(500)
   currentStep.value = 3
-  stepOutputs.pool = `Mean Pooling: ${tokens.length} 个向量 -> 1 个 768 维句子向量`
+  stepOutputs.pool = t('pipeline.poolOutput', { count: tokens.length })
 
-  // Step 5: Normalize
   await delay(400)
   currentStep.value = 4
   finalVector.value = generateVector(text)
-  stepOutputs.normalize = `L2 归一化: ||v|| = 1.0000`
+  stepOutputs.normalize = t('pipeline.normalizeOutput')
 
   running.value = false
 }

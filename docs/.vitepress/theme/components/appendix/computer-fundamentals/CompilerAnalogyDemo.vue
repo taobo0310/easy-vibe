@@ -1,21 +1,20 @@
 <template>
   <div class="compiler-analogy-demo">
     <div class="demo-header">
-      <span class="title">编译原理：翻译的艺术</span>
-      <span class="subtitle">如何把代码翻译成机器指令</span>
+      <span class="title">{{ t('compilers.analogy.title') }}</span>
+      <span class="subtitle">{{ t('compilers.analogy.subtitle') }}</span>
     </div>
 
     <div class="analogy-intro">
       <div class="analogy-box">
         <div class="analogy-text">
-          编译器就像<strong>翻译官</strong>，把人类能懂的代码翻译成机器能懂的指令
+          {{ t('compilers.analogy.introPrefix') }}<strong>{{ t('compilers.analogy.introStrong') }}</strong>{{ t('compilers.analogy.introSuffix') }}
         </div>
       </div>
     </div>
 
-    <!-- 翻译过程 -->
     <div class="translation-process">
-      <div class="process-title">代码翻译的完整流程</div>
+      <div class="process-title">{{ t('compilers.analogy.processTitle') }}</div>
       <div class="process-flow">
         <div
           v-for="(step, index) in translationSteps"
@@ -35,9 +34,8 @@
       </div>
     </div>
 
-    <!-- 词法分析 -->
     <div class="analyzer-section">
-      <div class="analyzer-title">词法分析：分词</div>
+      <div class="analyzer-title">{{ t('compilers.analogy.lexicalTitle') }}</div>
       <div class="lexical-demo">
         <div class="source-code">
           <code>int age = 25;</code>
@@ -52,24 +50,23 @@
       </div>
     </div>
 
-    <!-- 语法分析 -->
     <div class="analyzer-section">
-      <div class="analyzer-title">语法分析：构建树</div>
+      <div class="analyzer-title">{{ t('compilers.analogy.syntaxTitle') }}</div>
       <div class="syntax-demo">
         <div class="syntax-tree">
           <div class="tree-node root">
-            <span class="node-label">赋值语句</span>
+            <span class="node-label">{{ t('compilers.analogy.tree.assignment') }}</span>
             <div class="node-children">
               <div class="tree-node">
-                <span class="node-label">变量</span>
+                <span class="node-label">{{ t('compilers.analogy.tree.variable') }}</span>
                 <span class="node-value">age</span>
               </div>
               <div class="tree-node">
-                <span class="node-label">运算符</span>
+                <span class="node-label">{{ t('compilers.analogy.tree.operator') }}</span>
                 <span class="node-value">=</span>
               </div>
               <div class="tree-node">
-                <span class="node-label">数字</span>
+                <span class="node-label">{{ t('compilers.analogy.tree.number') }}</span>
                 <span class="node-value">25</span>
               </div>
             </div>
@@ -78,102 +75,62 @@
       </div>
     </div>
 
-    <!-- 编译 vs 解释 -->
     <div class="comparison">
-      <div class="comparison-title">编译 vs 解释</div>
+      <div class="comparison-title">{{ t('compilers.analogy.compareTitle') }}</div>
       <div class="comparison-box">
-        <div class="compare-side compile">
-          <div class="side-header">编译型语言</div>
+        <div
+          v-for="item in comparisonItems"
+          :key="item.header"
+          :class="['compare-side', item.class]"
+        >
+          <div class="side-header">{{ item.header }}</div>
           <div class="side-content">
-            <div class="side-step">源代码 → 编译器 → 机器码</div>
-            <div class="side-example">C, Go, Rust</div>
+            <div class="side-step">{{ item.step }}</div>
+            <div class="side-example">{{ item.example }}</div>
             <div class="side-features">
-              <div class="feature">✓ 执行快</div>
-              <div class="feature">✓ 一次编译多次运行</div>
-              <div class="feature">✗ 编译慢</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="compare-side interpret">
-          <div class="side-header">解释型语言</div>
-          <div class="side-content">
-            <div class="side-step">源代码 → 解释器 → 逐行执行</div>
-            <div class="side-example">Python, JavaScript, PHP</div>
-            <div class="side-features">
-              <div class="feature">✓ 开发快</div>
-              <div class="feature">✓ 跨平台</div>
-              <div class="feature">✗ 执行慢</div>
+              <div v-for="feature in item.features" :key="feature" class="feature">
+                {{ feature }}
+              </div>
             </div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- 优化 -->
     <div class="optimization">
-      <div class="optimization-title">编译器优化</div>
+      <div class="optimization-title">{{ t('compilers.analogy.optimizationTitle') }}</div>
       <div class="optimization-content">
         <div class="opt-examples">
           <div class="opt-item">
-            <div class="opt-before">优化前：</div>
+            <div class="opt-before">{{ t('compilers.analogy.before') }}</div>
             <div class="opt-code">x = 5 + 3 + 2</div>
           </div>
           <div class="opt-arrow">⬇️</div>
           <div class="opt-item">
-            <div class="opt-after">优化后：</div>
+            <div class="opt-after">{{ t('compilers.analogy.after') }}</div>
             <div class="opt-code">x = 10</div>
           </div>
         </div>
-        <div class="opt-note">编译器会自动优化代码，提高运行效率</div>
+        <div class="opt-note">{{ t('compilers.analogy.optimizationNote') }}</div>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n'
+import { computerFundamentalsLocale } from '../../../locales/computer-fundamentals'
 
-const translationSteps = [
-  {
-    name: '词法分析',
-    desc: '将代码分解成一个个单词（token）',
-    example: 'int age = 25 → [int, age, =, 25]'
-  },
-  {
-    name: '语法分析',
-    desc: '检查代码是否符合语法规则，构建语法树',
-    example: '验证语句结构是否正确'
-  },
-  {
-    name: '语义分析',
-    desc: '检查代码的含义是否合理',
-    example: '检查变量是否定义、类型是否匹配'
-  },
-  {
-    name: '中间代码生成',
-    desc: '生成与机器无关的中间表示',
-    example: '生成字节码或中间表示'
-  },
-  {
-    name: '优化',
-    desc: '改进代码，提高执行效率',
-    example: '常量折叠、死代码消除'
-  },
-  {
-    name: '目标代码生成',
-    desc: '生成机器码或目标代码',
-    example: '生成 x86、ARM 等机器指令'
-  }
-]
+const { t, messages } = useI18n(computerFundamentalsLocale)
 
-const tokens = [
-  { type: '关键字', value: 'int' },
-  { type: '标识符', value: 'age' },
-  { type: '运算符', value: '=' },
-  { type: '数字', value: '25' },
-  { type: '分隔符', value: ';' }
-]
+const translationSteps = computed(
+  () => messages.value.compilers.analogy.translationSteps
+)
+const tokens = computed(() => messages.value.compilers.analogy.tokens)
+const comparisonItems = computed(
+  () => messages.value.compilers.analogy.comparisonItems
+)
 </script>
 
 <style scoped>

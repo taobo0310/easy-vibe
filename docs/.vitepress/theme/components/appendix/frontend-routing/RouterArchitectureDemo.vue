@@ -2,12 +2,12 @@
   <div class="router-architecture-demo">
     <div class="demo-header">
       <span class="icon">🏗️</span>
-      <span class="title">路由架构</span>
-      <span class="subtitle">前端路由系统的组成部分</span>
+      <span class="title">{{ t('architecture.title') }}</span>
+      <span class="subtitle">{{ t('architecture.subtitle') }}</span>
     </div>
 
     <div class="intro-text">
-      想象<span class="highlight">公司的组织架构</span>：有前台接待（URL监听）、有调度中心（路由匹配）、有各部门（组件渲染）。前端路由也是这样分层协作的，各司其职。
+      {{ t('architecture.intro.prefix') }}<span class="highlight">{{ t('architecture.intro.highlight') }}</span>{{ t('architecture.intro.suffix') }}
     </div>
 
     <div class="architecture-layers">
@@ -40,59 +40,34 @@
     </div>
 
     <div class="data-flow">
-      <h5>📊 数据流向</h5>
+      <h5>{{ t('architecture.flowTitle') }}</h5>
       <div class="flow-steps">
-        <div class="flow-step">
-          <span class="step-num">1</span>
-          <span>用户点击链接，触发 URL 变化</span>
-        </div>
-        <div class="flow-step">
-          <span class="step-num">2</span>
-          <span>History 监听器捕获变化</span>
-        </div>
-        <div class="flow-step">
-          <span class="step-num">3</span>
-          <span>路由匹配器找到对应配置</span>
-        </div>
-        <div class="flow-step">
-          <span class="step-num">4</span>
-          <span>执行守卫进行验证</span>
-        </div>
-        <div class="flow-step">
-          <span class="step-num">5</span>
-          <span>渲染组件到 RouterView</span>
+        <div
+          v-for="(step, index) in flowSteps"
+          :key="step"
+          class="flow-step"
+        >
+          <span class="step-num">{{ index + 1 }}</span>
+          <span>{{ step }}</span>
         </div>
       </div>
     </div>
 
     <div class="info-box">
       <span class="icon">💡</span>
-      <strong>核心思想：</strong>路由系统通过监听URL变化、匹配路由配置、执行守卫验证、渲染组件这一系列流程，实现了单页应用的无刷新导航。
+      <strong>{{ t('common.coreIdea') }}</strong>{{ t('architecture.info') }}
     </div>
   </div>
 </template>
 
 <script setup>
-const layers = [
-  {
-    name: '浏览器层',
-    icon: '🌐',
-    desc: '提供 URL 和 History API',
-    components: ['URL Bar', 'History API', 'Hash Change', 'PopState']
-  },
-  {
-    name: '路由核心层',
-    icon: '⚙️',
-    desc: '路由系统的核心逻辑',
-    components: ['Router 实例', '路由匹配器', 'History 管理', '守卫管道']
-  },
-  {
-    name: '组件层',
-    icon: '🧩',
-    desc: '用户界面渲染',
-    components: ['RouterView', 'RouterLink', '页面组件']
-  }
-]
+import { computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { frontendRoutingLocale } from '../../../locales/frontend-routing/index.js'
+
+const { t, messages } = useI18n(frontendRoutingLocale)
+const layers = computed(() => messages.value.architecture.layers)
+const flowSteps = computed(() => messages.value.architecture.flowSteps)
 </script>
 
 <style scoped>

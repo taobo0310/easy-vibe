@@ -1,22 +1,15 @@
-<!--
-  CodeSplittingDemo.vue
-  代码分割演示
-
-  用途：
-  展示如何通过代码分割实现按需加载，优化首屏性能。
--->
 <template>
   <div class="code-splitting-demo">
     <div class="demo-header">
-      <h3>✂️ 代码分割演示</h3>
-      <p>按需加载，提升首屏速度</p>
+      <h3>✂️ {{ t('codeSplitting.title') }}</h3>
+      <p>{{ t('codeSplitting.subtitle') }}</p>
     </div>
 
     <div class="demo-content">
-      <!-- 左侧：路由配置 -->
+      <!-- left: route config -->
       <div class="routes-panel">
         <div class="panel-title">
-          🚦 路由配置
+          🚦 {{ t('codeSplitting.routeConfig') }}
         </div>
         <div class="routes-list">
           <div
@@ -39,15 +32,15 @@
               <span
                 v-if="route.loading"
                 class="loading-badge"
-              >加载中...</span>
+              >{{ t('codeSplitting.loading') }}</span>
               <span
                 v-else-if="route.loaded"
                 class="loaded-badge"
-              >已缓存</span>
+              >{{ t('codeSplitting.cached') }}</span>
               <span
                 v-else
                 class="lazy-badge"
-              >按需加载</span>
+              >{{ t('codeSplitting.lazyLoad') }}</span>
             </div>
 
             <div class="route-size">
@@ -57,18 +50,18 @@
         </div>
       </div>
 
-      <!-- 右侧：加载可视化 -->
+      <!-- right: load visualization -->
       <div class="load-panel">
         <div class="panel-title">
-          📊 加载分析
+          📊 {{ t('codeSplitting.loadAnalysis') }}
         </div>
 
         <div class="load-visualization">
-          <!-- 初始加载 -->
+          <!-- initial load -->
           <div class="load-section">
             <div class="section-header">
               <span class="section-icon">🚀</span>
-              <span class="section-title">首屏加载</span>
+              <span class="section-title">{{ t('codeSplitting.initialLoad') }}</span>
               <span class="section-size">{{ formatSize(initialLoadSize) }}</span>
             </div>
 
@@ -85,11 +78,11 @@
             </div>
           </div>
 
-          <!-- 按需加载 -->
+          <!-- lazy loading -->
           <div class="load-section">
             <div class="section-header">
               <span class="section-icon">📦</span>
-              <span class="section-title">按需加载 (Lazy Loading)</span>
+              <span class="section-title">{{ t('codeSplitting.lazyLoading') }}</span>
               <span class="section-size">{{ formatSize(lazyLoadSize) }}</span>
             </div>
 
@@ -109,14 +102,14 @@
             </div>
 
             <p class="lazy-tip">
-              💡 点击上方模块可模拟按需加载
+              💡 {{ t('codeSplitting.lazyTip') }}
             </p>
           </div>
 
-          <!-- 优化效果 -->
+          <!-- optimization result -->
           <div class="optimization-summary">
             <div class="summary-item">
-              <span class="summary-label">未优化总大小</span>
+              <span class="summary-label">{{ t('codeSplitting.originalTotal') }}</span>
               <span class="summary-value original">{{ formatSize(totalSize) }}</span>
             </div>
 
@@ -125,12 +118,12 @@
             </div>
 
             <div class="summary-item">
-              <span class="summary-label">首屏加载</span>
+              <span class="summary-label">{{ t('codeSplitting.initialLoadLabel') }}</span>
               <span class="summary-value optimized">{{ formatSize(initialLoadSize) }}</span>
             </div>
 
             <div class="summary-item savings">
-              <span class="summary-label">节省</span>
+              <span class="summary-label">{{ t('codeSplitting.savings') }}</span>
               <span class="summary-value">{{ savingsPercent }}%</span>
             </div>
           </div>
@@ -141,10 +134,8 @@
     <div class="info-box">
       <p>
         <span class="icon">💡</span>
-        <strong>代码分割的核心思想：</strong>
-        不是所有代码都需要在首屏加载。通过动态导入 `import()`，
-        我们可以把非核心功能延迟到真正需要时再加载。
-        这就像餐厅的点餐制——不是把所有菜一次性端上来，而是按需上菜。
+        <strong>{{ t('common.coreIdea') }}</strong>
+        {{ t('codeSplitting.infoBoxContent') }}
       </p>
     </div>
   </div>
@@ -152,19 +143,21 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { frontendEngineeringLocale } from '../../../locales/frontend-engineering/index.js'
 
-// 模拟路由配置
+const { t } = useI18n(frontendEngineeringLocale)
+
 const routes = ref([
-  { path: '/', name: '首页', size: 45, loaded: true, loading: false },
-  { path: '/about', name: '关于我们', size: 28, loaded: false, loading: false },
-  { path: '/dashboard', name: '数据面板', size: 156, loaded: false, loading: false },
-  { path: '/settings', name: '系统设置', size: 89, loaded: false, loading: false },
-  { path: '/reports', name: '报表中心', size: 234, loaded: false, loading: false }
+  { path: '/', name: t('codeSplitting.routes.home'), size: 45, loaded: true, loading: false },
+  { path: '/about', name: t('codeSplitting.routes.about'), size: 28, loaded: false, loading: false },
+  { path: '/dashboard', name: t('codeSplitting.routes.dashboard'), size: 156, loaded: false, loading: false },
+  { path: '/settings', name: t('codeSplitting.routes.settings'), size: 89, loaded: false, loading: false },
+  { path: '/reports', name: t('codeSplitting.routes.reports'), size: 234, loaded: false, loading: false }
 ])
 
 const currentRoute = ref('/')
 
-// 模拟代码块
 const initialChunks = ref([
   { name: 'runtime', size: 3 },
   { name: 'core', size: 42 }
@@ -177,7 +170,6 @@ const lazyChunks = ref([
   { name: 'reports.chunk', size: 234, loaded: false }
 ])
 
-// 计算属性
 const initialLoadSize = computed(() =>
   initialChunks.value.reduce((sum, c) => sum + c.size, 0)
 )
@@ -193,7 +185,6 @@ const savingsPercent = computed(() => {
   return Math.round((saved / totalSize.value) * 100)
 })
 
-// 方法
 const formatSize = (size) => {
   if (size > 1024) return (size / 1024).toFixed(1) + ' MB'
   return size + ' KB'
@@ -210,11 +201,9 @@ const navigateTo = (route) => {
 
   if (!route.loaded && !route.loading) {
     route.loading = true
-    // 模拟加载延迟
     setTimeout(() => {
       route.loaded = true
       route.loading = false
-      // 同步更新 chunk 状态
       const chunkName = route.path.slice(1) || 'index'
       const chunk = lazyChunks.value.find(c => c.name.includes(chunkName))
       if (chunk) chunk.loaded = true
@@ -225,10 +214,6 @@ const navigateTo = (route) => {
 const loadChunk = (chunk) => {
   if (chunk.loaded) return
   chunk.loaded = true
-}
-
-const selectFile = (file) => {
-  // 简化处理
 }
 </script>
 
@@ -284,7 +269,7 @@ const selectFile = (file) => {
 
 .routes-list {
   max-height: 280px;
-  
+
 }
 
 .route-item {

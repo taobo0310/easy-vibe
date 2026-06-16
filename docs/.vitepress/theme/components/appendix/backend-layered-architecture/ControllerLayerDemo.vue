@@ -1,22 +1,20 @@
 <template>
   <div class="controller-demo">
     <div class="header">
-      <div class="title">Controller 层：请求的"接待员"</div>
-      <div class="subtitle">点击流程节点查看详情</div>
+      <div class="title">{{ t('controller.title') }}</div>
+      <div class="subtitle">{{ t('controller.subtitle') }}</div>
     </div>
 
     <div class="flow">
       <div class="step">
-        <div class="step-label">客户端发起请求</div>
-        <pre class="step-code">POST /api/users/register
-Content-Type: application/json
-{ "username": "张三", "email": "zhangsan@example.com", "password": "123456" }</pre>
+        <div class="step-label">{{ t('controller.requestLabel') }}</div>
+        <pre class="step-code">{{ t('controller.requestCode') }}</pre>
       </div>
 
-      <div class="arrow">↓ 请求到达</div>
+      <div class="arrow">{{ t('controller.arrive') }}</div>
 
       <div :class="['step', 'clickable', { active: detail === 'ctrl' }]" @click="toggle('ctrl')">
-        <div class="step-label accent">Controller 接收并解析请求</div>
+        <div class="step-label accent">{{ t('controller.receiveLabel') }}</div>
         <pre class="step-code">@RestController
 @RequestMapping("/api/users")
 public class UserController {
@@ -29,40 +27,31 @@ public class UserController {
 }</pre>
       </div>
 
-      <div class="arrow">↓ 参数校验 + 调用</div>
+      <div class="arrow">{{ t('controller.validateArrow') }}</div>
 
       <div :class="['step', 'clickable', { active: detail === 'valid' }]" @click="toggle('valid')">
-        <div class="step-label warn">参数校验（Controller 的职责之一）</div>
-        <pre class="step-code">public class UserRegisterRequest {
-    @NotBlank(message = "用户名不能为空")
-    @Size(min = 2, max = 20) private String username;
-    @Email(message = "邮箱格式不正确") private String email;
-    @Size(min = 6, message = "密码至少6位") private String password;
-}</pre>
+        <div class="step-label warn">{{ t('controller.validationLabel') }}</div>
+        <pre class="step-code">{{ t('controller.validationCode') }}</pre>
         <div v-if="detail === 'valid'" class="detail-box">
-          <strong>为什么校验要放在 Controller？</strong>
+          <strong>{{ t('controller.validationDetailTitle') }}</strong>
           <ul>
-            <li>第一道防线：尽早拦截非法请求</li>
-            <li>减轻下游压力：Service 层可以假设数据已清洗</li>
-            <li>关注点分离：Service 专注于业务，不处理格式验证</li>
+            <li v-for="item in validationDetails" :key="item">{{ item }}</li>
           </ul>
         </div>
       </div>
 
-      <div class="arrow">↓ 返回结果</div>
+      <div class="arrow">{{ t('controller.responseArrow') }}</div>
 
       <div class="step">
-        <div class="step-label">Controller 封装响应返回</div>
-        <pre class="step-code">HTTP/1.1 200 OK
-{ "code": 200, "message": "注册成功",
-  "data": { "id": 10001, "username": "张三", "email": "zhangsan@example.com" } }</pre>
+        <div class="step-label">{{ t('controller.responseLabel') }}</div>
+        <pre class="step-code">{{ t('controller.responseCode') }}</pre>
       </div>
     </div>
 
     <div class="duties">
-      <div class="duties-title">Controller 的核心职责</div>
+      <div class="duties-title">{{ t('controller.dutiesTitle') }}</div>
       <div class="duty-grid">
-        <div class="duty" v-for="d in duties" :key="d.name">
+        <div v-for="d in duties" :key="d.name" class="duty">
           <div class="duty-name">{{ d.name }}</div>
           <div class="duty-desc">{{ d.desc }}</div>
         </div>
@@ -72,17 +61,16 @@ public class UserController {
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { backendLayeredArchitectureLocale } from '../../../locales/backend-layered-architecture/index.js'
 
+const { t, messages } = useI18n(backendLayeredArchitectureLocale)
 const detail = ref('')
 const toggle = (s) => { detail.value = detail.value === s ? '' : s }
 
-const duties = [
-  { name: '接收请求', desc: '映射 HTTP 请求到方法' },
-  { name: '参数校验', desc: '基础格式和必填校验' },
-  { name: '调用 Service', desc: '将请求转发给业务层' },
-  { name: '封装响应', desc: '统一响应格式返回' }
-]
+const duties = computed(() => messages.value.controller.duties)
+const validationDetails = computed(() => messages.value.controller.validationDetails)
 </script>
 
 <style scoped>

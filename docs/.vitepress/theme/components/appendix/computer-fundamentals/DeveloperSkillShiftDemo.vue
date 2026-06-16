@@ -1,13 +1,13 @@
 <template>
   <div class="skill-shift-demo">
     <div class="demo-header">
-      <span class="title">能力重要性变化</span>
-      <span class="subtitle">AI 时代，哪些能力更重要了？</span>
+      <span class="title">{{ t('computerOrganization.vibeCodingFullstack.skillShift.title') }}</span>
+      <span class="subtitle">{{ t('computerOrganization.vibeCodingFullstack.skillShift.subtitle') }}</span>
     </div>
 
     <div class="comparison-grid">
       <div class="column">
-        <div class="column-title">传统时代更重要</div>
+        <div class="column-title">{{ t('computerOrganization.vibeCodingFullstack.skillShift.beforeTitle') }}</div>
         <div class="skill-list">
           <div v-for="skill in beforeSkills" :key="skill.name" class="skill-item">
             <span class="skill-name">{{ skill.name }}</span>
@@ -20,7 +20,7 @@
       </div>
 
       <div class="column">
-        <div class="column-title">AI 时代更重要</div>
+        <div class="column-title">{{ t('computerOrganization.vibeCodingFullstack.skillShift.afterTitle') }}</div>
         <div class="skill-list">
           <div v-for="skill in afterSkills" :key="skill.name" class="skill-item">
             <span class="skill-name">{{ skill.name }}</span>
@@ -34,26 +34,20 @@
     </div>
 
     <div class="info-box">
-      <strong>关键洞察：</strong>AI 能帮你写代码，但判断力、架构思维、领域知识、调试能力是 AI 替代不了的。
+      <strong>{{ t('computerOrganization.vibeCodingFullstack.skillShift.insightLabel') }}</strong>{{ t('computerOrganization.vibeCodingFullstack.skillShift.insight') }}
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { computerFundamentalsLocale } from '../../../locales/computer-fundamentals/index.js'
 
-const beforeSkills = ref([
-  { name: '语法记忆', level: 90, desc: '熟记 API 和语法细节' },
-  { name: '手写代码速度', level: 85, desc: '快速敲代码的能力' },
-  { name: '查文档能力', level: 80, desc: '快速找到 API 用法' }
-])
+const { t, messages } = useI18n(computerFundamentalsLocale)
 
-const afterSkills = ref([
-  { name: '需求描述能力', level: 95, desc: '用自然语言准确描述需求' },
-  { name: '代码审核能力', level: 90, desc: '判断 AI 生成代码的对错' },
-  { name: '架构设计能力', level: 85, desc: '设计系统整体结构' },
-  { name: '问题定位能力', level: 80, desc: '出问题时知道从哪排查' }
-])
+const beforeSkills = computed(() => messages.value.computerOrganization.vibeCodingFullstack.skillShift.beforeSkills)
+const afterSkills = computed(() => messages.value.computerOrganization.vibeCodingFullstack.skillShift.afterSkills)
 </script>
 
 <style scoped>

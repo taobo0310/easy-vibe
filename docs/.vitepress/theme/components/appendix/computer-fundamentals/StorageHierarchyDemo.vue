@@ -1,112 +1,67 @@
 <template>
   <div class="storage-hierarchy-demo">
     <div class="demo-header">
-      <span class="title">存储层次结构</span>
-      <span class="subtitle">从快到慢，从小到大</span>
+      <span class="title">{{ t('computerOrganization.storageHierarchy.title') }}</span>
+      <span class="subtitle">{{ t('computerOrganization.storageHierarchy.subtitle') }}</span>
     </div>
 
     <div class="hierarchy-pyramid">
-      <div class="pyramid-level register">
-        <div class="level-name">寄存器</div>
-        <div class="level-speed">最快</div>
-        <div class="level-size">最小 (KB)</div>
-      </div>
-      <div class="pyramid-level cache">
-        <div class="level-name">缓存</div>
-        <div class="level-speed">很快</div>
-        <div class="level-size">小 (MB)</div>
-      </div>
-      <div class="pyramid-level ram">
-        <div class="level-name">内存</div>
-        <div class="level-speed">快</div>
-        <div class="level-size">中等 (GB)</div>
-      </div>
-      <div class="pyramid-level disk">
-        <div class="level-name">硬盘</div>
-        <div class="level-speed">慢</div>
-        <div class="level-size">大 (TB)</div>
-      </div>
-      <div class="pyramid-level network">
-        <div class="level-name">网络/云</div>
-        <div class="level-speed">最慢</div>
-        <div class="level-size">无限</div>
+      <div
+        v-for="level in levels"
+        :key="level.className"
+        :class="['pyramid-level', level.className]"
+      >
+        <div class="level-name">{{ level.name }}</div>
+        <div class="level-speed">{{ level.speed }}</div>
+        <div class="level-size">{{ level.size }}</div>
       </div>
     </div>
 
     <div class="comparison-table">
-      <div class="table-title">详细对比</div>
+      <div class="table-title">{{ t('computerOrganization.storageHierarchy.tableTitle') }}</div>
       <table class="hierarchy-table">
         <thead>
           <tr>
-            <th>存储层次</th>
-            <th>访问时间</th>
-            <th>典型容量</th>
-            <th>成本</th>
+            <th v-for="header in messages.computerOrganization.storageHierarchy.headers" :key="header">
+              {{ header }}
+            </th>
           </tr>
         </thead>
         <tbody>
-          <tr>
-            <td>寄存器</td>
-            <td>&lt; 1 ns</td>
-            <td>几 KB</td>
-            <td>最高</td>
-          </tr>
-          <tr>
-            <td>L1 缓存</td>
-            <td>~1 ns</td>
-            <td>64 KB</td>
-            <td>很高</td>
-          </tr>
-          <tr>
-            <td>L2 缓存</td>
-            <td>~3 ns</td>
-            <td>256 KB</td>
-            <td>高</td>
-          </tr>
-          <tr>
-            <td>L3 缓存</td>
-            <td>~10 ns</td>
-            <td>8 MB</td>
-            <td>中等</td>
-          </tr>
-          <tr>
-            <td>内存</td>
-            <td>~100 ns</td>
-            <td>8-32 GB</td>
-            <td>中低</td>
-          </tr>
-          <tr>
-            <td>SSD</td>
-            <td>~100 μs</td>
-            <td>256 GB-2 TB</td>
-            <td>低</td>
-          </tr>
-          <tr>
-            <td>HDD</td>
-            <td>~10 ms</td>
-            <td>1-10 TB</td>
-            <td>最低</td>
+          <tr v-for="row in messages.computerOrganization.storageHierarchy.rows" :key="row[0]">
+            <td v-for="cell in row" :key="cell">{{ cell }}</td>
           </tr>
         </tbody>
       </table>
     </div>
 
     <div class="principle">
-      <div class="principle-title">局部性原理</div>
+      <div class="principle-title">{{ t('computerOrganization.storageHierarchy.principleTitle') }}</div>
       <div class="principle-content">
         <div class="principle-text">
-          程序倾向于访问<strong>最近访问过的位置</strong>（时间局部性）
-          和<strong>邻近的位置</strong>（空间局部性）
+          {{ t('computerOrganization.storageHierarchy.principleTextPrefix') }}
+          <strong>{{ t('computerOrganization.storageHierarchy.temporalLocality') }}</strong>
+          {{ t('computerOrganization.storageHierarchy.principleTextMiddle') }}
+          <strong>{{ t('computerOrganization.storageHierarchy.spatialLocality') }}</strong>
+          {{ t('computerOrganization.storageHierarchy.principleTextSuffix') }}
         </div>
         <div class="principle-example">
-          利用局部性原理，缓存可以显著提高性能
+          {{ t('computerOrganization.storageHierarchy.principleExample') }}
         </div>
       </div>
     </div>
   </div>
 </template>
 
-<script setup></script>
+<script setup>
+import { computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { computerFundamentalsLocale } from '../../../locales/computer-fundamentals/index.js'
+
+const { t, messages } = useI18n(computerFundamentalsLocale)
+
+const levels = computed(() => messages.value.computerOrganization.storageHierarchy.levels)
+</script>
 
 <style scoped>
 .storage-hierarchy-demo {

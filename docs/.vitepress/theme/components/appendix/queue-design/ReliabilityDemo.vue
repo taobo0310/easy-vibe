@@ -1,24 +1,19 @@
-<!--
-  ReliabilityDemo.vue
-  消息可靠性演示 - 三道防线
--->
 <template>
   <div class="reliability-demo">
     <div class="demo-header">
       <span class="icon">🛡️</span>
-      <span class="title">消息可靠性演示</span>
-      <span class="subtitle">三道防线保证消息不丢失</span>
+      <span class="title">{{ t('reliability.title') }}</span>
+      <span class="subtitle">{{ t('reliability.subtitle') }}</span>
     </div>
 
     <div class="defense-system">
-      <!-- 防线1: 生产者确认 -->
       <div class="defense-line">
         <div class="defense-header">
           <div class="defense-badge line1">
-            防线 1
+            {{ t('reliability.line1') }}
           </div>
           <div class="defense-title">
-            生产者确认 (Producer ACK)
+            {{ t('reliability.producerAck') }}
           </div>
         </div>
         <div class="defense-content">
@@ -28,10 +23,10 @@
                 📤
               </div>
               <div class="comp-label">
-                生产者
+                {{ t('reliability.producer') }}
               </div>
               <div class="comp-desc">
-                发送消息
+                {{ t('reliability.sendMessage') }}
               </div>
             </div>
 
@@ -44,7 +39,7 @@
                   📨
                 </div>
                 <div class="msg-label">
-                  消息
+                  {{ t('reliability.message') }}
                 </div>
                 <div
                   v-if="step === 1"
@@ -62,7 +57,7 @@
                   ✓
                 </div>
                 <div class="ack-label">
-                  ACK确认
+                  {{ t('reliability.ackConfirm') }}
                 </div>
                 <div
                   v-if="step === 2"
@@ -78,41 +73,40 @@
                 📦
               </div>
               <div class="comp-label">
-                Broker
+                {{ t('reliability.broker') }}
               </div>
               <div class="comp-desc">
-                接收并存储
+                {{ t('reliability.receiveAndStore') }}
               </div>
             </div>
           </div>
 
           <div class="control-panel">
             <div class="control-item">
-              <label>发送消息</label>
+              <label>{{ t('reliability.sendMessage') }}</label>
               <button
                 class="action-btn"
                 :disabled="step > 0"
                 @click="sendWithAck"
               >
-                发送并等待确认
+                {{ t('reliability.sendAndWait') }}
               </button>
             </div>
             <div class="info-text">
               <span class="info-icon">💡</span>
-              如果没收到ACK,生产者会重试或记录本地日志
+              {{ t('reliability.producerTip') }}
             </div>
           </div>
         </div>
       </div>
 
-      <!-- 防线2: Broker持久化 -->
       <div class="defense-line">
         <div class="defense-header">
           <div class="defense-badge line2">
-            防线 2
+            {{ t('reliability.line2') }}
           </div>
           <div class="defense-title">
-            Broker持久化
+            {{ t('reliability.brokerPersistence') }}
           </div>
         </div>
         <div class="defense-content">
@@ -126,13 +120,13 @@
                   ⚡
                 </div>
                 <div class="option-label">
-                  内存存储
+                  {{ t('reliability.memoryStorage') }}
                 </div>
                 <div class="option-desc">
-                  速度快,但重启丢失
+                  {{ t('reliability.memoryDesc') }}
                 </div>
                 <div class="option-risk">
-                  ❌ 高风险
+                  {{ t('reliability.highRisk') }}
                 </div>
               </div>
 
@@ -148,13 +142,13 @@
                   💾
                 </div>
                 <div class="option-label">
-                  磁盘存储
+                  {{ t('reliability.diskStorage') }}
                 </div>
                 <div class="option-desc">
-                  落盘保证不丢失
+                  {{ t('reliability.diskDesc') }}
                 </div>
                 <div class="option-risk">
-                  ✅ 推荐
+                  {{ t('reliability.recommended') }}
                 </div>
               </div>
             </div>
@@ -162,31 +156,31 @@
             <div class="replication-info">
               <div class="replication-title">
                 <span class="icon">🔄</span>
-                多副本同步
+                {{ t('reliability.replication') }}
               </div>
               <div class="replication-detail">
-                消息同步到3个节点,即使1个节点宕机也不丢数据
+                {{ t('reliability.replicationDetail') }}
               </div>
             </div>
           </div>
 
           <div class="control-panel">
             <div class="control-item">
-              <label>存储方式</label>
+              <label>{{ t('reliability.storageMode') }}</label>
               <div class="btn-group">
                 <button
                   class="toggle-btn"
                   :class="{ active: storageType === 'memory' }"
                   @click="storageType = 'memory'"
                 >
-                  内存
+                  {{ t('reliability.memory') }}
                 </button>
                 <button
                   class="toggle-btn"
                   :class="{ active: storageType === 'disk' }"
                   @click="storageType = 'disk'"
                 >
-                  磁盘
+                  {{ t('reliability.disk') }}
                 </button>
               </div>
             </div>
@@ -195,20 +189,19 @@
               :class="{ warning: storageType === 'memory' }"
             >
               <span class="info-icon">{{ storageType === 'disk' ? '✅' : '⚠️' }}</span>
-              {{ storageType === 'disk' ? '消息已落盘,安全可靠' : '消息仅在内存,重启丢失' }}
+              {{ storageType === 'disk' ? t('reliability.diskSafe') : t('reliability.memoryRisk') }}
             </div>
           </div>
         </div>
       </div>
 
-      <!-- 防线3: 消费者确认 -->
       <div class="defense-line">
         <div class="defense-header">
           <div class="defense-badge line3">
-            防线 3
+            {{ t('reliability.line3') }}
           </div>
           <div class="defense-title">
-            消费者确认 (Consumer ACK)
+            {{ t('reliability.consumerAck') }}
           </div>
         </div>
         <div class="defense-content">
@@ -222,10 +215,10 @@
               </div>
               <div class="step-content">
                 <div class="step-title">
-                  拉取消息
+                  {{ t('reliability.pullMessage') }}
                 </div>
                 <div class="step-desc">
-                  从Broker获取消息
+                  {{ t('reliability.pullDesc') }}
                 </div>
               </div>
             </div>
@@ -246,10 +239,10 @@
               </div>
               <div class="step-content">
                 <div class="step-title">
-                  处理消息
+                  {{ t('reliability.processMessage') }}
                 </div>
                 <div class="step-desc">
-                  执行业务逻辑
+                  {{ t('reliability.processDesc') }}
                 </div>
               </div>
             </div>
@@ -270,10 +263,10 @@
               </div>
               <div class="step-content">
                 <div class="step-title">
-                  手动ACK
+                  {{ t('reliability.manualAck') }}
                 </div>
                 <div class="step-desc">
-                  确认处理完成
+                  {{ t('reliability.manualAckDesc') }}
                 </div>
               </div>
             </div>
@@ -282,43 +275,43 @@
           <div class="ack-comparison">
             <div class="ack-option">
               <div class="ack-type">
-                自动 ACK
+                {{ t('reliability.autoAck') }}
               </div>
               <div class="ack-desc">
-                高效但可能丢消息
+                {{ t('reliability.autoAckDesc') }}
               </div>
               <div class="ack-risk">
-                ⚠️ 不推荐
+                {{ t('reliability.notRecommended') }}
               </div>
             </div>
 
             <div class="ack-option recommended">
               <div class="ack-type">
-                手动 ACK
+                {{ t('reliability.manualAckSpaced') }}
               </div>
               <div class="ack-desc">
-                可靠,处理完才确认
+                {{ t('reliability.manualAckReliable') }}
               </div>
               <div class="ack-risk">
-                ✅ 推荐
+                {{ t('reliability.recommended') }}
               </div>
             </div>
           </div>
 
           <div class="control-panel">
             <div class="control-item">
-              <label>模拟消费</label>
+              <label>{{ t('reliability.simulateConsume') }}</label>
               <button
                 class="action-btn"
                 :disabled="consumerStep > 0"
                 @click="simulateConsume"
               >
-                开始消费流程
+                {{ t('reliability.startConsume') }}
               </button>
             </div>
             <div class="info-text">
               <span class="info-icon">💡</span>
-              如果处理失败,不发送ACK,Broker会重新投递
+              {{ t('reliability.consumeTip') }}
             </div>
           </div>
         </div>
@@ -330,7 +323,7 @@
         🎯
       </div>
       <div class="summary-content">
-        <strong>三道防线,缺一不可：</strong>生产者确认 → Broker持久化 → 消费者确认
+        <strong>{{ t('reliability.summaryTitle') }}</strong>{{ t('reliability.summary') }}
       </div>
     </div>
   </div>
@@ -338,26 +331,27 @@
 
 <script setup>
 import { ref } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { queueDesignLocale } from '../../../locales/queue-design/index.js'
 
-// 防线1: 生产者确认
+const { t } = useI18n(queueDesignLocale)
+
 const step = ref(0)
 const ackStatus = ref('')
 const ackMessage = ref('')
 
-// 防线2: 存储方式
 const storageType = ref('disk')
 
-// 防线3: 消费者确认
 const consumerStep = ref(0)
 
 const sendWithAck = () => {
   step.value = 1
-  ackStatus.value = '发送中...'
+  ackStatus.value = t('reliability.sending')
 
   setTimeout(() => {
     step.value = 2
-    ackStatus.value = '已发送'
-    ackMessage.value = '收到ACK,消息安全'
+    ackStatus.value = t('reliability.sent')
+    ackMessage.value = t('reliability.ackSafe')
 
     setTimeout(() => {
       step.value = 0

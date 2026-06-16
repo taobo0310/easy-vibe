@@ -1,39 +1,38 @@
 <template>
   <div class="flow-demo">
     <div class="flow-section">
-      <div class="flow-label traditional">传统开发流程</div>
+      <div class="flow-label traditional">{{ t('computerOrganization.vibeCodingFullstack.flow.traditionalLabel') }}</div>
       <div class="flow-steps">
         <span v-for="(step, i) in traditionalSteps" :key="step">
           <span class="flow-step">{{ step }}</span>
           <span v-if="i < traditionalSteps.length - 1" class="flow-arrow">→</span>
         </span>
       </div>
-      <div class="flow-loop">↑ 反复循环 ↓</div>
+      <div class="flow-loop">{{ t('computerOrganization.vibeCodingFullstack.flow.traditionalLoop') }}</div>
     </div>
 
     <div class="flow-section">
-      <div class="flow-label vibe">Vibe Coding 流程</div>
+      <div class="flow-label vibe">{{ t('computerOrganization.vibeCodingFullstack.flow.vibeLabel') }}</div>
       <div class="flow-steps">
         <span v-for="(step, i) in vibeSteps" :key="step">
           <span class="flow-step" :class="{ highlight: step.highlight }">{{ step.text }}</span>
           <span v-if="i < vibeSteps.length - 1" class="flow-arrow">→</span>
         </span>
       </div>
-      <div class="flow-loop">↑ 快速迭代 ↓</div>
+      <div class="flow-loop">{{ t('computerOrganization.vibeCodingFullstack.flow.vibeLoop') }}</div>
     </div>
   </div>
 </template>
 
 <script setup>
-const traditionalSteps = ['你', '学习语法', '写代码', '调试', '查文档', '修改', '运行']
+import { computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { computerFundamentalsLocale } from '../../../locales/computer-fundamentals/index.js'
 
-const vibeSteps = [
-  { text: '你', highlight: false },
-  { text: '用自然语言描述需求', highlight: true },
-  { text: 'AI 生成代码', highlight: true },
-  { text: '你审核修改', highlight: false },
-  { text: '运行', highlight: false }
-]
+const { t, messages } = useI18n(computerFundamentalsLocale)
+
+const traditionalSteps = computed(() => messages.value.computerOrganization.vibeCodingFullstack.flow.traditionalSteps)
+const vibeSteps = computed(() => messages.value.computerOrganization.vibeCodingFullstack.flow.vibeSteps)
 </script>
 
 <style scoped>

@@ -1,29 +1,29 @@
 <template>
   <div class="io-method-demo">
     <div class="demo-header">
-      <span class="title">I/O 方式对比</span>
-      <span class="subtitle">程序查询 · 中断方式 · DMA</span>
+      <span class="title">{{ t('computerOrganization.ioMethod.title') }}</span>
+      <span class="subtitle">{{ t('computerOrganization.ioMethod.subtitle') }}</span>
     </div>
 
     <div class="io-tabs">
       <button 
         v-for="method in ioMethods" 
-        :key="method.name"
-        :class="['tab-btn', { active: selectedMethod === method.name }]"
-        @click="selectedMethod = method.name"
+        :key="method.id"
+        :class="['tab-btn', { active: selectedMethod === method.id }]"
+        @click="selectedMethod = method.id"
       >
         {{ method.name }}
       </button>
     </div>
 
-    <div class="method-details" v-if="selectedMethodData">
+    <div v-if="selectedMethodData" class="method-details">
       <div class="detail-header">
         <span class="method-name">{{ selectedMethodData.name }}</span>
         <span class="method-english">{{ selectedMethodData.english }}</span>
       </div>
 
       <div class="detail-flow">
-        <div class="flow-title">工作流程</div>
+        <div class="flow-title">{{ t('computerOrganization.ioMethod.workflow') }}</div>
         <div class="flow-diagram">
           <div v-for="(step, i) in selectedMethodData.steps" :key="i" class="flow-node">
             <div class="node-box" :class="{ active: activeStep === i }" @click="activeStep = i">
@@ -38,15 +38,15 @@
       <div class="detail-comparison">
         <div class="comp-grid">
           <div class="comp-item">
-            <span class="comp-label">CPU 参与度</span>
-            <span class="comp-value" :class="selectedMethodData.cpuLevel">{{ selectedMethodData.cpuLevel }}</span>
+            <span class="comp-label">{{ t('computerOrganization.ioMethod.cpuLevel') }}</span>
+            <span class="comp-value" :class="selectedMethodData.cpuLevelClass">{{ selectedMethodData.cpuLevel }}</span>
           </div>
           <div class="comp-item">
-            <span class="comp-label">速度</span>
+            <span class="comp-label">{{ t('computerOrganization.ioMethod.speed') }}</span>
             <span class="comp-value">{{ selectedMethodData.speed }}</span>
           </div>
           <div class="comp-item">
-            <span class="comp-label">复杂度</span>
+            <span class="comp-label">{{ t('computerOrganization.ioMethod.complexity') }}</span>
             <span class="comp-value">{{ selectedMethodData.complexity }}</span>
           </div>
         </div>
@@ -54,53 +54,25 @@
     </div>
 
     <div class="comparison-section">
-      <div class="section-title">三种 I/O 方式对比</div>
+      <div class="section-title">{{ t('computerOrganization.ioMethod.comparisonTitle') }}</div>
       <table class="compare-table">
         <thead>
           <tr>
-            <th>特性</th>
-            <th>程序查询</th>
-            <th>中断方式</th>
-            <th>DMA</th>
+            <th v-for="header in messages.computerOrganization.ioMethod.headers" :key="header">
+              {{ header }}
+            </th>
           </tr>
         </thead>
         <tbody>
-          <tr>
-            <td>CPU 参与度</td>
-            <td>全程参与</td>
-            <td>仅处理中断</td>
-            <td>几乎不参与</td>
-          </tr>
-          <tr>
-            <td>数据传输</td>
-            <td>CPU 逐字节搬运</td>
-            <td>CPU 逐字搬运</td>
-            <td>外设直接到内存</td>
-          </tr>
-          <tr>
-            <td>优点</td>
-            <td>简单、控制灵活</td>
-            <td>CPU 效率高</td>
-            <td>CPU 完全解放</td>
-          </tr>
-          <tr>
-            <td>缺点</td>
-            <td>CPU 利用率低</td>
-            <td>中断开销</td>
-            <td>硬件复杂</td>
-          </tr>
-          <tr>
-            <td>适用场景</td>
-            <td>简单外设、低速设备</td>
-            <td>中低速设备</td>
-            <td>高速批量传输</td>
+          <tr v-for="row in messages.computerOrganization.ioMethod.rows" :key="row[0]">
+            <td v-for="cell in row" :key="cell">{{ cell }}</td>
           </tr>
         </tbody>
       </table>
     </div>
 
-    <div class="dma-demo" v-if="selectedMethod === 'DMA'">
-      <div class="dma-title">DMA 传输过程</div>
+    <div v-if="selectedMethod === 'dma'" class="dma-demo">
+      <div class="dma-title">{{ t('computerOrganization.ioMethod.dmaTitle') }}</div>
       <div class="dma-visual">
         <div class="device cpu-device">
           <div class="device-icon">💻</div>
@@ -108,41 +80,46 @@
         </div>
         
         <div class="dma-channel">
-          <div class="channel-step" v-if="dmaStep >= 1">
-            <span class="step-label">1. CPU 设置 DMA</span>
+          <div v-if="dmaStep >= 1" class="channel-step">
+            <span class="step-label">{{ t('computerOrganization.ioMethod.dmaStep1') }}</span>
             <span class="step-arrow">→</span>
           </div>
         </div>
         
         <div class="device dma-device">
           <div class="device-icon">🔧</div>
-          <div class="device-name">DMA 控制器</div>
+          <div class="device-name">{{ t('computerOrganization.ioMethod.dmaController') }}</div>
         </div>
         
         <div class="dma-channel">
-          <div class="channel-step" v-if="dmaStep >= 2">
-            <span class="step-label">2. DMA 直接访问内存</span>
+          <div v-if="dmaStep >= 2" class="channel-step">
+            <span class="step-label">{{ t('computerOrganization.ioMethod.dmaStep2') }}</span>
             <span class="step-arrow">→</span>
           </div>
         </div>
         
         <div class="device memory-device">
           <div class="device-icon">💾</div>
-          <div class="device-name">内存</div>
+          <div class="device-name">{{ t('computerOrganization.ioMethod.memory') }}</div>
         </div>
       </div>
       
       <div class="dma-controls">
-        <button class="btn" @click="startDma" :disabled="dmaStep > 0">开始 DMA 传输</button>
-        <button class="btn" @click="resetDma">重置</button>
+        <button class="btn" :disabled="dmaStep > 0" @click="startDma">{{ t('computerOrganization.ioMethod.startDma') }}</button>
+        <button class="btn" @click="resetDma">{{ t('computerOrganization.ioMethod.reset') }}</button>
       </div>
     </div>
 
-    <div class="interrupt-demo" v-if="selectedMethod === '中断方式'">
-      <div class="interrupt-title">中断处理流程</div>
+    <div v-if="selectedMethod === 'interrupt'" class="interrupt-demo">
+      <div class="interrupt-title">{{ t('computerOrganization.ioMethod.interruptTitle') }}</div>
       <div class="interrupt-visual">
         <div class="timeline">
-          <div class="timeline-item" v-for="(item, i) in interruptFlow" :key="i" :class="{ active: interruptStep === i }">
+          <div
+            v-for="(item, i) in interruptFlow"
+            :key="i"
+            class="timeline-item"
+            :class="{ active: interruptStep === i }"
+          >
             <div class="timeline-num">{{ i + 1 }}</div>
             <div class="timeline-content">
               <div class="timeline-title">{{ item.title }}</div>
@@ -152,8 +129,8 @@
         </div>
       </div>
       <div class="interrupt-controls">
-        <button class="btn" @click="nextInterrupt" :disabled="interruptStep >= interruptFlow.length - 1">下一步</button>
-        <button class="btn" @click="resetInterrupt">重置</button>
+        <button class="btn" :disabled="interruptStep >= interruptFlow.length - 1" @click="nextInterrupt">{{ t('computerOrganization.ioMethod.nextStep') }}</button>
+        <button class="btn" @click="resetInterrupt">{{ t('computerOrganization.ioMethod.reset') }}</button>
       </div>
     </div>
   </div>
@@ -161,71 +138,23 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { computerFundamentalsLocale } from '../../../locales/computer-fundamentals/index.js'
 
-const selectedMethod = ref('程序查询')
+const { t, messages } = useI18n(computerFundamentalsLocale)
+
+const selectedMethod = ref('programmed')
 const activeStep = ref(0)
 const dmaStep = ref(0)
 const interruptStep = ref(0)
 
-const ioMethods = ref([
-  {
-    name: '程序查询',
-    english: 'Programmed I/O',
-    cpuLevel: '高',
-    speed: '慢',
-    complexity: '低',
-    steps: [
-      'CPU 轮询检查 I/O 设备状态',
-      '设备忙？继续等待',
-      '设备就绪，发送读写命令',
-      'CPU 逐字节读取/写入数据',
-      '判断是否传输完成',
-      '未完成则继续查询'
-    ]
-  },
-  {
-    name: '中断方式',
-    english: 'Interrupt-Driven I/O',
-    cpuLevel: '中',
-    speed: '中',
-    complexity: '中',
-    steps: [
-      'CPU 启动 I/O 设备',
-      'CPU 继续执行其他任务',
-      'I/O 完成后发送中断请求',
-      'CPU 响应中断，保存现场',
-      '执行中断处理程序',
-      '恢复现场，继续执行'
-    ]
-  },
-  {
-    name: 'DMA',
-    english: 'Direct Memory Access',
-    cpuLevel: '低',
-    speed: '快',
-    complexity: '高',
-    steps: [
-      'CPU 设置 DMA 控制器',
-      '告诉 DMA 源地址、目标地址、传输长度',
-      'CPU 去执行其他任务',
-      'DMA 控制器直接与内存交换数据',
-      '传输完成，DMA 发送中断通知 CPU'
-    ]
-  }
-])
+const ioMethods = computed(() => messages.value.computerOrganization.ioMethod.methods)
 
 const selectedMethodData = computed(() => {
-  return ioMethods.value.find(m => m.name === selectedMethod.value)
+  return ioMethods.value.find(m => m.id === selectedMethod.value)
 })
 
-const interruptFlow = ref([
-  { title: '中断请求', desc: 'I/O 设备向 CPU 发送中断请求信号' },
-  { title: '中断响应', desc: 'CPU 完成当前指令后响应中断' },
-  { title: '保存现场', desc: '保存 PC、寄存器等当前状态到栈' },
-  { title: '中断处理', desc: '执行中断服务程序 ISR' },
-  { title: '恢复现场', desc: '恢复保存的寄存器值' },
-  { title: '返回执行', desc: '返回被中断的程序继续执行' }
-])
+const interruptFlow = computed(() => messages.value.computerOrganization.ioMethod.interruptFlow)
 
 const startDma = () => {
   dmaStep.value = 1
@@ -419,9 +348,9 @@ const resetInterrupt = () => {
   color: #1e293b;
 }
 
-.comp-value.高 { color: #dc2626; }
-.comp-value.中 { color: #f59e0b; }
-.comp-value.低 { color: #16a34a; }
+.comp-value.level-high { color: #dc2626; }
+.comp-value.level-medium { color: #f59e0b; }
+.comp-value.level-low { color: #16a34a; }
 
 .comparison-section {
   background: white;

@@ -10,22 +10,25 @@
         type="info"
         :closable="false"
       >
-        缓存策略演示组件占位符 - 待实现具体交互
+        {{ t('placeholders.cache.placeholder') }}
       </el-alert>
     </div>
 
     <div class="info-box">
       <span class="icon">💡</span>
-      <strong>核心思想：</strong>缓存策略平衡命中率和新鲜度，TTL 设置太短会导致频繁回源，太长会导致内容过期。
+      <strong>{{ t('common.coreIdea') }}</strong>{{ t('placeholders.cache.idea') }}
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { cloudStorageCdnLocale } from '../../../locales/cloud-storage-cdn/index.js'
 
-const title = ref('缓存策略演示')
-const description = ref('展示CDN和对象存储的缓存策略配置，包括缓存时间、刷新机制等')
+const { t } = useI18n(cloudStorageCdnLocale)
+const title = computed(() => t('placeholders.cache.title'))
+const description = computed(() => t('placeholders.cache.subtitle'))
 </script>
 
 <style scoped>

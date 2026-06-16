@@ -1,12 +1,8 @@
-<!--
-  DashboardLayoutDemo.vue
-  仪表盘布局演示：展示仪表盘的常见布局模式
--->
 <template>
   <div class="dashboard-demo">
     <div class="header">
-      <div class="title">仪表盘布局模式</div>
-      <div class="subtitle">点击查看不同类型的仪表盘布局</div>
+      <div class="title">{{ t('dashboardLayout.title') }}</div>
+      <div class="subtitle">{{ t('dashboardLayout.subtitle') }}</div>
     </div>
 
     <div class="layout-tabs">
@@ -32,72 +28,23 @@
           <div class="widget-label">{{ widget.label }}</div>
         </div>
       </div>
-      <div class="use-case">适用场景：{{ current.useCase }}</div>
+      <div class="use-case">{{ t('dashboardLayout.useCaseLabel') }}{{ current.useCase }}</div>
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { dataVisualizationLocale } from '../../../locales/data-visualization/index.js'
+
+const { t, messages } = useI18n(dataVisualizationLocale)
 
 const activeLayout = ref('overview')
 
-const layouts = [
-  {
-    key: 'overview',
-    name: '全局概览型',
-    desc: '顶部核心指标卡片 + 中间趋势图 + 底部明细表',
-    useCase: '管理层日报、运营大盘',
-    widgets: [
-      { type: 'kpi', label: 'DAU 12.5万' },
-      { type: 'kpi', label: '收入 ¥85万' },
-      { type: 'kpi', label: '转化率 3.2%' },
-      { type: 'kpi', label: '客单价 ¥268' },
-      { type: 'chart-wide', label: '趋势折线图' },
-      { type: 'table', label: '明细数据表' }
-    ]
-  },
-  {
-    key: 'comparison',
-    name: '对比分析型',
-    desc: '左右对比布局，适合 A/B 测试或同环比分析',
-    useCase: 'A/B 测试报告、竞品分析',
-    widgets: [
-      { type: 'half', label: '实验组指标' },
-      { type: 'half', label: '对照组指标' },
-      { type: 'chart-wide', label: '差异对比图' },
-      { type: 'table', label: '统计显著性检验' }
-    ]
-  },
-  {
-    key: 'drill',
-    name: '下钻分析型',
-    desc: '从汇总到明细逐层下钻，支持交互式探索',
-    useCase: '销售分析、用户行为分析',
-    widgets: [
-      { type: 'chart-wide', label: '全国销售地图（点击省份下钻）' },
-      { type: 'half', label: '省份排名柱状图' },
-      { type: 'half', label: '城市明细饼图' },
-      { type: 'table', label: '门店级明细表' }
-    ]
-  },
-  {
-    key: 'realtime',
-    name: '实时监控型',
-    desc: '大屏展示，数据自动刷新，适合投屏',
-    useCase: '双十一大屏、服务器监控',
-    widgets: [
-      { type: 'big-number', label: '实时 GMV ¥1.2亿' },
-      { type: 'half', label: '订单量实时曲线' },
-      { type: 'half', label: '地域热力图' },
-      { type: 'kpi', label: '支付成功率' },
-      { type: 'kpi', label: '平均响应时间' },
-      { type: 'kpi', label: '在线用户数' }
-    ]
-  }
-]
+const layouts = computed(() => messages.value.dashboardLayout.layouts)
 
-const current = computed(() => layouts.find(l => l.key === activeLayout.value))
+const current = computed(() => layouts.value.find(l => l.key === activeLayout.value))
 </script>
 
 <style scoped>

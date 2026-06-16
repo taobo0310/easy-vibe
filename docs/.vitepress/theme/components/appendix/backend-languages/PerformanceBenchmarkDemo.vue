@@ -2,17 +2,17 @@
   <div class="performance-benchmark-demo">
     <div class="demo-header">
       <span class="icon">🏁</span>
-      <span class="title">性能赛道</span>
-      <span class="subtitle">不同语言的竞速测试</span>
+      <span class="title">{{ t('performance.title') }}</span>
+      <span class="subtitle">{{ t('performance.subtitle') }}</span>
     </div>
 
     <div class="intro-text">
-      想象你在<span class="highlight">赛车场</span>：F1 赛车（C++、Rust）速度极快但难以驾驭，家用轿车（Python、Ruby）舒适但速度慢，跑车（Go、Java）在速度和操控之间取得平衡。
+      {{ t('performance.introPrefix') }}<span class="highlight">{{ t('performance.introHighlight') }}</span>{{ t('performance.introSuffix') }}
     </div>
 
     <div class="control-panel">
       <div class="scenario-selector">
-        <label>选择赛道：</label>
+        <label>{{ t('performance.scenarioLabel') }}</label>
         <select
           v-model="selectedScenario"
           @change="runBenchmark"
@@ -31,13 +31,13 @@
         :disabled="isRunning"
         @click="runBenchmark"
       >
-        {{ isRunning ? '测试中...' : '▶ 开始测试' }}
+        {{ isRunning ? t('performance.running') : t('performance.run') }}
       </button>
     </div>
 
     <div class="results-panel">
       <div class="panel-header">
-        <span class="panel-title">测试结果（Requests/Second）</span>
+        <span class="panel-title">{{ t('performance.resultTitle') }}</span>
       </div>
       <div class="bars-container">
         <div
@@ -70,62 +70,17 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { backendLanguagesLocale } from '../../../locales/backend-languages/index.js'
+
+const { t, messages } = useI18n(backendLanguagesLocale)
 
 const selectedScenario = ref('hello')
 const isRunning = ref(false)
 
-const scenarios = [
-  { id: 'hello', label: '🏁 简单 HTTP (Hello World)' },
-  { id: 'json', label: '📦 JSON 序列化' },
-  { id: 'db', label: '🗄️ 数据库查询' },
-  { id: 'compute', label: '⚙️ CPU 密集计算' }
-]
-
-const benchmarkData = {
-  hello: [
-    { language: 'C++', rps: 1500000 },
-    { language: 'Rust', rps: 1200000 },
-    { language: 'Go', rps: 1000000 },
-    { language: 'Node.js', rps: 800000 },
-    { language: 'Java', rps: 700000 },
-    { language: 'Python', rps: 200000 },
-    { language: 'Ruby', rps: 150000 }
-  ],
-  json: [
-    { language: 'C++', rps: 800000 },
-    { language: 'Rust', rps: 700000 },
-    { language: 'Go', rps: 600000 },
-    { language: 'Node.js', rps: 450000 },
-    { language: 'Java', rps: 500000 },
-    { language: 'Python', rps: 150000 },
-    { language: 'Ruby', rps: 120000 }
-  ],
-  db: [
-    { language: 'C++', rps: 300000 },
-    { language: 'Rust', rps: 280000 },
-    { language: 'Go', rps: 250000 },
-    { language: 'Node.js', rps: 220000 },
-    { language: 'Java', rps: 200000 },
-    { language: 'Python', rps: 80000 },
-    { language: 'Ruby', rps: 70000 }
-  ],
-  compute: [
-    { language: 'C++', rps: 500000 },
-    { language: 'Rust', rps: 480000 },
-    { language: 'Go', rps: 400000 },
-    { language: 'Java', rps: 350000 },
-    { language: 'Node.js', rps: 50000 },
-    { language: 'Python', rps: 30000 },
-    { language: 'Ruby', rps: 25000 }
-  ]
-}
-
-const explanations = {
-  hello: '简单的 HTTP 响应测试。C++ 和 Rust 展现出接近硬件的性能优势。Go 和 Node.js 表现优秀（HTTP 栈经过高度优化）。Python 和 Ruby 由于解释器开销，性能相对较低。',
-  json: 'JSON 序列化测试。C++ 和 Rust 依然领先，Node.js 的 V8 引擎优化让它的表现也不错。Python 标准库 json 模块性能尚可，但比编译型语言慢很多。',
-  db: '模拟数据库查询。性能差距缩小，因为瓶颈主要在数据库 I/O。但编译型语言（C++、Rust、Go）的优势依然明显。',
-  compute: 'CPU 密集型计算（斐波那契）。Node.js 的短板暴露：单线程 + V8 优化不如静态语言。Python 和 Ruby 表现最差（解释型语言 + GIL 限制）。'
-}
+const scenarios = computed(() => messages.value.performance.scenarios)
+const benchmarkData = computed(() => messages.value.performance.benchmarkData)
+const explanations = computed(() => messages.value.performance.explanations)
 
 const currentResults = ref([])
 
@@ -138,7 +93,7 @@ const runBenchmark = () => {
   currentResults.value = []
 
   setTimeout(() => {
-    currentResults.value = benchmarkData[selectedScenario.value]
+    currentResults.value = benchmarkData.value[selectedScenario.value]
     isRunning.value = false
   }, 800)
 }
@@ -161,7 +116,7 @@ const formatRPS = (rps) => {
 }
 
 const getCurrentExplanation = () => {
-  return explanations[selectedScenario.value]
+  return explanations.value[selectedScenario.value]
 }
 
 runBenchmark()

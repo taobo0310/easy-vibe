@@ -1,13 +1,9 @@
-<!--
-  IdempotenceDemo.vue
-  幂等性演示 - 重复消费处理
--->
 <template>
   <div class="idempotence-demo">
     <div class="demo-header">
       <span class="icon">🔄</span>
-      <span class="title">幂等性演示</span>
-      <span class="subtitle">保证重复消费不会产生副作用</span>
+      <span class="title">{{ t('idempotence.title') }}</span>
+      <span class="subtitle">{{ t('idempotence.subtitle') }}</span>
     </div>
 
     <div class="scenario-switch">
@@ -16,39 +12,38 @@
         :class="{ active: scenario === 'transfer' }"
         @click="scenario = 'transfer'"
       >
-        💰 银行转账
+        {{ t('idempotence.transferTab') }}
       </button>
       <button
         class="scenario-btn"
         :class="{ active: scenario === 'elevator' }"
         @click="scenario = 'elevator'"
       >
-        🛗 电梯按钮
+        {{ t('idempotence.elevatorTab') }}
       </button>
     </div>
 
     <div class="demo-content">
-      <!-- 银行转账场景 -->
       <div
         v-if="scenario === 'transfer'"
         class="transfer-scenario"
       >
         <div class="scenario-header">
           <div class="title">
-            ❌ 非幂等操作: 银行转账
+            {{ t('idempotence.transferTitle') }}
           </div>
           <div class="subtitle">
-            重复消费会导致多次扣款
+            {{ t('idempotence.transferSubtitle') }}
           </div>
         </div>
 
         <div class="account-system">
           <div class="account-card sender">
             <div class="account-name">
-              发送方
+              {{ t('idempotence.sender') }}
             </div>
             <div class="account-balance">
-              余额: ¥<span class="balance-amount">{{ senderBalance }}</span>
+              {{ t('idempotence.balance') }}<span class="balance-amount">{{ senderBalance }}</span>
             </div>
           </div>
 
@@ -61,7 +56,7 @@
                 💰
               </div>
               <div class="flow-label">
-                转账 ¥100
+                {{ t('idempotence.transferAmount') }}
               </div>
             </div>
             <div
@@ -69,17 +64,17 @@
               class="retry-info"
             >
               <div class="retry-badge">
-                重试 {{ retryCount }} 次
+                {{ t('idempotence.retryTimes', { count: retryCount }) }}
               </div>
             </div>
           </div>
 
           <div class="account-card receiver">
             <div class="account-name">
-              接收方
+              {{ t('idempotence.receiver') }}
             </div>
             <div class="account-balance">
-              余额: ¥<span class="balance-amount">{{ receiverBalance }}</span>
+              {{ t('idempotence.balance') }}<span class="balance-amount">{{ receiverBalance }}</span>
             </div>
           </div>
         </div>
@@ -87,7 +82,7 @@
         <div class="control-panel">
           <div class="control-row">
             <div class="control-item">
-              <label>幂等性保护</label>
+              <label>{{ t('idempotence.protection') }}</label>
               <div class="toggle-switch">
                 <button
                   class="toggle-btn"
@@ -96,7 +91,7 @@
                 >
                   <span class="toggle-slider" />
                 </button>
-                <span class="toggle-label">{{ useIdempotence ? '已启用' : '未启用' }}</span>
+                <span class="toggle-label">{{ useIdempotence ? t('idempotence.enabled') : t('idempotence.disabled') }}</span>
               </div>
             </div>
 
@@ -105,7 +100,7 @@
               :disabled="isTransferring"
               @click="simulateTransfer"
             >
-              {{ isTransferring ? '处理中...' : '模拟重复消费' }}
+              {{ isTransferring ? t('idempotence.processing') : t('idempotence.simulateDuplicate') }}
             </button>
           </div>
 
@@ -115,14 +110,14 @@
           >
             <div class="info-item">
               <span class="info-icon">🔑</span>
-              <span class="info-text">每笔交易有唯一ID,重复请求被自动过滤</span>
+              <span class="info-text">{{ t('idempotence.uniqueIdInfo') }}</span>
             </div>
           </div>
         </div>
 
         <div class="result-log">
           <div class="log-header">
-            处理日志
+            {{ t('idempotence.logTitle') }}
           </div>
           <div class="log-list">
             <div
@@ -138,7 +133,7 @@
               v-if="logs.length === 0"
               class="log-empty"
             >
-              暂无日志,点击按钮开始模拟
+              {{ t('idempotence.emptyLog') }}
             </div>
           </div>
         </div>
@@ -146,51 +141,50 @@
         <div class="comparison-box">
           <div class="comparison-item bad">
             <div class="comp-header">
-              ❌ 无幂等保护
+              {{ t('idempotence.noProtection') }}
             </div>
             <div class="comp-body">
               <div class="comp-result">
-                扣款 ¥{{ (retryCount + 1) * 100 }}
+                {{ t('idempotence.debit', { amount: (retryCount + 1) * 100 }) }}
               </div>
               <div class="comp-desc">
-                重复消费造成多次扣款
+                {{ t('idempotence.duplicateDebit') }}
               </div>
             </div>
           </div>
           <div class="comparison-item good">
             <div class="comp-header">
-              ✅ 有幂等保护
+              {{ t('idempotence.withProtection') }}
             </div>
             <div class="comp-body">
               <div class="comp-result">
-                扣款 ¥100
+                {{ t('idempotence.debit', { amount: 100 }) }}
               </div>
               <div class="comp-desc">
-                重复请求被过滤,只扣一次
+                {{ t('idempotence.filteredOnce') }}
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- 电梯按钮场景 -->
       <div
         v-else
         class="elevator-scenario"
       >
         <div class="scenario-header">
           <div class="title">
-            ✅ 天然幂等操作: 电梯按钮
+            {{ t('idempotence.elevatorTitle') }}
           </div>
           <div class="subtitle">
-            无论按多少次,电梯只响应一次
+            {{ t('idempotence.elevatorSubtitle') }}
           </div>
         </div>
 
         <div class="elevator-system">
           <div class="elevator-panel">
             <div class="panel-title">
-              电梯按钮面板
+              {{ t('idempotence.elevatorPanel') }}
             </div>
             <div class="button-grid">
               <button
@@ -204,9 +198,9 @@
               </button>
             </div>
             <div class="press-count">
-              <span class="count-label">按钮按了</span>
+              <span class="count-label">{{ t('idempotence.pressedPrefix') }}</span>
               <span class="count-value">{{ pressCount }}</span>
-              <span class="count-label">次</span>
+              <span class="count-label">{{ t('idempotence.pressedSuffix') }}</span>
             </div>
           </div>
 
@@ -234,36 +228,32 @@
 
         <div class="control-panel">
           <div class="control-item">
-            <label>快速连按3次</label>
+            <label>{{ t('idempotence.rapidPress') }}</label>
             <button
               class="action-btn"
               @click="pressMultipleTimes"
             >
-              🚀 连续点击
+              {{ t('idempotence.clickRepeatedly') }}
             </button>
           </div>
           <div class="info-text">
             <span class="info-icon">💡</span>
-            虽然按了{{ pressCount }}次,但电梯只响应一次请求
+            {{ t('idempotence.elevatorInfo', { count: pressCount }) }}
           </div>
         </div>
 
         <div class="explanation-box">
           <div class="explanation-title">
-            为什么电梯按钮是幂等的?
+            {{ t('idempotence.whyElevator') }}
           </div>
           <div class="explanation-list">
-            <div class="explanation-item">
+            <div
+              v-for="item in explanations"
+              :key="item"
+              class="explanation-item"
+            >
               <span class="icon">✅</span>
-              <span>状态只切换一次: 停靠 → 已选中</span>
-            </div>
-            <div class="explanation-item">
-              <span class="icon">✅</span>
-              <span>重复请求不改变目标楼层</span>
-            </div>
-            <div class="explanation-item">
-              <span class="icon">✅</span>
-              <span>无需额外的幂等性保护机制</span>
+              <span>{{ item }}</span>
             </div>
           </div>
         </div>
@@ -275,10 +265,10 @@
         🎯
       </div>
       <div class="principle-content">
-        <strong>幂等性核心原则:</strong>
+        <strong>{{ t('idempotence.principleTitle') }}</strong>
         {{ scenario === 'transfer'
-          ? '为每条消息生成唯一ID,处理前检查是否已处理,避免重复操作'
-          : '设计操作时确保重复执行和执行一次的效果相同' }}
+          ? t('idempotence.transferPrinciple')
+          : t('idempotence.elevatorPrinciple') }}
       </div>
     </div>
   </div>
@@ -286,11 +276,13 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { queueDesignLocale } from '../../../locales/queue-design/index.js'
 
-// 场景切换
+const { t, messages } = useI18n(queueDesignLocale)
+
 const scenario = ref('transfer')
 
-// 转账场景
 const senderBalance = ref(1000)
 const receiverBalance = ref(500)
 const isTransferring = ref(false)
@@ -314,9 +306,8 @@ const simulateTransfer = () => {
   const originalSenderBalance = senderBalance.value
   const originalReceiverBalance = receiverBalance.value
 
-  addLog('收到转账请求: ¥100', 'info')
+  addLog(t('idempotence.logRequest'), 'info')
 
-  // 模拟重复消费
   const processTransfer = (attempt) => {
     return new Promise((resolve) => {
       setTimeout(() => {
@@ -326,15 +317,15 @@ const simulateTransfer = () => {
           if (attempt === 0) {
             senderBalance.value = originalSenderBalance - 100
             receiverBalance.value = originalReceiverBalance + 100
-            addLog(`第${attempt + 1}次处理: 成功转账 ¥100`, 'success')
-            addLog('幂等性检查: 唯一ID已记录,后续请求被过滤', 'info')
+            addLog(t('idempotence.logSuccess', { attempt: attempt + 1 }), 'success')
+            addLog(t('idempotence.logRecorded'), 'info')
           } else {
-            addLog(`第${attempt + 1}次处理: 重复请求,已忽略`, 'warning')
+            addLog(t('idempotence.logDuplicate', { attempt: attempt + 1 }), 'warning')
           }
         } else {
           senderBalance.value -= 100
           receiverBalance.value += 100
-          addLog(`第${attempt + 1}次处理: 转账 ¥100`, attempt === 0 ? 'success' : 'error')
+          addLog(t('idempotence.logTransfer', { attempt: attempt + 1 }), attempt === 0 ? 'success' : 'error')
         }
 
         if (attempt < 2) {
@@ -353,11 +344,11 @@ const simulateTransfer = () => {
   processTransfer(0)
 }
 
-// 电梯场景
 const floors = [1, 2, 3, 4, 5]
 const selectedFloor = ref(null)
 const elevatorFloor = ref(1)
 const pressCount = ref(0)
+const explanations = computed(() => messages.value.idempotence.explanations)
 
 const elevatorPosition = computed(() => {
   return ((elevatorFloor.value - 1) / 4) * 100 + '%'

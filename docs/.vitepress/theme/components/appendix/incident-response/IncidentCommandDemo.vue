@@ -1,12 +1,8 @@
-<!--
-  IncidentCommandDemo.vue
-  事故指挥体系演示：展示事故响应中的角色分工和协作关系
--->
 <template>
   <div class="incident-command-demo">
     <div class="header">
-      <div class="title">事故指挥体系 (Incident Command System)</div>
-      <div class="subtitle">点击角色卡片，了解各角色的职责和协作关系</div>
+      <div class="title">{{ t('command.title') }}</div>
+      <div class="subtitle">{{ t('command.subtitle') }}</div>
     </div>
 
     <div class="org-chart">
@@ -16,8 +12,8 @@
           @click="selectRole('ic')"
         >
           <div class="role-icon">🎖️</div>
-          <div class="role-name">事故指挥官</div>
-          <div class="role-eng">Incident Commander</div>
+          <div class="role-name">{{ allRoles.ic.name }}</div>
+          <div class="role-eng">{{ allRoles.ic.eng }}</div>
         </div>
       </div>
 
@@ -46,7 +42,7 @@
       </div>
       <div class="detail-body">
         <div class="detail-section">
-          <div class="section-label">核心职责</div>
+          <div class="section-label">{{ t('command.labels.responsibilities') }}</div>
           <div class="responsibilities">
             <div
               v-for="(r, i) in currentRole.responsibilities"
@@ -59,7 +55,7 @@
           </div>
         </div>
         <div class="detail-section">
-          <div class="section-label">关键能力</div>
+          <div class="section-label">{{ t('command.labels.skills') }}</div>
           <div class="skills">
             <span
               v-for="skill in currentRole.skills"
@@ -71,7 +67,7 @@
           </div>
         </div>
         <div class="detail-section">
-          <div class="section-label">常见话术</div>
+          <div class="section-label">{{ t('command.labels.quote') }}</div>
           <div class="quote-box">
             "{{ currentRole.quote }}"
           </div>
@@ -80,7 +76,7 @@
     </div>
 
     <div class="scenario-box">
-      <div class="scenario-title">模拟场景：支付系统 P0 事故</div>
+      <div class="scenario-title">{{ t('command.scenarioTitle') }}</div>
       <div class="scenario-timeline">
         <div
           v-for="(event, i) in scenarioEvents"
@@ -103,97 +99,29 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { incidentResponseLocale } from '../../../locales/incident-response/index.js'
 
 const activeRole = ref('ic')
+const { t, messages } = useI18n(incidentResponseLocale)
 
-const allRoles = {
-  ic: {
-    id: 'ic',
-    icon: '🎖️',
-    name: '事故指挥官',
-    eng: 'Incident Commander',
-    color: '#8b5cf6',
-    responsibilities: [
-      '统筹协调整个事故响应过程',
-      '做出关键决策（回滚、切流、降级等）',
-      '确保各角色高效协作，避免混乱',
-      '控制事故响应节奏，定时同步进展'
-    ],
-    skills: ['全局视野', '决策能力', '沟通协调', '压力管理'],
-    quote: '当前状态：支付服务不可用。运维组排查数据库，后端组准备回滚方案，通讯组每 10 分钟同步一次。'
-  },
-  comm: {
-    id: 'comm',
-    icon: '📢',
-    name: '通讯协调员',
-    eng: 'Communications Lead',
-    color: '#3b82f6',
-    responsibilities: [
-      '对内：定时向管理层和相关团队通报进展',
-      '对外：更新状态页面，通知受影响客户',
-      '记录事故时间线，为复盘提供素材',
-      '过滤噪音信息，确保指挥官专注决策'
-    ],
-    skills: ['文字表达', '信息整理', '多方沟通', '时间管理'],
-    quote: '状态更新：我们已识别到支付服务异常，团队正在紧急处理中，预计 30 分钟内恢复。'
-  },
-  ops: {
-    id: 'ops',
-    icon: '🔧',
-    name: '运维负责人',
-    eng: 'Operations Lead',
-    color: '#ef4444',
-    responsibilities: [
-      '执行具体的技术操作（回滚、重启、扩容等）',
-      '监控系统指标变化，判断操作效果',
-      '管理基础设施层面的应急响应',
-      '向指挥官汇报技术层面的进展'
-    ],
-    skills: ['系统运维', '故障排查', '脚本自动化', '监控分析'],
-    quote: '数据库主节点 CPU 100%，正在执行主从切换，预计 2 分钟完成。'
-  },
-  dev: {
-    id: 'dev',
-    icon: '💻',
-    name: '开发负责人',
-    eng: 'Development Lead',
-    color: '#22c55e',
-    responsibilities: [
-      '分析代码层面的问题根因',
-      '准备和执行代码级别的修复或回滚',
-      '评估变更风险，提供技术方案',
-      '协调开发团队成员参与排查'
-    ],
-    skills: ['代码分析', '快速调试', '风险评估', '版本管理'],
-    quote: '定位到问题：昨天上线的批量查询没有加分页，导致全表扫描拖垮数据库。准备回滚到上一版本。'
-  }
-}
+const allRoles = computed(() => messages.value.command.roles)
 
-const middleRoles = [
-  allRoles.comm,
-  allRoles.ops,
-  allRoles.dev
-]
+const middleRoles = computed(() => [
+  allRoles.value.comm,
+  allRoles.value.ops,
+  allRoles.value.dev
+])
 
 const currentRole = computed(() => {
-  return allRoles[activeRole.value] || null
+  return allRoles.value[activeRole.value] || null
 })
 
 const selectRole = (id) => {
   activeRole.value = id
 }
 
-const scenarioEvents = [
-  { time: '14:02', role: '监控', color: '#3b82f6', text: '支付成功率从 99.9% 骤降至 12%，触发 P0 告警' },
-  { time: '14:03', role: '指挥官', color: '#8b5cf6', text: '确认 P0 事故，开启事故频道，召集各角色' },
-  { time: '14:05', role: '通讯', color: '#3b82f6', text: '通知管理层，更新状态页为"服务降级"' },
-  { time: '14:08', role: '运维', color: '#ef4444', text: '发现数据库主节点 CPU 100%，连接池耗尽' },
-  { time: '14:10', role: '开发', color: '#22c55e', text: '定位到昨日上线的慢查询是根因' },
-  { time: '14:12', role: '指挥官', color: '#8b5cf6', text: '决策：立即回滚昨日变更 + 数据库主从切换' },
-  { time: '14:15', role: '运维', color: '#ef4444', text: '数据库主从切换完成，连接恢复' },
-  { time: '14:18', role: '开发', color: '#22c55e', text: '代码回滚部署完成' },
-  { time: '14:20', role: '通讯', color: '#3b82f6', text: '支付成功率恢复至 99.8%，通知各方服务恢复' }
-]
+const scenarioEvents = computed(() => messages.value.command.scenarioEvents)
 </script>
 
 <style scoped>

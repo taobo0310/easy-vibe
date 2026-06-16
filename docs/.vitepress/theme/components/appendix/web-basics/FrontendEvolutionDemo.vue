@@ -281,7 +281,7 @@ export default {
   props: ['product'],
   methods: { buy() { ... } }
 }
-<\/script>`
+${'<'}/script>`
   }
 ]
 </script>

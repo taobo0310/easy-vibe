@@ -1,15 +1,14 @@
 <template>
   <div class="demo">
-    <div class="title">📁 你看到的文件 vs 硬盘上的碎片</div>
+    <div class="title">{{ t('operatingSystems.filesystem.title') }}</div>
     
     <div class="scene">
-      <!-- 文件视图 -->
       <div class="file-view">
-        <div class="view-label">📂 你看到的（文件夹）</div>
+        <div class="view-label">{{ t('operatingSystems.filesystem.folderView') }}</div>
         <div class="folder-tree">
           <div class="folder">
             <span class="folder-icon">📁</span>
-            <span>照片</span>
+            <span>{{ t('operatingSystems.filesystem.photosFolder') }}</span>
           </div>
           <div class="files">
             <div 
@@ -17,7 +16,7 @@
               :class="{ active: currentFile === 'pet' }"
             >
               <span class="file-icon">🖼️</span>
-              <span>宠物.jpg</span>
+              <span>{{ t('operatingSystems.filesystem.petFile') }}</span>
               <span class="file-size">2.5MB</span>
             </div>
             <div 
@@ -25,16 +24,15 @@
               :class="{ active: currentFile === 'trip' }"
             >
               <span class="file-icon">🖼️</span>
-              <span>旅游.png</span>
+              <span>{{ t('operatingSystems.filesystem.tripFile') }}</span>
               <span class="file-size">1.8MB</span>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- 读取动画 -->
-      <div class="read-animation" v-if="isReading">
-        <div class="read-text">正在读取...</div>
+      <div v-if="isReading" class="read-animation">
+        <div class="read-text">{{ t('operatingSystems.filesystem.reading') }}</div>
         <div class="read-blocks">
           <div 
             v-for="(block, idx) in readingBlocks" 
@@ -48,9 +46,8 @@
         </div>
       </div>
 
-      <!-- 硬盘视图 -->
       <div class="disk-view">
-        <div class="view-label">💾 硬盘实际存储（数据块）</div>
+        <div class="view-label">{{ t('operatingSystems.filesystem.diskView') }}</div>
         <div class="disk-grid">
           <div
             v-for="n in 12"
@@ -72,32 +69,37 @@
     </div>
 
     <div class="explain">
-      <strong>💡 原理：</strong>文件系统把文件切成碎片存在硬盘各处（如宠物.jpg存在第3、7、11块），然后用"账本"记录位置。你看到的整齐文件夹只是账本上的记录。
+      <strong>{{ t('operatingSystems.principleLabel') }}</strong>
+      {{ t('operatingSystems.filesystem.explain') }}
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { computerFundamentalsLocale } from '../../../locales/computer-fundamentals/index.js'
+
+const { t, messages } = useI18n(computerFundamentalsLocale)
 
 const currentFile = ref('')
 const isReading = ref(false)
 const readProgress = ref(-1)
 const currentBlocks = ref([])
 
-// 文件存储位置
+// File storage locations.
 const fileLocations = {
-  pet: [3, 7, 11],    // 宠物.jpg 存在第3、7、11块
-  trip: [5, 6]        // 旅游.png 存在第5、6块
+  pet: [3, 7, 11],
+  trip: [5, 6]
 }
 
-// 每块的内容
+// Content stored in each block.
 const blockContents = {
-  3: '宠-1',
-  7: '宠-2', 
-  11: '宠-3',
-  5: '旅-1',
-  6: '旅-2'
+  3: messages.value.operatingSystems.filesystem.blockContents.pet1,
+  7: messages.value.operatingSystems.filesystem.blockContents.pet2,
+  11: messages.value.operatingSystems.filesystem.blockContents.pet3,
+  5: messages.value.operatingSystems.filesystem.blockContents.trip1,
+  6: messages.value.operatingSystems.filesystem.blockContents.trip2
 }
 
 let timer = null
@@ -119,39 +121,39 @@ const readingBlocks = computed(() => {
 
 const runDemo = () => {
   switch(phase) {
-    case 0: // 开始读取宠物.jpg
+    case 0:
       currentFile.value = 'pet'
       currentBlocks.value = fileLocations.pet
       isReading.value = true
       readProgress.value = -1
       phase = 1
       break
-    case 1: // 逐块读取
+    case 1:
       if (readProgress.value < currentBlocks.value.length - 1) {
         readProgress.value++
       } else {
         phase = 2
       }
       break
-    case 2: // 读取完成，暂停
+    case 2:
       isReading.value = false
       phase = 3
       break
-    case 3: // 开始读取旅游.png
+    case 3:
       currentFile.value = 'trip'
       currentBlocks.value = fileLocations.trip
       isReading.value = true
       readProgress.value = -1
       phase = 4
       break
-    case 4: // 逐块读取
+    case 4:
       if (readProgress.value < currentBlocks.value.length - 1) {
         readProgress.value++
       } else {
         phase = 5
       }
       break
-    case 5: // 重置
+    case 5:
       isReading.value = false
       currentFile.value = ''
       currentBlocks.value = []

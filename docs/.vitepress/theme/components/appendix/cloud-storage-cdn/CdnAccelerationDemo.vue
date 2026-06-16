@@ -1,21 +1,16 @@
-<!--
-  CdnAccelerationDemo.vue
-  CDN 加速原理演示 - 展示边缘节点、源站、回源等概念
--->
 <template>
   <div class="cdn-acceleration-demo">
     <div class="demo-header">
       <span class="icon">🌐</span>
-      <span class="title">CDN 加速原理</span>
-      <span class="subtitle">边缘节点、源站与回源的协同工作</span>
+      <span class="title">{{ t('cdnAcceleration.title') }}</span>
+      <span class="subtitle">{{ t('cdnAcceleration.subtitle') }}</span>
     </div>
 
     <div class="cdn-architecture">
-      <!-- 用户层 -->
       <div class="layer users-layer">
         <div class="layer-title">
           <span class="icon">👥</span>
-          <span>全球用户</span>
+          <span>{{ t('cdnAcceleration.usersTitle') }}</span>
         </div>
         <div class="users-map">
           <div
@@ -34,7 +29,6 @@
             </div>
           </div>
 
-          <!-- 请求动画线 -->
           <div
             v-if="requestAnimation"
             class="request-line"
@@ -43,11 +37,10 @@
         </div>
       </div>
 
-      <!-- 边缘节点层 -->
       <div class="layer edge-layer">
         <div class="layer-title">
           <span class="icon">🌐</span>
-          <span>CDN 边缘节点 (Edge Nodes)</span>
+          <span>{{ t('cdnAcceleration.edgeTitle') }}</span>
           <span
             class="layer-status"
             :class="{ hit: cacheHit, miss: !cacheHit && showCacheStatus }"
@@ -77,11 +70,11 @@
             </div>
             <div class="node-stats">
               <div class="stat">
-                <span class="stat-label">缓存</span>
+                <span class="stat-label">{{ t('cdnAcceleration.cacheLabel') }}</span>
                 <span class="stat-value">{{ node.cacheSize }}</span>
               </div>
               <div class="stat">
-                <span class="stat-label">命中</span>
+                <span class="stat-label">{{ t('cdnAcceleration.hitLabel') }}</span>
                 <span
                   class="stat-value"
                   :style="{ color: node.hitRate > 80 ? 'var(--vp-c-brand-1)' : 'var(--vp-c-brand)' }"
@@ -94,11 +87,10 @@
         </div>
       </div>
 
-      <!-- 源站层 -->
       <div class="layer origin-layer">
         <div class="layer-title">
           <span class="icon">🏢</span>
-          <span>源站 (Origin Server)</span>
+          <span>{{ t('cdnAcceleration.originTitle') }}</span>
           <span
             class="layer-status"
             :class="{ active: showBackToSource }"
@@ -114,7 +106,7 @@
             </div>
             <div class="server-info">
               <div class="server-name">
-                对象存储源站
+                {{ t('cdnAcceleration.originName') }}
               </div>
               <div class="server-address">
                 bucket.oss-cn-beijing.aliyuncs.com
@@ -122,7 +114,7 @@
             </div>
             <div class="server-status">
               <span class="status-dot active" />
-              <span class="status-text">健康</span>
+              <span class="status-text">{{ t('cdnAcceleration.healthy') }}</span>
             </div>
           </div>
 
@@ -131,20 +123,15 @@
             class="back-to-source-flow"
           >
             <div class="flow-arrow">
-              <span>⬆️ 回源请求</span>
+              <span>{{ t('cdnAcceleration.backToSourceRequest') }}</span>
             </div>
             <div class="flow-detail">
-              <div class="flow-step">
-                1. CDN 节点未命中缓存
-              </div>
-              <div class="flow-step">
-                2. 向源站发起回源请求
-              </div>
-              <div class="flow-step">
-                3. 源站返回文件内容
-              </div>
-              <div class="flow-step">
-                4. CDN 缓存并响应用户
+              <div
+                v-for="step in backToSourceSteps"
+                :key="step"
+                class="flow-step"
+              >
+                {{ step }}
               </div>
             </div>
           </div>
@@ -152,10 +139,9 @@
       </div>
     </div>
 
-    <!-- 交互控制区 -->
     <div class="demo-controls">
       <div class="controls-title">
-        🎮 模拟演示
+        {{ t('cdnAcceleration.controlsTitle') }}
       </div>
       <div class="controls-row">
         <button
@@ -163,29 +149,28 @@
           @click="simulateCacheHit"
         >
           <span>✅</span>
-          <span>模拟缓存命中</span>
+          <span>{{ t('cdnAcceleration.hitButton') }}</span>
         </button>
         <button
           class="control-btn"
           @click="simulateCacheMiss"
         >
           <span>❌</span>
-          <span>模拟缓存未命中（回源）</span>
+          <span>{{ t('cdnAcceleration.missButton') }}</span>
         </button>
         <button
           class="control-btn reset"
           @click="resetDemo"
         >
           <span>🔄</span>
-          <span>重置</span>
+          <span>{{ t('cdnAcceleration.reset') }}</span>
         </button>
       </div>
     </div>
 
-    <!-- 统计信息 -->
     <div class="stats-panel">
       <div class="stats-title">
-        📊 访问统计
+        {{ t('cdnAcceleration.statsTitle') }}
       </div>
       <div class="stats-grid">
         <div class="stat-card">
@@ -196,7 +181,7 @@
             {{ stats.cacheHit }}
           </div>
           <div class="stat-label">
-            缓存命中
+            {{ t('cdnAcceleration.stats.cacheHit') }}
           </div>
         </div>
         <div class="stat-card">
@@ -207,7 +192,7 @@
             {{ stats.cacheMiss }}
           </div>
           <div class="stat-label">
-            缓存未命中
+            {{ t('cdnAcceleration.stats.cacheMiss') }}
           </div>
         </div>
         <div class="stat-card">
@@ -218,7 +203,7 @@
             {{ stats.hitRate }}%
           </div>
           <div class="stat-label">
-            命中率
+            {{ t('cdnAcceleration.stats.hitRate') }}
           </div>
         </div>
         <div class="stat-card">
@@ -229,7 +214,7 @@
             {{ stats.avgResponseTime }}ms
           </div>
           <div class="stat-label">
-            平均响应
+            {{ t('cdnAcceleration.stats.avgResponse') }}
           </div>
         </div>
       </div>
@@ -237,32 +222,21 @@
 
     <div class="info-box">
       <span class="icon">💡</span>
-      <strong>核心思想：</strong>CDN就像在全球开了分店——用户访问最近的分店拿资源，不用都跑总店来，速度自然快。
+      <strong>{{ t('common.coreIdea') }}</strong>{{ t('cdnAcceleration.idea') }}
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref, computed, reactive } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { cloudStorageCdnLocale } from '../../../locales/cloud-storage-cdn/index.js'
 
-// 用户数据
-const users = [
-  { id: 'user1', name: '北京用户', icon: '👤', x: 75, y: 35 },
-  { id: 'user2', name: '上海用户', icon: '👤', x: 80, y: 55 },
-  { id: 'user3', name: '广州用户', icon: '👤', x: 70, y: 75 },
-  { id: 'user4', name: '成都用户', icon: '👤', x: 50, y: 60 },
-  { id: 'user5', name: '海外用户', icon: '👤', x: 90, y: 25 }
-]
+const { t, messages } = useI18n(cloudStorageCdnLocale)
+const users = computed(() => messages.value.cdnAcceleration.users)
+const edgeNodes = computed(() => messages.value.cdnAcceleration.edgeNodes)
+const backToSourceSteps = computed(() => messages.value.cdnAcceleration.backToSourceSteps)
 
-// 边缘节点数据
-const edgeNodes = [
-  { id: 'node1', name: '北京节点', icon: '🌐', location: '华北', cacheSize: '2.5 TB', hitRate: 92 },
-  { id: 'node2', name: '上海节点', icon: '🌐', location: '华东', cacheSize: '3.1 TB', hitRate: 89 },
-  { id: 'node3', name: '广州节点', icon: '🌐', location: '华南', cacheSize: '1.8 TB', hitRate: 87 },
-  { id: 'node4', name: '成都节点', icon: '🌐', location: '西南', cacheSize: '1.2 TB', hitRate: 85 }
-]
-
-// 状态
 const activeUser = ref(null)
 const requestingUser = ref(null)
 const activeNode = ref(null)
@@ -272,7 +246,6 @@ const showCacheStatus = ref(false)
 const showBackToSource = ref(false)
 const requestAnimation = ref(false)
 
-// 统计
 const stats = reactive({
   cacheHit: 0,
   cacheMiss: 0,
@@ -280,24 +253,21 @@ const stats = reactive({
   avgResponseTime: 0
 })
 
-// 计算属性
 const requestLineStyle = computed(() => {
   if (!activeUser.value || !activeNode.value) return {}
-  // 这里简化处理，实际应该计算从用户到节点的线
   return {}
 })
 
 const cacheStatusText = computed(() => {
   if (!showCacheStatus.value) return ''
-  return cacheHit.value ? '✅ 缓存命中' : '❌ 未命中'
+  return cacheHit.value ? t('cdnAcceleration.cacheHitText') : t('cdnAcceleration.cacheMissText')
 })
 
 const backToSourceText = computed(() => {
   if (!showBackToSource.value) return ''
-  return '📥 回源中...'
+  return t('cdnAcceleration.backToSourceText')
 })
 
-// 方法
 const selectUser = (user) => {
   activeUser.value = user.id
 }
@@ -311,7 +281,6 @@ const simulateCacheHit = () => {
   stats.cacheHit++
   updateStats()
 
-  // 模拟缓存命中流程
   activeUser.value = 'user1'
   requestingUser.value = 'user1'
   activeNode.value = 'node1'
@@ -328,7 +297,6 @@ const simulateCacheMiss = () => {
   stats.cacheMiss++
   updateStats()
 
-  // 模拟缓存未命中（回源）流程
   activeUser.value = 'user3'
   requestingUser.value = 'user3'
   activeNode.value = 'node3'
@@ -344,7 +312,6 @@ const simulateCacheMiss = () => {
 const updateStats = () => {
   const total = stats.cacheHit + stats.cacheMiss
   stats.hitRate = total > 0 ? Math.round((stats.cacheHit / total) * 100) : 0
-  // 模拟平均响应时间：命中约 20ms，未命中约 200ms
   stats.avgResponseTime = total > 0
     ? Math.round((stats.cacheHit * 20 + stats.cacheMiss * 200) / total)
     : 0

@@ -1,44 +1,40 @@
-<!--
-  AsyncTaskFlowDemo.vue
-  异步任务流程演示：展示同步 vs 异步处理的对比
--->
 <template>
   <div class="async-task-demo">
     <div class="header">
-      <div class="title">同步 vs 异步处理对比</div>
-      <div class="subtitle">点击按钮观察两种模式的差异</div>
+      <div class="title">{{ t('flow.title') }}</div>
+      <div class="subtitle">{{ t('flow.subtitle') }}</div>
     </div>
 
     <div class="mode-tabs">
       <button
         :class="['tab', { active: mode === 'sync' }]"
         @click="mode = 'sync'; reset()"
-      >同步模式</button>
+      >{{ t('flow.tabs.sync') }}</button>
       <button
         :class="['tab', { active: mode === 'async' }]"
         @click="mode = 'async'; reset()"
-      >异步模式</button>
+      >{{ t('flow.tabs.async') }}</button>
     </div>
 
     <div class="flow-area">
       <div class="user-side">
-        <div class="label">用户请求</div>
-        <button class="action-btn" @click="startProcess" :disabled="running">
-          {{ running ? '处理中...' : '提交订单' }}
+        <div class="label">{{ t('flow.userRequest') }}</div>
+        <button class="action-btn" :disabled="running" @click="startProcess">
+          {{ running ? t('flow.processing') : t('flow.submitOrder') }}
         </button>
         <div :class="['response-box', { success: responseReady }]">
-          <template v-if="!running && !responseReady">等待提交</template>
+          <template v-if="!running && !responseReady">{{ t('flow.waitingSubmit') }}</template>
           <template v-else-if="running && mode === 'sync'">
-            ⏳ 用户等待中... ({{ elapsed }}s)
+            {{ t('flow.userWaiting', { elapsed }) }}
           </template>
           <template v-else-if="running && mode === 'async' && responseReady">
-            ✅ 已返回 ({{ asyncResponseTime }}ms)
+            {{ t('flow.returned', { time: asyncResponseTime }) }}
           </template>
           <template v-else-if="running && mode === 'async'">
-            ⏳ 等待响应...
+            {{ t('flow.waitingResponse') }}
           </template>
           <template v-else>
-            ✅ 完成 ({{ mode === 'sync' ? syncTime + 'ms' : asyncResponseTime + 'ms' }})
+            {{ t('flow.completed', { time: mode === 'sync' ? syncTime + 'ms' : asyncResponseTime + 'ms' }) }}
           </template>
         </div>
       </div>
@@ -46,14 +42,14 @@
       <div class="arrow">→</div>
 
       <div class="server-side">
-        <div class="label">服务端处理</div>
+        <div class="label">{{ t('flow.serverProcessing') }}</div>
         <div class="tasks">
           <div
             v-for="(task, i) in tasks"
             :key="i"
-            :class="['task-item', task.status]"
+            :class="['task-item', taskStatuses[i] || 'pending']"
           >
-            <span class="task-icon">{{ task.status === 'done' ? '✅' : task.status === 'running' ? '⏳' : '⬜' }}</span>
+            <span class="task-icon">{{ taskStatuses[i] === 'done' ? '✅' : taskStatuses[i] === 'running' ? '⏳' : '⬜' }}</span>
             <span>{{ task.name }}</span>
             <span class="task-time">{{ task.time }}ms</span>
           </div>
@@ -61,19 +57,23 @@
       </div>
     </div>
 
-    <div class="summary" v-if="!running && responseReady">
+    <div v-if="!running && responseReady" class="summary">
       <template v-if="mode === 'sync'">
-        <div class="summary-bad">同步模式：用户等待了 {{ syncTime }}ms，所有任务串行完成后才返回响应</div>
+        <div class="summary-bad">{{ t('flow.syncSummary', { time: syncTime }) }}</div>
       </template>
       <template v-else>
-        <div class="summary-good">异步模式：用户仅等待 {{ asyncResponseTime }}ms，耗时任务在后台异步处理</div>
+        <div class="summary-good">{{ t('flow.asyncSummary', { time: asyncResponseTime }) }}</div>
       </template>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { asyncTaskQueuesLocale } from '../../../locales/async-task-queues/index.js'
+
+const { t, messages } = useI18n(asyncTaskQueuesLocale)
 
 const mode = ref('sync')
 const running = ref(false)
@@ -82,13 +82,9 @@ const elapsed = ref(0)
 const syncTime = ref(0)
 const asyncResponseTime = ref(200)
 
-const tasks = ref([
-  { name: '扣减库存', time: 50, status: 'pending' },
-  { name: '创建订单', time: 100, status: 'pending' },
-  { name: '发送确认邮件', time: 800, status: 'pending' },
-  { name: '更新推荐系统', time: 600, status: 'pending' },
-  { name: '记录审计日志', time: 300, status: 'pending' }
-])
+const defaultTasks = computed(() => messages.value.flow.tasks)
+const tasks = computed(() => defaultTasks.value.map(task => ({ ...task })))
+const taskStatuses = ref([])
 
 let timer = null
 
@@ -97,7 +93,7 @@ function reset() {
   responseReady.value = false
   elapsed.value = 0
   syncTime.value = 0
-  tasks.value.forEach(t => t.status = 'pending')
+  taskStatuses.value = defaultTasks.value.map(() => 'pending')
   if (timer) clearInterval(timer)
 }
 
@@ -112,10 +108,10 @@ async function startProcess() {
   if (mode.value === 'sync') {
     timer = setInterval(() => { elapsed.value = (elapsed.value + 0.1).toFixed(1) }, 100)
     let total = 0
-    for (const task of tasks.value) {
-      task.status = 'running'
+    for (const [index, task] of tasks.value.entries()) {
+      taskStatuses.value[index] = 'running'
       await sleep(task.time)
-      task.status = 'done'
+      taskStatuses.value[index] = 'done'
       total += task.time
     }
     syncTime.value = total
@@ -123,22 +119,20 @@ async function startProcess() {
     running.value = false
     clearInterval(timer)
   } else {
-    // 异步模式：只等核心任务
-    tasks.value[0].status = 'running'
+    taskStatuses.value[0] = 'running'
     await sleep(tasks.value[0].time)
-    tasks.value[0].status = 'done'
+    taskStatuses.value[0] = 'done'
 
-    tasks.value[1].status = 'running'
+    taskStatuses.value[1] = 'running'
     await sleep(tasks.value[1].time)
-    tasks.value[1].status = 'done'
+    taskStatuses.value[1] = 'done'
 
     responseReady.value = true
 
-    // 后台任务继续
     for (let i = 2; i < tasks.value.length; i++) {
-      tasks.value[i].status = 'running'
+      taskStatuses.value[i] = 'running'
       await sleep(tasks.value[i].time)
-      tasks.value[i].status = 'done'
+      taskStatuses.value[i] = 'done'
     }
     running.value = false
   }

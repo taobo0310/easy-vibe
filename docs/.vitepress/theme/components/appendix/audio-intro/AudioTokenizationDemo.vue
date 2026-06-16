@@ -1,32 +1,18 @@
-<!--
-  AudioTokenizationDemo.vue
-  音频 Tokenization 演示组件
-
-  用途：
-  展示音频如何通过神经编解码器(如 EnCodec、SoundStream)被压缩成离散的 Token。
-
-  交互功能：
-  - 音频压缩/解压流程
-  - 不同码率对比
-  - Token 可视化
-  - 重建质量评估
--->
 <template>
   <div class="audio-tokenization-demo">
     <el-card shadow="never">
       <template #header>
         <div class="header-title">
           <el-icon><Grid /></el-icon>
-          <span>🎵 音频 Tokenization：神经编解码器</span>
+          <span>{{ t('audioTokenization.title') }}</span>
         </div>
       </template>
 
       <div class="demo-content">
-        <!-- 流程图 -->
         <div class="codec-flow">
           <div class="flow-section encode">
             <div class="section-title">
-              🔽 编码器 (Encoder)
+              {{ t('audioTokenization.encoder') }}
             </div>
             <div class="flow-steps">
               <div class="codec-step">
@@ -38,7 +24,7 @@
                   />
                 </div>
                 <div class="step-label">
-                  原始波形
+                  {{ t('audioTokenization.rawWaveform') }}
                 </div>
                 <div class="step-meta">
                   24kHz, 16-bit
@@ -61,10 +47,10 @@
                   </div>
                 </div>
                 <div class="step-label">
-                  CNN 下采样
+                  {{ t('audioTokenization.cnnDownsample') }}
                 </div>
                 <div class="step-meta">
-                  降维 320x
+                  {{ t('audioTokenization.dimensionReduction') }}
                 </div>
               </div>
               <el-icon class="flow-arrow">
@@ -84,10 +70,10 @@
                   </div>
                 </div>
                 <div class="step-label">
-                  VQ 量化
+                  {{ t('audioTokenization.vq') }}
                 </div>
                 <div class="step-meta">
-                  离散 Token
+                  {{ t('audioTokenization.discreteToken') }}
                 </div>
               </div>
             </div>
@@ -96,14 +82,14 @@
           <div class="flow-divider">
             <div class="divider-line" />
             <div class="divider-label">
-              压缩后: ~1.5 kbps
+              {{ t('audioTokenization.compressed') }}
             </div>
             <div class="divider-line" />
           </div>
 
           <div class="flow-section decode">
             <div class="section-title">
-              🔼 解码器 (Decoder)
+              {{ t('audioTokenization.decoder') }}
             </div>
             <div class="flow-steps reverse">
               <div class="codec-step">
@@ -120,10 +106,10 @@
                   </div>
                 </div>
                 <div class="step-label">
-                  离散 Token
+                  {{ t('audioTokenization.discreteToken') }}
                 </div>
                 <div class="step-meta">
-                  Codebook 索引
+                  {{ t('audioTokenization.codebookIndex') }}
                 </div>
               </div>
               <el-icon class="flow-arrow">
@@ -143,10 +129,10 @@
                   </div>
                 </div>
                 <div class="step-label">
-                  转置卷积
+                  {{ t('audioTokenization.transposedConv') }}
                 </div>
                 <div class="step-meta">
-                  上采样
+                  {{ t('audioTokenization.upsample') }}
                 </div>
               </div>
               <el-icon class="flow-arrow">
@@ -161,7 +147,7 @@
                   />
                 </div>
                 <div class="step-label">
-                  重建波形
+                  {{ t('audioTokenization.reconstructedWaveform') }}
                 </div>
                 <div class="step-meta">
                   24kHz
@@ -171,10 +157,9 @@
           </div>
         </div>
 
-        <!-- 码率对比 -->
         <div class="bitrate-comparison">
           <div class="comparison-title">
-            📊 不同码率对比
+            {{ t('audioTokenization.bitrateTitle') }}
           </div>
           <div class="bitrate-cards">
             <div
@@ -192,15 +177,15 @@
               </div>
               <div class="bitrate-detail">
                 <div class="detail-item">
-                  <span class="label">采样率:</span>
+                  <span class="label">{{ t('audioTokenization.sampleRate') }}</span>
                   <span>{{ config.sampleRate }}</span>
                 </div>
                 <div class="detail-item">
-                  <span class="label">帧率:</span>
+                  <span class="label">{{ t('audioTokenization.frameRate') }}</span>
                   <span>{{ config.frameRate }}</span>
                 </div>
                 <div class="detail-item">
-                  <span class="label">码本大小:</span>
+                  <span class="label">{{ t('audioTokenization.codebookSize') }}</span>
                   <span>{{ config.codebookSize }}</span>
                 </div>
               </div>
@@ -214,10 +199,9 @@
           </div>
         </div>
 
-        <!-- Token 可视化 -->
         <div class="token-visualization">
           <div class="viz-title">
-            🔢 Token 序列可视化
+            {{ t('audioTokenization.tokenTitle') }}
           </div>
           <div class="token-display">
             <div class="token-ruler">
@@ -246,73 +230,43 @@
                 class="legend-color"
                 style="background: #409eff"
               />
-              低频成分
+              {{ t('audioTokenization.lowFreq') }}
             </span>
             <span class="legend-item">
               <span
                 class="legend-color"
                 style="background: #67c23a"
               />
-              中频成分
+              {{ t('audioTokenization.midFreq') }}
             </span>
             <span class="legend-item">
               <span
                 class="legend-color"
                 style="background: #e6a23c"
               />
-              高频成分
+              {{ t('audioTokenization.highFreq') }}
             </span>
           </div>
         </div>
 
-        <!-- 应用场景 -->
         <div class="applications">
           <div class="apps-title">
-            🎯 为什么需要音频 Tokenization？
+            {{ t('audioTokenization.appsTitle') }}
           </div>
           <div class="apps-grid">
-            <div class="app-card">
+            <div
+              v-for="app in applications"
+              :key="app.title"
+              class="app-card"
+            >
               <div class="app-icon">
-                🚀
+                {{ app.icon }}
               </div>
               <div class="app-title">
-                高效传输
+                {{ app.title }}
               </div>
               <div class="app-desc">
-                将音频压缩到 ~1.5 kbps，比原始音频小 256 倍，适合网络传输
-              </div>
-            </div>
-            <div class="app-card">
-              <div class="app-icon">
-                🧠
-              </div>
-              <div class="app-title">
-                语言模型友好
-              </div>
-              <div class="app-desc">
-                离散 Token 可以被 LLM 直接处理，实现文本到音频的统一建模
-              </div>
-            </div>
-            <div class="app-card">
-              <div class="app-icon">
-                🎵
-              </div>
-              <div class="app-title">
-                音乐生成
-              </div>
-              <div class="app-desc">
-                MusicGen、AudioLDM 等模型使用音频 Token 生成音乐和音效
-              </div>
-            </div>
-            <div class="app-card">
-              <div class="app-icon">
-                🗣️
-              </div>
-              <div class="app-title">
-                语音合成
-              </div>
-              <div class="app-desc">
-                VALL-E、SoundStorm 等 TTS 模型直接生成音频 Token
+                {{ app.desc }}
               </div>
             </div>
           </div>
@@ -322,8 +276,8 @@
       <div class="info-box">
         <p>
           <span class="icon">💡</span>
-          <strong>神经音频编解码器：</strong>
-          EnCodec (Meta)、SoundStream (Google)、SNAC 等模型使用 VQ-VAE 架构将音频压缩成离散 Token。这些 Token 可以被语言模型处理，实现高质量的音频生成和压缩。
+          <strong>{{ t('audioTokenization.infoStrong') }}</strong>
+          {{ t('audioTokenization.info') }}
         </p>
       </div>
     </el-card>
@@ -331,8 +285,12 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { Grid, ArrowRight } from '@element-plus/icons-vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { audioIntroLocale } from '../../../locales/audio-intro/index.js'
+
+const { t, messages } = useI18n(audioIntroLocale)
 
 const selectedBitrate = ref('EnCodec-24k')
 const originalWaveformCanvas = ref(null)
@@ -373,10 +331,10 @@ const bitrateConfigs = [
   }
 ]
 
-// 生成模拟 Token 序列
+const applications = computed(() => messages.value.audioTokenization.applications)
+
 const tokenSequence = Array.from({ length: 50 }, () => Math.floor(Math.random() * 1024))
 
-// 绘制波形
 const drawWaveform = (canvas, isNoisy = false) => {
   if (!canvas) return
 
@@ -394,11 +352,9 @@ const drawWaveform = (canvas, isNoisy = false) => {
     const t = x / width
     let y = height / 2
 
-    // 基础波形
     y += Math.sin(t * Math.PI * 8) * 15
     y += Math.sin(t * Math.PI * 16) * 10
 
-    // 添加噪声（重建版本）
     if (isNoisy) {
       y += (Math.random() - 0.5) * 8
     }
@@ -412,7 +368,6 @@ const drawWaveform = (canvas, isNoisy = false) => {
 
   ctx.stroke()
 
-  // 中心线
   ctx.strokeStyle = '#e0e0e0'
   ctx.lineWidth = 1
   ctx.beginPath()

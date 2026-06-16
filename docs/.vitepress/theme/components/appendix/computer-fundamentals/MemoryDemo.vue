@@ -1,14 +1,13 @@
 <template>
   <div class="demo">
-    <div class="title">🧠 操作系统给每个程序"画饼"</div>
+    <div class="title">{{ t('operatingSystems.memory.title') }}</div>
     
     <div class="scene">
-      <!-- 程序视角 -->
       <div class="view-box">
-        <div class="view-title">📱 程序以为的内存（虚拟）</div>
+        <div class="view-title">{{ t('operatingSystems.memory.virtualTitle') }}</div>
         <div class="virtual-mem">
           <div class="proc-mem wechat">
-            <div class="proc-label">💬 微信</div>
+            <div class="proc-label">{{ t('operatingSystems.memory.wechat') }}</div>
             <div class="mem-blocks">
               <div 
                 v-for="n in 4" 
@@ -19,7 +18,7 @@
             </div>
           </div>
           <div class="proc-mem game">
-            <div class="proc-label">🎮 游戏</div>
+            <div class="proc-label">{{ t('operatingSystems.memory.game') }}</div>
             <div class="mem-blocks">
               <div 
                 v-for="n in 4" 
@@ -32,9 +31,8 @@
         </div>
       </div>
 
-      <!-- 映射箭头 -->
       <div class="mapping-arrow">
-        <div class="arrow-text">操作系统偷偷映射 ↓</div>
+        <div class="arrow-text">{{ t('operatingSystems.memory.mappingTitle') }}</div>
         <div class="mapping-lines">
           <div 
             v-for="(map, idx) in visibleMappings" 
@@ -50,9 +48,8 @@
         </div>
       </div>
 
-      <!-- 物理内存 -->
       <div class="view-box physical">
-        <div class="view-title">💾 真实的内存条（物理）</div>
+        <div class="view-title">{{ t('operatingSystems.memory.physicalTitle') }}</div>
         <div class="physical-mem">
           <div 
             v-for="(block, idx) in physicalBlocks" 
@@ -68,36 +65,41 @@
     </div>
 
     <div class="explain">
-      <strong>💡 原理：</strong>每个程序以为自己独占连续的内存（左），实际上操作系统把数据分散存到真实内存各处（右）。程序看到的地址都是"假"的，操作系统负责翻译。
+      <strong>{{ t('operatingSystems.principleLabel') }}</strong>
+      {{ t('operatingSystems.memory.explain') }}
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { computerFundamentalsLocale } from '../../../locales/computer-fundamentals/index.js'
+
+const { t, messages } = useI18n(computerFundamentalsLocale)
 
 const wechatProgress = ref(0)
 const gameProgress = ref(0)
 const currentMapping = ref(0)
 
-// 物理内存状态
+// Physical memory state.
 const physicalBlocks = ref([
-  { type: 'os', label: '系统', active: false },
+  { type: 'os', label: messages.value.operatingSystems.memory.systemLabel, active: false },
   { type: 'empty', label: '', active: false },
   { type: 'empty', label: '', active: false },
-  { type: 'os', label: '系统', active: false },
+  { type: 'os', label: messages.value.operatingSystems.memory.systemLabel, active: false },
   { type: 'empty', label: '', active: false },
   { type: 'empty', label: '', active: false },
   { type: 'empty', label: '', active: false },
-  { type: 'os', label: '系统', active: false }
+  { type: 'os', label: messages.value.operatingSystems.memory.systemLabel, active: false }
 ])
 
-// 映射关系（虚拟地址 -> 物理地址）
+// Mapping from virtual addresses to physical addresses.
 const mappings = [
-  { from: '微信-1', to: '物理-2', type: 'wechat' },
-  { from: '微信-2', to: '物理-3', type: 'wechat' },
-  { from: '游戏-1', to: '物理-5', type: 'game' },
-  { from: '游戏-2', to: '物理-6', type: 'game' }
+  { from: t('operatingSystems.memory.mappingWechat', { index: 1 }), to: t('operatingSystems.memory.physicalBlock', { index: 2 }), type: 'wechat' },
+  { from: t('operatingSystems.memory.mappingWechat', { index: 2 }), to: t('operatingSystems.memory.physicalBlock', { index: 3 }), type: 'wechat' },
+  { from: t('operatingSystems.memory.mappingGame', { index: 1 }), to: t('operatingSystems.memory.physicalBlock', { index: 5 }), type: 'game' },
+  { from: t('operatingSystems.memory.mappingGame', { index: 2 }), to: t('operatingSystems.memory.physicalBlock', { index: 6 }), type: 'game' }
 ]
 
 const visibleMappings = computed(() => {
@@ -109,25 +111,25 @@ let phase = 0
 
 const runDemo = () => {
   switch(phase) {
-    case 0: // 微信申请内存
+    case 0:
       wechatProgress.value = 50
       physicalBlocks.value[1] = { type: 'wechat', label: 'W1', active: true }
       physicalBlocks.value[2] = { type: 'wechat', label: 'W2', active: true }
       currentMapping.value = 2
       phase = 1
       break
-    case 1: // 游戏申请内存
+    case 1:
       gameProgress.value = 50
       physicalBlocks.value[4] = { type: 'game', label: 'G1', active: true }
       physicalBlocks.value[5] = { type: 'game', label: 'G2', active: true }
       currentMapping.value = 4
       phase = 2
       break
-    case 2: // 高亮显示
+    case 2:
       physicalBlocks.value.forEach(b => b.active = false)
       phase = 3
       break
-    case 3: // 重置
+    case 3:
       wechatProgress.value = 0
       gameProgress.value = 0
       currentMapping.value = 0

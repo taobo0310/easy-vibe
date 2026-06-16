@@ -1,7 +1,11 @@
 <script setup>
 import { ref } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { javascriptIntroLocale } from '../../../locales/javascript-intro/index.js'
 
-const name = ref('张三')
+const { t } = useI18n(javascriptIntroLocale)
+
+const name = ref(t('variableBox.defaultName'))
 const age = ref(25)
 const isStudent = ref(true)
 const showMessage = ref('')
@@ -22,15 +26,15 @@ const setMessage = (msg, type) => {
 
 const modifyAge = () => {
   age.value = 26
-  setMessage('✅ let 可以修改', 'success')
+  setMessage(t('variableBox.successMessage'), 'success')
 }
 
 const modifyName = () => {
-  setMessage('❌ const 不能改', 'error')
+  setMessage(t('variableBox.errorMessage'), 'error')
 }
 
 const reset = () => {
-  name.value = '张三'
+  name.value = t('variableBox.defaultName')
   age.value = 25
   isStudent.value = true
   clearMessage()
@@ -40,7 +44,7 @@ const reset = () => {
 <template>
   <div class="variable-box-demo">
     <div class="demo-header">
-      <span class="title">📦 变量就像带名字的盒子</span>
+      <span class="title">{{ t('variableBox.title') }}</span>
     </div>
 
     <div class="boxes-row">
@@ -109,19 +113,19 @@ const reset = () => {
         class="btn btn-primary"
         @click="modifyAge"
       >
-        修改 age
+        {{ t('variableBox.modifyAge') }}
       </button>
       <button
         class="btn btn-danger"
         @click="modifyName"
       >
-        修改 name
+        {{ t('variableBox.modifyName') }}
       </button>
       <button
         class="btn btn-secondary"
         @click="reset"
       >
-        重置
+        {{ t('variableBox.reset') }}
       </button>
     </div>
 

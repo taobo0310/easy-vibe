@@ -1,15 +1,11 @@
-<!--
-  AuthBasicsDemo.vue
-  鉴权基础：你到底在“传什么”来证明身份？
--->
 <template>
   <div class="auth-basics-demo">
     <div class="header">
       <div class="title">
-        🧰 鉴权的 4 种常见“凭证”
+        {{ t('basics.title') }}
       </div>
       <div class="subtitle">
-        选一个方案，看看请求长什么样、优缺点是什么、最常见坑是什么。
+        {{ t('basics.subtitle') }}
       </div>
     </div>
 
@@ -29,7 +25,7 @@
     <div class="grid">
       <div class="card">
         <div class="card-title">
-          请求长什么样
+          {{ t('basics.requestShape') }}
         </div>
         <pre class="code"><code>{{ active.example }}</code></pre>
         <div class="hint">
@@ -39,12 +35,12 @@
 
       <div class="card">
         <div class="card-title">
-          什么时候用 / 不用
+          {{ t('basics.usageTitle') }}
         </div>
         <div class="two">
           <div class="box">
             <div class="box-title">
-              ✅ 适合
+              {{ t('basics.suitable') }}
             </div>
             <ul class="list">
               <li
@@ -57,7 +53,7 @@
           </div>
           <div class="box">
             <div class="box-title">
-              ⚠️ 不适合 / 风险
+              {{ t('basics.risk') }}
             </div>
             <ul class="list">
               <li
@@ -74,10 +70,10 @@
 
     <div class="card">
       <div class="card-title">
-        一句话口诀
+        {{ t('basics.mantraTitle') }}
       </div>
       <div class="desc">
-        <strong>先认证（你是谁）</strong>，再授权（你能做什么）。凭证只是“证明身份的方式”，授权永远要在服务端执行。
+        {{ t('basics.mantra') }}
       </div>
     </div>
   </div>
@@ -85,68 +81,15 @@
 
 <script setup>
 import { computed, ref } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { authDesignLocale } from '../../../locales/auth-design/index.js'
 
-const methods = [
-  {
-    id: 'basic',
-    name: 'HTTP Basic',
-    bestFor: '内部工具',
-    example: `GET /api/profile
-Authorization: Basic <base64(username:password)>`,
-    note: 'Base64 不是加密；必须配合 HTTPS，且不建议用于公网生产。',
-    pros: ['最简单，所有客户端都支持', '适合内部/临时调试工具'],
-    cons: [
-      '每次请求都带密码（风险大）',
-      '无法“注销”（除非服务端改密码）',
-      '不适合现代业务'
-    ]
-  },
-  {
-    id: 'cookie',
-    name: 'Session + Cookie',
-    bestFor: '传统 Web',
-    example: `POST /login
-→ 200 OK
-Set-Cookie: session_id=abc; HttpOnly; Secure; SameSite=Lax
+const { t, messages } = useI18n(authDesignLocale)
+const methods = computed(() => messages.value.basics.methods)
 
-GET /api/profile
-Cookie: session_id=abc`,
-    note: '浏览器会自动带 Cookie；因此一定要做 CSRF 防护（SameSite / CSRF Token）。',
-    pros: ['服务端可控（可主动注销）', '适合 SSR/同域 Web', '实现直观'],
-    cons: ['服务端有状态（需要共享 session）', '跨域复杂', '容易被 CSRF 影响']
-  },
-  {
-    id: 'jwt',
-    name: 'JWT Bearer',
-    bestFor: 'API/移动端',
-    example: `POST /login
-→ { "access_token": "..." }
-
-GET /api/profile
-Authorization: Bearer <access_token>`,
-    note: 'JWT payload 可解码；不要放敏感信息。建议短 access token + refresh token。',
-    pros: ['无状态，易扩展', '跨域友好', '移动端/多服务常用'],
-    cons: [
-      '难以全局注销（需要额外机制）',
-      'token 变大，每次都要带',
-      '设计不好会导致权限失控'
-    ]
-  },
-  {
-    id: 'apikey',
-    name: 'API Key',
-    bestFor: '服务到服务',
-    example: `GET /api/metrics
-X-API-Key: <your_api_key>`,
-    note: 'API Key 更像“门禁卡”，要配合限流、IP 白名单、轮换、最小权限。',
-    pros: ['实现简单', '适合服务间/脚本访问', '易于轮换（如果设计得当）'],
-    cons: ['通常缺少用户上下文', '泄露后影响大', '需要做权限/轮换/审计']
-  }
-]
-
-const current = ref(methods[0].id)
+const current = ref('basic')
 const active = computed(
-  () => methods.find((m) => m.id === current.value) || methods[0]
+  () => methods.value.find((m) => m.id === current.value) || methods.value[0]
 )
 </script>
 

@@ -36,7 +36,7 @@
           <span class="value">{{ selectedServiceData.aws }}</span>
         </div>
         <div class="compare-item">
-          <span class="label">阿里云:</span>
+          <span class="label">{{ t('overview.aliyun') }}</span>
           <span class="value">{{ selectedServiceData.aliyun }}</span>
         </div>
       </div>
@@ -46,68 +46,16 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { cloudServicesLocale } from '../../../locales/cloud-services/index.js'
+
+const { t, messages } = useI18n(cloudServicesLocale)
 
 const selectedService = ref(null)
-
-const services = [
-  { 
-    id: 'compute', 
-    icon: '⚙️', 
-    name: '计算', 
-    examples: 'EC2 / ECS',
-    description: '提供虚拟服务器和计算能力，是云服务的基础',
-    aws: 'Amazon EC2',
-    aliyun: 'ECS 云服务器'
-  },
-  { 
-    id: 'storage', 
-    icon: '💾', 
-    name: '存储', 
-    examples: 'S3 / OSS',
-    description: '对象存储服务，用于存放图片、文档等文件',
-    aws: 'Amazon S3',
-    aliyun: 'OSS 对象存储'
-  },
-  { 
-    id: 'network', 
-    icon: '🌐', 
-    name: '网络', 
-    examples: 'VPC / 专有网络',
-    description: '构建隔离的虚拟网络环境',
-    aws: 'Amazon VPC',
-    aliyun: '专有网络 VPC'
-  },
-  { 
-    id: 'database', 
-    icon: '🗄️', 
-    name: '数据库', 
-    examples: 'RDS / PolarDB',
-    description: '托管的关系型数据库服务',
-    aws: 'Amazon RDS',
-    aliyun: 'RDS 关系型数据库'
-  },
-  { 
-    id: 'security', 
-    icon: '🔒', 
-    name: '安全', 
-    examples: 'IAM / RAM',
-    description: '身份认证和访问控制服务',
-    aws: 'AWS IAM',
-    aliyun: 'RAM 访问控制'
-  },
-  { 
-    id: 'middleware', 
-    icon: '🔧', 
-    name: '中间件', 
-    examples: 'MQ / RocketMQ',
-    description: '消息队列和缓存服务',
-    aws: 'Amazon MQ',
-    aliyun: 'RocketMQ'
-  }
-]
+const services = computed(() => messages.value.overview.services)
 
 const selectedServiceData = computed(() => 
-  services.find(s => s.id === selectedService.value)
+  services.value.find((service) => service.id === selectedService.value)
 )
 
 function selectService(id) {

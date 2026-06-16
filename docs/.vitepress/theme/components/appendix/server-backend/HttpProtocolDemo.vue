@@ -2,7 +2,7 @@
   <div class="http-root">
     <div class="http-header">
       <span class="http-icon">🌐</span>
-      <span class="http-title">HTTP 协议演示</span>
+      <span class="http-title">{{ t('httpProtocol.title') }}</span>
     </div>
 
     <div class="http-tabs">
@@ -17,13 +17,12 @@
     </div>
 
     <div class="http-content">
-      <!-- 请求响应演示 -->
       <div v-if="activeTab === 'request'" class="http-section">
         <div class="http-flow">
           <div class="http-card http-request">
             <div class="http-card-header">
               <span class="http-card-icon">📤</span>
-              <span class="http-card-title">HTTP 请求</span>
+              <span class="http-card-title">{{ t('httpProtocol.labels.request') }}</span>
             </div>
             <div class="http-card-body">
               <div class="http-line http-line-start">
@@ -50,13 +49,13 @@
 
           <div class="http-connection">
             <div class="http-connection-line"></div>
-            <span class="http-connection-label">TCP 连接</span>
+            <span class="http-connection-label">{{ t('httpProtocol.labels.tcpConnection') }}</span>
           </div>
 
           <div class="http-card http-response">
             <div class="http-card-header">
               <span class="http-card-icon">📥</span>
-              <span class="http-card-title">HTTP 响应</span>
+              <span class="http-card-title">{{ t('httpProtocol.labels.response') }}</span>
             </div>
             <div class="http-card-body">
               <div class="http-line http-line-start">
@@ -92,15 +91,10 @@
         </div>
       </div>
 
-      <!-- HTTP 版本对比 -->
       <div v-else-if="activeTab === 'versions'" class="http-section">
         <div class="version-table">
           <div class="version-row version-row-head">
-            <div class="version-cell">版本</div>
-            <div class="version-cell">年份</div>
-            <div class="version-cell">核心特性</div>
-            <div class="version-cell">传输格式</div>
-            <div class="version-cell">连接方式</div>
+            <div v-for="header in versionHeaders" :key="header" class="version-cell">{{ header }}</div>
           </div>
           <div
             v-for="ver in versions"
@@ -117,7 +111,6 @@
         </div>
       </div>
 
-      <!-- HTTP/2 多路复用 -->
       <div v-else-if="activeTab === 'http2'" class="http-section">
         <div class="http2-diagram">
           <div class="http2-header">
@@ -128,68 +121,52 @@
             <div class="http2-side">
               <div class="http2-side-title">HTTP/1.1</div>
               <div class="http2-connection http2-connection-legacy">
-                <div class="http2-stream http2-stream-1">
-                  <div class="http2-label">请求 1</div>
+                <div
+                  v-for="(stream, i) in http2.legacyRequests"
+                  :key="stream.label"
+                  :class="['http2-stream', `http2-stream-${i + 1}`]"
+                >
+                  <div class="http2-label">{{ stream.label }}</div>
                   <div class="http2-timeline">
-                    <div class="http2-block http2-block-req">发送</div>
-                    <div class="http2-block http2-block-wait">等待</div>
-                    <div class="http2-block http2-block-res">接收</div>
-                  </div>
-                </div>
-                <div class="http2-stream http2-stream-2">
-                  <div class="http2-label">请求 2</div>
-                  <div class="http2-timeline">
-                    <div class="http2-block http2-block-wait">排队</div>
-                    <div class="http2-block http2-block-req">发送</div>
-                    <div class="http2-block http2-block-wait">等待</div>
-                    <div class="http2-block http2-block-res">接收</div>
-                  </div>
-                </div>
-                <div class="http2-stream http2-stream-3">
-                  <div class="http2-label">请求 3</div>
-                  <div class="http2-timeline">
-                    <div class="http2-block http2-block-wait">排队</div>
-                    <div class="http2-block http2-block-wait">排队</div>
-                    <div class="http2-block http2-block-req">发送</div>
-                    <div class="http2-block http2-block-res">接收</div>
+                    <div
+                      v-for="(block, j) in stream.blocks"
+                      :key="j"
+                      :class="['http2-block', `http2-block-${block.type}`]"
+                    >
+                      {{ block.label }}
+                    </div>
                   </div>
                 </div>
               </div>
-              <div class="http2-note">串行传输，需等待前一个请求完成</div>
+              <div class="http2-note">{{ http2.legacyNote }}</div>
             </div>
 
             <div class="http2-side">
               <div class="http2-side-title">HTTP/2</div>
               <div class="http2-connection http2-connection-modern">
-                <div class="http2-stream http2-stream-1">
-                  <div class="http2-label">Stream 1</div>
+                <div
+                  v-for="(stream, i) in http2.modernStreams"
+                  :key="stream.label"
+                  :class="['http2-stream', `http2-stream-${i + 1}`]"
+                >
+                  <div class="http2-label">{{ stream.label }}</div>
                   <div class="http2-timeline">
-                    <div class="http2-block http2-block-req">发送</div>
-                    <div class="http2-block http2-block-res">接收</div>
-                  </div>
-                </div>
-                <div class="http2-stream http2-stream-2">
-                  <div class="http2-label">Stream 2</div>
-                  <div class="http2-timeline">
-                    <div class="http2-block http2-block-req">发送</div>
-                    <div class="http2-block http2-block-res">接收</div>
-                  </div>
-                </div>
-                <div class="http2-stream http2-stream-3">
-                  <div class="http2-label">Stream 3</div>
-                  <div class="http2-timeline">
-                    <div class="http2-block http2-block-req">发送</div>
-                    <div class="http2-block http2-block-res">接收</div>
+                    <div
+                      v-for="(block, j) in stream.blocks"
+                      :key="j"
+                      :class="['http2-block', `http2-block-${block.type}`]"
+                    >
+                      {{ block.label }}
+                    </div>
                   </div>
                 </div>
               </div>
-              <div class="http2-note">多路复用，并发传输多个请求</div>
+              <div class="http2-note">{{ http2.modernNote }}</div>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- HTTPS vs HTTP -->
       <div v-else-if="activeTab === 'https'" class="http-section">
         <div class="https-comparison">
           <div class="https-card https-http">
@@ -198,14 +175,12 @@
               <span class="https-title">HTTP</span>
             </div>
             <div class="https-body">
-              <div class="https-warning">⚠️ 不安全</div>
+              <div class="https-warning">{{ t('httpProtocol.labels.unsafe') }}</div>
               <ul class="https-list">
-                <li>明文传输，数据可被窃听</li>
-                <li>无法验证服务器身份</li>
-                <li>数据可能被篡改</li>
+                <li v-for="item in https.httpItems" :key="item">{{ item }}</li>
               </ul>
               <div class="https-example">
-                <div class="https-example-label">传输内容：</div>
+                <div class="https-example-label">{{ t('httpProtocol.labels.transferContent') }}</div>
                 <code>GET /login?user=admin&pass=123456</code>
               </div>
             </div>
@@ -217,58 +192,26 @@
               <span class="https-title">HTTPS</span>
             </div>
             <div class="https-body">
-              <div class="https-success">✓ 安全</div>
+              <div class="https-success">{{ t('httpProtocol.labels.safe') }}</div>
               <ul class="https-list">
-                <li>加密传输，数据无法被窃听</li>
-                <li>SSL/TLS 证书验证身份</li>
-                <li>数据完整性校验，防篡改</li>
+                <li v-for="item in https.httpsItems" :key="item">{{ item }}</li>
               </ul>
               <div class="https-example">
-                <div class="https-example-label">传输内容：</div>
-                <code>8f3a2b...（加密数据）</code>
+                <div class="https-example-label">{{ t('httpProtocol.labels.transferContent') }}</div>
+                <code>{{ https.encryptedExample }}</code>
               </div>
             </div>
           </div>
         </div>
 
         <div class="https-flow">
-          <div class="https-flow-title">HTTPS 握手过程</div>
+          <div class="https-flow-title">{{ t('httpProtocol.labels.handshakeTitle') }}</div>
           <div class="https-steps">
-            <div class="https-step">
-              <div class="https-step-number">1</div>
+            <div v-for="(step, i) in https.steps" :key="step.title" class="https-step">
+              <div class="https-step-number">{{ i + 1 }}</div>
               <div class="https-step-content">
-                <div class="https-step-title">Client Hello</div>
-                <div class="https-step-desc">客户端发送支持的加密套件</div>
-              </div>
-            </div>
-            <div class="https-step">
-              <div class="https-step-number">2</div>
-              <div class="https-step-content">
-                <div class="https-step-title">Server Hello</div>
-                <div class="https-step-desc">
-                  服务器返回证书和选定的加密套件
-                </div>
-              </div>
-            </div>
-            <div class="https-step">
-              <div class="https-step-number">3</div>
-              <div class="https-step-content">
-                <div class="https-step-title">验证证书</div>
-                <div class="https-step-desc">客户端验证服务器证书</div>
-              </div>
-            </div>
-            <div class="https-step">
-              <div class="https-step-number">4</div>
-              <div class="https-step-content">
-                <div class="https-step-title">密钥交换</div>
-                <div class="https-step-desc">生成会话密钥</div>
-              </div>
-            </div>
-            <div class="https-step">
-              <div class="https-step-number">5</div>
-              <div class="https-step-content">
-                <div class="https-step-title">加密通信</div>
-                <div class="https-step-desc">使用会话密钥加密数据</div>
+                <div class="https-step-title">{{ step.title }}</div>
+                <div class="https-step-desc">{{ step.desc }}</div>
               </div>
             </div>
           </div>
@@ -279,167 +222,34 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { computed, ref, watch } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { serverBackendLocale } from '../../../locales/server-backend/index.js'
+
+const { t, messages } = useI18n(serverBackendLocale)
 
 const activeTab = ref('request')
 
-const tabs = [
-  { id: 'request', name: '请求响应', icon: '📡' },
-  { id: 'versions', name: '版本对比', icon: '📊' },
-  { id: 'http2', name: 'HTTP/2', icon: '⚡' },
-  { id: 'https', name: 'HTTPS', icon: '🔒' }
-]
+const http = computed(() => messages.value.httpProtocol)
+const tabs = computed(() => http.value.tabs)
+const versionHeaders = computed(() => http.value.versionHeaders)
+const demos = computed(() => http.value.demos)
+const versions = computed(() => http.value.versions)
+const http2 = computed(() => http.value.http2)
+const https = computed(() => http.value.https)
+const request = ref(http.value.initialRequest)
+const response = ref(http.value.initialResponse)
 
-const request = ref({
-  method: 'GET',
-  url: '/api/users/123',
-  version: 'HTTP/1.1',
-  headers: {
-    Host: 'api.example.com',
-    'User-Agent': 'Mozilla/5.0',
-    Accept: 'application/json',
-    Authorization: 'Bearer xxx'
-  },
-  body: null
+watch(http, value => {
+  request.value = value.initialRequest
+  response.value = value.initialResponse
 })
-
-const response = ref({
-  version: 'HTTP/1.1',
-  status: '200',
-  statusClass: 'success',
-  statusText: 'OK',
-  headers: {
-    'Content-Type': 'application/json',
-    'Content-Length': '156',
-    'Cache-Control': 'max-age=3600'
-  },
-  body: '{\n  "id": 123,\n  "name": "张三",\n  "email": "zhangsan@example.com"\n}'
-})
-
-const demos = [
-  {
-    id: 'get',
-    name: 'GET 请求',
-    request: {
-      method: 'GET',
-      url: '/api/users/123',
-      version: 'HTTP/1.1',
-      headers: {
-        Host: 'api.example.com',
-        Accept: 'application/json'
-      },
-      body: null
-    },
-    response: {
-      version: 'HTTP/1.1',
-      status: '200',
-      statusClass: 'success',
-      statusText: 'OK',
-      headers: {
-        'Content-Type': 'application/json',
-        'Content-Length': '156'
-      },
-      body: '{\n  "id": 123,\n  "name": "张三"\n}'
-    }
-  },
-  {
-    id: 'post',
-    name: 'POST 创建',
-    request: {
-      method: 'POST',
-      url: '/api/users',
-      version: 'HTTP/1.1',
-      headers: {
-        Host: 'api.example.com',
-        'Content-Type': 'application/json',
-        'Content-Length': '45'
-      },
-      body: '{\n  "name": "李四",\n  "email": "lisi@example.com"\n}'
-    },
-    response: {
-      version: 'HTTP/1.1',
-      status: '201',
-      statusClass: 'success',
-      statusText: 'Created',
-      headers: {
-        'Content-Type': 'application/json',
-        Location: '/api/users/124'
-      },
-      body: '{\n  "id": 124,\n  "name": "李四"\n}'
-    }
-  },
-  {
-    id: '404',
-    name: '404 错误',
-    request: {
-      method: 'GET',
-      url: '/api/users/999',
-      version: 'HTTP/1.1',
-      headers: {
-        Host: 'api.example.com'
-      },
-      body: null
-    },
-    response: {
-      version: 'HTTP/1.1',
-      status: '404',
-      statusClass: 'error',
-      statusText: 'Not Found',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: '{\n  "error": "用户不存在"\n}'
-    }
-  }
-]
-
-const versions = [
-  {
-    version: 'HTTP/0.9',
-    year: '1991',
-    features: '仅支持 GET',
-    format: '纯文本',
-    connection: '一次一请求',
-    highlight: false
-  },
-  {
-    version: 'HTTP/1.0',
-    year: '1996',
-    features: '增加 POST/HEAD',
-    format: '纯文本',
-    connection: '短连接',
-    highlight: false
-  },
-  {
-    version: 'HTTP/1.1',
-    year: '1997',
-    features: '持久连接、分块传输',
-    format: '纯文本',
-    connection: '长连接',
-    highlight: true
-  },
-  {
-    version: 'HTTP/2',
-    year: '2015',
-    features: '多路复用、头部压缩',
-    format: '二进制帧',
-    connection: '多路复用',
-    highlight: true
-  },
-  {
-    version: 'HTTP/3',
-    year: '2022',
-    features: '基于 QUIC、解决队头阻塞',
-    format: 'QUIC (UDP)',
-    connection: '独立连接',
-    highlight: true
-  }
-]
 
 function loadDemo(demo) {
   request.value = demo.request
   response.value = demo.response
 }
+
 </script>
 
 <style scoped>
@@ -504,7 +314,6 @@ function loadDemo(demo) {
   padding: 20px;
 }
 
-/* 请求响应演示 */
 .http-flow {
   display: flex;
   align-items: stretch;
@@ -672,7 +481,6 @@ function loadDemo(demo) {
   border-color: var(--vp-c-brand);
 }
 
-/* 版本对比表 */
 .version-table {
   border: 1px solid var(--vp-c-divider);
   border-radius: 8px;
@@ -721,7 +529,6 @@ function loadDemo(demo) {
   color: var(--vp-c-brand);
 }
 
-/* HTTP/2 对比 */
 .http2-comparison {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -789,7 +596,6 @@ function loadDemo(demo) {
   margin-top: 8px;
 }
 
-/* HTTPS 对比 */
 .https-comparison {
   display: grid;
   grid-template-columns: 1fr 1fr;

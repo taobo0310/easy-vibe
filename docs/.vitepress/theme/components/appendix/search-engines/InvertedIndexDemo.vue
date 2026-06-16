@@ -1,18 +1,14 @@
-<!--
-  InvertedIndexDemo.vue
-  倒排索引演示：展示搜索引擎的核心数据结构
--->
 <template>
   <div class="inverted-index-demo">
     <div class="header">
-      <div class="title">倒排索引 (Inverted Index)</div>
-      <div class="subtitle">输入搜索词，观察倒排索引如何工作</div>
+      <div class="title">{{ t('invertedIndex.title') }}</div>
+      <div class="subtitle">{{ t('invertedIndex.subtitle') }}</div>
     </div>
 
     <div class="search-box">
       <input
         v-model="query"
-        placeholder="试试搜索：苹果、手机、水果..."
+        :placeholder="t('invertedIndex.placeholder')"
         class="search-input"
         @input="search"
       />
@@ -20,7 +16,7 @@
 
     <div class="index-layout">
       <div class="docs-section">
-        <div class="section-title">原始文档</div>
+        <div class="section-title">{{ t('invertedIndex.sourceTitle') }}</div>
         <div
           v-for="doc in docs"
           :key="doc.id"
@@ -32,7 +28,7 @@
       </div>
 
       <div class="index-section">
-        <div class="section-title">倒排索引表</div>
+        <div class="section-title">{{ t('invertedIndex.indexTitle') }}</div>
         <div class="index-table">
           <div
             v-for="(entry, word) in invertedIndex"
@@ -50,54 +46,39 @@
     </div>
 
     <div v-if="query && matchedDocs.length > 0" class="result">
-      命中文档：{{ matchedDocs.map(id => 'Doc ' + id).join('、') }}
+      {{ t('invertedIndex.hitPrefix') }}{{ matchedDocs.map(id => 'Doc ' + id).join(t('invertedIndex.joiner')) }}
     </div>
     <div v-else-if="query" class="result no-match">
-      未找到匹配文档
+      {{ t('invertedIndex.noMatch') }}
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { searchEnginesLocale } from '../../../locales/search-engines/index.js'
+
+const { t, messages } = useI18n(searchEnginesLocale)
 
 const query = ref('')
 const matchedDocs = ref([])
 const matchedWords = ref([])
 
-const docs = [
-  { id: 1, text: '苹果是一种常见的水果' },
-  { id: 2, text: '苹果公司发布了新款手机' },
-  { id: 3, text: '我喜欢吃水果和蔬菜' },
-  { id: 4, text: '这款手机的价格很实惠' },
-  { id: 5, text: '水果店里有苹果和香蕉' }
-]
-
-const invertedIndex = {
-  '苹果': [1, 2, 5],
-  '水果': [1, 3, 5],
-  '手机': [2, 4],
-  '公司': [2],
-  '发布': [2],
-  '喜欢': [3],
-  '蔬菜': [3],
-  '价格': [4],
-  '实惠': [4],
-  '香蕉': [5],
-  '常见': [1]
-}
+const docs = computed(() => messages.value.invertedIndex.docs)
+const invertedIndex = computed(() => messages.value.invertedIndex.index)
 
 function search() {
-  const q = query.value.trim()
+  const q = query.value.trim().toLowerCase()
   if (!q) {
     matchedDocs.value = []
     matchedWords.value = []
     return
   }
-  const words = Object.keys(invertedIndex).filter(w => q.includes(w))
+  const words = Object.keys(invertedIndex.value).filter(w => q.includes(w.toLowerCase()))
   matchedWords.value = words
   const docSet = new Set()
-  words.forEach(w => invertedIndex[w].forEach(id => docSet.add(id)))
+  words.forEach(w => invertedIndex.value[w].forEach(id => docSet.add(id)))
   matchedDocs.value = [...docSet].sort()
 }
 </script>

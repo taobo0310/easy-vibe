@@ -1,6 +1,6 @@
 <template>
   <div class="url-parser-demo custom-demo-base">
-    <div class="demo-label">URL 解析 ── 把人类文字翻译成结构化信息</div>
+    <div class="demo-label">{{ t('network.urlParser.label') }}</div>
 
     <div class="demo-panel url-panel">
       <!-- url block -->
@@ -26,44 +26,29 @@
       </div>
 
       <div class="info-blocks">
-        <div 
-          class="info-card protocol-card"
-          :class="{ active: activePart === 'protocol' }"
-          @mouseenter="activePart = 'protocol'"
+        <div
+          v-for="part in parts"
+          :key="part.id"
+          :class="['info-card', `${part.id}-card`, { active: activePart === part.id }]"
+          @mouseenter="activePart = part.id"
           @mouseleave="activePart = null"
         >
-          <div class="card-title">🚛 交通方式 (协议 Protocol)</div>
-          <div class="card-desc">代表你要求坐安全级别最高的"运钞车"（加密通信HTTPS）。如果是 HTTP，就是老式敞篷车，沿途都会被看见。</div>
-        </div>
-
-        <div 
-          class="info-card host-card"
-          :class="{ active: activePart === 'host' }"
-          @mouseenter="activePart = 'host'"
-          @mouseleave="activePart = null"
-        >
-          <div class="card-title">🏢 店铺名 (主机名 Host)</div>
-          <div class="card-desc">这就是你要去哪家店，也是服务器的域名，后续浏览器需要把它翻译成网络世界认的数字 IP。</div>
-        </div>
-
-        <div 
-          class="info-card path-card"
-          :class="{ active: activePart === 'path' }"
-          @mouseenter="activePart = 'path'"
-          @mouseleave="activePart = null"
-        >
-          <div class="card-title">📍 具体货架 (路径 Path)</div>
-          <div class="card-desc">进了店门之后，你要去哪个房间拿具体的哪件商品或执行具体的某个动作。</div>
+          <div class="card-title">{{ part.title }}</div>
+          <div class="card-desc">{{ part.desc }}</div>
         </div>
       </div>
     </div>
-    <div class="demo-status">悬停查看每个部分的职责</div>
+    <div class="demo-status">{{ t('network.urlParser.status') }}</div>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { webBasicsLocale } from '../../../locales/web-basics/index.js'
 
+const { t, messages } = useI18n(webBasicsLocale)
+const parts = computed(() => messages.value.network.urlParser.parts)
 const activePart = ref(null)
 </script>
 

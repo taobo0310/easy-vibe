@@ -1,12 +1,12 @@
 <template>
   <div class="checklist-demo">
     <div class="header">
-      <div class="title">项目安全检查清单</div>
-      <div class="subtitle">勾选已完成的安全措施，查看项目安全评分</div>
+      <div class="title">{{ t('securityChecklist.title') }}</div>
+      <div class="subtitle">{{ t('securityChecklist.subtitle') }}</div>
     </div>
 
     <div class="score-bar">
-      <div class="score-label">安全评分</div>
+      <div class="score-label">{{ t('securityChecklist.scoreLabel') }}</div>
       <div class="score-track">
         <div
           class="score-fill"
@@ -14,7 +14,7 @@
         />
       </div>
       <div class="score-value" :style="{ color: scoreColor }">
-        {{ score }}分
+        {{ t('securityChecklist.scoreValue', { score }) }}
       </div>
       <div class="score-level" :style="{ color: scoreColor }">
         {{ scoreLevel }}
@@ -37,14 +37,14 @@
           class="check-item"
         >
           <div class="item-row" @click="item.checked = !item.checked">
-            <input type="checkbox" v-model="item.checked" @click.stop />
+            <input v-model="item.checked" type="checkbox" @click.stop />
             <span :class="['item-text', { done: item.checked }]">
               {{ item.label }}
             </span>
           </div>
           <div
-            class="item-detail"
             v-if="item.showDetail"
+            class="item-detail"
           >
             {{ item.detail }}
           </div>
@@ -52,7 +52,7 @@
             class="detail-toggle"
             @click="item.showDetail = !item.showDetail"
           >
-            {{ item.showDetail ? '收起' : '查看最佳实践' }}
+            {{ item.showDetail ? t('securityChecklist.collapse') : t('securityChecklist.detail') }}
           </button>
         </div>
       </div>
@@ -61,51 +61,12 @@
 </template>
 
 <script setup>
-import { reactive, computed } from 'vue'
+import { computed, reactive } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { engineeringExcellenceLocale } from '../../../locales/engineering-excellence/index.js'
 
-const categories = reactive([
-  {
-    icon: '🔍',
-    name: '输入验证',
-    open: true,
-    items: [
-      { label: '所有用户输入在服务端进行校验', checked: false, showDetail: false, detail: '永远不要仅依赖前端校验。攻击者可以绕过浏览器直接发送请求，服务端必须对长度、类型、格式、范围做二次验证。' },
-      { label: '使用白名单而非黑名单过滤', checked: false, showDetail: false, detail: '黑名单容易遗漏。应明确定义"允许什么"而非"禁止什么"，例如只允许字母数字而非试图过滤所有特殊字符。' },
-      { label: '对文件上传进行类型和大小限制', checked: false, showDetail: false, detail: '校验文件 MIME 类型和扩展名，限制文件大小，将上传文件存储在 Web 根目录之外，使用随机文件名。' }
-    ]
-  },
-  {
-    icon: '🔐',
-    name: '认证授权',
-    open: false,
-    items: [
-      { label: '密码使用 bcrypt/argon2 哈希存储', checked: false, showDetail: false, detail: '绝不明文存储密码。使用自带盐值的慢哈希算法（bcrypt cost>=10 或 argon2id），抵御彩虹表和暴力破解。' },
-      { label: '实施多因素认证 (MFA)', checked: false, showDetail: false, detail: '在密码之外增加第二因素（TOTP、短信、硬件密钥），即使密码泄露也能阻止未授权登录。' },
-      { label: '接口实施最小权限访问控制', checked: false, showDetail: false, detail: '每个 API 端点都应检查用户角色和权限，确保用户只能访问自己有权操作的资源（RBAC / ABAC）。' },
-      { label: '会话管理安全（超时、轮换）', checked: false, showDetail: false, detail: '登录后重新生成 Session ID，设置合理的过期时间，登出时销毁服务端会话。' }
-    ]
-  },
-  {
-    icon: '🛡️',
-    name: '数据保护',
-    open: false,
-    items: [
-      { label: '敏感数据加密存储', checked: false, showDetail: false, detail: '对数据库中的敏感字段（手机号、身份证等）使用 AES-256 等算法加密，密钥与数据分离存储。' },
-      { label: '日志中不记录敏感信息', checked: false, showDetail: false, detail: '日志中不应出现密码、Token、信用卡号等。使用脱敏处理，如只记录手机号后四位。' },
-      { label: '实施 SQL 注入防护（参数化查询）', checked: false, showDetail: false, detail: '所有数据库操作使用参数化查询或 ORM，绝不拼接 SQL 字符串。' }
-    ]
-  },
-  {
-    icon: '🌐',
-    name: '通信安全',
-    open: false,
-    items: [
-      { label: '全站启用 HTTPS', checked: false, showDetail: false, detail: '使用 TLS 1.2+ 加密所有通信，配置 HSTS 头强制 HTTPS，防止中间人攻击和数据窃听。' },
-      { label: '设置安全响应头（CSP、X-Frame-Options）', checked: false, showDetail: false, detail: '配置 Content-Security-Policy 限制资源加载来源，X-Frame-Options 防止点击劫持，X-Content-Type-Options 防止 MIME 嗅探。' },
-      { label: 'Cookie 设置 HttpOnly / Secure / SameSite', checked: false, showDetail: false, detail: 'HttpOnly 防止 JS 读取，Secure 确保仅 HTTPS 传输，SameSite=Lax 防止 CSRF 攻击。' }
-    ]
-  }
-])
+const { t, messages } = useI18n(engineeringExcellenceLocale)
+const categories = reactive(JSON.parse(JSON.stringify(messages.value.securityChecklist.categories)))
 
 const totalItems = computed(() =>
   categories.reduce((sum, c) => sum + c.items.length, 0)
@@ -129,9 +90,9 @@ const scoreColor = computed(() => {
 })
 
 const scoreLevel = computed(() => {
-  if (score.value >= 80) return '优秀'
-  if (score.value >= 50) return '及格'
-  return '危险'
+  if (score.value >= 80) return t('securityChecklist.levels.excellent')
+  if (score.value >= 50) return t('securityChecklist.levels.pass')
+  return t('securityChecklist.levels.danger')
 })
 
 const checkedCount = (ci) =>

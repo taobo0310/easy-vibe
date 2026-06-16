@@ -1,7 +1,7 @@
 <template>
   <div class="functional-unit-demo">
     <div class="demo-label">
-      常见功能单元 ── 切换不同模块，查看其实际工作原理
+      {{ t('functionalUnit.label') }}
     </div>
 
     <div class="tabs">
@@ -20,12 +20,12 @@
       <!-- MUX Demo -->
       <div v-if="currentTab === 'mux'" class="demo-panel">
         <div class="panel-desc">
-          <strong>多路选择器 (MUX)</strong>：像铁路道岔一样，根据"选择信号"决定让哪一路数据通过。
+          {{ t('functionalUnit.mux.desc') }}
         </div>
         <div class="mux-container">
           <div class="inputs">
             <div class="input-line">
-              <span class="label">数据 0 (D0)</span>
+              <span class="label">{{ t('functionalUnit.mux.data0') }}</span>
               <button
                 class="toggle-btn"
                 :class="{ on: muxD0 }"
@@ -35,7 +35,7 @@
               </button>
             </div>
             <div class="input-line">
-              <span class="label">数据 1 (D1)</span>
+              <span class="label">{{ t('functionalUnit.mux.data1') }}</span>
               <button
                 class="toggle-btn"
                 :class="{ on: muxD1 }"
@@ -49,7 +49,7 @@
           <div class="mux-chip">
             <div class="chip-body">MUX</div>
             <div class="select-pin">
-              <span class="label">选择 (Sel)</span>
+              <span class="label">{{ t('functionalUnit.mux.select') }}</span>
               <button
                 class="select-btn"
                 :class="{ on: muxSel }"
@@ -62,17 +62,14 @@
 
           <div class="outputs">
             <div class="output-line" :class="{ active: muxResult }">
-              <span class="label">输出 (Out)</span>
+              <span class="label">{{ t('functionalUnit.mux.output') }}</span>
               <span class="out-val">{{ muxResult ? '1' : '0' }}</span>
             </div>
           </div>
         </div>
         <div class="logic-explain">
           <p>
-            当前选择信号为 {{ muxSel ? '1' : '0' }}，因此输出等于 数据
-            {{ muxSel ? '1 (D1)' : '0 (D0)' }} 的值：<strong>{{
-              muxResult ? '1' : '0'
-            }}</strong>
+            {{ muxExplain }}
           </p>
         </div>
       </div>
@@ -80,8 +77,7 @@
       <!-- Decoder Demo -->
       <div v-if="currentTab === 'decoder'" class="demo-panel">
         <div class="panel-desc">
-          <strong>译码器 (Decoder)</strong>：将二进制输入转换为特定输出线的激活信号（例如 2位输入可以激活
-          4根输出线中的一根）。
+          {{ t('functionalUnit.decoder.desc') }}
         </div>
         <div class="decoder-container">
           <div class="inputs vertical">
@@ -93,7 +89,7 @@
               >
                 {{ decA1 ? '1' : '0' }}
               </button>
-              <span class="label">A1 (高位)</span>
+              <span class="label">{{ t('functionalUnit.decoder.highBit') }}</span>
             </div>
             <div class="input-line">
               <button
@@ -103,38 +99,36 @@
               >
                 {{ decA0 ? '1' : '0' }}
               </button>
-              <span class="label">A0 (低位)</span>
+              <span class="label">{{ t('functionalUnit.decoder.lowBit') }}</span>
             </div>
           </div>
 
           <div class="decoder-chip">
-            <div class="chip-body">2-to-4<br />译码器</div>
+            <div class="chip-body">{{ t('functionalUnit.decoder.chip') }}</div>
           </div>
 
           <div class="outputs vertical-out">
             <div class="output-line" :class="{ active: decResult === 0 }">
               <span class="out-val">{{ decResult === 0 ? '1' : '0' }}</span>
-              <span class="label">Y0 (当输入 00 时)</span>
+              <span class="label">{{ decoderOutputLabels[0] }}</span>
             </div>
             <div class="output-line" :class="{ active: decResult === 1 }">
               <span class="out-val">{{ decResult === 1 ? '1' : '0' }}</span>
-              <span class="label">Y1 (当输入 01 时)</span>
+              <span class="label">{{ decoderOutputLabels[1] }}</span>
             </div>
             <div class="output-line" :class="{ active: decResult === 2 }">
               <span class="out-val">{{ decResult === 2 ? '1' : '0' }}</span>
-              <span class="label">Y2 (当输入 10 时)</span>
+              <span class="label">{{ decoderOutputLabels[2] }}</span>
             </div>
             <div class="output-line" :class="{ active: decResult === 3 }">
               <span class="out-val">{{ decResult === 3 ? '1' : '0' }}</span>
-              <span class="label">Y3 (当输入 11 时)</span>
+              <span class="label">{{ decoderOutputLabels[3] }}</span>
             </div>
           </div>
         </div>
         <div class="logic-explain">
           <p>
-            当前输入为二进制的 {{ decA1 ? '1' : '0'
-            }}{{ decA0 ? '1' : '0' }} (十进制 {{ decResult }})，因此只有
-            <strong>Y{{ decResult }}</strong> 被激活（输出 1）。
+            {{ decoderExplain }}
           </p>
         </div>
       </div>
@@ -144,11 +138,11 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { computerFundamentalsLocale } from '../../../locales/computer-fundamentals/index.js'
 
-const tabs = [
-  { id: 'mux', name: '多路选择器 (MUX)' },
-  { id: 'decoder', name: '译码器 (Decoder)' }
-]
+const { t, messages } = useI18n(computerFundamentalsLocale)
+const tabs = computed(() => messages.value.functionalUnit.tabs)
 
 const currentTab = ref('mux')
 
@@ -157,11 +151,25 @@ const muxD0 = ref(false)
 const muxD1 = ref(true)
 const muxSel = ref(false)
 const muxResult = computed(() => (muxSel.value ? muxD1.value : muxD0.value))
+const muxExplain = computed(() =>
+  t('functionalUnit.mux.explain')
+    .replace('{sel}', muxSel.value ? '1' : '0')
+    .replace('{data}', muxSel.value ? '1 (D1)' : '0 (D0)')
+    .replace('{result}', muxResult.value ? '1' : '0')
+)
 
 // Decoder State
 const decA1 = ref(false)
 const decA0 = ref(false)
 const decResult = computed(() => (decA1.value ? 2 : 0) + (decA0.value ? 1 : 0))
+const decoderOutputLabels = computed(
+  () => messages.value.functionalUnit.decoder.outputLabels
+)
+const decoderExplain = computed(() =>
+  t('functionalUnit.decoder.explain')
+    .replace('{binary}', `${decA1.value ? '1' : '0'}${decA0.value ? '1' : '0'}`)
+    .replaceAll('{decimal}', String(decResult.value))
+)
 </script>
 
 <style scoped>

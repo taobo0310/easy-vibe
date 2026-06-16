@@ -1,14 +1,14 @@
 <template>
   <div class="kubernetes-demo">
     <div class="demo-header">
-      <h4>☸️ Kubernetes 编排演示</h4>
-      <p>观察 K8s 如何自动调度容器、实现负载均衡和故障恢复</p>
+      <h4>{{ t('kubernetes.title') }}</h4>
+      <p>{{ t('kubernetes.subtitle') }}</p>
     </div>
 
     <div class="k8s-architecture">
       <div class="control-plane">
         <div class="plane-title">
-          控制平面 (Control Plane)
+          {{ t('kubernetes.controlPlaneTitle') }}
         </div>
         <div class="components">
           <div
@@ -33,7 +33,7 @@
 
       <div class="worker-nodes">
         <div class="plane-title">
-          工作节点 (Worker Nodes)
+          {{ t('kubernetes.workerNodesTitle') }}
         </div>
         <div class="nodes-container">
           <div
@@ -53,7 +53,7 @@
               <span
                 class="node-status"
                 :class="node.status"
-              >{{ node.statusText }}</span>
+              >{{ t(`kubernetes.statuses.${node.statusText}`) }}</span>
             </div>
             <div class="node-resources">
               <div class="resource">
@@ -68,7 +68,7 @@
                 <span class="res-value">{{ node.cpu }}%</span>
               </div>
               <div class="resource">
-                <span class="res-label">内存:</span>
+                <span class="res-label">{{ t('kubernetes.memory') }}</span>
                 <div class="res-bar">
                   <div
                     class="res-fill"
@@ -81,7 +81,7 @@
             </div>
             <div class="node-pods">
               <div class="pods-label">
-                运行 Pod: {{ node.pods }} 个
+                {{ t('kubernetes.podCount', { count: node.pods }) }}
               </div>
               <div class="pods-grid">
                 <div
@@ -113,27 +113,27 @@
         :disabled="isScheduling"
         @click="simulateScheduling"
       >
-        {{ isScheduling ? '调度中...' : '🚀 模拟 Pod 调度' }}
+        {{ isScheduling ? t('kubernetes.scheduling') : t('kubernetes.schedule') }}
       </button>
       <button
         class="control-btn"
         :disabled="isScaling"
         @click="simulateScaling"
       >
-        {{ isScaling ? '扩容中...' : '📈 自动扩容' }}
+        {{ isScaling ? t('kubernetes.scaling') : t('kubernetes.scale') }}
       </button>
       <button
         class="control-btn danger"
         :disabled="isFailing"
         @click="simulateFailure"
       >
-        {{ isFailing ? '故障注入中...' : '💥 模拟节点故障' }}
+        {{ isFailing ? t('kubernetes.failing') : t('kubernetes.fail') }}
       </button>
       <button
         class="control-btn"
         @click="resetCluster"
       >
-        🔄 重置集群
+        {{ t('kubernetes.reset') }}
       </button>
     </div>
 
@@ -153,33 +153,34 @@
     </div>
 
     <div class="demo-explanation">
-      <h5>💡 Kubernetes 核心概念</h5>
+      <h5>{{ t('kubernetes.explanationTitle') }}</h5>
       <ul>
-        <li><strong>Pod</strong>：最小的部署单元，一个 Pod 可以包含一个或多个容器</li>
-        <li><strong>Deployment</strong>：管理 Pod 的副本数量和滚动更新</li>
-        <li><strong>Service</strong>：提供稳定的网络访问入口，实现负载均衡</li>
-        <li><strong>Scheduler</strong>：根据资源需求和策略，自动将 Pod 调度到合适的节点</li>
+        <li
+          v-for="item in explanation"
+          :key="item.term"
+        >
+          <strong>{{ item.term }}</strong>: {{ item.desc }}
+        </li>
       </ul>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue'
+import { computed, ref, reactive } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { backendEvolutionLocale } from '../../../locales/backend-evolution/index.js'
 
-const controlPlane = [
-  { name: 'API Server', icon: '🌐', desc: '集群的统一入口' },
-  { name: 'etcd', icon: '🗄️', desc: '分布式键值存储' },
-  { name: 'Scheduler', icon: '📋', desc: 'Pod 调度器' },
-  { name: 'Controller', icon: '🎮', desc: '控制器管理器' }
-]
+const { t, messages } = useI18n(backendEvolutionLocale)
+const controlPlane = computed(() => messages.value.kubernetes.controlPlane)
+const explanation = computed(() => messages.value.kubernetes.explanation)
 
 const workerNodes = reactive([
   {
     name: 'Node-1',
     icon: '🖥️',
     status: 'active',
-    statusText: '运行中',
+    statusText: 'active',
     cpu: 45,
     memory: 60,
     pods: 5
@@ -188,7 +189,7 @@ const workerNodes = reactive([
     name: 'Node-2',
     icon: '🖥️',
     status: 'active',
-    statusText: '运行中',
+    statusText: 'active',
     cpu: 30,
     memory: 40,
     pods: 3
@@ -197,7 +198,7 @@ const workerNodes = reactive([
     name: 'Node-3',
     icon: '🖥️',
     status: 'pending',
-    statusText: '准备中',
+    statusText: 'pending',
     cpu: 0,
     memory: 0,
     pods: 0
@@ -224,19 +225,19 @@ const selectNode = (name) => {
 
 const simulateScheduling = async () => {
   isScheduling.value = true
-  addLog('开始调度新 Pod...', 'info')
+  addLog(t('kubernetes.logs.startSchedule'), 'info')
 
   await new Promise(r => setTimeout(r, 800))
-  addLog('Scheduler: 评估节点资源...', 'info')
+  addLog(t('kubernetes.logs.evaluate'), 'info')
 
   await new Promise(r => setTimeout(r, 800))
   const targetNode = workerNodes.find(n => n.status === 'active' && n.cpu < 70)
   if (targetNode) {
     targetNode.pods++
     targetNode.cpu += 10
-    addLog(`Pod 已调度到 ${targetNode.name}`, 'success')
+    addLog(t('kubernetes.logs.scheduled', { node: targetNode.name }), 'success')
   } else {
-    addLog('警告: 没有合适的节点可调度', 'warning')
+    addLog(t('kubernetes.logs.noNode'), 'warning')
   }
 
   isScheduling.value = false
@@ -244,18 +245,18 @@ const simulateScheduling = async () => {
 
 const simulateScaling = async () => {
   isScaling.value = true
-  addLog('检测到高负载，开始水平扩容...', 'info')
+  addLog(t('kubernetes.logs.highLoad'), 'info')
 
   const pendingNode = workerNodes.find(n => n.status === 'pending')
   if (pendingNode) {
     await new Promise(r => setTimeout(r, 1500))
     pendingNode.status = 'active'
-    pendingNode.statusText = '运行中'
+    pendingNode.statusText = 'active'
     pendingNode.cpu = 20
     pendingNode.memory = 30
-    addLog(`${pendingNode.name} 已启动并加入集群`, 'success')
+    addLog(t('kubernetes.logs.joined', { node: pendingNode.name }), 'success')
   } else {
-    addLog('已达到最大节点数', 'warning')
+    addLog(t('kubernetes.logs.maxNodes'), 'warning')
   }
 
   isScaling.value = false
@@ -266,18 +267,18 @@ const simulateFailure = async () => {
   const targetNode = workerNodes.find(n => n.status === 'active')
 
   if (targetNode) {
-    addLog(`警告: ${targetNode.name} 失去连接!`, 'error')
+    addLog(t('kubernetes.logs.lost', { node: targetNode.name }), 'error')
     targetNode.status = 'failed'
-    targetNode.statusText = '故障'
+    targetNode.statusText = 'failed'
 
     await new Promise(r => setTimeout(r, 1000))
-    addLog('Controller: 开始重新调度 Pod...', 'info')
+    addLog(t('kubernetes.logs.reschedule'), 'info')
 
     await new Promise(r => setTimeout(r, 1500))
     const healthyNode = workerNodes.find(n => n.status === 'active' && n.name !== targetNode.name)
     if (healthyNode) {
       healthyNode.pods += targetNode.pods
-      addLog(`Pod 已成功迁移到 ${healthyNode.name}`, 'success')
+      addLog(t('kubernetes.logs.migrated', { node: healthyNode.name }), 'success')
     }
 
     targetNode.pods = 0
@@ -292,20 +293,20 @@ const resetCluster = () => {
   workerNodes.forEach((node, index) => {
     if (index < 2) {
       node.status = 'active'
-      node.statusText = '运行中'
+      node.statusText = 'active'
       node.cpu = 30 + index * 15
       node.memory = 40 + index * 20
       node.pods = 3 + index * 2
     } else {
       node.status = 'pending'
-      node.statusText = '准备中'
+      node.statusText = 'pending'
       node.cpu = 0
       node.memory = 0
       node.pods = 0
     }
   })
   logs.value = []
-  addLog('集群已重置', 'info')
+  addLog(t('kubernetes.logs.reset'), 'info')
 }
 </script>
 

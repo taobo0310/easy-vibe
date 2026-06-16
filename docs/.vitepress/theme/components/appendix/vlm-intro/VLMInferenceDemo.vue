@@ -1,7 +1,3 @@
-<!--
-  VLMInferenceDemo.vue
-  多模态推理演示
--->
 <template>
   <div class="vlm-chat-demo">
     <div class="chat-window">
@@ -19,7 +15,7 @@
               </div>
             </div>
             <div class="text">
-              这只猫在做什么？
+              {{ t('vlmInference.question') }}
             </div>
           </div>
         </div>
@@ -37,13 +33,13 @@
               v-if="step === 1"
               class="thinking"
             >
-              <span class="icon">👁️</span> 正在观察图片...
+              <span class="icon">👁️</span> {{ t('vlmInference.observing') }}
             </div>
             <div
               v-else-if="step === 2"
               class="thinking"
             >
-              <span class="icon">🧠</span> 正在思考...
+              <span class="icon">🧠</span> {{ t('vlmInference.thinking') }}
             </div>
             <div
               v-else
@@ -62,17 +58,20 @@
         :disabled="step > 0 && step < 3"
         @click="startInference"
       >
-        {{ step === 0 || step === 3 ? '发送 (Send)' : '生成中...' }}
+        {{ step === 0 || step === 3 ? t('vlmInference.send') : t('vlmInference.generating') }}
       </button>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, watch } from 'vue'
+import { ref, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { vlmIntroLocale } from '../../../locales/vlm-intro/index.js'
 
+const { t } = useI18n(vlmIntroLocale)
 const step = ref(0)
-const fullText = '它正趴在窗台上晒太阳，看起来非常惬意。'
+const fullText = computed(() => t('vlmInference.answer'))
 const typedText = ref('')
 
 const startInference = () => {
@@ -93,8 +92,8 @@ const startInference = () => {
 const typeText = () => {
   let i = 0
   const interval = setInterval(() => {
-    if (i < fullText.length) {
-      typedText.value += fullText[i]
+    if (i < fullText.value.length) {
+      typedText.value += fullText.value[i]
       i++
     } else {
       clearInterval(interval)

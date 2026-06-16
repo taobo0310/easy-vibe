@@ -4,7 +4,7 @@
       <!-- Step 1: Sound Wave -->
       <div class="step-box">
         <div class="label">
-          🌊 声波
+          {{ t('audioWaveform.wave') }}
         </div>
         <div class="wave-visual">
           <svg
@@ -20,7 +20,7 @@
           </svg>
         </div>
         <div class="desc">
-          连续模拟信号
+          {{ t('audioWaveform.analog') }}
         </div>
       </div>
 
@@ -31,7 +31,7 @@
       <!-- Step 2: Sampling -->
       <div class="step-box">
         <div class="label">
-          📊 采样
+          {{ t('audioWaveform.sampling') }}
         </div>
         <div class="sample-visual">
           <div
@@ -41,7 +41,7 @@
           />
         </div>
         <div class="desc">
-          44100 点/秒
+          {{ t('audioWaveform.sampleRate') }}
         </div>
       </div>
 
@@ -52,7 +52,7 @@
       <!-- Step 3: Digital -->
       <div class="step-box">
         <div class="label">
-          🔢 数字化
+          {{ t('audioWaveform.digital') }}
         </div>
         <div class="digital-visual">
           <div
@@ -64,7 +64,7 @@
           </div>
         </div>
         <div class="desc">
-          PCM 数据
+          {{ t('audioWaveform.pcm') }}
         </div>
       </div>
     </div>
@@ -72,11 +72,18 @@
     <div class="explanation">
       <p>
         <span class="icon">💡</span>
-        计算机无法直接处理连续的声波，需要把它转换成数字。 这个过程叫<strong>模数转换 (ADC)</strong>：每隔一小段时间测量一次声音的强度，记录成数字。
+        <span v-html="t('audioWaveform.explanation')" />
       </p>
     </div>
   </div>
 </template>
+
+<script setup>
+import { useI18n } from '../../../composables/useI18n.js'
+import { audioIntroLocale } from '../../../locales/audio-intro/index.js'
+
+const { t } = useI18n(audioIntroLocale)
+</script>
 
 <style scoped>
 .waveform-demo {

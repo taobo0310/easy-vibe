@@ -1,9 +1,8 @@
 <template>
   <div class="demo">
     <div class="scene">
-      <!-- 应用程序层 -->
       <div class="layer-box app-layer" :class="{ active: currentStep >= 1 }">
-        <div class="layer-title">📱 应用程序</div>
+        <div class="layer-title">{{ t('operatingSystems.osArchitecture.appLayer') }}</div>
         <div class="apps">
           <span class="app-icon" :class="{ pulse: currentStep === 1 }">🎵</span>
           <span class="app-icon" :class="{ pulse: currentStep === 1 }">💬</span>
@@ -11,37 +10,38 @@
         </div>
       </div>
 
-      <!-- 流动箭头 -->
       <div class="flow-arrow" :class="{ flowing: currentStep === 2 }">
         <div class="arrow-line"></div>
         <div class="arrow-head">▼</div>
-        <div class="packet" v-if="currentStep === 2">📦 请求</div>
+        <div v-if="currentStep === 2" class="packet">{{ t('operatingSystems.osArchitecture.requestPacket') }}</div>
       </div>
 
-      <!-- 操作系统层 -->
       <div class="layer-box os-layer" :class="{ active: currentStep >= 2, processing: currentStep === 3 }">
-        <div class="layer-title">🖥️ 操作系统</div>
+        <div class="layer-title">{{ t('operatingSystems.osArchitecture.osLayer') }}</div>
         <div class="os-core">
-          <div class="core-item" :class="{ working: currentStep === 3 && subStep === 0 }">调度CPU</div>
-          <div class="core-item" :class="{ working: currentStep === 3 && subStep === 1 }">分配内存</div>
-          <div class="core-item" :class="{ working: currentStep === 3 && subStep === 2 }">管理文件</div>
+          <div
+            v-for="(item, index) in messages.operatingSystems.osArchitecture.coreItems"
+            :key="item"
+            class="core-item"
+            :class="{ working: currentStep === 3 && subStep === index }"
+          >
+            {{ item }}
+          </div>
         </div>
       </div>
 
-      <!-- 流动箭头 -->
       <div class="flow-arrow" :class="{ flowing: currentStep === 4 }">
         <div class="arrow-line"></div>
         <div class="arrow-head">▼</div>
-        <div class="packet" v-if="currentStep === 4">⚡ 指令</div>
+        <div v-if="currentStep === 4" class="packet">{{ t('operatingSystems.osArchitecture.instructionPacket') }}</div>
       </div>
 
-      <!-- 硬件层 -->
       <div class="layer-box hw-layer" :class="{ active: currentStep >= 4, working: currentStep === 5 }">
-        <div class="layer-title">💾 硬件</div>
+        <div class="layer-title">{{ t('operatingSystems.osArchitecture.hardwareLayer') }}</div>
         <div class="hw-items">
           <span class="hw-icon" :class="{ spin: currentStep === 5 }">🧠 CPU</span>
-          <span class="hw-icon" :class="{ flash: currentStep === 5 }">💾 内存</span>
-          <span class="hw-icon" :class="{ flash: currentStep === 5 }">💿 硬盘</span>
+          <span class="hw-icon" :class="{ flash: currentStep === 5 }">{{ t('operatingSystems.osArchitecture.memory') }}</span>
+          <span class="hw-icon" :class="{ flash: currentStep === 5 }">{{ t('operatingSystems.osArchitecture.disk') }}</span>
         </div>
       </div>
     </div>
@@ -54,25 +54,22 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { computerFundamentalsLocale } from '../../../locales/computer-fundamentals/index.js'
+
+const { t, messages } = useI18n(computerFundamentalsLocale)
 
 const currentStep = ref(0)
 const subStep = ref(0)
 let timer = null
 
-const statusTexts = [
-  '应用程序准备发起请求...',
-  '应用程序：我要播放音乐！',
-  '请求发送给操作系统...',
-  '操作系统正在协调资源...',
-  '指令下发到硬件...',
-  '硬件开始执行：音乐播放中 🎵'
-]
-
-const statusText = computed(() => statusTexts[currentStep.value] || '')
+const statusText = computed(
+  () => messages.value.operatingSystems.osArchitecture.statusTexts[currentStep.value] || ''
+)
 
 const nextStep = () => {
   if (currentStep.value === 3) {
-    // 在操作系统处理阶段，循环显示子步骤
+    // Cycle through OS sub-steps while the OS layer is processing.
     subStep.value = (subStep.value + 1) % 3
     if (subStep.value === 0) {
       currentStep.value = 4

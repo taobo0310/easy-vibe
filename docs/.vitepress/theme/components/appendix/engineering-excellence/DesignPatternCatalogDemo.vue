@@ -1,6 +1,6 @@
 <template>
   <div class="pattern-catalog-demo">
-    <div class="demo-label">设计模式图鉴 ── 点击分类查看常用模式</div>
+    <div class="demo-label">{{ t('designPatternCatalog.title') }}</div>
 
     <div class="categories">
       <div
@@ -12,7 +12,7 @@
       >
         <span class="cat-icon">{{ cat.icon }}</span>
         <span class="cat-name">{{ cat.name }}</span>
-        <span class="cat-count">{{ cat.patterns.length }} 个模式</span>
+        <span class="cat-count">{{ t('designPatternCatalog.count', { count: cat.patterns.length }) }}</span>
       </div>
     </div>
 
@@ -31,9 +31,9 @@
           <div class="pattern-intent">{{ p.intent }}</div>
           <Transition name="fade">
             <div v-if="expanded === p.name" class="pattern-detail">
-              <div class="detail-label">适用场景</div>
+              <div class="detail-label">{{ t('designPatternCatalog.when') }}</div>
               <div class="detail-text">{{ p.when }}</div>
-              <div class="detail-label">代码示例</div>
+              <div class="detail-label">{{ t('designPatternCatalog.code') }}</div>
               <pre><code>{{ p.code }}</code></pre>
             </div>
           </Transition>
@@ -44,110 +44,14 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { engineeringExcellenceLocale } from '../../../locales/engineering-excellence/index.js'
 
+const { t, messages } = useI18n(engineeringExcellenceLocale)
 const selected = ref(-1)
 const expanded = ref('')
-
-const categories = [
-  {
-    name: '创建型',
-    icon: '🏗️',
-    cls: 'create',
-    patterns: [
-      {
-        name: '单例模式 Singleton',
-        intent: '确保一个类只有一个实例，并提供全局访问点。',
-        when: '数据库连接池、全局配置管理、日志记录器。',
-        code: `class Database {
-  static instance = null
-  static getInstance() {
-    if (!this.instance) {
-      this.instance = new Database()
-    }
-    return this.instance
-  }
-}`
-      },
-      {
-        name: '工厂模式 Factory',
-        intent: '定义创建对象的接口，让子类决定实例化哪个类。',
-        when: '需要根据条件创建不同类型对象时。',
-        code: `function createNotification(type) {
-  switch (type) {
-    case 'email': return new EmailNotify()
-    case 'sms':   return new SmsNotify()
-    case 'push':  return new PushNotify()
-  }
-}`
-      }
-    ]
-  },
-  {
-    name: '结构型',
-    icon: '🧱',
-    cls: 'structure',
-    patterns: [
-      {
-        name: '装饰器模式 Decorator',
-        intent: '动态地给对象添加额外职责，比继承更灵活。',
-        when: '需要在不修改原有代码的情况下扩展功能。',
-        code: `function withLogging(fn) {
-  return function(...args) {
-    console.log('调用:', fn.name)
-    return fn.apply(this, args)
-  }
-}
-const save = withLogging(saveUser)`
-      },
-      {
-        name: '适配器模式 Adapter',
-        intent: '将一个接口转换成客户端期望的另一个接口。',
-        when: '对接第三方 API、兼容旧系统接口。',
-        code: `class OldApi { getData() { ... } }
-
-class ApiAdapter {
-  constructor(old) { this.old = old }
-  fetch() { return this.old.getData() }
-}`
-      }
-    ]
-  },
-  {
-    name: '行为型',
-    icon: '🎭',
-    cls: 'behavior',
-    patterns: [
-      {
-        name: '观察者模式 Observer',
-        intent: '定义一对多依赖，当状态变化时自动通知所有依赖者。',
-        when: '事件系统、状态管理、消息推送。',
-        code: `class EventBus {
-  listeners = {}
-  on(event, fn) {
-    (this.listeners[event] ||= []).push(fn)
-  }
-  emit(event, data) {
-    this.listeners[event]?.forEach(fn => fn(data))
-  }
-}`
-      },
-      {
-        name: '策略模式 Strategy',
-        intent: '定义一系列算法，使它们可以互相替换。',
-        when: '排序策略、支付方式、验证规则的切换。',
-        code: `const strategies = {
-  bubble: arr => { /* 冒泡排序 */ },
-  quick:  arr => { /* 快速排序 */ },
-  merge:  arr => { /* 归并排序 */ }
-}
-function sort(arr, type) {
-  return strategies[type](arr)
-}`
-      }
-    ]
-  }
-]
+const categories = computed(() => messages.value.designPatternCatalog.categories)
 </script>
 
 <style scoped>

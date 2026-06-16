@@ -1,12 +1,12 @@
 <template>
   <div class="algorithm-paradigm-demo">
     <div class="demo-header">
-      <span class="title">算法设计范式</span>
-      <span class="subtitle">解决问题的常用套路</span>
+      <span class="title">{{ t('algorithmThinking.paradigm.title') }}</span>
+      <span class="subtitle">{{ t('algorithmThinking.paradigm.subtitle') }}</span>
     </div>
 
     <div class="intro-text">
-      算法设计范式是解决问题的<strong>通用策略</strong>，掌握这些套路可以快速找到解题思路
+      {{ t('algorithmThinking.paradigm.introPrefix') }}<strong>{{ t('algorithmThinking.paradigm.introStrong') }}</strong>{{ t('algorithmThinking.paradigm.introSuffix') }}
     </div>
 
     <div class="paradigm-grid">
@@ -22,7 +22,6 @@
       </div>
     </div>
 
-    <!-- 详细说明 -->
     <div v-if="activeParadigm" class="paradigm-detail">
       <div class="detail-header">
         <span class="detail-icon">{{ currentParadigm.icon }}</span>
@@ -31,12 +30,16 @@
 
       <div class="detail-content">
         <div class="detail-section">
-          <div class="section-title">核心思想</div>
+          <div class="section-title">
+            {{ t('algorithmThinking.paradigm.coreIdea') }}
+          </div>
           <div class="section-text">{{ currentParadigm.idea }}</div>
         </div>
 
         <div class="detail-section">
-          <div class="section-title">适用场景</div>
+          <div class="section-title">
+            {{ t('algorithmThinking.paradigm.scenarios') }}
+          </div>
           <div class="scenario-tags">
             <span
               v-for="(scenario, index) in currentParadigm.scenarios"
@@ -49,7 +52,9 @@
         </div>
 
         <div class="detail-section">
-          <div class="section-title">经典问题</div>
+          <div class="section-title">
+            {{ t('algorithmThinking.paradigm.classicProblems') }}
+          </div>
           <div class="problems-list">
             <div
               v-for="(problem, index) in currentParadigm.problems"
@@ -63,7 +68,9 @@
         </div>
 
         <div class="detail-section">
-          <div class="section-title">时间复杂度</div>
+          <div class="section-title">
+            {{ t('algorithmThinking.paradigm.timeComplexity') }}
+          </div>
           <div class="complexity-box">
             <div class="complexity-value">{{ currentParadigm.complexity }}</div>
             <div class="complexity-note">
@@ -74,16 +81,17 @@
       </div>
     </div>
 
-    <!-- 对比总结 -->
     <div class="paradigm-comparison">
-      <div class="comparison-title">范式对比总结</div>
+      <div class="comparison-title">
+        {{ t('algorithmThinking.paradigm.comparisonTitle') }}
+      </div>
       <table class="comparison-table">
         <thead>
           <tr>
-            <th>范式</th>
-            <th>核心策略</th>
-            <th>最优性</th>
-            <th>适用场景</th>
+            <th>{{ t('algorithmThinking.paradigm.paradigm') }}</th>
+            <th>{{ t('algorithmThinking.paradigm.strategy') }}</th>
+            <th>{{ t('algorithmThinking.paradigm.optimality') }}</th>
+            <th>{{ t('algorithmThinking.paradigm.useCase') }}</th>
           </tr>
         </thead>
         <tbody>
@@ -101,29 +109,16 @@
       </table>
     </div>
 
-    <!-- 选择建议 -->
     <div class="selection-guide">
-      <div class="guide-title">如何选择合适的范式？</div>
+      <div class="guide-title">
+        {{ t('algorithmThinking.paradigm.guideTitle') }}
+      </div>
       <div class="guide-steps">
-        <div class="guide-step">
-          <div class="step-number">1</div>
+        <div v-for="(step, index) in guideSteps" :key="step.title" class="guide-step">
+          <div class="step-number">{{ index + 1 }}</div>
           <div class="step-content">
-            <div class="step-title">分析问题特征</div>
-            <div class="step-desc">是否有重叠子问题？是否有最优子结构？</div>
-          </div>
-        </div>
-        <div class="guide-step">
-          <div class="step-number">2</div>
-          <div class="step-content">
-            <div class="step-title">判断是否需要最优解</div>
-            <div class="step-desc">贪心不一定最优，动态规划保证最优</div>
-          </div>
-        </div>
-        <div class="guide-step">
-          <div class="step-number">3</div>
-          <div class="step-content">
-            <div class="step-title">考虑数据规模</div>
-            <div class="step-desc">回溯适合小规模，分治适合大规模</div>
+            <div class="step-title">{{ step.title }}</div>
+            <div class="step-desc">{{ step.desc }}</div>
           </div>
         </div>
       </div>
@@ -133,93 +128,25 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n'
+import { computerFundamentalsLocale } from '../../../locales/computer-fundamentals'
+
+const { t, messages } = useI18n(computerFundamentalsLocale)
 
 const activeParadigm = ref('divide')
 
-const paradigms = [
-  {
-    id: 'divide',
-    name: '分治法',
-    icon: '✂️',
-    tagline: '分而治之',
-    idea: '将大问题分解成多个小问题，递归解决小问题，最后合并结果',
-    scenarios: ['数组排序', '矩阵乘法', '大整数运算'],
-    problems: ['归并排序', '快速排序', '二分查找', 'Strassen 矩阵乘法'],
-    complexity: 'O(n log n)',
-    complexityNote: '通常比暴力法快很多'
-  },
-  {
-    id: 'dynamic',
-    name: '动态规划',
-    icon: '📊',
-    tagline: '保存结果避免重复',
-    idea: '将问题分解为重叠子问题，保存子问题的解，避免重复计算',
-    scenarios: ['最优解问题', '计数问题', '路径问题'],
-    problems: ['斐波那契数列', '背包问题', '最长公共子序列', '最短路径'],
-    complexity: 'O(n²) 或 O(n³)',
-    complexityNote: '用空间换时间，比递归快'
-  },
-  {
-    id: 'greedy',
-    name: '贪心法',
-    icon: '🎯',
-    tagline: '局部最优',
-    idea: '在每一步选择中都采取当前状态下最优的选择，希望达到全局最优',
-    scenarios: ['优化问题', '调度问题', '图问题'],
-    problems: ['找零钱', '活动选择', 'Huffman 编码', '最小生成树'],
-    complexity: 'O(n log n)',
-    complexityNote: '最快，但不一定最优'
-  },
-  {
-    id: 'backtrack',
-    name: '回溯法',
-    icon: '🔙',
-    tagline: '试错法',
-    idea: '系统性地搜索解空间，遇到死路就回退到上一个分岔口',
-    scenarios: ['组合问题', '排列问题', '约束满足'],
-    problems: ['N 皇后问题', '数独', '全排列', '子集问题'],
-    complexity: 'O(2ⁿ) 或 O(n!)',
-    complexityNote: '指数级，适合小规模'
-  }
-]
-
-const comparisonData = [
-  {
-    id: 'divide',
-    name: '分治法',
-    icon: '✂️',
-    strategy: '分解 → 递归 → 合并',
-    optimal: '保证最优',
-    use: '问题可独立分解'
-  },
-  {
-    id: 'dynamic',
-    name: '动态规划',
-    icon: '📊',
-    strategy: '保存子问题解',
-    optimal: '保证最优',
-    use: '有重叠子问题'
-  },
-  {
-    id: 'greedy',
-    name: '贪心法',
-    icon: '🎯',
-    strategy: '每次选最优',
-    optimal: '不一定最优',
-    use: '局部最优 → 全局最优'
-  },
-  {
-    id: 'backtrack',
-    name: '回溯法',
-    icon: '🔙',
-    strategy: '深度优先搜索',
-    optimal: '保证最优',
-    use: '解空间小，需要穷举'
-  }
-]
+const paradigms = computed(
+  () => messages.value.algorithmThinking.paradigm.paradigms
+)
+const comparisonData = computed(
+  () => messages.value.algorithmThinking.paradigm.comparisonData
+)
+const guideSteps = computed(
+  () => messages.value.algorithmThinking.paradigm.guideSteps
+)
 
 const currentParadigm = computed(() =>
-  paradigms.find((p) => p.id === activeParadigm.value)
+  paradigms.value.find((p) => p.id === activeParadigm.value)
 )
 </script>
 

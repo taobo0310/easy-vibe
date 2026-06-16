@@ -1,59 +1,61 @@
 <template>
   <div class="hash-table-demo">
     <div class="demo-header">
-      <span class="title">哈希表：超快的查找</span>
-      <span class="subtitle">通过关键词直接找到数据</span>
+      <span class="title">{{ t('dataStructures.hash.title') }}</span>
+      <span class="subtitle">{{ t('dataStructures.hash.subtitle') }}</span>
     </div>
 
     <div class="analogy-box">
       <div class="analogy-icon">📚</div>
       <div class="analogy-text">
-        哈希表就像图书馆的<strong>索引卡片</strong>：不用在一排排书架上找，直接查索引就能找到书的位置
+        {{ t('dataStructures.hash.analogyPrefix') }}<strong>{{ t('dataStructures.hash.analogyStrong') }}</strong>{{ t('dataStructures.hash.analogySuffix') }}
       </div>
     </div>
 
     <div class="hash-visual">
       <div class="input-section">
-        <div class="section-title">存储数据</div>
+        <div class="section-title">{{ t('dataStructures.hash.storageTitle') }}</div>
         <div class="input-group">
           <input
             v-model="newKey"
             type="text"
-            placeholder="键 (如: apple)"
+            :placeholder="t('dataStructures.hash.keyPlaceholder')"
             class="hash-input"
           />
           <input
             v-model="newValue"
             type="text"
-            placeholder="值 (如: 苹果)"
+            :placeholder="t('dataStructures.hash.valuePlaceholder')"
             class="hash-input"
           />
-          <button class="add-btn" @click="addData">添加</button>
+          <button class="add-btn" @click="addData">
+            {{ t('dataStructures.hash.add') }}
+          </button>
         </div>
       </div>
 
       <div class="hash-process">
-        <div class="process-title">哈希过程</div>
+        <div class="process-title">{{ t('dataStructures.hash.processTitle') }}</div>
         <div class="process-diagram">
           <div class="process-step">
-            <div class="step-label">输入键</div>
+            <div class="step-label">{{ t('dataStructures.hash.inputKey') }}</div>
             <div class="step-box">{{ exampleKey }}</div>
           </div>
           <div class="process-arrow">↓</div>
           <div class="process-step">
-            <div class="step-label">哈希函数</div>
+            <div class="step-label">{{ t('dataStructures.hash.hashFunction') }}</div>
             <div class="step-box func">hash(key) % 10</div>
           </div>
           <div class="process-arrow">↓</div>
           <div class="process-step">
-            <div class="step-label">数组索引</div>
+            <div class="step-label">{{ t('dataStructures.hash.arrayIndex') }}</div>
             <div class="step-box index">{{ exampleIndex }}</div>
           </div>
         </div>
       </div>
 
       <div class="hash-table-display">
-        <div class="section-title">哈希表</div>
+        <div class="section-title">{{ t('dataStructures.hash.tableTitle') }}</div>
         <div class="table-slots">
           <div
             v-for="(slot, index) in hashTable"
@@ -64,51 +66,33 @@
             ]"
           >
             <div class="slot-index">{{ index }}</div>
-            <div class="slot-value">{{ slot || '空' }}</div>
+            <div class="slot-value">{{ slot || t('dataStructures.hash.empty') }}</div>
           </div>
         </div>
       </div>
     </div>
 
     <div class="performance-comparison">
-      <div class="comparison-title">性能对比</div>
+      <div class="comparison-title">{{ t('dataStructures.hash.comparisonTitle') }}</div>
       <div class="comparison-grid">
-        <div class="comparison-item">
-          <div class="item-label">哈希表查找</div>
-          <div class="item-value excellent">O(1)</div>
-          <div class="item-desc">瞬间找到</div>
-        </div>
-        <div class="comparison-item">
-          <div class="item-label">数组查找</div>
-          <div class="item-value good">O(n)</div>
-          <div class="item-desc">需要遍历</div>
-        </div>
-        <div class="comparison-item">
-          <div class="item-label">二分查找</div>
-          <div class="item-value better">O(log n)</div>
-          <div class="item-desc">需要排序</div>
+        <div
+          v-for="item in performanceItems"
+          :key="item.label"
+          class="comparison-item"
+        >
+          <div class="item-label">{{ item.label }}</div>
+          <div :class="['item-value', item.class]">{{ item.value }}</div>
+          <div class="item-desc">{{ item.desc }}</div>
         </div>
       </div>
     </div>
 
     <div class="applications">
-      <div class="app-title">常见应用</div>
+      <div class="app-title">{{ t('dataStructures.hash.appTitle') }}</div>
       <div class="app-list">
-        <div class="app-item">
-          <span class="app-icon">👤</span>
-          <div class="app-text">用户信息表（用户ID → 用户资料）</div>
-        </div>
-        <div class="app-item">
-          <span class="app-icon">🛒</span>
-          <div class="app-text">购物车（商品ID → 数量）</div>
-        </div>
-        <div class="app-item">
-          <span class="app-icon">📝</span>
-          <div class="app-text">缓存系统（URL → 网页内容）</div>
-        </div>
-        <div class="app-item">
-          <span class="app-icon">🔍</span>
-          <div class="app-text">字典（单词 → 释义）</div>
+        <div v-for="app in applications" :key="app.text" class="app-item">
+          <span class="app-icon">{{ app.icon }}</span>
+          <div class="app-text">{{ app.text }}</div>
         </div>
       </div>
     </div>
@@ -117,6 +101,10 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n'
+import { computerFundamentalsLocale } from '../../../locales/computer-fundamentals'
+
+const { t, messages } = useI18n(computerFundamentalsLocale)
 
 const newKey = ref('')
 const newValue = ref('')
@@ -135,14 +123,8 @@ const hashTable = ref([
   null
 ])
 
-// 初始化一些数据
 const initData = () => {
-  const data = [
-    { key: 'apple', value: '苹果' },
-    { key: 'banana', value: '香蕉' },
-    { key: 'orange', value: '橙子' }
-  ]
-  data.forEach((item) => {
+  messages.value.dataStructures.hash.initialData.forEach((item) => {
     const index = simpleHash(item.key)
     hashTable.value[index] = `${item.key}: ${item.value}`
   })
@@ -166,6 +148,13 @@ const addData = () => {
     newValue.value = ''
   }
 }
+
+const performanceItems = computed(
+  () => messages.value.dataStructures.hash.performanceItems
+)
+const applications = computed(
+  () => messages.value.dataStructures.hash.applications
+)
 
 initData()
 </script>

@@ -1,15 +1,11 @@
-<!--
-  JWTWorkflowDemo.vue
-  JWT 工作流程（手动推进，更贴近真实使用）
--->
 <template>
   <div class="jwt-workflow-demo">
     <div class="header">
       <div class="title">
-        🎫 JWT：生成 → 发送 → 验证 → 解析
+        {{ t('jwtWorkflow.title') }}
       </div>
       <div class="subtitle">
-        默认“手动推进”，不自动下一步；避免把演示误当成真实系统的安全边界。
+        {{ t('jwtWorkflow.subtitle') }}
       </div>
     </div>
 
@@ -19,27 +15,27 @@
         :disabled="step !== 0"
         @click="start"
       >
-        开始
+        {{ t('jwtWorkflow.start') }}
       </button>
       <button
         class="btn"
         :disabled="step <= 1"
         @click="prev"
       >
-        上一步
+        {{ t('jwtWorkflow.prev') }}
       </button>
       <button
         class="btn primary"
         :disabled="step === 0 || step >= maxStep"
         @click="next"
       >
-        下一步
+        {{ t('jwtWorkflow.next') }}
       </button>
       <button
         class="btn"
         @click="reset"
       >
-        重置
+        {{ t('jwtWorkflow.reset') }}
       </button>
     </div>
 
@@ -47,24 +43,23 @@
       v-if="step > 0"
       class="progress"
     >
-      Step {{ step }} / {{ maxStep }} · {{ steps[step - 1]?.title }}
+      {{ t('jwtWorkflow.progress', { step, maxStep, title: activeStep?.title }) }}
     </div>
 
     <div class="grid">
       <div class="card">
         <div class="card-title">
-          用户声明（Payload 示例）
+          {{ t('jwtWorkflow.payloadTitle') }}
         </div>
         <pre class="code"><code>{{ payloadJson }}</code></pre>
         <div class="hint">
-          注意：JWT 的 payload 只是 Base64Url
-          编码，任何人都能解码，所以不要放密码、手机号等敏感数据。
+          {{ t('jwtWorkflow.payloadHint') }}
         </div>
       </div>
 
       <div class="card">
         <div class="card-title">
-          JWT Token（示意）
+          {{ t('jwtWorkflow.tokenTitle') }}
         </div>
         <div class="token">
           <div
@@ -107,14 +102,14 @@
           class="mono-box"
         >
           <div class="mono-label">
-            完整 Token
+            {{ t('jwtWorkflow.fullToken') }}
           </div>
           <code class="mono">{{ token }}</code>
           <button
             class="copy"
             @click="copy(token)"
           >
-            {{ copied ? '已复制' : '复制 Token' }}
+            {{ copied ? t('jwtWorkflow.copied') : t('jwtWorkflow.copyToken') }}
           </button>
         </div>
 
@@ -123,7 +118,7 @@
           class="mono-box"
         >
           <div class="mono-label">
-            请求头示例
+            {{ t('jwtWorkflow.requestHeader') }}
           </div>
           <code class="mono">Authorization: Bearer {{ token }}</code>
         </div>
@@ -132,20 +127,20 @@
 
     <div class="card">
       <div class="card-title">
-        {{ steps[step - 1]?.title || '流程说明' }}
+        {{ activeStep?.title || t('jwtWorkflow.fallbackTitle') }}
       </div>
       <div class="desc">
-        {{ steps[step - 1]?.desc }}
+        {{ activeStep?.desc }}
       </div>
       <div
-        v-if="steps[step - 1]?.warn"
+        v-if="activeStep?.warn"
         class="warn"
       >
         <div class="warn-title">
-          注意
+          {{ t('jwtWorkflow.warning') }}
         </div>
         <div class="warn-text">
-          {{ steps[step - 1]?.warn }}
+          {{ activeStep?.warn }}
         </div>
       </div>
     </div>
@@ -154,6 +149,10 @@
 
 <script setup>
 import { computed, ref } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { authDesignLocale } from '../../../locales/auth-design/index.js'
+
+const { t, messages } = useI18n(authDesignLocale)
 
 const maxStep = 6
 const step = ref(0)
@@ -178,34 +177,8 @@ const token = computed(
   () => `${headerB64.value}.${payloadB64.value}.${signatureB64.value}`
 )
 
-const steps = [
-  {
-    title: '1) 生成 Header',
-    desc: 'Header 描述使用的算法与 token 类型（JWT）。'
-  },
-  {
-    title: '2) 生成 Payload',
-    desc: 'Payload 放业务声明（claims）。它可被解码，所以不要放敏感信息。'
-  },
-  {
-    title: '3) 生成 Signature',
-    desc: 'Signature 用密钥对 header.payload 做签名，用来防篡改。',
-    warn: '只有“签名校验”能保证 payload 未被改过；Base64 不是加密。'
-  },
-  {
-    title: '4) 拼接 Token',
-    desc: '把三段用 “.” 连接：header.payload.signature。'
-  },
-  {
-    title: '5) 客户端发送请求',
-    desc: '通常放在 Authorization: Bearer <token>。'
-  },
-  {
-    title: '6) 服务端验证与授权',
-    desc: '服务端校验签名与过期时间，再按 role/权限做授权判断。',
-    warn: 'JWT 无法“立刻全局注销”：常用解法是短 access token + refresh token + 黑名单/版本号。'
-  }
-]
+const steps = computed(() => messages.value.jwtWorkflow.steps)
+const activeStep = computed(() => steps.value[step.value - 1])
 
 const start = () => {
   step.value = 1

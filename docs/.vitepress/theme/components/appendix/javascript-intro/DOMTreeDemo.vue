@@ -1,17 +1,21 @@
 <script setup>
 import { ref } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { javascriptIntroLocale } from '../../../locales/javascript-intro/index.js'
 
-const title = ref('我的网页')
-const items = ref(['项目1', '项目2'])
+const { t } = useI18n(javascriptIntroLocale)
+
+const title = ref(t('domTree.defaultTitle'))
+const items = ref([`${t('domTree.itemPrefix')}1`, `${t('domTree.itemPrefix')}2`])
 const paragraphColor = ref('black')
 
 const modifyTitle = () => {
-  title.value = 'Hello World!'
+  title.value = t('domTree.newTitle')
 }
 
 const addItem = () => {
   const id = items.value.length + 1
-  items.value.push(`新项目${id}`)
+  items.value.push(`${t('domTree.newItemPrefix')}${id}`)
 }
 
 const changeColor = () => {
@@ -27,10 +31,9 @@ const removeItem = () => {
 
 <template>
   <div class="dom-tree-demo">
-    <h3>DOM 树：JavaScript 看到的网页</h3>
+    <h3>{{ t('domTree.title') }}</h3>
 
     <div class="demo-container">
-      <!-- 左侧：迷你网页 -->
       <div class="webpage-preview">
         <div class="browser-bar">
           <div class="dots">
@@ -42,7 +45,7 @@ const removeItem = () => {
         <div class="webpage-content">
           <h1>{{ title }}</h1>
           <p :style="{ color: paragraphColor }">
-            欢迎光临
+            {{ t('domTree.welcome') }}
           </p>
           <ul>
             <li
@@ -55,7 +58,6 @@ const removeItem = () => {
         </div>
       </div>
 
-      <!-- 右侧：DOM 树 -->
       <div class="dom-tree">
         <div class="tree-node">
           <span class="tag">&lt;html&gt;</span>
@@ -65,7 +67,7 @@ const removeItem = () => {
               <div class="tree-children">
                 <div
                   class="tree-node"
-                  :class="{ 'active': title === 'Hello World!' }"
+                  :class="{ 'active': title === t('domTree.newTitle') }"
                 >
                   <span class="tag">&lt;h1&gt;</span>
                   <span class="text">{{ title }}</span>
@@ -75,7 +77,7 @@ const removeItem = () => {
                   :class="{ 'active': paragraphColor === 'red' }"
                 >
                   <span class="tag">&lt;p&gt;</span>
-                  <span class="text">欢迎光临</span>
+                  <span class="text">{{ t('domTree.welcome') }}</span>
                 </div>
                 <div class="tree-node">
                   <span class="tag">&lt;ul&gt;</span>
@@ -102,33 +104,33 @@ const removeItem = () => {
         class="btn-primary"
         @click="modifyTitle"
       >
-        修改标题
+        {{ t('domTree.modifyTitle') }}
       </button>
       <button
         class="btn-secondary"
         @click="addItem"
       >
-        添加列表项
+        {{ t('domTree.addItem') }}
       </button>
       <button
         class="btn-secondary"
         @click="changeColor"
       >
-        改变段落颜色
+        {{ t('domTree.changeColor') }}
       </button>
       <button
         class="btn-danger"
         @click="removeItem"
       >
-        删除列表项
+        {{ t('domTree.removeItem') }}
       </button>
     </div>
 
     <div class="code-display">
-      <h4>对应代码</h4>
-      <pre><code v-if="title === 'Hello World!'">document.querySelector('h1').textContent = '{{ title }}'</code>
+      <h4>{{ t('domTree.codeTitle') }}</h4>
+      <pre><code v-if="title === t('domTree.newTitle')">document.querySelector('h1').textContent = '{{ title }}'</code>
       <code v-else-if="paragraphColor === 'red'">document.querySelector('p').style.color = '{{ paragraphColor }}'</code>
-      <code v-else>点击上方按钮查看对应代码</code></pre>
+      <code v-else>{{ t('domTree.clickHint') }}</code></pre>
     </div>
   </div>
 </template>

@@ -1,18 +1,3 @@
-<!--
-  RNNvsTransformer.vue
-  RNN vs Transformer 架构对比演示
-  
-  用途：
-  对比两种处理序列数据的核心架构：
-  - RNN: 串行处理，记忆随距离衰减。
-  - Transformer: 并行处理，Self-Attention 机制捕捉长距离依赖。
-  
-  交互功能：
-  - 架构切换：RNN / Transformer (Self-Attention)。
-  - 动态演示：
-    - RNN: 逐步输入单词，观察 Hidden State 的变化。
-    - Transformer: 鼠标悬停在单词上，显示其关注（Attend to）的其他单词（Attention Map）。
--->
 <template>
   <div class="arch-demo">
     <div class="control-tabs">
@@ -78,8 +63,7 @@
           </div>
         </div>
         <p class="desc-text">
-          RNN 从左到右逐个读取。注意看
-          Memory（记忆），随着句子变长，最早的信息（"The"）可能会被后面的信息冲淡，这就是“长距离依赖”问题。
+          {{ t('rnnTransformer.rnnDesc') }}
         </p>
       </div>
 
@@ -133,14 +117,12 @@
           v-else
           class="attention-info"
         >
-          <p>👆 鼠标悬停在任意单词上，查看它在“关注”谁。</p>
+          <p>{{ t('rnnTransformer.hoverTip') }}</p>
         </div>
 
         <p class="desc-text">
-          Transformer 一眼看完整个句子（并行）。Self-Attention
-          机制让每个词都能直接“看见”其他词，无论距离多远。
-          <br>例如：悬停在 <strong>"it"</strong> 上，你会发现它强烈关注
-          <strong>"animal"</strong>，因为它指代的就是 animal。
+          {{ t('rnnTransformer.transformerDescPrefix') }}
+          <br>{{ t('rnnTransformer.transformerExample') }}
         </p>
       </div>
     </div>
@@ -149,7 +131,10 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { llmIntroLocale } from '../../../locales/llm-intro/index.js'
 
+const { t } = useI18n(llmIntroLocale)
 const mode = ref('rnn')
 
 // RNN Data

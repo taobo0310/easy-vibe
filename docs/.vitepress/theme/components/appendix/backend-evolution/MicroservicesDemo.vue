@@ -1,8 +1,8 @@
 <template>
   <div class="microservices-demo">
     <div class="demo-header">
-      <h4>🏭 微服务架构演示</h4>
-      <p>观察多个独立服务如何协作，以及服务间通信方式</p>
+      <h4>{{ t('microservices.title') }}</h4>
+      <p>{{ t('microservices.subtitle') }}</p>
     </div>
 
     <div class="services-grid">
@@ -23,23 +23,23 @@
         </div>
         <div class="service-details">
           <div class="detail-row">
-            <span class="label">端口:</span>
+            <span class="label">{{ t('microservices.port') }}</span>
             <span class="value">{{ service.port }}</span>
           </div>
           <div class="detail-row">
-            <span class="label">数据库:</span>
+            <span class="label">{{ t('microservices.database') }}</span>
             <span class="value">{{ service.database }}</span>
           </div>
           <div class="detail-row">
-            <span class="label">依赖:</span>
-            <span class="value deps">{{ service.dependencies.join(', ') || '无' }}</span>
+            <span class="label">{{ t('microservices.dependencies') }}</span>
+            <span class="value deps">{{ service.dependencies.join(', ') || t('microservices.none') }}</span>
           </div>
         </div>
       </div>
     </div>
 
     <div class="communication-flow">
-      <h5>服务间通信链路</h5>
+      <h5>{{ t('microservices.flowTitle') }}</h5>
       <div class="flow-visualization">
         <div
           v-for="(step, idx) in flowSteps"
@@ -66,13 +66,13 @@
           :disabled="isFlowRunning"
           @click="startFlow"
         >
-          开始流程
+          {{ t('microservices.startFlow') }}
         </button>
         <button
           class="flow-btn"
           @click="resetFlow"
         >
-          重置
+          {{ t('microservices.reset') }}
         </button>
       </div>
     </div>
@@ -80,58 +80,25 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { computed, ref } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { backendEvolutionLocale } from '../../../locales/backend-evolution/index.js'
 
-const services = ref([
-  {
-    name: '用户服务',
-    icon: '👤',
+const { t, messages } = useI18n(backendEvolutionLocale)
+
+const services = computed(() =>
+  messages.value.microservices.services.map((service) => ({
+    ...service,
     status: 'healthy',
-    statusText: '健康',
-    port: '8081',
-    database: 'MySQL',
-    dependencies: []
-  },
-  {
-    name: '订单服务',
-    icon: '📦',
-    status: 'healthy',
-    statusText: '健康',
-    port: '8082',
-    database: 'PostgreSQL',
-    dependencies: ['用户服务']
-  },
-  {
-    name: '支付服务',
-    icon: '💳',
-    status: 'healthy',
-    statusText: '健康',
-    port: '8083',
-    database: 'MongoDB',
-    dependencies: ['用户服务', '订单服务']
-  },
-  {
-    name: '库存服务',
-    icon: '🏭',
-    status: 'healthy',
-    statusText: '健康',
-    port: '8084',
-    database: 'Redis',
-    dependencies: ['订单服务']
-  }
-])
+    statusText: t('microservices.healthy')
+  }))
+)
 
 const activeService = ref(null)
 const currentFlowStep = ref(-1)
 const isFlowRunning = ref(false)
 
-const flowSteps = [
-  { service: '用户服务', action: '验证用户身份' },
-  { service: '订单服务', action: '创建订单记录' },
-  { service: '库存服务', action: '检查库存数量' },
-  { service: '支付服务', action: '处理支付请求' },
-  { service: '订单服务', action: '更新订单状态' }
-]
+const flowSteps = computed(() => messages.value.microservices.flowSteps)
 
 const selectService = (name) => {
   activeService.value = activeService.value === name ? null : name
@@ -141,7 +108,7 @@ const startFlow = async () => {
   isFlowRunning.value = true
   currentFlowStep.value = 0
 
-  for (let i = 0; i < flowSteps.length; i++) {
+  for (let i = 0; i < flowSteps.value.length; i++) {
     currentFlowStep.value = i
     await new Promise(resolve => setTimeout(resolve, 1500))
   }

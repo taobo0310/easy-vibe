@@ -2,14 +2,14 @@
   <div class="cross-account-access-demo">
     <div class="demo-header">
       <span class="icon">🔗</span>
-      <span class="title">跨账号访问</span>
-      <span class="subtitle">AssumeRole 机制</span>
+      <span class="title">{{ t('crossAccount.title') }}</span>
+      <span class="subtitle">{{ t('crossAccount.subtitle') }}</span>
     </div>
 
     <div class="flow-diagram">
       <div class="account-box source">
         <div class="account-header">
-          账号 A（源）
+          {{ t('crossAccount.sourceAccount') }}
         </div>
         <div class="entity">
           IAM User
@@ -21,49 +21,53 @@
       <span class="arrow">→</span>
       <div class="account-box sts">
         <div class="account-header">
-          STS 服务
+          {{ t('crossAccount.stsService') }}
         </div>
         <div class="step">
-          验证身份
+          {{ t('crossAccount.verifyIdentity') }}
         </div>
         <div class="step">
-          生成临时凭证
+          {{ t('crossAccount.temporaryCredentials') }}
         </div>
       </div>
       <span class="arrow">→</span>
       <div class="account-box target">
         <div class="account-header">
-          账号 B（目标）
+          {{ t('crossAccount.targetAccount') }}
         </div>
         <div class="entity">
           CrossAccountRole
         </div>
         <div class="resource">
-          访问 S3/EC2
+          {{ t('crossAccount.accessResource') }}
         </div>
       </div>
     </div>
 
     <div class="code-block">
       <div class="code-title">
-        Python 示例
+        {{ t('crossAccount.codeTitle') }}
       </div>
       <pre><code>sts = boto3.client('sts')
 assumed = sts.assume_role(
     RoleArn='arn:aws:iam::123456789012:role/CrossAccountRole',
     RoleSessionName='MySession'
 )
-# 使用临时凭证访问目标账号资源</code></pre>
+{{ t('crossAccount.codeComment') }}</code></pre>
     </div>
 
     <div class="info-box">
       <span class="icon">💡</span>
-      <strong>核心思想：</strong>通过角色扮演实现跨账号访问，临时凭证自动过期，更安全更易管理。
+      <strong>{{ t('common.coreIdea') }}</strong>{{ t('crossAccount.info') }}
     </div>
   </div>
 </template>
 
 <script setup>
+import { useI18n } from '../../../composables/useI18n.js'
+import { cloudIamLocale } from '../../../locales/cloud-iam/index.js'
+
+const { t } = useI18n(cloudIamLocale)
 </script>
 
 <style scoped>

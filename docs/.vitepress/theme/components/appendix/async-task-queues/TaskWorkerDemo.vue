@@ -1,49 +1,45 @@
-<!--
-  TaskWorkerDemo.vue
-  Worker 工作池演示：展示任务分发和消费过程
--->
 <template>
   <div class="worker-demo">
     <div class="header">
-      <div class="title">Worker 工作池模型</div>
-      <div class="subtitle">观察任务如何被分发到不同 Worker 处理</div>
+      <div class="title">{{ t('worker.title') }}</div>
+      <div class="subtitle">{{ t('worker.subtitle') }}</div>
     </div>
 
     <div class="controls">
-      <button class="ctrl-btn" @click="addTask" :disabled="running">添加任务</button>
-      <button class="ctrl-btn primary" @click="startProcessing" :disabled="running || queue.length === 0">开始处理</button>
-      <button class="ctrl-btn" @click="resetAll">重置</button>
+      <button class="ctrl-btn" :disabled="running" @click="addTask">{{ t('worker.buttons.add') }}</button>
+      <button class="ctrl-btn primary" :disabled="running || queue.length === 0" @click="startProcessing">{{ t('worker.buttons.start') }}</button>
+      <button class="ctrl-btn" @click="resetAll">{{ t('worker.buttons.reset') }}</button>
       <div class="worker-count">
-        Worker 数量：
-        <button class="small-btn" @click="workerCount = Math.max(1, workerCount - 1)" :disabled="running">-</button>
+        {{ t('worker.workerCount') }}
+        <button class="small-btn" :disabled="running" @click="workerCount = Math.max(1, workerCount - 1)">-</button>
         <span>{{ workerCount }}</span>
-        <button class="small-btn" @click="workerCount = Math.min(5, workerCount + 1)" :disabled="running">+</button>
+        <button class="small-btn" :disabled="running" @click="workerCount = Math.min(5, workerCount + 1)">+</button>
       </div>
     </div>
 
     <div class="pool-layout">
       <div class="queue-section">
-        <div class="section-title">任务队列 ({{ queue.length }})</div>
+        <div class="section-title">{{ t('worker.queueTitle', { count: queue.length }) }}</div>
         <div class="queue-list">
           <div v-for="task in queue" :key="task.id" class="queue-item">
             {{ task.name }}
           </div>
-          <div v-if="queue.length === 0" class="empty">队列为空</div>
+          <div v-if="queue.length === 0" class="empty">{{ t('worker.emptyQueue') }}</div>
         </div>
       </div>
 
       <div class="arrow-section">→</div>
 
       <div class="workers-section">
-        <div class="section-title">Workers</div>
+        <div class="section-title">{{ t('worker.workersTitle') }}</div>
         <div class="workers-grid">
           <div v-for="w in workers" :key="w.id" :class="['worker-card', w.status]">
             <div class="worker-name">Worker {{ w.id }}</div>
             <div class="worker-status">
-              <template v-if="w.status === 'idle'">💤 空闲</template>
+              <template v-if="w.status === 'idle'">{{ t('worker.idle') }}</template>
               <template v-else>⚙️ {{ w.currentTask }}</template>
             </div>
-            <div class="worker-count-label">已完成: {{ w.completed }}</div>
+            <div class="worker-count-label">{{ t('worker.completedCount', { count: w.completed }) }}</div>
           </div>
         </div>
       </div>
@@ -51,12 +47,12 @@
       <div class="arrow-section">→</div>
 
       <div class="done-section">
-        <div class="section-title">已完成 ({{ doneList.length }})</div>
+        <div class="section-title">{{ t('worker.doneTitle', { count: doneList.length }) }}</div>
         <div class="done-list">
           <div v-for="task in doneList" :key="task.id" class="done-item">
             ✅ {{ task.name }}
           </div>
-          <div v-if="doneList.length === 0" class="empty">暂无</div>
+          <div v-if="doneList.length === 0" class="empty">{{ t('worker.emptyDone') }}</div>
         </div>
       </div>
     </div>
@@ -65,15 +61,18 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { asyncTaskQueuesLocale } from '../../../locales/async-task-queues/index.js'
+
+const { t, messages } = useI18n(asyncTaskQueuesLocale)
 
 const workerCount = ref(3)
 const running = ref(false)
 let taskId = 0
 
-const taskTypes = ['发送邮件', '生成报表', '图片压缩', '数据同步', '推送通知', '日志归档', 'PDF 导出', '缓存预热']
-
 const queue = ref([])
 const doneList = ref([])
+const taskTypes = computed(() => messages.value.worker.taskTypes)
 
 const workers = computed(() => {
   const arr = []
@@ -86,7 +85,7 @@ const workers = computed(() => {
 const workerState = ref({})
 
 function addTask() {
-  const name = taskTypes[taskId % taskTypes.length]
+  const name = taskTypes.value[taskId % taskTypes.value.length]
   queue.value.push({ id: ++taskId, name: `${name} #${taskId}` })
 }
 
@@ -104,7 +103,6 @@ async function sleep(ms) {
 
 async function startProcessing() {
   running.value = true
-  // Initialize worker states
   for (let i = 1; i <= workerCount.value; i++) {
     workerState.value[i] = { id: i, status: 'idle', currentTask: '', completed: 0 }
   }

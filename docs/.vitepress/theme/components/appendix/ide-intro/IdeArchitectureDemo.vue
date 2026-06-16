@@ -1,31 +1,15 @@
 <script setup>
 import { ref, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { ideIntroLocale } from '../../../locales/ide-intro/index.js'
 
-const currentScenario = ref('editor') // 'editor' | 'extension' | 'full'
+const { t, messages } = useI18n(ideIntroLocale)
+const currentScenario = ref('editor')
 const isRunning = ref(false)
 const logs = ref([])
-const activeStep = ref('') // 'start' | 'error-editor' | 'extension' | 'error-env' | 'env' | 'result'
+const activeStep = ref('')
 
-const scenarios = {
-  editor: {
-    tab: '1. 仅编辑器',
-    title: '场景 1: 只有 VS Code (纯文本模式)',
-    desc: '就像用 Windows 记事本写代码。虽然能打字，但它根本不懂什么是 Python。',
-    result: '❌ 失败：VS Code 把代码当成普通文本，不知道该怎么运行。'
-  },
-  extension: {
-    tab: '2. +插件',
-    title: '场景 2: 安装了插件 (缺环境)',
-    desc: '你安装了 Python 插件。插件知道“运行”意味着要找 Python 程序，但你的电脑里并没有安装 Python。',
-    result: '⚠️ 报错：插件生成了指令，但在系统里找不到 "python.exe"。'
-  },
-  full: {
-    tab: '3. +环境 (完整)',
-    title: '场景 3: 完整形态 (IDE + 插件 + 环境)',
-    desc: '你安装了 Python 解释器。插件生成指令，解释器接收并执行，完美配合。',
-    result: '✅ 成功：Hello World'
-  }
-}
+const scenarios = computed(() => messages.value.architecture.scenarios)
 
 const run = async () => {
   if (isRunning.value) return
@@ -36,11 +20,10 @@ const run = async () => {
   await wait(600)
 
   if (currentScenario.value === 'editor') {
-    logs.value.push('VS Code: "这是什么文件？我不认识。"')
-    logs.value.push('VS Code: "我只是个打字机，无法运行。"')
+    logs.value.push(t('architecture.logs.unknownFile'))
+    logs.value.push(t('architecture.logs.textEditor'))
     activeStep.value = 'error-editor'
   } else {
-    // Has extension
     activeStep.value = 'extension'
     await wait(800)
 
@@ -48,10 +31,9 @@ const run = async () => {
       logs.value.push('> python main.py')
       await wait(600)
       logs.value.push("Error: command 'python' not found")
-      logs.value.push('系统: 找不到 Python 解释器')
+      logs.value.push(t('architecture.logs.missingPython'))
       activeStep.value = 'error-env'
     } else {
-      // Full
       logs.value.push('> python main.py')
       activeStep.value = 'env'
       await wait(1200)
@@ -77,10 +59,10 @@ const setScenario = (key) => {
   <div class="arch-demo">
     <div class="demo-header">
       <div class="title">
-        🛠️ IDE 核心机制模拟器
+        🛠️ {{ t('architecture.title') }}
       </div>
       <div class="subtitle">
-        点击下方标签，体验不同配置下的运行结果，理解为什么缺一不可。
+        {{ t('architecture.subtitle') }}
       </div>
     </div>
 
@@ -109,7 +91,7 @@ const setScenario = (key) => {
         :class="{ dim: activeStep === 'env' }"
       >
         <div class="comp-label">
-          1. 外壳 (VS Code)
+          {{ t('architecture.layerLabels.shell') }}
         </div>
         <div class="editor-window">
           <div class="file-tab">
@@ -123,17 +105,17 @@ const setScenario = (key) => {
           <button
             class="run-btn-small"
             :disabled="isRunning"
-            title="点击运行"
+            :title="t('architecture.runTitle')"
             @click="run"
           >
-            {{ isRunning ? '...' : '▶ 运行' }}
+            {{ isRunning ? '...' : t('architecture.runButton') }}
           </button>
         </div>
         <div
           v-if="activeStep === 'error-editor'"
           class="status-badge error"
         >
-          🚫 不懂怎么运行
+          🚫 {{ t('architecture.statuses.editorError') }}
         </div>
       </div>
 
@@ -168,14 +150,14 @@ const setScenario = (key) => {
         }"
       >
         <div class="comp-label">
-          2. 中介 (插件)
+          {{ t('architecture.layerLabels.mediator') }}
         </div>
         <div class="comp-box">
           <div
             v-if="currentScenario === 'editor'"
             class="missing-content"
           >
-            <span class="icon">❌</span> 未安装插件
+            <span class="icon">❌</span> {{ t('architecture.statuses.extensionMissing') }}
           </div>
           <div
             v-else
@@ -185,7 +167,7 @@ const setScenario = (key) => {
               🧩
             </div>
             <div class="text">
-              Python 插件
+              {{ t('architecture.pythonExtension') }}
             </div>
             <div
               v-if="
@@ -195,7 +177,7 @@ const setScenario = (key) => {
               "
               class="action"
             >
-              生成指令: <code>python main.py</code>
+              {{ t('architecture.statuses.commandGenerated') }} <code>python main.py</code>
             </div>
           </div>
         </div>
@@ -224,14 +206,14 @@ const setScenario = (key) => {
         }"
       >
         <div class="comp-label">
-          3. 引擎 (环境)
+          {{ t('architecture.layerLabels.engine') }}
         </div>
         <div class="comp-box">
           <div
             v-if="currentScenario !== 'full'"
             class="missing-content"
           >
-            <span class="icon">❌</span> 未安装环境
+            <span class="icon">❌</span> {{ t('architecture.statuses.envMissing') }}
           </div>
           <div
             v-else
@@ -241,19 +223,19 @@ const setScenario = (key) => {
               ⚙️
             </div>
             <div class="text">
-              Python 解释器
+              {{ t('architecture.pythonInterpreter') }}
             </div>
             <div
               v-if="activeStep === 'env'"
               class="action"
             >
-              <span class="spin">⚙️</span> 正在计算...
+              <span class="spin">⚙️</span> {{ t('architecture.statuses.calculating') }}
             </div>
             <div
               v-if="activeStep === 'result'"
               class="action success"
             >
-              ✅ 计算完成
+              ✅ {{ t('architecture.statuses.done') }}
             </div>
           </div>
         </div>
@@ -261,7 +243,7 @@ const setScenario = (key) => {
           v-if="activeStep === 'error-env'"
           class="status-badge error"
         >
-          🚫 找不到程序
+          🚫 {{ t('architecture.statuses.programMissing') }}
         </div>
       </div>
     </div>
@@ -269,14 +251,14 @@ const setScenario = (key) => {
     <!-- Output Console -->
     <div class="terminal-box">
       <div class="term-header">
-        <span class="term-icon">_</span> 终端 (Terminal)
+        <span class="term-icon">_</span> {{ t('architecture.statuses.terminal') }}
       </div>
       <div class="term-body">
         <div
           v-for="(l, i) in logs"
           :key="i"
           class="log-line"
-          :class="{ error: l.includes('Error') || l.includes('失败') }"
+          :class="{ error: l.includes('Error') || currentScenario !== 'full' }"
         >
           {{ l }}
         </div>
@@ -284,7 +266,7 @@ const setScenario = (key) => {
           v-if="logs.length === 0"
           class="placeholder"
         >
-          点击上方“运行”按钮开始...
+          {{ t('architecture.statuses.placeholder') }}
         </div>
       </div>
     </div>
@@ -293,10 +275,11 @@ const setScenario = (key) => {
       v-if="!isRunning && logs.length > 0"
       class="result-bar"
       :class="{
-        success: scenarios[currentScenario].result.includes('成功'),
-        error: !scenarios[currentScenario].result.includes('成功')
+        success: currentScenario === 'full',
+        error: currentScenario !== 'full'
       }"
     >
+      {{ currentScenario === 'full' ? '✅' : currentScenario === 'extension' ? '⚠️' : '❌' }}
       {{ scenarios[currentScenario].result }}
     </div>
   </div>

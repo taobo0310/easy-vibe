@@ -105,7 +105,7 @@
     <div class="controls">
       <div class="description">
         <div v-if="!isAltBufferActive">
-          <p><strong>Current: Primary Buffer (主缓冲区)</strong></p>
+          <p><strong>Current: Primary Buffer ({{ t('common.primaryBuffer') }})</strong></p>
           <p>
             This is the standard scrolling log. Commands are executed line by
             line.
@@ -114,11 +114,11 @@
             class="action-btn"
             @click="openVim"
           >
-            Execute `vim notes.txt`
+            {{ t('bufferSwitch.executeVim') }}
           </button>
         </div>
         <div v-else>
-          <p><strong>Current: Alternate Buffer (备用缓冲区)</strong></p>
+          <p><strong>Current: Alternate Buffer ({{ t('common.alternateBuffer') }})</strong></p>
           <p>
             A separate "canvas" for full-screen apps. It hides the history but
             doesn't delete it.
@@ -127,7 +127,7 @@
             class="action-btn red"
             @click="quitVim"
           >
-            Execute `:q` (Quit)
+            {{ t('bufferSwitch.executeQuit') }}
           </button>
         </div>
       </div>
@@ -137,6 +137,10 @@
 
 <script setup>
 import { ref } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { terminalIntroLocale } from '../../../locales/terminal-intro/index.js'
+
+const { t } = useI18n(terminalIntroLocale)
 
 const isAltBufferActive = ref(false)
 const showQuitCmd = ref(false)

@@ -1,14 +1,18 @@
 <script setup>
 import { ref, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { portsLocalhostLocale } from '../../../locales/ports-localhost/index.js'
+
+const { t } = useI18n(portsLocalhostLocale)
 
 const services = ref([
-  { id: 1, name: 'Vite 前端', port: 5173, status: 'running', color: '#646cff' },
+  { id: 1, name: 'Vite', port: 5173, status: 'running', color: '#646cff' },
 ])
 
 const nextServices = [
-  { name: 'React 项目', defaultPort: 5173, color: '#61dafb' },
+  { name: 'React', defaultPort: 5173, color: '#61dafb' },
   { name: 'Express API', defaultPort: 3000, color: '#10b981' },
-  { name: 'Flask 后端', defaultPort: 5000, color: '#f59e0b' },
+  { name: 'Flask', defaultPort: 5000, color: '#f59e0b' },
 ]
 
 const nextServiceIndex = ref(0)
@@ -26,7 +30,7 @@ function tryStart() {
 
   const svc = nextService.value
   if (occupiedPorts.value.includes(svc.defaultPort)) {
-    conflictMessage.value = `❌ 端口 ${svc.defaultPort} 已被「${services.value.find(s => s.port === svc.defaultPort).name}」占用！Error: EADDRINUSE :::${svc.defaultPort}`
+    conflictMessage.value = t('portConflict.conflictMsg', { port: svc.defaultPort, name: services.value.find(s => s.port === svc.defaultPort).name })
   } else {
     services.value.push({
       id: idCounter++,
@@ -35,7 +39,7 @@ function tryStart() {
       status: 'running',
       color: svc.color
     })
-    resolveMessage.value = `✅ ${svc.name} 成功启动在端口 ${svc.defaultPort}`
+    resolveMessage.value = t('portConflict.successMsg', { name: svc.name, port: svc.defaultPort })
     advanceNext()
   }
 }
@@ -56,9 +60,9 @@ function autoResolve() {
   })
 
   if (newPort !== svc.defaultPort) {
-    resolveMessage.value = `✅ 端口 ${svc.defaultPort} 被占用，自动换到端口 ${newPort}！（很多框架会自动帮你做这件事）`
+    resolveMessage.value = t('portConflict.autoResolveMsg', { port: svc.defaultPort, newPort: newPort })
   } else {
-    resolveMessage.value = `✅ ${svc.name} 成功启动在端口 ${newPort}`
+    resolveMessage.value = t('portConflict.successMsg', { name: svc.name, port: newPort })
   }
   conflictMessage.value = ''
   advanceNext()
@@ -68,7 +72,7 @@ function killService(id) {
   const svc = services.value.find(s => s.id === id)
   if (svc) {
     services.value = services.value.filter(s => s.id !== id)
-    resolveMessage.value = `🗑️ 已停止「${svc.name}」，端口 ${svc.port} 已释放`
+    resolveMessage.value = t('portConflict.killedMsg', { name: svc.name, port: svc.port })
     conflictMessage.value = ''
   }
 }
@@ -79,7 +83,7 @@ function advanceNext() {
 
 function reset() {
   services.value = [
-    { id: 1, name: 'Vite 前端', port: 5173, status: 'running', color: '#646cff' }
+    { id: 1, name: 'Vite', port: 5173, status: 'running', color: '#646cff' }
   ]
   idCounter = 2
   nextServiceIndex.value = 0
@@ -92,22 +96,22 @@ function reset() {
   <div class="port-conflict-demo">
     <div class="control-panel">
       <div class="control-left">
-        <span class="panel-label">尝试启动：</span>
+        <span class="panel-label">{{ t('portConflict.tryStart') }}</span>
         <span class="next-svc" :style="{ color: nextService.color }">{{ nextService.name }}</span>
-        <span class="next-port">（默认端口 {{ nextService.defaultPort }}）</span>
+        <span class="next-port">{{ t('portConflict.defaultPort', { port: nextService.defaultPort }) }}</span>
       </div>
       <div class="control-btns">
-        <button class="action-btn" @click="tryStart">直接启动</button>
-        <button class="action-btn secondary" @click="autoResolve">智能启动</button>
-        <button class="action-btn ghost" @click="reset">重置</button>
+        <button class="action-btn" @click="tryStart">{{ t('portConflict.startDirect') }}</button>
+        <button class="action-btn secondary" @click="autoResolve">{{ t('portConflict.smartStart') }}</button>
+        <button class="action-btn ghost" @click="reset">{{ t('portConflict.reset') }}</button>
       </div>
     </div>
 
     <div class="visualization-area">
       <div class="port-list">
         <div class="port-list-header">
-          <span>当前运行的服务</span>
-          <span class="port-count">{{ services.length }} 个</span>
+          <span>{{ t('portConflict.runningServices') }}</span>
+          <span class="port-count">{{ t('portConflict.count', { count: services.length }) }}</span>
         </div>
         <transition-group name="list" tag="div" class="port-items">
           <div
@@ -118,8 +122,8 @@ function reset() {
             <div class="port-dot" :style="{ backgroundColor: svc.color }" />
             <span class="svc-name">{{ svc.name }}</span>
             <code class="svc-port">:{{ svc.port }}</code>
-            <span class="svc-status">🟢 运行中</span>
-            <button class="kill-btn" title="停止服务" @click="killService(svc.id)">✕</button>
+            <span class="svc-status">{{ t('portConflict.running') }}</span>
+            <button class="kill-btn" :title="t('portConflict.killService')" @click="killService(svc.id)">✕</button>
           </div>
         </transition-group>
       </div>
@@ -128,10 +132,8 @@ function reset() {
         <div v-if="conflictMessage" class="msg-box error">
           <div class="msg-content">{{ conflictMessage }}</div>
           <div class="msg-hint">
-            <strong>解决办法：</strong>
-            ① 停掉占用端口的进程（点击上方 ✕ 按钮）；
-            ② 改用其他端口（点击"智能启动"）；
-            ③ 命令行排查：<code>lsof -i :{{ nextService.defaultPort }}</code>
+            <strong>{{ t('portConflict.solution') }}</strong>
+            {{ t('portConflict.solutionDesc', { port: nextService.defaultPort }) }}
           </div>
         </div>
       </transition>
@@ -144,7 +146,7 @@ function reset() {
     </div>
 
     <div class="info-box">
-      <strong>端口冲突：</strong>一个端口同一时刻只能被一个程序监听。如果你看到 <code>EADDRINUSE</code> 错误，说明这个端口已经被占了。要么杀掉旧进程，要么换个端口。
+      <strong>{{ t('portConflict.core') }}</strong>一个端口同一时刻只能被一个程序监听。如果你看到 <code>EADDRINUSE</code> 错误，说明这个端口已经被占了。要么杀掉旧进程，要么换个端口。
     </div>
   </div>
 </template>

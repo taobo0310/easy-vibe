@@ -1,30 +1,17 @@
-<!--
-  AuthInteractiveLoginDemo.vue
-  交互式登录流程演示
-
-  用途：
-  通过模拟真实的登录流程，让用户直观理解认证和授权的概念。
-
-  互动功能：
-  - 模拟登录：输入用户名密码，看到完整的认证流程
-  - 可视化数据流：HTTP 请求和响应的实时展示
-  - 两种模式对比：Session vs JWT
--->
 <template>
   <div class="auth-interactive-login">
     <div class="header">
       <div class="title">
-        🔐 认证流程演示
+        {{ t('interactiveLogin.title') }}
       </div>
       <div class="subtitle">
-        模拟登录过程，理解认证与授权的区别
+        {{ t('interactiveLogin.subtitle') }}
       </div>
     </div>
 
-    <!-- 模式切换 -->
     <div class="mode-selector">
       <div class="mode-label">
-        选择鉴权方式：
+        {{ t('interactiveLogin.modeLabel') }}
       </div>
       <div class="mode-buttons">
         <button
@@ -45,28 +32,27 @@
     </div>
 
     <div class="main-content">
-      <!-- 登录表单 -->
       <div class="login-section">
         <div class="form-container">
           <div class="form-title">
-            登录表单
+            {{ t('interactiveLogin.formTitle') }}
           </div>
           <div class="form-fields">
             <div class="field-group">
-              <label>用户名</label>
+              <label>{{ t('interactiveLogin.username') }}</label>
               <input
                 v-model="username"
                 type="text"
-                placeholder="输入用户名"
+                :placeholder="t('interactiveLogin.usernamePlaceholder')"
                 :disabled="locked"
               >
             </div>
             <div class="field-group">
-              <label>密码</label>
+              <label>{{ t('interactiveLogin.password') }}</label>
               <input
                 v-model="password"
                 type="password"
-                placeholder="输入密码"
+                :placeholder="t('interactiveLogin.passwordPlaceholder')"
                 :disabled="locked"
                 @keyup.enter="startDemo"
               >
@@ -76,16 +62,16 @@
               :disabled="!username || !password || locked"
               @click="startDemo"
             >
-              开始演示
+              {{ t('interactiveLogin.startDemo') }}
             </button>
           </div>
 
           <div class="hints">
             <div class="hint-title">
-              💡 提示
+              {{ t('interactiveLogin.hintTitle') }}
             </div>
             <div class="hint-text">
-              试试用户名 <code>admin</code>，密码 <code>123456</code>
+              {{ t('interactiveLogin.hintText') }} <code>admin</code>，{{ t('interactiveLogin.hintPassword') }} <code>123456</code>
             </div>
           </div>
 
@@ -94,8 +80,8 @@
             class="stepper"
           >
             <div class="stepper-title">
-              当前步骤：{{ flowStep }} / {{ maxStep }}
-              <span class="stepper-hint">（手动推进，避免“自动下一步”误解）</span>
+              {{ t('interactiveLogin.currentStep', { step: flowStep, maxStep }) }}
+              <span class="stepper-hint">{{ t('interactiveLogin.manualHint') }}</span>
             </div>
             <div class="stepper-actions">
               <button
@@ -103,32 +89,30 @@
                 :disabled="flowStep <= 1"
                 @click="prevStep"
               >
-                上一步
+                {{ t('interactiveLogin.prev') }}
               </button>
               <button
                 class="step-btn primary"
                 :disabled="flowStep >= maxStep"
                 @click="nextStep"
               >
-                下一步
+                {{ t('interactiveLogin.next') }}
               </button>
               <button
                 class="step-btn"
                 @click="resetDemo"
               >
-                重置
+                {{ t('interactiveLogin.reset') }}
               </button>
             </div>
           </div>
         </div>
 
-        <!-- 实时数据流 -->
         <div class="data-flow">
           <div class="flow-title">
-            📊 数据流可视化
+            {{ t('interactiveLogin.flowTitle') }}
           </div>
 
-          <!-- 请求阶段 -->
           <div
             v-if="currentStage >= 1"
             class="flow-stage request-stage"
@@ -137,7 +121,7 @@
               <span class="stage-badge">{{
                 currentStage === 1 ? '📤' : '✅'
               }}</span>
-              <span class="stage-name">1. 客户端发送登录请求</span>
+              <span class="stage-name">{{ t('interactiveLogin.stageLoginRequest') }}</span>
             </div>
             <div
               v-if="currentStage >= 1"
@@ -167,7 +151,6 @@
             ⬇️
           </div>
 
-          <!-- 服务器验证阶段 -->
           <div
             v-if="currentStage >= 2"
             class="flow-stage server-stage"
@@ -176,7 +159,7 @@
               <span class="stage-badge">{{
                 currentStage === 2 ? '⚙️' : '✅'
               }}</span>
-              <span class="stage-name">2. 服务器验证身份</span>
+              <span class="stage-name">{{ t('interactiveLogin.stageVerify') }}</span>
             </div>
             <div
               v-if="currentStage >= 2"
@@ -190,7 +173,7 @@
                   <span class="step-icon">{{
                     verificationStep >= 1 ? '✅' : '⏳'
                   }}</span>
-                  <span class="step-text">查询用户数据库</span>
+                  <span class="step-text">{{ t('interactiveLogin.queryUser') }}</span>
                 </div>
                 <div
                   class="verify-step"
@@ -199,7 +182,7 @@
                   <span class="step-icon">{{
                     verificationStep >= 2 ? '✅' : '⏳'
                   }}</span>
-                  <span class="step-text">验证密码哈希</span>
+                  <span class="step-text">{{ t('interactiveLogin.verifyHash') }}</span>
                 </div>
                 <div
                   class="verify-step"
@@ -208,7 +191,7 @@
                   <span class="step-icon">{{
                     verificationStep >= 3 ? '✅' : '⏳'
                   }}</span>
-                  <span class="step-text">生成{{
+                  <span class="step-text">{{ t('interactiveLogin.generate') }} {{
                     mode === 'session' ? 'Session' : 'JWT Token'
                   }}</span>
                 </div>
@@ -223,7 +206,6 @@
             ⬇️
           </div>
 
-          <!-- 响应阶段 -->
           <div
             v-if="currentStage >= 3"
             class="flow-stage response-stage"
@@ -232,14 +214,14 @@
               <span class="stage-badge">{{
                 currentStage === 3 ? '📥' : '✅'
               }}</span>
-              <span class="stage-name">3. 服务器返回认证结果</span>
+              <span class="stage-name">{{ t('interactiveLogin.stageResponse') }}</span>
             </div>
             <div
               v-if="authResult"
               class="response-content"
             >
               <div class="response-status success">
-                ✅ 登录成功
+                {{ t('interactiveLogin.loginSuccess') }}
               </div>
               <div class="response-body">
                 <div class="body-title">
@@ -268,7 +250,7 @@
                 class="auth-mechanism"
               >
                 <div class="mechanism-title">
-                  {{ mode === 'session' ? '🍪 Cookie 设置' : '🎫 Token 存储' }}
+                  {{ mode === 'session' ? t('interactiveLogin.cookieSetting') : t('interactiveLogin.tokenStorage') }}
                 </div>
                 <div class="mechanism-content">
                   <div v-if="mode === 'session'">
@@ -285,14 +267,13 @@
             </div>
           </div>
 
-          <!-- 后续请求 -->
           <div
             v-if="currentStage >= 5"
             class="flow-stage request-stage"
           >
             <div class="stage-header">
               <span class="stage-badge">🔄</span>
-              <span class="stage-name">4. 后续请求自动携带认证信息</span>
+              <span class="stage-name">{{ t('interactiveLogin.stageSubsequent') }}</span>
             </div>
             <div class="subsequent-request">
               <div class="request-line">
@@ -316,31 +297,23 @@
       </div>
     </div>
 
-    <!-- 状态说明 -->
     <div
       v-if="currentStage >= 4"
       class="state-description"
     >
       <div class="description-title">
-        📖 {{ mode === 'session' ? 'Session' : 'JWT' }} 工作原理
+        {{ t('interactiveLogin.workingPrinciple', { mode: mode === 'session' ? 'Session' : 'JWT' }) }}
       </div>
       <div class="description-content">
         <p v-if="mode === 'session'">
-          <strong>Session 模式：</strong>服务器在内存或 Redis 中创建一个
-          Session，存储用户信息。 服务器返回一个
-          <code>session_id</code> 给客户端，客户端后续请求会自动在 Cookie
-          中携带这个 ID。 服务器根据 ID 查找对应的 Session，从而识别用户身份。
+          {{ t('interactiveLogin.sessionPrinciple') }}
         </p>
         <p v-else>
-          <strong>JWT 模式：</strong>服务器将用户信息编码成 JWT
-          Token，直接返回给客户端。 客户端将 Token 存储在
-          localStorage，后续请求在 <code>Authorization</code> Header 中携带。
-          服务器验证 Token 的签名即可识别用户，无需存储状态。
+          {{ t('interactiveLogin.jwtPrinciple') }}
         </p>
       </div>
     </div>
 
-    <!-- 重置按钮 -->
     <div
       v-if="currentStage >= 5"
       class="reset-section"
@@ -349,7 +322,7 @@
         class="reset-btn"
         @click="resetDemo"
       >
-        🔄 重新演示
+        {{ t('interactiveLogin.replay') }}
       </button>
     </div>
   </div>
@@ -357,11 +330,15 @@
 
 <script setup>
 import { computed, ref } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { authDesignLocale } from '../../../locales/auth-design/index.js'
 
-const mode = ref('session') // 'session' or 'jwt'
+const { t } = useI18n(authDesignLocale)
+
+const mode = ref('session')
 const username = ref('')
 const password = ref('')
-const flowStep = ref(0) // 0 = not started, 1..maxStep = manual steps
+const flowStep = ref(0)
 const authResult = ref(null)
 const locked = ref(false)
 
@@ -412,7 +389,6 @@ const buildAuthResult = () => {
 const startDemo = () => {
   if (!username.value || !password.value) return
 
-  // Start at step 1 (request). Other steps are manual via Next.
   authResult.value = buildAuthResult()
   flowStep.value = 1
   locked.value = true
@@ -461,7 +437,6 @@ const resetDemo = () => {
   font-size: 0.9rem;
 }
 
-/* 模式切换 */
 .mode-selector {
   display: flex;
   align-items: center;
@@ -502,7 +477,6 @@ const resetDemo = () => {
   border-color: var(--vp-c-brand);
 }
 
-/* 主内容 */
 .main-content {
   display: grid;
   grid-template-columns: 1fr 1.5fr;
@@ -510,7 +484,6 @@ const resetDemo = () => {
   margin-bottom: 1.5rem;
 }
 
-/* 登录表单 */
 .login-section {
   display: contents;
 }
@@ -662,7 +635,6 @@ const resetDemo = () => {
   font-size: 0.8rem;
 }
 
-/* 数据流 */
 .data-flow {
   background: var(--vp-c-bg);
   border-radius: 10px;
@@ -753,7 +725,6 @@ const resetDemo = () => {
   line-height: 1.5;
 }
 
-/* 验证步骤 */
 .verification-steps {
   display: flex;
   flex-direction: column;
@@ -783,7 +754,6 @@ const resetDemo = () => {
   flex: 1;
 }
 
-/* 响应 */
 .response-status {
   padding: 0.5rem 0.75rem;
   border-radius: 6px;
@@ -797,7 +767,6 @@ const resetDemo = () => {
   color: #16a34a;
 }
 
-/* 认证机制 */
 .auth-mechanism {
   margin-top: 1rem;
   padding: 0.75rem;
@@ -824,7 +793,6 @@ const resetDemo = () => {
   word-break: break-all;
 }
 
-/* 后续请求 */
 .subsequent-request {
   margin-top: 0.5rem;
 }
@@ -851,7 +819,6 @@ const resetDemo = () => {
   margin: 0.5rem 0;
 }
 
-/* 状态说明 */
 .state-description {
   background: var(--vp-c-bg);
   border-radius: 10px;
@@ -881,7 +848,6 @@ const resetDemo = () => {
   color: var(--vp-c-brand);
 }
 
-/* 重置 */
 .reset-section {
   text-align: center;
 }

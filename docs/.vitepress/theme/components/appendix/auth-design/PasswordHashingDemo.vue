@@ -1,42 +1,33 @@
-<!--
-  PasswordHashingDemo.vue
-  密码哈希/加密学派生函数演示（更安全/更可用）
-
-  说明：
-  - 为避免引入第三方依赖（bcryptjs）导致构建失败，本组件用 WebCrypto 的 PBKDF2 来模拟“慢哈希 + 盐”的核心效果。
-  - 生产环境更推荐 bcrypt / scrypt / Argon2（取决于语言/库），本演示只讲原理。
--->
 <template>
   <div class="password-hashing-demo">
     <div class="header">
       <div class="title">
-        🔐 密码存储：哈希 + 盐 + 慢
+        {{ t('passwordHashing.title') }}
       </div>
       <div class="subtitle">
-        演示 PBKDF2（模拟慢哈希）如何抵抗彩虹表/暴力破解；真实项目通常选
-        bcrypt/Argon2。
+        {{ t('passwordHashing.subtitle') }}
       </div>
     </div>
 
     <div class="grid">
       <div class="card">
         <div class="card-title">
-          输入
+          {{ t('passwordHashing.inputTitle') }}
         </div>
 
-        <label class="label">密码</label>
+        <label class="label">{{ t('passwordHashing.passwordLabel') }}</label>
         <input
           v-model="password"
           type="password"
           class="input"
-          placeholder="例如：123456"
+          :placeholder="t('passwordHashing.placeholder')"
           @input="debouncedRecompute"
         >
 
         <div class="row">
           <div class="col">
             <label class="label">
-              iterations（迭代次数）：<strong>{{ iterations }}</strong>
+              {{ t('passwordHashing.iterationsLabel') }}<strong>{{ iterations }}</strong>
             </label>
             <input
               v-model.number="iterations"
@@ -48,7 +39,7 @@
               @input="debouncedRecompute"
             >
             <div class="hint">
-              越大越慢，暴力破解成本越高（但登录也更慢）。
+              {{ t('passwordHashing.iterationsHint') }}
             </div>
           </div>
         </div>
@@ -60,14 +51,14 @@
               type="checkbox"
               @change="recompute"
             >
-            <span>启用盐（salt）</span>
+            <span>{{ t('passwordHashing.enableSalt') }}</span>
           </label>
           <button
             class="btn"
             :disabled="!saltEnabled"
             @click="regenSalt"
           >
-            生成新盐
+            {{ t('passwordHashing.regenSalt') }}
           </button>
         </div>
 
@@ -81,7 +72,7 @@
 
       <div class="card">
         <div class="card-title">
-          输出（模拟）
+          {{ t('passwordHashing.outputTitle') }}
         </div>
 
         <div class="status">
@@ -93,16 +84,15 @@
           <div class="mono-label">
             derived key (hex)
           </div>
-          <code class="mono">{{ hashHex || '（请输入密码）' }}</code>
+          <code class="mono">{{ hashHex || t('passwordHashing.emptyHash') }}</code>
         </div>
 
         <div class="alert">
           <div class="alert-title">
-            结论
+            {{ t('passwordHashing.conclusionTitle') }}
           </div>
           <div class="alert-text">
-            不要存明文；不要用无盐的快速哈希（MD5/SHA1/SHA256 直接 hash 密码）。
-            应使用“专门的密码哈希/KDF（慢 + 盐）”，并设置合理成本。
+            {{ t('passwordHashing.conclusion') }}
           </div>
         </div>
       </div>
@@ -110,7 +100,7 @@
 
     <div class="card">
       <div class="card-title">
-        🌈 彩虹表为什么会失效？（同一密码 + 不同盐 → 不同结果）
+        {{ t('passwordHashing.rainbowTitle') }}
       </div>
       <div class="two">
         <div class="mono-box">
@@ -135,7 +125,7 @@
         </div>
       </div>
       <div class="hint">
-        彩虹表依赖“预计算”：同一个密码如果总产生同一个哈希，攻击者就能快速反查。盐让预计算成本爆炸。
+        {{ t('passwordHashing.rainbowHint') }}
       </div>
     </div>
   </div>
@@ -143,6 +133,10 @@
 
 <script setup>
 import { onMounted, ref } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { authDesignLocale } from '../../../locales/auth-design/index.js'
+
+const { t } = useI18n(authDesignLocale)
 
 const password = ref('')
 const iterations = ref(60000)
@@ -152,7 +146,7 @@ const saltHex = ref('')
 const hashHex = ref('')
 const timeMs = ref(0)
 
-let t = null
+let recomputeTimer = null
 
 const toHex = (bytes) =>
   [...bytes].map((b) => b.toString(16).padStart(2, '0')).join('')
@@ -217,8 +211,8 @@ const recompute = async () => {
 }
 
 const debouncedRecompute = () => {
-  if (t) clearTimeout(t)
-  t = setTimeout(() => {
+  if (recomputeTimer) clearTimeout(recomputeTimer)
+  recomputeTimer = setTimeout(() => {
     recompute()
   }, 200)
 }

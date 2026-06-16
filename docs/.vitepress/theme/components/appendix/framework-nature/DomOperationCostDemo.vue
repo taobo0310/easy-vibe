@@ -1,13 +1,13 @@
 <template>
   <div class="dom-cost-demo">
     <div class="demo-header">
-      <span class="title">DOM 操作耗时对比</span>
-      <span class="subtitle">逐个操作 vs 批量操作</span>
+      <span class="title">{{ t('domCost.title') }}</span>
+      <span class="subtitle">{{ t('domCost.subtitle') }}</span>
     </div>
 
     <div class="control-panel">
       <div class="control-group">
-        <label>修改次数</label>
+        <label>{{ t('domCost.countLabel') }}</label>
         <div class="radio-group">
           <button
             v-for="n in counts"
@@ -15,12 +15,12 @@
             :class="['radio-btn', { active: selectedCount === n }]"
             @click="selectedCount = n"
           >
-            {{ n }} 次
+            {{ t('domCost.countUnit', { count: n }) }}
           </button>
         </div>
       </div>
       <button class="action-btn" :disabled="isRunning" @click="runComparison">
-        {{ isRunning ? '执行中...' : '开始对比' }}
+        {{ isRunning ? t('domCost.running') : t('domCost.start') }}
       </button>
     </div>
 
@@ -28,10 +28,10 @@
       <div class="comparison-row">
         <div class="method-card">
           <div class="method-header">
-            <span class="method-badge slow">逐个操作 DOM</span>
+            <span class="method-badge slow">{{ t('domCost.slowBadge') }}</span>
           </div>
           <div class="method-desc">
-            每修改一次数据 → 立刻操作一次真实 DOM → 浏览器每次都要重新布局和绘制
+            {{ t('domCost.slowDesc') }}
           </div>
           <div class="progress-container">
             <div class="progress-bar-bg">
@@ -42,7 +42,7 @@
             </div>
           </div>
           <div class="result-row">
-            <span class="result-label">模拟耗时</span>
+            <span class="result-label">{{ t('domCost.timeLabel') }}</span>
             <span class="result-value" :class="{ highlight: showResults }">
               {{ showResults ? slowTime + 'ms' : '—' }}
             </span>
@@ -50,20 +50,22 @@
           <div class="step-list">
             <div v-for="i in Math.min(selectedCount, 4)" :key="i" class="step-item">
               <span class="step-num">{{ i }}</span>
-              <span class="step-text">修改 → 布局 → 绘制</span>
+              <span class="step-text">{{ t('domCost.slowStep') }}</span>
             </div>
             <div v-if="selectedCount > 4" class="step-item ellipsis">
-              <span class="step-text">... 重复 {{ selectedCount - 4 }} 次 ...</span>
+              <span class="step-text">
+                {{ t('domCost.repeatStep', { count: selectedCount - 4 }) }}
+              </span>
             </div>
           </div>
         </div>
 
         <div class="method-card">
           <div class="method-header">
-            <span class="method-badge fast">批量计算后一次性操作</span>
+            <span class="method-badge fast">{{ t('domCost.fastBadge') }}</span>
           </div>
           <div class="method-desc">
-            所有修改先在内存中计算好 → 最后只操作一次真实 DOM → 浏览器只需要重新布局和绘制一次
+            {{ t('domCost.fastDesc') }}
           </div>
           <div class="progress-container">
             <div class="progress-bar-bg">
@@ -74,7 +76,7 @@
             </div>
           </div>
           <div class="result-row">
-            <span class="result-label">模拟耗时</span>
+            <span class="result-label">{{ t('domCost.timeLabel') }}</span>
             <span class="result-value" :class="{ highlight: showResults }">
               {{ showResults ? fastTime + 'ms' : '—' }}
             </span>
@@ -82,31 +84,38 @@
           <div class="step-list">
             <div class="step-item">
               <span class="step-num">1</span>
-              <span class="step-text">内存中计算 {{ selectedCount }} 次变化</span>
+              <span class="step-text">
+                {{ t('domCost.memoryStep', { count: selectedCount }) }}
+              </span>
             </div>
             <div class="step-item">
               <span class="step-num">2</span>
-              <span class="step-text">一次性提交 → 布局 → 绘制</span>
+              <span class="step-text">{{ t('domCost.commitStep') }}</span>
             </div>
           </div>
         </div>
       </div>
 
       <div v-if="showResults" class="savings-banner">
-        批量操作节省了 <strong>{{ savingsPercent }}%</strong> 的耗时
+        {{ t('domCost.savings') }} <strong>{{ savingsPercent }}%</strong>
+        {{ t('domCost.savingsTail') }}
         （{{ slowTime }}ms → {{ fastTime }}ms）
       </div>
     </div>
 
     <div class="info-box">
-      <strong>核心思想：</strong>
-      <span>DOM 操作的真正代价不是"修改值"本身，而是每次修改后浏览器必须执行的"重新布局 + 重新绘制"。减少 DOM 操作次数，就是减少这些昂贵的计算。虚拟 DOM 的作用就是先在内存中算好所有变化，最后一次性提交。</span>
+      <strong>{{ t('domCost.infoStrong') }}</strong>
+      <span>{{ t('domCost.info') }}</span>
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { frameworkNatureLocale } from '../../../locales/framework-nature/index.js'
+
+const { t } = useI18n(frameworkNatureLocale)
 
 const counts = [5, 20, 100, 500]
 const selectedCount = ref(20)

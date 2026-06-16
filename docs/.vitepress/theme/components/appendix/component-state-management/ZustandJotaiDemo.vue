@@ -2,12 +2,12 @@
   <div class="zustand-jotai-demo">
     <div class="demo-header">
       <span class="icon">🐻</span>
-      <span class="title">Zustand & Jotai</span>
-      <span class="subtitle">React 轻量级状态管理</span>
+      <span class="title">{{ t('zustandJotai.title') }}</span>
+      <span class="subtitle">{{ t('zustandJotai.subtitle') }}</span>
     </div>
 
     <div class="intro-text">
-      想象你在<span class="highlight">便利店</span>工作：Zustand 就像整个仓库统一管理，Jotai 就像把商品拆成一个个小格子（Atom），每个格子独立管理，按需取用。
+      {{ t('zustandJotai.introPrefix') }}<span class="highlight">{{ t('zustandJotai.introHighlight') }}</span>{{ t('zustandJotai.introSuffix') }}
     </div>
 
     <div class="demo-content">
@@ -36,20 +36,14 @@
             v-if="activeTab === 'zustand'"
             class="feature-showcase"
           >
-            <div class="feature-card">
-              <span class="feature-icon">📦</span>
-              <span class="feature-title">单一 Store</span>
-              <span class="feature-desc">所有状态集中管理</span>
-            </div>
-            <div class="feature-card">
-              <span class="feature-icon">⚡</span>
-              <span class="feature-title">极简 API</span>
-              <span class="feature-desc">无需 Provider 包裹</span>
-            </div>
-            <div class="feature-card">
-              <span class="feature-icon">🎯</span>
-              <span class="feature-title">细粒度订阅</span>
-              <span class="feature-desc">只重渲染需要的组件</span>
+            <div
+              v-for="feature in t('zustandJotai.features.zustand')"
+              :key="feature.title"
+              class="feature-card"
+            >
+              <span class="feature-icon">{{ feature.icon }}</span>
+              <span class="feature-title">{{ feature.title }}</span>
+              <span class="feature-desc">{{ feature.desc }}</span>
             </div>
           </div>
 
@@ -67,10 +61,10 @@ const useStore = create((set) => ({
   }))
 }))
 
-// 在组件中使用
+// {{ t('zustandJotai.codeComments.useInComponent') }}
 function BearCounter() {
   const bears = useStore((state) => state.bears)
-  return <div>{bears} bears around here</div>
+  return &lt;div&gt;{bears} bears around here&lt;/div&gt;
 }</code></pre>
           </div>
 
@@ -78,20 +72,14 @@ function BearCounter() {
             v-if="activeTab === 'jotai'"
             class="feature-showcase"
           >
-            <div class="feature-card">
-              <span class="feature-icon">⚛️</span>
-              <span class="feature-title">原子化</span>
-              <span class="feature-desc">状态拆分成独立 Atom</span>
-            </div>
-            <div class="feature-card">
-              <span class="feature-icon">🔗</span>
-              <span class="feature-title">自动依赖</span>
-              <span class="feature-desc">派生状态自动追踪</span>
-            </div>
-            <div class="feature-card">
-              <span class="feature-icon">📝</span>
-              <span class="feature-title">TypeScript</span>
-              <span class="feature-desc">原生类型支持</span>
+            <div
+              v-for="feature in t('zustandJotai.features.jotai')"
+              :key="feature.title"
+              class="feature-card"
+            >
+              <span class="feature-icon">{{ feature.icon }}</span>
+              <span class="feature-title">{{ feature.title }}</span>
+              <span class="feature-desc">{{ feature.desc }}</span>
             </div>
           </div>
 
@@ -102,13 +90,13 @@ function BearCounter() {
             <pre class="code-block"><code>// Jotai Atom
 import { atom } from 'jotai'
 
-// 基础 Atom
+// {{ t('zustandJotai.codeComments.baseAtom') }}
 const countAtom = atom(0)
 
-// 派生 Atom
+// {{ t('zustandJotai.codeComments.derivedAtom') }}
 const doubleAtom = atom((get) => get(countAtom) * 2)
 
-// 在组件中使用
+// {{ t('zustandJotai.codeComments.useInComponent') }}
 function Counter() {
   const [count, setCount] = useAtom(countAtom)
   const [double] = useAtom(doubleAtom)
@@ -126,20 +114,21 @@ function Counter() {
 
     <div class="info-box">
       <span class="icon">💡</span>
-      <strong>选择建议：</strong>Zustand 适合中小项目，API 简洁直观；Jotai 适合需要细粒度控制的场景，状态更模块化。两个都支持 TypeScript，不需要 Provider。
+      <strong>{{ t('common.recommendation') }}</strong>{{ t('zustandJotai.idea') }}
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { componentStateManagementLocale } from '../../../locales/component-state-management/index.js'
+
+const { t, messages } = useI18n(componentStateManagementLocale)
 
 const activeTab = ref('zustand')
 
-const tabs = [
-  { id: 'zustand', name: 'Zustand', icon: '🐻' },
-  { id: 'jotai', name: 'Jotai', icon: '⚛️' }
-]
+const tabs = computed(() => messages.value.zustandJotai.tabs)
 </script>
 
 <style scoped>

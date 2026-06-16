@@ -2,32 +2,30 @@
   <div class="developer-efficiency-demo">
     <div class="demo-header">
       <span class="icon">⏱️</span>
-      <span class="title">开发效率</span>
-      <span class="subtitle">不同语言完成相同任务的时间成本</span>
+      <span class="title">{{ t('efficiency.title') }}</span>
+      <span class="subtitle">{{ t('efficiency.subtitle') }}</span>
     </div>
 
     <div class="intro-text">
-      想象你在<span class="highlight">装修房子</span>：有的装修队能快速完工但质量一般（Python、Ruby），有的慢工出细活（Rust、C++），有的速度和质量都不错（Go、Node.js）。
+      {{ t('efficiency.introPrefix') }}<span class="highlight">{{ t('efficiency.introHighlight') }}</span>{{ t('efficiency.introSuffix') }}
     </div>
 
     <div class="task-selector">
-      <label>选择任务：</label>
+      <label>{{ t('efficiency.taskLabel') }}</label>
       <select v-model="selectedTask">
-        <option value="rest">
-          REST API
-        </option>
-        <option value="web">
-          Web 应用
-        </option>
-        <option value="script">
-          数据处理脚本
+        <option
+          v-for="task in tasks"
+          :key="task.id"
+          :value="task.id"
+        >
+          {{ task.label }}
         </option>
       </select>
     </div>
 
     <div class="efficiency-chart">
       <div class="chart-header">
-        <span>开发时间（小时）</span>
+        <span>{{ t('efficiency.chartTitle') }}</span>
       </div>
       <div class="bars">
         <div
@@ -52,49 +50,28 @@
 
     <div class="info-box">
       <span class="icon">💡</span>
-      <strong>核心思想：</strong>初创公司选 Python/Ruby 快速验证想法，大厂选 Java/Go 平衡速度和质量。开发效率不只是写代码的速度，还包括调试、测试、维护的时间成本。
+      <strong>{{ t('efficiency.infoStrong') }}</strong>{{ t('efficiency.info') }}
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { backendLanguagesLocale } from '../../../locales/backend-languages/index.js'
+
+const { t, messages } = useI18n(backendLanguagesLocale)
 
 const selectedTask = ref('rest')
-
-const taskData = {
-  rest: [
-    { name: 'Python', time: 4 },
-    { name: 'Ruby', time: 3.5 },
-    { name: 'Go', time: 5 },
-    { name: 'Node.js', time: 4.5 },
-    { name: 'Java', time: 8 },
-    { name: 'Rust', time: 10 }
-  ],
-  web: [
-    { name: 'Ruby', time: 9 },
-    { name: 'Python', time: 10 },
-    { name: 'Node.js', time: 11 },
-    { name: 'Go', time: 12 },
-    { name: 'Java', time: 20 },
-    { name: 'Rust', time: 25 }
-  ],
-  script: [
-    { name: 'Python', time: 1 },
-    { name: 'Ruby', time: 1 },
-    { name: 'Node.js', time: 1.5 },
-    { name: 'Go', time: 2 },
-    { name: 'Java', time: 4 },
-    { name: 'Rust', time: 4 }
-  ]
-}
+const tasks = computed(() => messages.value.efficiency.tasks)
+const taskData = computed(() => messages.value.efficiency.taskData)
 
 const sortedLanguages = computed(() => {
-  return [...taskData[selectedTask.value]].sort((a, b) => a.time - b.time)
+  return [...taskData.value[selectedTask.value]].sort((a, b) => a.time - b.time)
 })
 
 const maxTime = computed(() => {
-  return Math.max(...taskData[selectedTask.value].map(l => l.time))
+  return Math.max(...taskData.value[selectedTask.value].map(l => l.time))
 })
 </script>
 

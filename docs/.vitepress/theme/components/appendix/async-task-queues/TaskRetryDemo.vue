@@ -1,12 +1,8 @@
-<!--
-  TaskRetryDemo.vue
-  任务重试机制演示：展示失败重试和退避策略
--->
 <template>
   <div class="retry-demo">
     <div class="header">
-      <div class="title">任务重试与退避策略</div>
-      <div class="subtitle">模拟任务失败后的重试过程</div>
+      <div class="title">{{ t('retry.title') }}</div>
+      <div class="subtitle">{{ t('retry.subtitle') }}</div>
     </div>
 
     <div class="strategy-tabs">
@@ -19,8 +15,8 @@
     </div>
 
     <div class="retry-area">
-      <button class="start-btn" @click="startRetry" :disabled="running">
-        {{ running ? '重试中...' : '执行任务（模拟失败）' }}
+      <button class="start-btn" :disabled="running" @click="startRetry">
+        {{ running ? t('retry.runningLabel') : t('retry.startLabel') }}
       </button>
 
       <div class="attempts">
@@ -30,13 +26,13 @@
           :class="['attempt', attempt.status]"
         >
           <div class="attempt-header">
-            <span class="attempt-num">第 {{ i + 1 }} 次{{ i === 0 ? '执行' : '重试' }}</span>
+            <span class="attempt-num">{{ t('retry.attemptLabel', { count: i + 1, kind: i === 0 ? t('retry.executeKind') : t('retry.retryKind') }) }}</span>
             <span :class="['status-badge', attempt.status]">
-              {{ attempt.status === 'success' ? '成功' : attempt.status === 'fail' ? '失败' : attempt.status === 'waiting' ? '等待中' : '执行中' }}
+              {{ t(`retry.statuses.${attempt.status}`) }}
             </span>
           </div>
           <div class="attempt-detail">
-            <span v-if="attempt.delay > 0">等待 {{ attempt.delay }}s 后重试</span>
+            <span v-if="attempt.delay > 0">{{ t('retry.waitLabel', { delay: attempt.delay }) }}</span>
             <span v-if="attempt.error" class="error-msg">{{ attempt.error }}</span>
           </div>
         </div>
@@ -47,7 +43,7 @@
       <div class="info-title">{{ currentStrategy.label }}</div>
       <div class="info-desc">{{ currentStrategy.desc }}</div>
       <div class="info-formula">
-        延迟公式：<code>{{ currentStrategy.formula }}</code>
+        {{ t('retry.formulaLabel') }}<code>{{ currentStrategy.formula }}</code>
       </div>
     </div>
   </div>
@@ -55,18 +51,17 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { asyncTaskQueuesLocale } from '../../../locales/async-task-queues/index.js'
+
+const { t, messages } = useI18n(asyncTaskQueuesLocale)
 
 const strategy = ref('fixed')
 const running = ref(false)
 const attempts = ref([])
 
-const strategies = [
-  { key: 'fixed', label: '固定间隔', desc: '每次重试等待相同的时间，简单但可能造成"重试风暴"', formula: 'delay = 2s' },
-  { key: 'exponential', label: '指数退避', desc: '每次重试等待时间翻倍，有效避免服务端过载', formula: 'delay = 2^n 秒 (1s, 2s, 4s, 8s...)' },
-  { key: 'jitter', label: '指数退避+抖动', desc: '在指数退避基础上加随机偏移，防止多个客户端同时重试', formula: 'delay = 2^n + random(0, 1s)' }
-]
-
-const currentStrategy = computed(() => strategies.find(s => s.key === strategy.value))
+const strategies = computed(() => messages.value.retry.strategies)
+const currentStrategy = computed(() => strategies.value.find(s => s.key === strategy.value))
 
 function reset() {
   running.value = false
@@ -87,7 +82,7 @@ async function startRetry() {
   reset()
   running.value = true
   const maxRetries = 4
-  const failUntil = 2 + Math.floor(Math.random() * 2) // succeed on 3rd or 4th attempt
+  const failUntil = 2 + Math.floor(Math.random() * 2)
 
   for (let i = 0; i <= maxRetries; i++) {
     const delay = i === 0 ? 0 : getDelay(i - 1)
@@ -103,7 +98,7 @@ async function startRetry() {
 
     if (i < failUntil) {
       attempt.status = 'fail'
-      attempt.error = ['连接超时', '服务不可用', '网络错误'][i % 3]
+      attempt.error = messages.value.retry.errors[i % 3]
     } else {
       attempt.status = 'success'
       running.value = false

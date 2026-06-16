@@ -2,34 +2,34 @@
   <div class="props-flow-demo">
     <div class="demo-header">
       <span class="icon">📦</span>
-      <span class="title">Props 数据传递</span>
-      <span class="subtitle">父亲给儿子送礼物的单向流动</span>
+      <span class="title">{{ t('propsFlow.title') }}</span>
+      <span class="subtitle">{{ t('propsFlow.subtitle') }}</span>
     </div>
 
     <div class="intro-text">
-      想象你在<span class="highlight">快递公司</span>工作：包裹（数据）只能从寄件人（父组件）发往收件人（子组件），收件人不能直接修改包裹内容，只能通过电话（事件）让寄件人修改。
+      {{ t('propsFlow.introPrefix') }}<span class="highlight">{{ t('propsFlow.introHighlight') }}</span>{{ t('propsFlow.introSuffix') }}
     </div>
 
     <div class="demo-content">
       <div class="component-box parent">
         <div class="component-label">
-          👨 父组件 (寄件人)
+          {{ t('propsFlow.parentLabel') }}
         </div>
         <div class="data-display">
           <div class="data-row">
-            <span class="key">包裹内容:</span>
-            <span class="value">{{ user.name }} ({{ user.age }}岁)</span>
+            <span class="key">{{ t('propsFlow.packageContent') }}</span>
+            <span class="value">{{ user.name }} ({{ user.age }} {{ t('propsFlow.ageUnit') }})</span>
           </div>
           <div class="data-row">
-            <span class="key">包装颜色:</span>
+            <span class="key">{{ t('propsFlow.packageColor') }}</span>
             <span
               class="value"
               :class="theme"
-            >{{ theme === 'light' ? '亮色' : '暗色' }}</span>
+            >{{ themeLabel }}</span>
           </div>
         </div>
         <div class="props-output">
-          <span class="label">📮 发送包裹:</span>
+          <span class="label">{{ t('propsFlow.sendPackage') }}</span>
           <div class="prop-tags">
             <span class="prop-tag">:user</span>
             <span class="prop-tag">:theme</span>
@@ -45,51 +45,51 @@
           ▼
         </div>
         <div class="flow-text">
-          {{ isFlowing ? '快递派送中...' : 'Props 单向传递' }}
+          {{ isFlowing ? t('propsFlow.flowing') : t('propsFlow.idleFlow') }}
         </div>
       </div>
 
       <div class="component-box child">
         <div class="component-label">
-          👦 子组件 (收件人)
+          {{ t('propsFlow.childLabel') }}
         </div>
         <div class="props-display">
           <div class="label">
-            📬 接收包裹:
+            {{ t('propsFlow.receivePackage') }}
           </div>
           <div class="prop-item">
             <span class="prop-name">user</span>
-            <span class="prop-value">{{ user.name }} ({{ user.age }}岁)</span>
+            <span class="prop-value">{{ user.name }} ({{ user.age }} {{ t('propsFlow.ageUnit') }})</span>
           </div>
           <div class="prop-item">
             <span class="prop-name">theme</span>
             <span
               class="prop-value"
               :class="theme"
-            >{{ theme === 'light' ? '亮色' : '暗色' }}</span>
+            >{{ themeLabel }}</span>
           </div>
         </div>
         <button
           class="emit-btn"
           @click="handleEmit"
         >
-          📞 打电话给爸爸改名字
+          {{ t('propsFlow.emitButton') }}
         </button>
       </div>
     </div>
 
     <div class="interaction-area">
       <div class="control-group">
-        <label>📝 修改包裹内容：</label>
+        <label>{{ t('propsFlow.editLabel') }}</label>
         <input
           v-model="user.name"
-          placeholder="收件人姓名"
+          :placeholder="t('propsFlow.namePlaceholder')"
           @input="triggerFlow"
         >
         <input
           v-model.number="user.age"
           type="number"
-          placeholder="年龄"
+          :placeholder="t('propsFlow.agePlaceholder')"
           @input="triggerFlow"
         >
         <select
@@ -97,10 +97,10 @@
           @change="triggerFlow"
         >
           <option value="light">
-            亮色包装
+            {{ t('propsFlow.lightPackage') }}
           </option>
           <option value="dark">
-            暗色包装
+            {{ t('propsFlow.darkPackage') }}
           </option>
         </select>
       </div>
@@ -108,21 +108,31 @@
 
     <div class="info-box">
       <span class="icon">💡</span>
-      <strong>核心思想：</strong>Props 是单向数据流，父组件像寄件人，子组件像收件人。子组件不能直接修改 props，只能通过 emit 事件通知父组件修改。
+      <strong>{{ t('common.coreIdea') }}</strong>{{ t('propsFlow.idea') }}
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue'
+import { ref, reactive, computed, watch } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { componentStateManagementLocale } from '../../../locales/component-state-management/index.js'
+
+const { t, messages, locale } = useI18n(componentStateManagementLocale)
 
 const user = reactive({
-  name: '小明',
-  age: 25
+  name: messages.value.propsFlow.defaultUser.name,
+  age: messages.value.propsFlow.defaultUser.age
 })
 
 const theme = ref('light')
 const isFlowing = ref(false)
+const themeLabel = computed(() => theme.value === 'light' ? t('propsFlow.light') : t('propsFlow.dark'))
+
+watch(locale, () => {
+  user.name = messages.value.propsFlow.defaultUser.name
+  user.age = messages.value.propsFlow.defaultUser.age
+})
 
 let flowTimeout = null
 
@@ -135,7 +145,7 @@ const triggerFlow = () => {
 }
 
 const handleEmit = () => {
-  user.name = '小红'
+  user.name = t('propsFlow.emittedName')
   triggerFlow()
 }
 </script>

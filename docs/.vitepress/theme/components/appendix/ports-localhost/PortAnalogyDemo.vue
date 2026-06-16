@@ -1,41 +1,45 @@
 <script setup>
 import { ref, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { portsLocalhostLocale } from '../../../locales/ports-localhost/index.js'
+
+const { t } = useI18n(portsLocalhostLocale)
 
 const selectedBuilding = ref('web-server')
 
-const buildings = {
+const buildings = computed(() => ({
   'web-server': {
-    name: 'Web 服务器大楼',
+    name: t('portAnalogy.webServer'),
     ip: '192.168.1.100',
     doors: [
-      { port: 80, label: 'HTTP', status: 'open', color: '#10b981', desc: '网页访问入口' },
-      { port: 443, label: 'HTTPS', status: 'open', color: '#3b82f6', desc: '加密网页入口' },
-      { port: 22, label: 'SSH', status: 'open', color: '#f59e0b', desc: '远程管理通道' },
-      { port: 3306, label: 'MySQL', status: 'closed', color: '#ef4444', desc: '数据库（已关闭）' }
+      { port: 80, label: t('portAnalogy.http'), status: 'open', color: '#10b981', desc: t('portAnalogy.httpDesc') },
+      { port: 443, label: t('portAnalogy.https'), status: 'open', color: '#3b82f6', desc: t('portAnalogy.httpsDesc') },
+      { port: 22, label: t('portAnalogy.ssh'), status: 'open', color: '#f59e0b', desc: t('portAnalogy.sshDesc') },
+      { port: 3306, label: t('portAnalogy.mysql'), status: 'closed', color: '#ef4444', desc: t('portAnalogy.mysqlClosed') }
     ]
   },
   'dev-machine': {
-    name: '你的开发电脑',
+    name: t('portAnalogy.devMachine'),
     ip: '127.0.0.1',
     doors: [
-      { port: 3000, label: 'React', status: 'open', color: '#61dafb', desc: '前端开发服务' },
-      { port: 5173, label: 'Vite', status: 'open', color: '#646cff', desc: 'Vite 开发服务' },
-      { port: 8080, label: 'API', status: 'open', color: '#10b981', desc: '后端 API 服务' },
-      { port: 5432, label: 'PostgreSQL', status: 'open', color: '#336791', desc: '本地数据库' }
+      { port: 3000, label: t('portAnalogy.react'), status: 'open', color: '#61dafb', desc: t('portAnalogy.reactDesc') },
+      { port: 5173, label: t('portAnalogy.vite'), status: 'open', color: '#646cff', desc: t('portAnalogy.viteDesc') },
+      { port: 8080, label: t('portAnalogy.api'), status: 'open', color: '#10b981', desc: t('portAnalogy.apiDesc') },
+      { port: 5432, label: t('portAnalogy.postgresql'), status: 'open', color: '#336791', desc: t('portAnalogy.postgresqlDesc') }
     ]
   }
-}
+}))
 
-const currentBuilding = computed(() => buildings[selectedBuilding.value])
+const currentBuilding = computed(() => buildings.value[selectedBuilding.value])
 const knockingPort = ref(null)
 const knockResult = ref('')
 
 function knockDoor(door) {
   knockingPort.value = door.port
   if (door.status === 'open') {
-    knockResult.value = `✅ 端口 ${door.port} 开着！${door.label} 服务正在监听，准备接收你的请求。`
+    knockResult.value = t('portAnalogy.knockOpen', { port: door.port, label: door.label })
   } else {
-    knockResult.value = `🚫 端口 ${door.port} 关着！没有程序在监听这个端口，连接被拒绝 (Connection Refused)。`
+    knockResult.value = t('portAnalogy.knockClosed', { port: door.port })
   }
   setTimeout(() => { knockingPort.value = null }, 600)
 }
@@ -44,7 +48,7 @@ function knockDoor(door) {
 <template>
   <div class="port-analogy-demo">
     <div class="control-panel">
-      <span class="panel-label">选择一栋"大楼"：</span>
+      <span class="panel-label">{{ t('portAnalogy.selectBuilding') }}</span>
       <div class="btn-group">
         <button
           v-for="(b, key) in buildings"
@@ -78,7 +82,7 @@ function knockDoor(door) {
               <span class="door-desc">{{ door.desc }}</span>
             </div>
             <div :class="['door-status', door.status]">
-              {{ door.status === 'open' ? '🟢 监听中' : '🔴 已关闭' }}
+              {{ door.status === 'open' ? t('portAnalogy.listening') : t('portAnalogy.closed') }}
             </div>
           </div>
         </div>
@@ -92,7 +96,7 @@ function knockDoor(door) {
     </div>
 
     <div class="info-box">
-      <strong>核心比喻：</strong>IP 地址 = 大楼地址，端口号 = 房间门牌号。一台电脑上可以同时运行多个服务，每个服务"占用"一个端口号，就像同一栋大楼里的不同房间。
+      <strong>{{ t('portAnalogy.core') }}</strong>IP 地址 = 大楼地址，端口号 = 房间门牌号。一台电脑上可以同时运行多个服务，每个服务"占用"一个端口号，就像同一栋大楼里的不同房间。
     </div>
   </div>
 </template>

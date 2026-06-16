@@ -19,10 +19,12 @@
 </template>
 
 <script setup>
-const scenarios = [
-  { name: 'Without cache', metric: '5-8 s response, high DB pressure', width: '95%' },
-  { name: 'With cache', metric: '50 ms response, most reads served from memory', width: '24%' }
-]
+import { computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { cacheDesignLocale } from '../../../locales/cache-design/index.js'
+
+const { messages } = useI18n(cacheDesignLocale)
+const scenarios = computed(() => messages.value.performanceComparison.scenarios)
 </script>
 
 <style scoped>

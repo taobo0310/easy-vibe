@@ -2,8 +2,8 @@
   <div class="imperative-declarative-demo">
     <div class="demo-header">
       <span class="icon">🔄</span>
-      <span class="title">命令式 vs 声明式</span>
-      <span class="subtitle">两种编程思维的对比（通俗说：手动操作 vs 自动响应）</span>
+      <span class="title">{{ t('frameworks.imperativeDeclarative.title') }}</span>
+      <span class="subtitle">{{ t('frameworks.imperativeDeclarative.subtitle') }}</span>
     </div>
 
     <div class="demo-content">
@@ -11,24 +11,24 @@
         <!-- Imperative (jQuery Style) -->
         <div class="panel imperative">
           <div class="panel-header">
-            <span class="badge yellow">命令式 (Imperative)</span>
-            <span class="sub-text">jQuery Style - 手动操作</span>
+            <span class="badge yellow">{{ t('frameworks.imperativeDeclarative.imperative') }}</span>
+            <span class="sub-text">{{ t('frameworks.imperativeDeclarative.imperativeSub') }}</span>
           </div>
           <div class="code-preview">
             <code>
-              // 手动操作 DOM<br>
+              {{ t('frameworks.imperativeDeclarative.manualDom') }}<br>
               $('#count').text(val);<br>
               if (val > 5) $('#msg').show();
             </code>
           </div>
           <div class="interactive-area">
             <div class="output-box">
-              Count: <span id="imp-count-display">{{ impCount }}</span>
+              {{ t('frameworks.imperativeDeclarative.count') }} <span id="imp-count-display">{{ impCount }}</span>
               <div
                 v-show="impShowMsg"
                 class="warning-msg"
               >
-                ⚠️ Count is high!
+                {{ t('frameworks.imperativeDeclarative.high') }}
               </div>
             </div>
             <div class="actions">
@@ -36,21 +36,21 @@
                 class="btn"
                 @click="impIncrement"
               >
-                Step 1: Value++
+                {{ t('frameworks.imperativeDeclarative.step1') }}
               </button>
               <button
                 class="btn"
                 :disabled="!impChanged"
                 @click="impUpdateText"
               >
-                Step 2: Update Text
+                {{ t('frameworks.imperativeDeclarative.step2') }}
               </button>
               <button
                 class="btn"
                 :disabled="!impTextUpdated"
                 @click="impCheckState"
               >
-                Step 3: Check Logic
+                {{ t('frameworks.imperativeDeclarative.step3') }}
               </button>
             </div>
             <div class="status-log">
@@ -62,24 +62,24 @@
         <!-- Declarative (Vue Style) -->
         <div class="panel declarative">
           <div class="panel-header">
-            <span class="badge green">声明式 (Declarative)</span>
-            <span class="sub-text">Vue/React Style - 自动响应</span>
+            <span class="badge green">{{ t('frameworks.imperativeDeclarative.declarative') }}</span>
+            <span class="sub-text">{{ t('frameworks.imperativeDeclarative.declarativeSub') }}</span>
           </div>
           <div class="code-preview">
-            <code v-pre>
-              // 只需要绑定数据
-              {{ count }}
+            <code>
+              {{ t('frameworks.imperativeDeclarative.bindData') }}<br>
+              <span v-text="'{{ count }}'" /><br>
               &lt;div v-if="count > 5"&gt;...&lt;/div&gt;
             </code>
           </div>
           <div class="interactive-area">
             <div class="output-box">
-              Count: <span>{{ decCount }}</span>
+              {{ t('frameworks.imperativeDeclarative.count') }} <span>{{ decCount }}</span>
               <div
                 v-if="decCount > 5"
                 class="warning-msg"
               >
-                ⚠️ Count is high!
+                {{ t('frameworks.imperativeDeclarative.high') }}
               </div>
             </div>
             <div class="actions">
@@ -87,11 +87,11 @@
                 class="btn primary"
                 @click="decIncrement"
               >
-                Value++ (Auto Render)
+                {{ t('frameworks.imperativeDeclarative.autoRender') }}
               </button>
             </div>
             <div class="status-log">
-              Framework handles DOM updates automatically.
+              {{ t('frameworks.imperativeDeclarative.autoStatus') }}
             </div>
           </div>
         </div>
@@ -100,25 +100,29 @@
 
     <div class="info-box">
       <span class="icon">💡</span>
-      <strong>核心思想：</strong>命令式像"手把手教电脑怎么做"，声明式像"告诉电脑要什么，它自己搞定"。
+      <strong>{{ t('frameworks.imperativeDeclarative.ideaTitle') }}</strong>{{ t('frameworks.imperativeDeclarative.idea') }}
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { webBasicsLocale } from '../../../locales/web-basics/index.js'
+
+const { t } = useI18n(webBasicsLocale)
 
 // Imperative State
 const impCount = ref(0)
 const impShowMsg = ref(false)
 const impChanged = ref(false)
 const impTextUpdated = ref(false)
-const impStatus = ref('Ready.')
+const impStatus = ref(t('frameworks.imperativeDeclarative.ready'))
 
 const impIncrement = () => {
   // Logic layer changes, but DOM doesn't
   impStatus.value =
-    'Variable `count` is now ' + (impCount.value + 1) + '. DOM is NOT updated.'
+    t('frameworks.imperativeDeclarative.variableChanged', { count: impCount.value + 1 })
   impCount.value++
   impChanged.value = true
   impTextUpdated.value = false
@@ -126,7 +130,7 @@ const impIncrement = () => {
 
 const impUpdateText = () => {
   // Manually update text
-  impStatus.value = 'DOM text updated manually.'
+  impStatus.value = t('frameworks.imperativeDeclarative.domUpdated')
   impChanged.value = false
   impTextUpdated.value = true
 }
@@ -135,10 +139,10 @@ const impCheckState = () => {
   // Manually check logic
   if (impCount.value > 5) {
     impShowMsg.value = true
-    impStatus.value = 'Logic checked: > 5. Manually showing message.'
+    impStatus.value = t('frameworks.imperativeDeclarative.logicHigh')
   } else {
     impShowMsg.value = false
-    impStatus.value = 'Logic checked: <= 5. No message.'
+    impStatus.value = t('frameworks.imperativeDeclarative.logicLow')
   }
 }
 

@@ -1,21 +1,17 @@
-<!--
-  SliceRequestDemo.vue
-  切图时代的请求数与加载时间演示
--->
 <template>
   <div class="slice-demo">
     <div class="header">
       <div class="title">
-        切图时代：请求数越多越慢
+        {{ t('frameworks.sliceRequest.title') }}
       </div>
       <div class="subtitle">
-        调整切图数量，观察加载时间变化
+        {{ t('frameworks.sliceRequest.subtitle') }}
       </div>
     </div>
 
     <div class="controls">
       <label>
-        切图数量：<strong>{{ slices }}</strong> 张
+        {{ t('frameworks.sliceRequest.sliceCount') }}<strong>{{ slices }}</strong> {{ t('frameworks.sliceRequest.sheet') }}
       </label>
       <input
         v-model="slices"
@@ -29,14 +25,14 @@
           v-model="useSprite"
           type="checkbox"
         >
-        合并雪碧图 (Sprite)
+        {{ t('frameworks.sliceRequest.sprite') }}
       </label>
     </div>
 
     <div class="metrics">
       <div class="metric">
         <div class="label">
-          总请求数
+          {{ t('frameworks.sliceRequest.totalRequests') }}
         </div>
         <div class="value">
           {{ totalRequests }}
@@ -44,7 +40,7 @@
       </div>
       <div class="metric">
         <div class="label">
-          预计加载时间
+          {{ t('frameworks.sliceRequest.loadTime') }}
         </div>
         <div class="value">
           {{ loadTime }} ms
@@ -63,6 +59,10 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { webBasicsLocale } from '../../../locales/web-basics/index.js'
+
+const { t } = useI18n(webBasicsLocale)
 
 const slices = ref(12)
 const useSprite = ref(false)

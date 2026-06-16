@@ -2,12 +2,12 @@
   <div class="language-selector-demo">
     <div class="demo-header">
       <span class="icon">🎯</span>
-      <span class="title">语言选择器</span>
-      <span class="subtitle">根据需求选择最合适的后端语言</span>
+      <span class="title">{{ t('selector.title') }}</span>
+      <span class="subtitle">{{ t('selector.subtitle') }}</span>
     </div>
 
     <div class="intro-text">
-      想象你在<span class="highlight">点餐</span>：想吃快餐选 Python（快速），想吃大餐选 Java（正式），想吃健康餐选 Go（平衡）。没有"最好的"选择，只有"最合适"的选择。
+      {{ t('selector.introPrefix') }}<span class="highlight">{{ t('selector.introHighlight') }}</span>{{ t('selector.introSuffix') }}
     </div>
 
     <div class="questions-container">
@@ -45,125 +45,75 @@
         <div class="rec-header">
           <span class="rec-icon">{{ recommendation.icon }}</span>
           <div class="rec-title">
-            <h6>推荐语言</h6>
+            <h6>{{ t('selector.recommended') }}</h6>
             <div class="rec-name">
               {{ recommendation.language }}
             </div>
           </div>
         </div>
         <div class="rec-reason">
-          <strong>选择理由：</strong>
+          <strong>{{ t('selector.reasonStrong') }}</strong>
           <p>{{ recommendation.reason }}</p>
         </div>
         <button
           class="reset-btn"
           @click="reset"
         >
-          🔄 重新选择
+          {{ t('selector.reset') }}
         </button>
       </div>
     </Transition>
 
     <div class="info-box">
       <span class="icon">💡</span>
-      <strong>核心思想：</strong>不要问"哪个语言最火"，而要问"我的项目需要什么"。初创公司优先开发速度（Python/Node.js），大厂优先稳定性和性能（Java/Go），系统编程优先安全（Rust）。
+      <strong>{{ t('selector.infoStrong') }}</strong>{{ t('selector.info') }}
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { backendLanguagesLocale } from '../../../locales/backend-languages/index.js'
+
+const { t, messages } = useI18n(backendLanguagesLocale)
 
 const currentQuestion = ref(0)
 const answers = ref({})
-
-const questions = [
-  {
-    id: 'project_type',
-    text: '项目类型是什么？',
-    options: [
-      { value: 'web', label: 'Web 应用' },
-      { value: 'api', label: 'API 服务' },
-      { value: 'ai', label: 'AI/ML' },
-      { value: 'system', label: '系统编程' }
-    ]
-  },
-  {
-    id: 'performance',
-    text: '性能要求如何？',
-    options: [
-      { value: 'high', label: '高性能' },
-      { value: 'medium', label: '中等' },
-      { value: 'low', label: '不敏感' }
-    ]
-  },
-  {
-    id: 'team',
-    text: '团队背景？',
-    options: [
-      { value: 'frontend', label: '前端团队' },
-      { value: 'python', label: 'Python 背景' },
-      { value: 'java', label: 'Java 背景' },
-      { value: 'new', label: '新团队' }
-    ]
-  }
-]
+const questions = computed(() => messages.value.selector.questions)
 
 const recommendation = computed(() => {
   if (Object.keys(answers.value).length < 3) return null
 
   const { project_type, performance, team } = answers.value
+  const recs = messages.value.selector.recommendations
 
   if (project_type === 'ai') {
-    return {
-      icon: '🐍',
-      language: 'Python',
-      reason: 'AI/ML 的绝对统治地位，生态无与伦比。虽然性能不如 C++/Rust，但 95% 的 AI 项目都在用 Python。'
-    }
+    return recs.ai
   }
 
   if (project_type === 'system' || performance === 'high') {
-    return {
-      icon: '🐹',
-      language: 'Go',
-      reason: '云原生时代的宠儿，简洁语法 + 原生并发 + 快速编译。单一可执行文件部署极其简单。'
-    }
+    return recs.high
   }
 
   if (team === 'frontend') {
-    return {
-      icon: '💚',
-      language: 'Node.js',
-      reason: '前后端统一，减少语言切换成本。NPM 生态庞大，适合快速迭代和 MVP 开发。'
-    }
+    return recs.frontend
   }
 
   if (team === 'python') {
-    return {
-      icon: '🐍',
-      language: 'Python',
-      reason: '利用团队现有技能，快速开发。Django/FastAPI 生态成熟，适合数据驱动的应用。'
-    }
+    return recs.python
   }
 
   if (team === 'java') {
-    return {
-      icon: '☕',
-      language: 'Java',
-      reason: '企业级开发的最佳选择。Spring Boot 生态极其成熟，团队熟悉度高，维护成本低。'
-    }
+    return recs.java
   }
 
-  return {
-    icon: '🐹',
-    language: 'Go',
-    reason: '云原生时代的高性能语言。相比 Java 更简洁，相比 Node.js 性能更好，相比 Python 更稳定。'
-  }
+  return recs.default
 })
 
 const selectAnswer = (questionIndex, value) => {
   answers.value[questionIndex] = value
-  if (currentQuestion.value < questions.length - 1) {
+  if (currentQuestion.value < questions.value.length - 1) {
     currentQuestion.value++
   }
 }

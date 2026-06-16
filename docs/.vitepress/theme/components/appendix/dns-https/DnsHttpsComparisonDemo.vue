@@ -1,7 +1,7 @@
 <template>
   <div class="comparison-demo">
     <h4 style="margin: 0 0 12px 0; color: #1a1a2e">
-      🔐 HTTP vs HTTPS 数据传输对比
+      {{ t('comparison.title') }}
     </h4>
     <div class="control-row">
       <button
@@ -9,26 +9,26 @@
         :class="{ active: mode === 'http' }"
         @click="mode = 'http'"
       >
-        HTTP（明文）
+        {{ t('comparison.httpMode') }}
       </button>
       <button
         class="mode-btn https"
         :class="{ active: mode === 'https' }"
         @click="mode = 'https'"
       >
-        HTTPS（加密）
+        {{ t('comparison.httpsMode') }}
       </button>
       <button class="send-btn" :disabled="isSending" @click="sendData">
-        {{ isSending ? '传输中...' : '发送数据' }}
+        {{ isSending ? t('comparison.sending') : t('comparison.send') }}
       </button>
     </div>
 
     <div class="flow-area">
       <div class="endpoint">
         <div class="ep-icon">💻</div>
-        <div class="ep-label">浏览器</div>
+        <div class="ep-label">{{ t('comparison.browser') }}</div>
         <div class="ep-data original">
-          <div class="data-title">原始数据</div>
+          <div class="data-title">{{ t('comparison.originalDataTitle') }}</div>
           <code>{{ originalData }}</code>
         </div>
       </div>
@@ -36,7 +36,7 @@
       <div class="transmission">
         <div class="wire" :class="mode">
           <div class="wire-label">
-            {{ mode === 'http' ? '🔓 明文传输' : '🔒 加密传输' }}
+            {{ mode === 'http' ? t('comparison.plainTransmission') : t('comparison.encryptedTransmission') }}
           </div>
           <div
             class="packet"
@@ -47,14 +47,14 @@
         </div>
         <div v-if="mode === 'http'" class="hacker-box">
           <div class="hacker-icon">🕵️</div>
-          <div class="hacker-label">中间人可窃听</div>
+          <div class="hacker-label">{{ t('comparison.hackerPlain') }}</div>
           <div v-if="sendDone" class="hacker-sees">
             <code>{{ originalData }}</code>
           </div>
         </div>
         <div v-else class="hacker-box blocked">
           <div class="hacker-icon">🕵️</div>
-          <div class="hacker-label">中间人无法解密</div>
+          <div class="hacker-label">{{ t('comparison.hackerEncrypted') }}</div>
           <div v-if="sendDone" class="hacker-sees encrypted">
             <code>{{ encryptedData }}</code>
           </div>
@@ -63,9 +63,9 @@
 
       <div class="endpoint">
         <div class="ep-icon">🖥️</div>
-        <div class="ep-label">服务器</div>
+        <div class="ep-label">{{ t('comparison.server') }}</div>
         <div v-if="sendDone" class="ep-data received">
-          <div class="data-title">收到数据</div>
+          <div class="data-title">{{ t('comparison.receivedDataTitle') }}</div>
           <code>{{ originalData }}</code>
         </div>
       </div>
@@ -75,9 +75,7 @@
       <table>
         <thead>
           <tr>
-            <th>对比项</th>
-            <th>HTTP</th>
-            <th>HTTPS</th>
+            <th v-for="header in messages.comparison.headers" :key="header">{{ header }}</th>
           </tr>
         </thead>
         <tbody>
@@ -94,24 +92,21 @@
 
 <script setup>
 import { ref } from 'vue'
+import { computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { dnsHttpsLocale } from '../../../locales/dns-https/index.js'
 
 const mode = ref('http')
 const isSending = ref(false)
 const sendDone = ref(false)
+const { t, messages } = useI18n(dnsHttpsLocale)
 
 const originalData = 'password=MySecret123&user=zhangsan'
-const encryptedData = 'a7f2c9...3b8e1d（密文）'
+const encryptedData = computed(() => t('comparison.encryptedData'))
 
 const transmittedData = ref('')
 
-const compareRows = [
-  { label: '端口', http: '80', https: '443' },
-  { label: '数据加密', http: '无（明文传输）', https: 'TLS 对称加密' },
-  { label: '身份验证', http: '无', https: 'CA 证书验证服务器身份' },
-  { label: '数据完整性', http: '无保障', https: 'MAC 校验防篡改' },
-  { label: 'SEO 影响', http: '搜索引擎降权', https: '搜索引擎优先收录' },
-  { label: '性能开销', http: '无额外开销', https: 'TLS 握手增加约 1-2 RTT' }
-]
+const compareRows = computed(() => messages.value.comparison.rows)
 
 async function sendData() {
   if (isSending.value) return
@@ -121,7 +116,7 @@ async function sendData() {
   if (mode.value === 'http') {
     transmittedData.value = originalData
   } else {
-    transmittedData.value = encryptedData
+    transmittedData.value = encryptedData.value
   }
 
   await sleep(1500)

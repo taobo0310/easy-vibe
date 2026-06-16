@@ -1,8 +1,8 @@
 <template>
   <div class="language-map-demo">
     <div class="demo-header">
-      <span class="title">编程语言图谱</span>
-      <span class="subtitle">演化历程 · 编程范式 · 类型系统 · 语言对比</span>
+      <span class="title">{{ t('languageMap.title') }}</span>
+      <span class="subtitle">{{ t('languageMap.subtitle') }}</span>
     </div>
 
     <div class="control-panel">
@@ -64,9 +64,9 @@
         <div class="paradigm-cards">
           <div
             v-for="p in paradigms"
-            :key="p.name"
-            :class="['paradigm-card', { active: activeParadigm === p.name }]"
-            @click="activeParadigm = p.name"
+            :key="p.id"
+            :class="['paradigm-card', { active: activeParadigm === p.id }]"
+            @click="activeParadigm = p.id"
           >
             <div class="paradigm-icon">{{ p.icon }}</div>
             <div class="paradigm-name">{{ p.name }}</div>
@@ -85,7 +85,7 @@
           </div>
           <div class="paradigm-detail-desc">{{ selectedParadigm.desc }}</div>
           <div class="paradigm-detail-langs">
-            <span class="detail-label">代表语言：</span>
+            <span class="detail-label">{{ t('languageMap.representativeLanguages') }}</span>
             <span
               v-for="lang in selectedParadigm.languages"
               :key="lang"
@@ -97,26 +97,26 @@
           </div>
           <div class="paradigm-traits">
             <span
-              v-for="t in selectedParadigm.traits"
-              :key="t"
+              v-for="trait in selectedParadigm.traits"
+              :key="trait"
               class="trait-chip"
-              >{{ t }}</span>
+              >{{ trait }}</span>
           </div>
         </div>
       </div>
 
       <!-- Tab 3: Comparison Table -->
       <div v-if="activeTab === 'compare'" class="compare-section">
-        <div class="compare-intro">点击语言名称高亮对比</div>
+        <div class="compare-intro">{{ t('languageMap.compareIntro') }}</div>
         <div class="compare-table-wrapper">
           <table class="compare-table">
             <thead>
               <tr>
-                <th>语言</th>
-                <th>类型系统</th>
-                <th>范式</th>
-                <th>运行方式</th>
-                <th>主要用途</th>
+                <th>{{ t('languageMap.table.language') }}</th>
+                <th>{{ t('languageMap.table.typeSystem') }}</th>
+                <th>{{ t('languageMap.table.paradigm') }}</th>
+                <th>{{ t('languageMap.table.runtime') }}</th>
+                <th>{{ t('languageMap.table.usage') }}</th>
               </tr>
             </thead>
             <tbody>
@@ -165,7 +165,7 @@
         </div>
 
         <div class="learning-path">
-          <div class="path-title">学习路线建议</div>
+          <div class="path-title">{{ t('languageMap.learningPathTitle') }}</div>
           <div class="path-steps">
             <div v-for="(step, i) in learningPath" :key="i" class="path-step">
               <div class="path-num">{{ i + 1 }}</div>
@@ -180,161 +180,35 @@
     </div>
 
     <div class="info-box">
-      <strong>核心思想：</strong>
-      <span v-if="activeTab === 'timeline'">编程语言从机器语言到现代高级语言，一直在朝着"更接近人类思维"的方向演化。</span>
-      <span v-else-if="activeTab === 'paradigms'">编程范式是思考问题的方式——命令式关注"怎么做"，声明式关注"做什么"，选择范式比选语言更重要。</span>
-      <span v-else-if="activeTab === 'compare'">没有最好的语言，只有最适合场景的语言。类型系统、运行方式、生态都是选择时的关键考量。</span>
-      <span v-else>初学者先学 Python（简单通用），再学 JavaScript（Web
-        必备），最后选一门静态语言（TypeScript/Go/Rust）深入。</span>
+      <strong>{{ t('languageMap.coreIdeaLabel') }}</strong>
+      <span>{{ activeCoreIdea }}</span>
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { computerFundamentalsLocale } from '../../../locales/computer-fundamentals/index.js'
+
+const { t, messages } = useI18n(computerFundamentalsLocale)
 
 const activeTab = ref('timeline')
 
-const tabs = [
-  { id: 'timeline', label: '演化历程' },
-  { id: 'paradigms', label: '编程范式' },
-  { id: 'compare', label: '语言对比' },
-  { id: 'choose', label: '如何选择' }
-]
+const tabs = computed(() => messages.value.languageMap.tabs)
 
 const activeEra = ref(4)
 
-const eras = [
-  {
-    year: '1940s',
-    name: '机器语言',
-    languages: ['二进制'],
-    desc: '直接用 0 和 1 编写指令，计算机可以直接执行。人类极难阅读和维护。',
-    milestones: [
-      { lang: '机器码', significance: '最底层的编程方式，一个 0 写成 1 就全错' }
-    ]
-  },
-  {
-    year: '1950s',
-    name: '汇编 & 早期高级语言',
-    languages: ['汇编', 'Fortran', 'Lisp', 'COBOL'],
-    desc: '用助记符代替 0/1，Fortran 开创高级语言时代，Lisp 奠定函数式编程基础。',
-    milestones: [
-      { lang: 'Fortran', significance: '第一个高级语言，科学计算之王' },
-      { lang: 'Lisp', significance: '函数式编程鼻祖，影响至今' }
-    ]
-  },
-  {
-    year: '1970s',
-    name: '系统编程时代',
-    languages: ['C', 'Pascal', 'Smalltalk'],
-    desc: 'C 语言诞生，用它写了 Unix 操作系统，开创了系统编程时代。',
-    milestones: [
-      { lang: 'C', significance: '影响最深远的语言，Unix/Linux 的基础' },
-      { lang: 'Smalltalk', significance: '面向对象编程的先驱' }
-    ]
-  },
-  {
-    year: '1980-90s',
-    name: 'OOP & 互联网',
-    languages: ['C++', 'Java', 'Python', 'JavaScript'],
-    desc: '面向对象成为主流，Java"一次编写到处运行"，JavaScript 统治了浏览器。',
-    milestones: [
-      { lang: 'Java', significance: '跨平台企业应用，JVM 生态' },
-      { lang: 'JavaScript', significance: 'Web 前端的唯一选择' },
-      { lang: 'Python', significance: '简洁优雅，后来成为 AI 之王' }
-    ]
-  },
-  {
-    year: '2000s',
-    name: '现代语言',
-    languages: ['C#', 'Go', 'Scala', 'Ruby'],
-    desc: '语言设计更注重开发效率和安全性，Go 为云原生而生。',
-    milestones: [
-      { lang: 'Go', significance: '并发友好，Docker/K8s 的实现语言' },
-      { lang: 'Ruby', significance: 'Rails 框架带来 Web 开发效率革命' }
-    ]
-  },
-  {
-    year: '2010s+',
-    name: '新一代语言',
-    languages: ['Rust', 'Swift', 'Kotlin', 'TypeScript'],
-    desc: '强调内存安全（Rust）、类型安全（TypeScript）和开发体验。',
-    milestones: [
-      { lang: 'Rust', significance: '无 GC 的内存安全，系统编程新选择' },
-      { lang: 'TypeScript', significance: '给 JavaScript 加上类型系统' },
-      { lang: 'Kotlin', significance: '取代 Java 成为 Android 首选' }
-    ]
-  }
-]
+const eras = computed(() => messages.value.languageMap.eras)
 
-const selectedEra = computed(() => eras[activeEra.value])
+const selectedEra = computed(() => eras.value[activeEra.value])
 
-const activeParadigm = ref('命令式')
+const activeParadigm = ref('imperative')
 
-const paradigms = [
-  {
-    name: '命令式',
-    icon: '📝',
-    oneLiner: '告诉计算机"怎么做"',
-    desc: '通过一条条语句改变程序状态，按步骤描述解决问题的过程。最接近计算机实际执行方式。',
-    languages: ['C', 'Fortran', 'BASIC', 'Go'],
-    example: `// 计算数组总和（命令式）
-int sum = 0;
-for (int i = 0; i < n; i++) {
-    sum += arr[i];  // 逐步累加
-}`,
-    traits: ['关注步骤', '状态可变', '接近底层', '易理解']
-  },
-  {
-    name: '面向对象',
-    icon: '📦',
-    oneLiner: '把数据和行为封装在对象中',
-    desc: '用"类"和"对象"模拟现实世界，通过封装、继承、多态组织代码。适合大型软件。',
-    languages: ['Java', 'C++', 'Python', 'C#'],
-    example: `class Dog:
-    def __init__(self, name):
-        self.name = name
-
-    def bark(self):
-        print(f"{self.name} says woof!")
-
-dog = Dog("Buddy")
-dog.bark()  # Buddy says woof!`,
-    traits: ['封装', '继承', '多态', '适合大型项目']
-  },
-  {
-    name: '函数式',
-    icon: '🔗',
-    oneLiner: '用纯函数组合解决问题',
-    desc: '将计算视为函数求值，数据不可变，没有副作用。代码更容易测试和推理。',
-    languages: ['Haskell', 'Lisp', 'Erlang', 'F#'],
-    example: `-- 计算数组总和（函数式）
-sum = foldl (+) 0
-
--- 数据不可变，函数无副作用
-map (*2) [1, 2, 3]  -- [2, 4, 6]
-filter even [1..10]  -- [2, 4, 6, 8, 10]`,
-    traits: ['纯函数', '不可变数据', '无副作用', '易测试']
-  },
-  {
-    name: '声明式',
-    icon: '🎯',
-    oneLiner: '只说"做什么"，不管"怎么做"',
-    desc: '描述想要的结果，具体执行方式由系统决定。SQL、HTML 都是典型的声明式。',
-    languages: ['SQL', 'HTML', 'CSS', 'Prolog'],
-    example: `-- 查询所有活跃用户（声明式）
-SELECT name, email
-FROM users
-WHERE active = true
-ORDER BY created_at DESC
--- 数据库自己决定怎么查最快`,
-    traits: ['描述结果', '系统优化执行', '简洁表达', '领域专用']
-  }
-]
+const paradigms = computed(() => messages.value.languageMap.paradigms)
 
 const selectedParadigm = computed(() =>
-  paradigms.find((p) => p.name === activeParadigm.value)
+  paradigms.value.find((p) => p.id === activeParadigm.value)
 )
 
 const highlightedLangs = ref([])
@@ -348,138 +222,17 @@ function toggleHighlight(name) {
   }
 }
 
-const languageComparison = [
-  {
-    name: 'Python',
-    type: '动态强类型',
-    typeClass: 'dynamic-strong',
-    paradigm: '多范式',
-    runtime: '解释执行',
-    usage: 'AI、数据分析、Web 后端'
-  },
-  {
-    name: 'JavaScript',
-    type: '动态弱类型',
-    typeClass: 'dynamic-weak',
-    paradigm: '多范式',
-    runtime: 'JIT 编译',
-    usage: 'Web 全栈、跨端应用'
-  },
-  {
-    name: 'TypeScript',
-    type: '静态强类型',
-    typeClass: 'static-strong',
-    paradigm: '多范式',
-    runtime: '编译为 JS',
-    usage: 'Web 前端、Node.js'
-  },
-  {
-    name: 'Java',
-    type: '静态强类型',
-    typeClass: 'static-strong',
-    paradigm: '面向对象',
-    runtime: 'JVM',
-    usage: '企业应用、Android'
-  },
-  {
-    name: 'C/C++',
-    type: '静态弱类型',
-    typeClass: 'static-weak',
-    paradigm: '多范式',
-    runtime: '编译执行',
-    usage: '系统、游戏、嵌入式'
-  },
-  {
-    name: 'Rust',
-    type: '静态强类型',
-    typeClass: 'static-strong',
-    paradigm: '多范式',
-    runtime: '编译执行',
-    usage: '系统编程、WebAssembly'
-  },
-  {
-    name: 'Go',
-    type: '静态强类型',
-    typeClass: 'static-strong',
-    paradigm: '并发导向',
-    runtime: '编译执行',
-    usage: '云原生、微服务'
-  },
-  {
-    name: 'Swift',
-    type: '静态强类型',
-    typeClass: 'static-strong',
-    paradigm: '多范式',
-    runtime: '编译执行',
-    usage: 'iOS/macOS 开发'
-  },
-  {
-    name: 'Kotlin',
-    type: '静态强类型',
-    typeClass: 'static-strong',
-    paradigm: '多范式',
-    runtime: 'JVM',
-    usage: 'Android、后端'
-  }
-]
+const languageComparison = computed(
+  () => messages.value.languageMap.languageComparison
+)
 
-const recommendations = [
-  {
-    icon: '🌐',
-    scene: 'Web 前端',
-    langs: ['JavaScript', 'TypeScript'],
-    reason: '浏览器原生支持 JS，TS 是 JS + 类型系统'
-  },
-  {
-    icon: '🖥️',
-    scene: 'Web 后端',
-    langs: ['Go', 'Java', 'Python', 'Node.js'],
-    reason: '生态成熟，框架丰富'
-  },
-  {
-    icon: '📱',
-    scene: '移动开发',
-    langs: ['Swift', 'Kotlin'],
-    reason: 'Apple 和 Google 官方推荐'
-  },
-  {
-    icon: '🤖',
-    scene: 'AI / 数据',
-    langs: ['Python'],
-    reason: 'PyTorch、TensorFlow、Pandas 全在 Python'
-  },
-  {
-    icon: '⚙️',
-    scene: '系统编程',
-    langs: ['C', 'Rust'],
-    reason: '直接操控硬件，性能极致'
-  },
-  {
-    icon: '☁️',
-    scene: '云原生',
-    langs: ['Go', 'Rust'],
-    reason: 'Docker、K8s 都是 Go 写的'
-  },
-  {
-    icon: '🎮',
-    scene: '游戏开发',
-    langs: ['C++', 'C#'],
-    reason: 'Unreal 用 C++，Unity 用 C#'
-  },
-  {
-    icon: '📊',
-    scene: 'DevOps 脚本',
-    langs: ['Python', 'Bash'],
-    reason: '快速编写自动化脚本'
-  }
-]
+const recommendations = computed(() => messages.value.languageMap.recommendations)
 
-const learningPath = [
-  { lang: 'Python', why: '语法最简单，覆盖面最广（AI、Web、脚本）' },
-  { lang: 'JavaScript', why: 'Web 开发必备，前后端通吃（Node.js）' },
-  { lang: 'TypeScript', why: '给 JS 加上类型系统，体验静态类型的好处' },
-  { lang: 'Go 或 Rust', why: '理解编译型语言和底层概念' }
-]
+const learningPath = computed(() => messages.value.languageMap.learningPath)
+
+const activeCoreIdea = computed(
+  () => messages.value.languageMap.coreIdeas[activeTab.value]
+)
 </script>
 
 <style scoped>

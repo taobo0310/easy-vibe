@@ -2,12 +2,12 @@
   <div class="backend-languages-demo">
     <div class="demo-header">
       <span class="icon">🛠️</span>
-      <span class="title">后端语言工具箱</span>
-      <span class="subtitle">选择合适的工具完成工作</span>
+      <span class="title">{{ t('demo.title') }}</span>
+      <span class="subtitle">{{ t('demo.subtitle') }}</span>
     </div>
 
     <div class="intro-text">
-      想象你是一名<span class="highlight">建筑工人</span>：搬砖用铁铲，砌墙用瓦刀，装修用刷子。后端语言也一样，不同场景适合不同的"工具"。没有最好的语言，只有最合适的选择。
+      {{ t('demo.introPrefix') }}<span class="highlight">{{ t('demo.introHighlight') }}</span>{{ t('demo.introSuffix') }}
     </div>
 
     <div class="language-grid">
@@ -45,7 +45,7 @@
 
         <div class="detail-sections">
           <div class="detail-section">
-            <h6>🎯 适用场景</h6>
+            <h6>{{ t('demo.scenariosTitle') }}</h6>
             <ul>
               <li
                 v-for="scenario in getCurrentLang().scenarios"
@@ -57,7 +57,7 @@
           </div>
 
           <div class="detail-section">
-            <h6>✅ 优势</h6>
+            <h6>{{ t('demo.prosTitle') }}</h6>
             <ul>
               <li
                 v-for="pro in getCurrentLang().pros"
@@ -69,7 +69,7 @@
           </div>
 
           <div class="detail-section">
-            <h6>❌ 劣势</h6>
+            <h6>{{ t('demo.consTitle') }}</h6>
             <ul>
               <li
                 v-for="con in getCurrentLang().cons"
@@ -87,170 +87,27 @@
       v-if="!selectedLang"
       class="hint-text"
     >
-      👆 点击上方任意语言，查看详细说明
+      {{ t('demo.hint') }}
     </div>
 
     <div class="info-box">
       <span class="icon">💡</span>
-      <strong>核心思想：</strong>选择语言时，先想清楚"我要解决什么问题"，而不是"哪个语言最火"。初创公司选 Python/Node.js 快速验证，大厂选 Java/Go 保证稳定，游戏开发选 C++ 追求极致性能。
+      <strong>{{ t('demo.infoStrong') }}</strong>{{ t('demo.info') }}
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { backendLanguagesLocale } from '../../../locales/backend-languages/index.js'
 
 const selectedLang = ref('Go')
-
-const languages = [
-  {
-    name: 'Go',
-    icon: '🐹',
-    metaphor: '电动螺丝刀',
-    description: '云原生时代的高效工具',
-    scenarios: [
-      '微服务架构（Docker、K8s 都是 Go 写的）',
-      '高并发 API 服务',
-      'DevOps 工具开发',
-      '区块链基础设施'
-    ],
-    pros: [
-      '并发性能优秀（Goroutine 轻量级协程）',
-      '编译快，部署简单（单一可执行文件）',
-      '语法简洁，学习曲线平缓',
-      '内存占用低，性能接近 C++'
-    ],
-    cons: [
-      '生态不如 Java/Python 成熟',
-      '错误处理繁琐（if err != nil）',
-      '泛型支持较弱（Go 1.18+ 引入）',
-      '不适合 CPU 密集型任务'
-    ]
-  },
-  {
-    name: 'Python',
-    icon: '🐍',
-    metaphor: '瑞士军刀',
-    description: '什么都能干的全能工具',
-    scenarios: [
-      'AI/机器学习（PyTorch、TensorFlow）',
-      '数据分析和处理',
-      '快速原型开发',
-      '自动化脚本'
-    ],
-    pros: [
-      '语法极简，学习曲线平缓',
-      'AI 生态无与伦比',
-      '开发速度快，代码量少',
-      '库丰富，几乎任何功能都有现成方案'
-    ],
-    cons: [
-      '运行速度慢（比 Go/Java 慢 10-100 倍）',
-      'GIL 限制多线程性能',
-      '打包部署复杂（依赖地狱）',
-      '动态类型，运行时错误多'
-    ]
-  },
-  {
-    name: 'Java',
-    icon: '☕',
-    metaphor: '重型挖掘机',
-    description: '企业级开发的稳定选择',
-    scenarios: [
-      '大型企业系统（银行、保险、电商）',
-      'Android 应用开发',
-      '大数据处理（Hadoop、Spark）',
-      '微服务架构（Spring Cloud）'
-    ],
-    pros: [
-      '生态极其成熟，框架完备',
-      '强类型，编译时检查',
-      '多线程模型成熟',
-      '跨平台，JVM 优化强大'
-    ],
-    cons: [
-      '代码冗长，样板代码多',
-      '启动慢，内存占用高',
-      '学习曲线陡峭（Spring 全家桶）',
-      '版本更新快，兼容性问题'
-    ]
-  },
-  {
-    name: 'Node.js',
-    icon: '💚',
-    metaphor: '万能扳手',
-    description: '前后端统一的利器',
-    scenarios: [
-      '全栈 Web 应用（React + Node.js）',
-      '实时系统（聊天应用、协作工具）',
-      'Serverless（AWS Lambda、Vercel）',
-      'I/O 密集型 API'
-    ],
-    pros: [
-      '前后端统一语言，减少切换成本',
-      'NPM 生态庞大，世界最大包仓库',
-      '适合 I/O 密集型应用',
-      '事件驱动，非阻塞 I/O'
-    ],
-    cons: [
-      '单线程，CPU 密集型性能差',
-      '回调地狱（虽然 async/await 有改善）',
-      '动态类型，运行时错误多',
-      '版本兼容性问题多'
-    ]
-  },
-  {
-    name: 'Rust',
-    icon: '🦀',
-    metaphor: '激光切割机',
-    description: '内存安全的系统级工具',
-    scenarios: [
-      '系统编程（操作系统、数据库）',
-      '区块链（Solana、Polkadot）',
-      'WebAssembly（前端高性能计算）',
-      '基础设施（AWS Firecracker）'
-    ],
-    pros: [
-      '内存安全，编译时保证无泄漏',
-      '性能接近 C++',
-      '现代化语法，零成本抽象',
-      '无 GC，运行时开销低'
-    ],
-    cons: [
-      '学习曲线极其陡峭',
-      '编译时间长',
-      '生态不如 Go/Java 成熟',
-      '开发速度慢'
-    ]
-  },
-  {
-    name: 'C++',
-    icon: '⚡',
-    metaphor: '工业电钻',
-    description: '高性能计算的基石',
-    scenarios: [
-      '游戏开发（Unreal Engine）',
-      '高频交易（金融系统）',
-      '浏览器引擎（Chrome V8）',
-      'AI 框架底层（PyTorch、TF）'
-    ],
-    pros: [
-      '性能极致，无语言能超越',
-      '底层控制力强，直接操作内存',
-      '游戏开发标准',
-      '生态成熟'
-    ],
-    cons: [
-      '学习曲线极其陡峭',
-      '内存管理复杂（易泄漏）',
-      '开发效率低',
-      '不适合 Web 开发'
-    ]
-  }
-]
+const { t, messages } = useI18n(backendLanguagesLocale)
+const languages = computed(() => messages.value.demo.languages)
 
 const getCurrentLang = () => {
-  return languages.find(l => l.name === selectedLang.value) || languages[0]
+  return languages.value.find(l => l.name === selectedLang.value) || languages.value[0]
 }
 </script>
 

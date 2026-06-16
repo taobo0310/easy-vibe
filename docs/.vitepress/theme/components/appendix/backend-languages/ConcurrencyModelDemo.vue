@@ -2,12 +2,12 @@
   <div class="concurrency-model-demo">
     <div class="demo-header">
       <span class="icon">🔄</span>
-      <span class="title">并发模型</span>
-      <span class="subtitle">不同语言处理多任务的方式</span>
+      <span class="title">{{ t('concurrency.title') }}</span>
+      <span class="subtitle">{{ t('concurrency.subtitle') }}</span>
     </div>
 
     <div class="intro-text">
-      想象你在<span class="highlight">餐厅工作</span>：有的餐厅多个服务员同时服务（多线程），有的只有一个服务员但动作极快（事件循环），有的像流水线一样分工协作（协程）。
+      {{ t('concurrency.introPrefix') }}<span class="highlight">{{ t('concurrency.introHighlight') }}</span>{{ t('concurrency.introSuffix') }}
     </div>
 
     <div class="models-grid">
@@ -48,7 +48,7 @@
 
         <div class="stats-grid">
           <div class="stat-item">
-            <span class="stat-label">并发能力</span>
+            <span class="stat-label">{{ t('concurrency.concurrencyLabel') }}</span>
             <div class="stat-bar">
               <div
                 class="stat-fill"
@@ -57,7 +57,7 @@
             </div>
           </div>
           <div class="stat-item">
-            <span class="stat-label">内存开销</span>
+            <span class="stat-label">{{ t('concurrency.memoryLabel') }}</span>
             <div class="stat-bar">
               <div
                 class="stat-fill memory"
@@ -73,7 +73,7 @@
 
         <div class="pros-cons">
           <div class="pros">
-            <strong>✅ 优势</strong>
+            <strong>{{ t('concurrency.prosTitle') }}</strong>
             <ul>
               <li
                 v-for="pro in getModelInfo().pros"
@@ -84,7 +84,7 @@
             </ul>
           </div>
           <div class="cons">
-            <strong>❌ 劣势</strong>
+            <strong>{{ t('concurrency.consTitle') }}</strong>
             <ul>
               <li
                 v-for="con in getModelInfo().cons"
@@ -100,80 +100,24 @@
 
     <div class="info-box">
       <span class="icon">💡</span>
-      <strong>核心思想：</strong>Go 的协程适合高并发 I/O，Java 的线程池适合稳定的企业级应用，Node.js 的事件循环适合简单的 I/O 密集型任务。根据场景选择，而不是盲目追求"并发数"。
+      <strong>{{ t('concurrency.infoStrong') }}</strong>{{ t('concurrency.info') }}
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { backendLanguagesLocale } from '../../../locales/backend-languages/index.js'
+
+const { t, messages } = useI18n(backendLanguagesLocale)
 
 const selectedModel = ref('Goroutine')
-
-const models = [
-  {
-    name: 'Goroutine',
-    icon: '🐹',
-    language: 'Go',
-    description: '轻量级协程'
-  },
-  {
-    name: 'Thread Pool',
-    icon: '🧵',
-    language: 'Java',
-    description: '线程池'
-  },
-  {
-    name: 'Event Loop',
-    icon: '⚡',
-    language: 'Node.js',
-    description: '事件循环'
-  },
-  {
-    name: 'Async/Await',
-    icon: '🦀',
-    language: 'Rust',
-    description: '异步运行时'
-  }
-]
-
-const modelInfo = {
-  Goroutine: {
-    title: 'Go Goroutine (协程)',
-    concurrency: 95,
-    memory: 90,
-    code: 'go func() { /* 任务 */ }()',
-    pros: ['轻量级（2KB 栈内存）', '可创建百万级协程', '语法简洁'],
-    cons: ['需要手动管理生命周期', '错误处理繁琐']
-  },
-  'Thread Pool': {
-    title: 'Java Thread Pool (线程池)',
-    concurrency: 70,
-    memory: 40,
-    code: 'executor.submit(() -> { /* 任务 */ });',
-    pros: ['成熟稳定', '异常处理完善', '工具丰富'],
-    cons: ['线程重（1-2MB 栈）', '上下文切换开销大']
-  },
-  'Event Loop': {
-    title: 'Node.js Event Loop (事件循环)',
-    concurrency: 85,
-    memory: 75,
-    code: 'async function task() { /* 任务 */ }',
-    pros: ['适合 I/O 密集型', '单线程无锁竞争', '语法优雅'],
-    cons: ['CPU 密集型性能差', '无法利用多核']
-  },
-  'Async/Await': {
-    title: 'Rust Async/Await (零成本抽象)',
-    concurrency: 90,
-    memory: 95,
-    code: 'task::spawn(async move { /* 任务 */ });',
-    pros: ['零成本抽象', '内存安全', '性能接近手动管理'],
-    cons: ['学习曲线陡峭', '需要运行时']
-  }
-}
+const models = computed(() => messages.value.concurrency.models)
+const modelInfo = computed(() => messages.value.concurrency.modelInfo)
 
 const getModelInfo = () => {
-  return modelInfo[selectedModel.value] || modelInfo.Goroutine
+  return modelInfo.value[selectedModel.value] || modelInfo.value.Goroutine
 }
 </script>
 

@@ -1,20 +1,8 @@
-<!--
-  VectorDatabaseDemo.vue
-  向量数据库对比组件
-
-  用途：
-  交互式对比主流向量数据库的特性、适用场景和架构差异。
-
-  交互功能：
-  - 点击卡片查看详情
-  - 对比不同数据库的核心指标
-  - 场景推荐
--->
 <template>
   <div class="vdb-demo">
     <div class="demo-header">
-      <h4>主流向量数据库对比</h4>
-      <p class="desc">点击卡片查看详细信息，了解不同向量数据库的特点与适用场景</p>
+      <h4>{{ t('database.title') }}</h4>
+      <p class="desc">{{ t('database.desc') }}</p>
     </div>
 
     <div class="db-grid">
@@ -43,19 +31,19 @@
 
         <div v-if="selected === db.name" class="card-detail">
           <div class="detail-row">
-            <span class="detail-label">开源协议</span>
+            <span class="detail-label">{{ t('database.labels.license') }}</span>
             <span class="detail-val">{{ db.license }}</span>
           </div>
           <div class="detail-row">
-            <span class="detail-label">索引算法</span>
+            <span class="detail-label">{{ t('database.labels.index') }}</span>
             <span class="detail-val">{{ db.index }}</span>
           </div>
           <div class="detail-row">
-            <span class="detail-label">最大维度</span>
+            <span class="detail-label">{{ t('database.labels.maxDim') }}</span>
             <span class="detail-val">{{ db.maxDim }}</span>
           </div>
           <div class="detail-row">
-            <span class="detail-label">适用场景</span>
+            <span class="detail-label">{{ t('database.labels.useCase') }}</span>
             <span class="detail-val">{{ db.useCase }}</span>
           </div>
           <p class="detail-desc">{{ db.description }}</p>
@@ -66,26 +54,26 @@
             <div class="metric-bar-wrap">
               <div class="metric-bar" :style="{ width: db.perf + '%', background: db.color }"></div>
             </div>
-            <span class="metric-label">性能</span>
+            <span class="metric-label">{{ t('database.labels.perf') }}</span>
           </div>
           <div class="metric">
             <div class="metric-bar-wrap">
               <div class="metric-bar" :style="{ width: db.ease + '%', background: db.color }"></div>
             </div>
-            <span class="metric-label">易用性</span>
+            <span class="metric-label">{{ t('database.labels.ease') }}</span>
           </div>
           <div class="metric">
             <div class="metric-bar-wrap">
               <div class="metric-bar" :style="{ width: db.scale + '%', background: db.color }"></div>
             </div>
-            <span class="metric-label">扩展性</span>
+            <span class="metric-label">{{ t('database.labels.scale') }}</span>
           </div>
         </div>
       </div>
     </div>
 
     <div class="scenario-section">
-      <h5>场景推荐</h5>
+      <h5>{{ t('database.scenarioTitle') }}</h5>
       <div class="scenario-grid">
         <div
           v-for="s in scenarios"
@@ -102,94 +90,14 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { embeddingVectorLocale } from '../../../locales/embedding-vector/index.js'
 
+const { t, messages } = useI18n(embeddingVectorLocale)
 const selected = ref(null)
-
-const databases = [
-  {
-    name: 'Pinecone',
-    type: '全托管云服务',
-    icon: 'P',
-    color: '#3b82f6',
-    tags: ['云原生', 'Serverless'],
-    license: '商业',
-    index: 'Proprietary ANN',
-    maxDim: '20,000',
-    useCase: '快速上线的 AI 应用',
-    description: '全托管向量数据库，无需运维，按用量付费。适合初创团队和快速原型开发。',
-    perf: 85,
-    ease: 95,
-    scale: 80
-  },
-  {
-    name: 'Milvus',
-    type: '开源分布式',
-    icon: 'M',
-    color: '#10b981',
-    tags: ['开源', '分布式', '高性能'],
-    license: 'Apache 2.0',
-    index: 'IVF / HNSW / DiskANN',
-    maxDim: '32,768',
-    useCase: '大规模企业级检索',
-    description: '支持十亿级向量的分布式数据库，提供丰富的索引类型和混合查询能力。',
-    perf: 95,
-    ease: 65,
-    scale: 95
-  },
-  {
-    name: 'Weaviate',
-    type: '开源 AI 原生',
-    icon: 'W',
-    color: '#8b5cf6',
-    tags: ['开源', 'GraphQL', '模块化'],
-    license: 'BSD-3',
-    index: 'HNSW',
-    maxDim: '65,536',
-    useCase: '语义搜索与多模态',
-    description: '内置向量化模块，支持文本、图像等多模态数据的自动嵌入和检索。',
-    perf: 80,
-    ease: 85,
-    scale: 80
-  },
-  {
-    name: 'Chroma',
-    type: '轻量级嵌入式',
-    icon: 'C',
-    color: '#f59e0b',
-    tags: ['开源', '轻量', 'Python'],
-    license: 'Apache 2.0',
-    index: 'HNSW',
-    maxDim: '无限制',
-    useCase: '本地开发与 RAG 原型',
-    description: '极简 API 设计，几行代码即可集成。非常适合 LangChain / LlamaIndex 生态。',
-    perf: 60,
-    ease: 98,
-    scale: 40
-  },
-  {
-    name: 'pgvector',
-    type: 'PostgreSQL 扩展',
-    icon: 'pg',
-    color: '#ef4444',
-    tags: ['SQL', 'PostgreSQL', '扩展'],
-    license: 'PostgreSQL',
-    index: 'IVFFlat / HNSW',
-    maxDim: '16,000',
-    useCase: '已有 PG 基础设施的团队',
-    description: '在现有 PostgreSQL 中添加向量能力，无需引入新的数据库。支持 SQL 混合查询。',
-    perf: 65,
-    ease: 80,
-    scale: 60
-  }
-]
-
-const scenarios = [
-  { icon: '&#x1F680;', title: '快速原型', recommend: 'Chroma / Pinecone' },
-  { icon: '&#x1F3E2;', title: '企业级部署', recommend: 'Milvus / Weaviate' },
-  { icon: '&#x1F4BE;', title: '已有 PG 数据库', recommend: 'pgvector' },
-  { icon: '&#x1F916;', title: 'RAG 应用', recommend: 'Chroma / Weaviate' }
-]
+const databases = computed(() => messages.value.database.databases)
+const scenarios = computed(() => messages.value.database.scenarios)
 </script>
 
 <style scoped>

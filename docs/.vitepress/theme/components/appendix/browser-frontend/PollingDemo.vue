@@ -1,42 +1,42 @@
 <template>
   <div class="demo-wrapper">
-    <div class="demo-header">Polling / 短轮询交互演示</div>
+    <div class="demo-header">{{ t('polling.title') }}</div>
     
     <div class="network-stage">
-      <!-- 客户端 -->
+      
       <div class="node client">
         <div class="node-icon">💻</div>
         <div class="node-label">Client</div>
       </div>
 
-      <!-- 通信链路 -->
+      
       <div class="channel">
         <div class="message req" :class="{ 'moving-right': isRequesting }">
-          <span v-if="isRequesting">"有新消息吗？" →</span>
+          <span v-if="isRequesting">"{{ t('polling.question') }}" →</span>
         </div>
         <div class="message res" :class="{ 'moving-left': isResponding }">
           <span v-if="isResponding">← "{{ serverResponse }}"</span>
         </div>
       </div>
 
-      <!-- 服务端 -->
+      
       <div class="node server">
         <div class="node-icon">🖧</div>
-        <div class="node-label">Server (无状态)</div>
+        <div class="node-label">{{ t('polling.server') }}</div>
         <button class="action-btn" @click="triggerNewMessage" :disabled="hasNewMessage">
-          制造新消息
+          {{ t('polling.createMessage') }}
         </button>
       </div>
     </div>
 
     <div class="status-panel">
       <div class="status-controls">
-        <button 
-          class="toggle-btn" 
-          :class="{ active: isPolling }" 
+        <button
+          class="toggle-btn"
+          :class="{ active: isPolling }"
           @click="togglePolling"
         >
-          {{ isPolling ? '⏹ 停止轮询' : '▶ 开始定时轮询 (1s)' }}
+          {{ isPolling ? t('polling.stopPolling') : t('polling.startPolling') }}
         </button>
       </div>
       <div class="log-box">
@@ -49,15 +49,23 @@
 </template>
 
 <script setup>
-import { ref, onUnmounted } from 'vue'
+import { ref, computed, onUnmounted } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { browserFrontendLocale } from '../../../locales/browser-frontend/index.js'
+
+const { t } = useI18n(browserFrontendLocale)
 
 const isPolling = ref(false)
 const isRequesting = ref(false)
 const isResponding = ref(false)
-const serverResponse = ref('')
+const serverResponseVal = ref('yes')
 const hasNewMessage = ref(false)
 const logs = ref([])
 let timer = null
+
+const serverResponse = computed(() => {
+  return hasNewMessage.value ? t('polling.logResponseYes') : t('polling.logResponseNo')
+})
 
 const addLog = (msg) => {
   logs.value.unshift(`[${new Date().toLocaleTimeString()}] ${msg}`)
@@ -66,28 +74,28 @@ const addLog = (msg) => {
 
 const triggerNewMessage = () => {
   hasNewMessage.value = true
-  addLog('服务端：偷偷准备了一条新消息 🤫')
+  addLog(t('polling.logServerPrepare'))
 }
 
 const performPoll = () => {
   if (isRequesting.value || isResponding.value) return
-  
-  // 发起请求
+
+
   isRequesting.value = true
-  addLog('客户端：发起 HTTP GET 请求...')
-  
+  addLog(t('polling.logClientRequest'))
+
   setTimeout(() => {
     isRequesting.value = false
-    // 服务端处理并响应
+
     if (hasNewMessage.value) {
-      serverResponse.value = '有啦！这是刚收到的弹幕'
+      serverResponseVal.value = 'yes'
       hasNewMessage.value = false
     } else {
-      serverResponse.value = '没有'
+      serverResponseVal.value = 'no'
     }
     isResponding.value = true
-    addLog(`服务端：响应 "${serverResponse.value}"，然后关闭连接。`)
-    
+    addLog(t('polling.logServerResponse').replace('{response}', serverResponse.value))
+
     setTimeout(() => {
       isResponding.value = false
     }, 600)
@@ -98,12 +106,12 @@ const togglePolling = () => {
   if (isPolling.value) {
     clearInterval(timer)
     isPolling.value = false
-    addLog('停止定时器。')
+    addLog(t('polling.logStopTimer'))
   } else {
     isPolling.value = true
-    addLog('启动 setInterval() 狂轰乱炸模式。')
+    addLog(t('polling.logStartPolling'))
     performPoll()
-    timer = setInterval(performPoll, 2500) // 放慢演示速度
+    timer = setInterval(performPoll, 2500)
   }
 }
 

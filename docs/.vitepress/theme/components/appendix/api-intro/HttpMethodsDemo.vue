@@ -14,7 +14,7 @@
         </div>
         <div class="method-flags">
           <span :class="['flag', method.idempotent ? 'yes' : 'no']">
-            {{ method.idempotent ? '幂等' : '不幂等' }}
+            {{ method.idempotent ? t('httpMethods.idempotent') : t('httpMethods.notIdempotent') }}
           </span>
         </div>
       </div>
@@ -29,7 +29,7 @@
       </div>
       <div class="detail-desc">{{ currentMethod.desc }}</div>
       <div class="detail-analogy">
-        <span class="analogy-label">餐厅类比:</span>
+        <span class="analogy-label">{{ t('httpMethods.analogy') }}</span>
         <span class="analogy-text">{{ currentMethod.analogy }}</span>
       </div>
       <div class="detail-code">
@@ -41,70 +41,15 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { apiIntroLocale } from '../../../locales/api-intro/index.js'
 
+const { t, messages } = useI18n(apiIntroLocale)
 const active = ref('get')
-
-const methods = [
-  {
-    id: 'get',
-    name: '获取',
-    use: '查询数据',
-    idempotent: true,
-    desc: '从服务器获取资源,不会修改任何数据',
-    analogy: '"服务员,菜单给我看看"',
-    example: `GET /api/users           # 获取用户列表
-GET /api/users/123       # 获取单个用户
-GET /api/products?cat=phone  # 查询手机商品`
-  },
-  {
-    id: 'post',
-    name: '创建',
-    use: '新增数据',
-    idempotent: false,
-    desc: '向服务器提交数据,创建新资源',
-    analogy: '"给我来份宫保鸡丁"',
-    example: `POST /api/users
-Body: {"name": "张三", "email": "zhang@example.com"}
-
-POST /api/orders
-Body: {"items": [{"id": 1, "qty": 2}]}`
-  },
-  {
-    id: 'put',
-    name: '全量更新',
-    use: '替换资源',
-    idempotent: true,
-    desc: '用新数据完整替换旧资源',
-    analogy: '"把宫保鸡丁改成糖醋里脊"',
-    example: `PUT /api/users/123
-Body: {"name": "李四", "email": "li@example.com", "age": 25}
-# 注意:必须提供所有字段`
-  },
-  {
-    id: 'patch',
-    name: '部分更新',
-    use: '修改字段',
-    idempotent: false,
-    desc: '只修改资源的部分字段',
-    analogy: '"宫保鸡丁不要放花生"',
-    example: `PATCH /api/users/123
-Body: {"name": "王五"}
-# 只修改 name,其他字段保持不变`
-  },
-  {
-    id: 'delete',
-    name: '删除',
-    use: '删除资源',
-    idempotent: true,
-    desc: '从服务器删除资源',
-    analogy: '"算了,那道菜不要了"',
-    example: `DELETE /api/users/123       # 删除指定用户
-DELETE /api/orders/456      # 取消订单`
-  }
-]
+const methods = computed(() => messages.value.httpMethods.methods)
 
 const currentMethod = computed(() => {
-  return methods.find((m) => m.id === active.value) || methods[0]
+  return methods.value.find((m) => m.id === active.value) || methods.value[0]
 })
 </script>
 

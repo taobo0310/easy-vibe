@@ -1,8 +1,8 @@
 <template>
   <div class="flex-demo">
     <div class="demo-header">
-      <span class="title">Flexbox 布局</span>
-      <span class="subtitle">通过调整参数观察元素排列方式的变化</span>
+      <span class="title">{{ t('layout.flexbox.title') }}</span>
+      <span class="subtitle">{{ t('layout.flexbox.subtitle') }}</span>
     </div>
 
     <div class="axis-concept">
@@ -10,23 +10,23 @@
         <div class="concept-item">
           <div class="concept-visual main">
             <span class="arrow">→</span>
-            <span class="label">主轴</span>
+            <span class="label">{{ t('layout.flexbox.mainAxis') }}</span>
             <span class="arrow">→</span>
           </div>
           <div class="concept-desc">
-            <strong>主轴 (Main Axis)</strong>
-            <span>元素排列的方向，由 flex-direction 决定</span>
+            <strong>{{ t('layout.flexbox.mainAxisTitle') }}</strong>
+            <span>{{ t('layout.flexbox.mainAxisDesc') }}</span>
           </div>
         </div>
         <div class="concept-item">
           <div class="concept-visual cross">
             <span class="arrow">↓</span>
-            <span class="label">交叉轴</span>
+            <span class="label">{{ t('layout.flexbox.crossAxis') }}</span>
             <span class="arrow">↓</span>
           </div>
           <div class="concept-desc">
-            <strong>交叉轴 (Cross Axis)</strong>
-            <span>垂直于主轴，用于对齐元素</span>
+            <strong>{{ t('layout.flexbox.crossAxisTitle') }}</strong>
+            <span>{{ t('layout.flexbox.crossAxisDesc') }}</span>
           </div>
         </div>
       </div>
@@ -48,7 +48,7 @@
           </div>
         </div>
         <div class="control-group">
-          <label>justify-content（主轴对齐）</label>
+          <label>{{ t('layout.flexbox.justifyLabel') }}</label>
           <div class="chips">
             <button
               v-for="j in justifies"
@@ -61,7 +61,7 @@
           </div>
         </div>
         <div class="control-group">
-          <label>align-items（交叉轴对齐）</label>
+          <label>{{ t('layout.flexbox.alignLabel') }}</label>
           <div class="chips">
             <button
               v-for="a in aligns"
@@ -102,8 +102,8 @@
           </div>
         </div>
         <div class="axis-hint">
-          <span class="axis-tag main">主轴方向: {{ dir === 'row' ? '水平 →' : '垂直 ↓' }}</span>
-          <span class="axis-tag cross">交叉轴方向: {{ dir === 'row' ? '垂直 ↓' : '水平 →' }}</span>
+          <span class="axis-tag main">{{ mainAxisLabel }}</span>
+          <span class="axis-tag cross">{{ crossAxisLabel }}</span>
         </div>
       </div>
     </div>
@@ -116,20 +116,19 @@
     </div>
 
     <div class="info-box">
-      <strong>记忆方法：</strong>
-      <code>justify-content</code> 控制主轴方向的对齐（水平时左右，垂直时上下）；
-      <code>align-items</code> 控制交叉轴方向的对齐。
+      <strong>{{ t('layout.flexbox.memoryTitle') }}</strong>
+      {{ t('layout.flexbox.memory') }}
     </div>
   </div>
 </template>
 
 <script setup>
 import { computed, ref } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { webBasicsLocale } from '../../../locales/web-basics/index.js'
 
-const directions = [
-  { id: 'row', label: 'row（水平）' },
-  { id: 'column', label: 'column（垂直）' }
-]
+const { t, messages } = useI18n(webBasicsLocale)
+const directions = computed(() => messages.value.layout.flexbox.directions)
 const justifies = [
   { id: 'flex-start', label: 'flex-start' },
   { id: 'center', label: 'center' },
@@ -171,6 +170,18 @@ const cssCode = computed(() => {
   if (wrap.value !== 'nowrap') parts.push(`flex-wrap: ${wrap.value}`)
   return parts.join('; ') + ';'
 })
+
+const mainAxisLabel = computed(() =>
+  t('layout.flexbox.mainAxisDirection', {
+    direction: dir.value === 'row' ? t('layout.flexbox.horizontal') : t('layout.flexbox.vertical')
+  })
+)
+
+const crossAxisLabel = computed(() =>
+  t('layout.flexbox.crossAxisDirection', {
+    direction: dir.value === 'row' ? t('layout.flexbox.vertical') : t('layout.flexbox.horizontal')
+  })
+)
 </script>
 
 <style scoped>

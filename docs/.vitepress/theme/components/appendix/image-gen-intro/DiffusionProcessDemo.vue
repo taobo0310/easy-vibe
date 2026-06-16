@@ -15,7 +15,7 @@
           :class="{ visible: isProcessing }"
         >
           <div class="step-counter">
-            Step {{ currentStep }} / {{ totalSteps }}
+            {{ t('diffusionProcess.step') }} {{ currentStep }} / {{ totalSteps }}
           </div>
           <div class="step-desc">
             {{ stepDescription }}
@@ -31,7 +31,7 @@
           @click="startDenoise"
         >
           <span class="icon">✨</span>
-          {{ isProcessing ? '去噪中...' : '开始去噪 (Denoise)' }}
+          {{ isProcessing ? t('diffusionProcess.denoising') : t('diffusionProcess.start') }}
         </button>
         
         <button
@@ -39,7 +39,7 @@
           :disabled="isProcessing"
           @click="reset"
         >
-          <span class="icon">🔄</span> 重置
+          <span class="icon">🔄</span> {{ t('diffusionProcess.reset') }}
         </button>
       </div>
     </div>
@@ -47,8 +47,8 @@
     <div class="info-bar">
       <span class="icon">💡</span>
       <span>
-        <strong>观察重点：</strong>
-        注意看，图像不是一下子变出来的，而是像在雾气中慢慢显影。这就是 Diffusion 的核心——它在不断猜测“噪声背后的真相”。
+        <strong>{{ t('diffusionProcess.focusTitle') }}</strong>
+        {{ t('diffusionProcess.focusText') }}
       </span>
     </div>
   </div>
@@ -56,6 +56,10 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { imageGenIntroLocale } from '../../../locales/image-gen-intro/index.js'
+
+const { t } = useI18n(imageGenIntroLocale)
 
 const canvasRef = ref(null)
 const isProcessing = ref(false)
@@ -93,8 +97,6 @@ const drawTargetImage = (ctx) => {
 const drawNoise = (ctx, amount) => {
   const w = 300
   const h = 300
-  const idata = ctx.getImageData(0, 0, w, h)
-  const buffer = new Uint32Array(idata.data.buffer)
   
   // We need to blend the target image with noise based on 'amount' (0 to 1)
   // But since we can't easily read back the target image every frame efficiently without offscreen canvas,
@@ -131,11 +133,11 @@ const drawNoise = (ctx, amount) => {
 }
 
 const stepDescription = computed(() => {
-  if (currentStep.value === 0) return '纯噪声 (Pure Noise)'
-  if (currentStep.value < 10) return '隐约出现轮廓...'
-  if (currentStep.value < 30) return '色彩开始浮现...'
-  if (currentStep.value < 50) return '细节逐渐清晰...'
-  return '生成完成 (Done)!'
+  if (currentStep.value === 0) return t('diffusionProcess.descriptions.pureNoise')
+  if (currentStep.value < 10) return t('diffusionProcess.descriptions.outline')
+  if (currentStep.value < 30) return t('diffusionProcess.descriptions.color')
+  if (currentStep.value < 50) return t('diffusionProcess.descriptions.detail')
+  return t('diffusionProcess.descriptions.done')
 })
 
 const startDenoise = () => {

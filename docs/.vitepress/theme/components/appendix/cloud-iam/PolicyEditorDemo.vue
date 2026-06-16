@@ -2,14 +2,14 @@
   <div class="policy-editor-demo">
     <div class="demo-header">
       <span class="icon">📋</span>
-      <span class="title">策略编辑器</span>
-      <span class="subtitle">理解 IAM 策略的 JSON 结构</span>
+      <span class="title">{{ t('policyEditor.title') }}</span>
+      <span class="subtitle">{{ t('policyEditor.subtitle') }}</span>
     </div>
 
     <div class="editor-layout">
       <div class="editor-panel">
         <div class="panel-title">
-          策略编辑器
+          {{ t('policyEditor.editorTitle') }}
         </div>
         <div class="action-list">
           <div 
@@ -32,7 +32,7 @@
       
       <div class="preview-panel">
         <div class="panel-title">
-          生成的策略
+          {{ t('policyEditor.generatedTitle') }}
         </div>
         <pre><code>{{ generatedPolicy }}</code></pre>
       </div>
@@ -40,7 +40,7 @@
     
     <div class="effect-preview">
       <div class="effect-title">
-        权限效果预览
+        {{ t('policyEditor.effectTitle') }}
       </div>
       <div class="effect-list">
         <div 
@@ -57,27 +57,22 @@
 
     <div class="info-box">
       <span class="icon">💡</span>
-      <strong>核心思想：</strong>策略由 Effect、Action、Resource、Condition 四个核心元素组成，理解这四个元素的作用是编写 IAM 策略的基础。
+      <strong>{{ t('common.coreIdea') }}</strong>{{ t('policyEditor.info') }}
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { cloudIamLocale } from '../../../locales/cloud-iam/index.js'
 
+const { t, messages } = useI18n(cloudIamLocale)
 const selectedActions = ref(['describe', 'start'])
-
-const actions = [
-  { id: 'describe', name: '查看实例', desc: 'DescribeInstances', resource: 'ecs:Describe*' },
-  { id: 'start', name: '启动实例', desc: 'StartInstance', resource: 'ecs:StartInstance' },
-  { id: 'stop', name: '停止实例', desc: 'StopInstance', resource: 'ecs:StopInstance' },
-  { id: 'reboot', name: '重启实例', desc: 'RebootInstance', resource: 'ecs:RebootInstance' },
-  { id: 'create', name: '创建实例', desc: 'CreateInstance', resource: 'ecs:CreateInstance' },
-  { id: 'delete', name: '删除实例', desc: 'DeleteInstance', resource: 'ecs:DeleteInstance' }
-]
+const actions = computed(() => messages.value.policyEditor.actions)
 
 const generatedPolicy = computed(() => {
-  const selected = actions.filter(a => selectedActions.value.includes(a.id))
+  const selected = actions.value.filter(a => selectedActions.value.includes(a.id))
   const actionList = selected.map(a => a.resource)
   
   return JSON.stringify({
@@ -93,7 +88,7 @@ const generatedPolicy = computed(() => {
 })
 
 const effectList = computed(() => {
-  return actions.map(action => ({
+  return actions.value.map(action => ({
     name: action.name,
     action: action.id,
     allowed: selectedActions.value.includes(action.id)

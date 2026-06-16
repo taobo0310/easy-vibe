@@ -2,8 +2,8 @@
   <div class="access-key-management-demo">
     <div class="demo-header">
       <span class="icon">🔑</span>
-      <span class="title">访问密钥管理</span>
-      <span class="subtitle">AK/SK 生命周期</span>
+      <span class="title">{{ t('accessKey.title') }}</span>
+      <span class="subtitle">{{ t('accessKey.subtitle') }}</span>
     </div>
 
     <div class="main-area">
@@ -13,7 +13,7 @@
             class="status-badge"
             :class="akStatus"
           >{{ statusText }}</span>
-          <span class="age">已创建 {{ akAge }} 天</span>
+          <span class="age">{{ t('accessKey.createdAge', { days: akAge }) }}</span>
         </div>
         <div class="credentials">
           <div class="cred-row">
@@ -39,10 +39,10 @@
         </div>
         <div class="stats">
           <div class="stat">
-            <span class="v">{{ apiCalls }}</span><span class="l">API调用</span>
+            <span class="v">{{ apiCalls }}</span><span class="l">{{ t('accessKey.apiCalls') }}</span>
           </div>
           <div class="stat">
-            <span class="v">{{ lastUsed }}</span><span class="l">最后使用</span>
+            <span class="v">{{ lastUsedText }}</span><span class="l">{{ t('accessKey.lastUsedLabel') }}</span>
           </div>
         </div>
       </div>
@@ -53,20 +53,20 @@
           :disabled="isRotating"
           @click="rotateKey"
         >
-          🔄 轮换
+          {{ t('accessKey.rotate') }}
         </button>
         <button
           class="btn warning"
           :disabled="akStatus === 'inactive'"
           @click="deactivateKey"
         >
-          ⏸️ 禁用
+          {{ t('accessKey.deactivate') }}
         </button>
         <button
           class="btn danger"
           @click="deleteKey"
         >
-          🗑️ 删除
+          {{ t('accessKey.delete') }}
         </button>
       </div>
     </div>
@@ -86,20 +86,24 @@
 
     <div class="info-box">
       <span class="icon">💡</span>
-      <strong>核心思想：</strong>访问密钥泄露是云安全事件主因之一。建议优先使用 IAM 角色，必须使用时请定期轮换。
+      <strong>{{ t('common.coreIdea') }}</strong>{{ t('accessKey.info') }}
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { cloudIamLocale } from '../../../locales/cloud-iam/index.js'
+
+const { t } = useI18n(cloudIamLocale)
 
 const akId = ref('AKIAIOSFODNN7EXAMPLE')
 const skId = ref('wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY')
 const akStatus = ref('active')
 const akAge = ref(45)
 const apiCalls = ref(123456)
-const lastUsed = ref('2小时前')
+const lastUsedState = ref('initial')
 const showAK = ref(false)
 const showSK = ref(false)
 const isRotating = ref(false)
@@ -108,19 +112,20 @@ const rotationStatus = ref('')
 
 const maskedAK = computed(() => showAK.value ? akId.value : akId.value.substring(0, 8) + '...')
 const maskedSK = computed(() => showSK.value ? skId.value : '************************************')
-const statusText = computed(() => ({ active: '活跃', inactive: '已禁用' }[akStatus.value] || akStatus.value))
+const lastUsedText = computed(() => t(`accessKey.lastUsed.${lastUsedState.value}`))
+const statusText = computed(() => t(`accessKey.statuses.${akStatus.value}`) || akStatus.value)
 
 async function rotateKey() {
   isRotating.value = true
   rotationProgress.value = 0
-  rotationStatus.value = '生成新密钥...'
-  await simulateProgress(30, '创建新 Key...')
-  await simulateProgress(60, '更新配置...')
-  await simulateProgress(100, '验证完成')
+  rotationStatus.value = t('accessKey.rotation.generate')
+  await simulateProgress(30, t('accessKey.rotation.create'))
+  await simulateProgress(60, t('accessKey.rotation.update'))
+  await simulateProgress(100, t('accessKey.rotation.verify'))
   akId.value = 'AKIA' + Math.random().toString(36).substring(2, 14).toUpperCase()
   akAge.value = 0
   apiCalls.value = 0
-  lastUsed.value = '刚刚'
+  lastUsedState.value = 'now'
   isRotating.value = false
 }
 
@@ -135,11 +140,11 @@ function simulateProgress(target, status) {
 }
 
 function deactivateKey() {
-  if (confirm('确定要禁用这个访问密钥吗？')) akStatus.value = 'inactive'
+  if (confirm(t('accessKey.confirmDeactivate'))) akStatus.value = 'inactive'
 }
 
 function deleteKey() {
-  if (confirm('警告：删除是不可逆的操作！')) alert('密钥已删除（演示）')
+  if (confirm(t('accessKey.confirmDelete'))) alert(t('accessKey.deleted'))
 }
 </script>
 

@@ -1,31 +1,18 @@
-<!--
-  TokenizationDemo.vue
-  分词原理演示组件
-  
-  用途：
-  展示大语言模型如何“看”文本。通过将文本拆解为 Token，让用户理解 Token 是 LLM 处理的最小单位。
-  
-  交互功能：
-  - 文本输入：用户可输入任意文本。
-  - 实时分词：模拟 Tokenizer 将文本切分为 Token。
-  - 映射展示：显示 Token 文本与其对应的（模拟）数字 ID。
-  - 颜色编码：使用不同颜色区分相邻 Token，直观展示切分边界。
--->
 <template>
   <div class="token-demo">
     <div class="control-panel">
       <div class="main-controls">
         <div class="input-group">
-          <label>Input Text / 输入文本</label>
+          <label>{{ t('tokenization.labels.input') }}</label>
           <textarea
             v-model="inputText"
             rows="3"
-            placeholder="Type something to see how AI reads it..."
+            :placeholder="t('tokenization.placeholder')"
           />
         </div>
 
         <div class="settings-group">
-          <label>Algorithm / 算法</label>
+          <label>{{ t('tokenization.labels.algorithm') }}</label>
           <div class="radio-group">
             <label
               class="radio-option"
@@ -71,7 +58,7 @@
         </div>
         <div class="stat-item">
           <span class="value">{{ inputText.length }}</span>
-          <span class="label">Characters / 字符</span>
+          <span class="label">{{ t('tokenization.labels.characters') }}</span>
         </div>
       </div>
     </div>
@@ -97,8 +84,8 @@
             v-if="hoverIndex === index"
             class="tooltip"
           >
-            ID: {{ token.id }}<br>
-            Type: {{ token.type }}
+            {{ t('tokenization.labels.tokenId') }}: {{ token.id }}<br>
+            {{ t('tokenization.labels.tokenType') }}: {{ token.type }}
           </div>
         </div>
       </div>
@@ -107,10 +94,8 @@
     <div class="info-box">
       <p>
         <span class="icon">💡</span>
-        <strong>Note:</strong>
-        LLM 不直接理解单词，它们处理的是数字（Token IDs）。 对于英文，一个 Token
-        通常是一个单词或单词的一部分（如 "ing"）； 对于中文，一个 Token
-        通常是一个汉字或词组。
+        <strong>{{ t('tokenization.labels.note') }}</strong>
+        {{ t('tokenization.note') }}
       </p>
     </div>
   </div>
@@ -118,18 +103,18 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { llmIntroLocale } from '../../../locales/llm-intro/index.js'
 
-const inputText = ref(
-  'The quick brown fox jumps over the lazy dog. \n今天天气真不错！'
-)
+const { t } = useI18n(llmIntroLocale)
+
+const inputText = ref(t('tokenization.sampleText'))
 const hoverIndex = ref(-1)
 const algorithm = ref('bpe')
 
-// 模拟不同分词算法
 const tokens = computed(() => {
   const text = inputText.value
   const result = []
-  let idCounter = 1000
 
   // Helper to generate consistent fake ID
   const generateId = (str) => {
@@ -141,8 +126,7 @@ const tokens = computed(() => {
   }
 
   if (algorithm.value === 'bpe') {
-    // 1. BPE (Subword) Simulation
-    // 模拟：保留常用词，拆分生僻词/后缀，中文字符独立
+    // 1. BPE (Subword) simulation.
     const regex = /([a-zA-Z]+)|([\u4e00-\u9fa5])|(\s+)|(.+?)/g
     let match
     while ((match = regex.exec(text)) !== null) {
@@ -157,8 +141,7 @@ const tokens = computed(() => {
       }
     }
   } else if (algorithm.value === 'word') {
-    // 2. Word-based Simulation
-    // 简单按空格拆分，标点符号也可能粘连
+    // 2. Word-based simulation.
     const words = text.split(/(\s+)/)
     words.forEach((w) => {
       if (w) {
@@ -167,8 +150,7 @@ const tokens = computed(() => {
       }
     })
   } else if (algorithm.value === 'char') {
-    // 3. Character-based Simulation
-    // 每个字符都是一个 Token
+    // 3. Character-based simulation.
     for (let char of text) {
       let type = 'char'
       if (/\s/.test(char)) type = 'whitespace'

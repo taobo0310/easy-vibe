@@ -2,50 +2,29 @@
   <div class="demo-card">
     <div class="expert-system-flow">
       <div class="es-card success">
-        <div class="es-title">🌟 专家系统的辉煌</div>
+        <div class="es-title">{{ t('expertSystemWave.successTitle') }}</div>
         <div class="es-list">
-          <div class="es-item">
-            <span class="es-box input">人类专家经验</span>
+          <div v-for="flow in flows" :key="flow[0]" class="es-item">
+            <span class="es-box input">{{ flow[0] }}</span>
             <span class="es-arrow">→</span>
-            <span class="es-box rules">转为 IF-THEN 规则库</span>
-          </div>
-          <div class="es-item">
-            <span class="es-box input">特定领域问题</span>
-            <span class="es-arrow">→</span>
-            <span class="es-box output">推理解答 (诊断/配置)</span>
+            <span :class="['es-box', flow[2] ?? 'rules']">{{ flow[1] }}</span>
           </div>
         </div>
         <div class="es-tags">
-          <span class="es-tag">1965: Dendral (化学)</span>
-          <span class="es-tag">1977: MYCIN (医疗)</span>
-          <span class="es-tag">1980: XCON (配置)</span>
+          <span v-for="tag in tags" :key="tag" class="es-tag">{{ tag }}</span>
         </div>
       </div>
 
-      <div class="es-arrow-down">⬇️ 局限性爆发 ⬇️</div>
+      <div class="es-arrow-down">{{ t('expertSystemWave.winterArrow') }}</div>
 
       <div class="es-card winter">
-        <div class="es-title"><span class="snow">❄️</span> 第一次 AI 寒冬 (1974-1980)</div>
+        <div class="es-title"><span class="snow">❄️</span> {{ t('expertSystemWave.winterTitle') }}</div>
         <div class="winter-reasons">
-          <div class="reason">
-            <span class="r-icon">📝</span>
+          <div v-for="reason in reasons" :key="reason.title" class="reason">
+            <span class="r-icon">{{ reason.icon }}</span>
             <div class="r-text">
-              <strong>知识获取瓶颈</strong>
-              <span>波兰尼悖论：人类无法说清所有规律。大量"常识"无法被人工硬编码。</span>
-            </div>
-          </div>
-          <div class="reason">
-            <span class="r-icon">💥</span>
-            <div class="r-text">
-              <strong>组合爆炸 & 脆性问题</strong>
-              <span>现实情况太多，穷举极难；且缺少常识，稍微偏离规则库系统就直接崩溃。</span>
-            </div>
-          </div>
-          <div class="reason">
-            <span class="r-icon">📉</span>
-            <div class="r-text">
-              <strong>算力不足 & 经费断层</strong>
-              <span>当时的硬件算力根本无法支撑爆发性的逻辑推演，遭遇 DARPA 研发经费大削减。</span>
+              <strong>{{ reason.title }}</strong>
+              <span>{{ reason.desc }}</span>
             </div>
           </div>
         </div>
@@ -55,6 +34,21 @@
 </template>
 
 <script setup>
+import { computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { aiHistoryLocale } from '../../../locales/ai-history/index.js'
+
+const { t, messages } = useI18n(aiHistoryLocale)
+
+const flows = computed(() =>
+  messages.value.expertSystemWave.flows.map((flow, index) => [
+    flow[0],
+    flow[1],
+    index === 0 ? 'rules' : 'output'
+  ])
+)
+const tags = computed(() => messages.value.expertSystemWave.tags)
+const reasons = computed(() => messages.value.expertSystemWave.reasons)
 </script>
 
 <style scoped>

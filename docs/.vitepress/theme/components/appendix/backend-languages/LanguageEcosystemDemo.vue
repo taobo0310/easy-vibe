@@ -2,12 +2,12 @@
   <div class="language-ecosystem-demo">
     <div class="demo-header">
       <span class="icon">🌐</span>
-      <span class="title">生态系统</span>
-      <span class="subtitle">不同语言的社区和包管理器</span>
+      <span class="title">{{ t('ecosystem.title') }}</span>
+      <span class="subtitle">{{ t('ecosystem.subtitle') }}</span>
     </div>
 
     <div class="intro-text">
-      想象你在<span class="highlight">逛超市</span>：有的超市商品种类多但质量参差（NPM），有的商品质量高但价格贵（Java Maven），有的商品精挑细选（Go Modules）。
+      {{ t('ecosystem.introPrefix') }}<span class="highlight">{{ t('ecosystem.introHighlight') }}</span>{{ t('ecosystem.introSuffix') }}
     </div>
 
     <div class="ecosystem-grid">
@@ -27,11 +27,11 @@
         </div>
         <div class="eco-stats">
           <div class="stat">
-            <span class="stat-label">包数量</span>
+            <span class="stat-label">{{ t('ecosystem.packageCount') }}</span>
             <span class="stat-value">{{ eco.packages }}</span>
           </div>
           <div class="stat">
-            <span class="stat-label">特点</span>
+            <span class="stat-label">{{ t('ecosystem.feature') }}</span>
             <span class="stat-value">{{ eco.feature }}</span>
           </div>
         </div>
@@ -40,56 +40,18 @@
 
     <div class="info-box">
       <span class="icon">💡</span>
-      <strong>核心思想：</strong>JavaScript/Node.js 的 NPM 是世界最大的包仓库，几乎任何功能都有现成方案。Python 的 PyPI 在 AI 领域无敌。Go 的 Go Modules 简洁可靠，没有依赖地狱。
+      <strong>{{ t('ecosystem.infoStrong') }}</strong>{{ t('ecosystem.info') }}
     </div>
   </div>
 </template>
 
 <script setup>
-const ecosystems = [
-  {
-    name: 'NPM',
-    icon: '💚',
-    language: 'Node.js',
-    packages: '200万+',
-    feature: '最大生态'
-  },
-  {
-    name: 'PyPI',
-    icon: '🐍',
-    language: 'Python',
-    packages: '50万+',
-    feature: 'AI 霸主'
-  },
-  {
-    name: 'Maven',
-    icon: '☕',
-    language: 'Java',
-    packages: '30万+',
-    feature: '企业级'
-  },
-  {
-    name: 'Go Modules',
-    icon: '🐹',
-    language: 'Go',
-    packages: '10万+',
-    feature: '简洁可靠'
-  },
-  {
-    name: 'Cargo',
-    icon: '🦀',
-    language: 'Rust',
-    packages: '10万+',
-    feature: '现代化'
-  },
-  {
-    name: 'RubyGems',
-    icon: '💎',
-    language: 'Ruby',
-    packages: '15万+',
-    feature: '优雅'
-  }
-]
+import { computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { backendLanguagesLocale } from '../../../locales/backend-languages/index.js'
+
+const { t, messages } = useI18n(backendLanguagesLocale)
+const ecosystems = computed(() => messages.value.ecosystem.ecosystems)
 </script>
 
 <style scoped>

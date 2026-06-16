@@ -2,8 +2,8 @@
   <div class="dependency-graph-demo">
     <div class="demo-header">
       <span class="icon">🕸️</span>
-      <span class="title">依赖图谱</span>
-      <span class="subtitle">模块依赖关系可视化</span>
+      <span class="title">{{ t('dependencyGraph.title') }}</span>
+      <span class="subtitle">{{ t('dependencyGraph.subtitle') }}</span>
     </div>
 
     <div class="graph-container">
@@ -68,25 +68,29 @@
 
     <div class="legend">
       <div class="legend-item">
-        <span class="dot entry" />入口文件
+        <span class="dot entry" />{{ t('dependencyGraph.entryFile') }}
       </div>
       <div class="legend-item">
-        <span class="dot module" />模块
+        <span class="dot module" />{{ t('dependencyGraph.module') }}
       </div>
       <div class="legend-item">
-        <span class="arrow">→</span>依赖关系
+        <span class="arrow">→</span>{{ t('dependencyGraph.dependency') }}
       </div>
     </div>
 
     <div class="info-box">
       <span class="icon">💡</span>
-      <strong>依赖图谱的作用：</strong>就像地图一样，帮助你理解模块之间是如何相互引用的。main.js 引用了 utils、components、api，而 components 又引用了 utils——这就是依赖链。
+      <strong>{{ t('common.coreIdea') }}</strong>{{ t('dependencyGraph.infoBoxContent') }}
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { frontendEngineeringLocale } from '../../../locales/frontend-engineering/index.js'
+
+const { t } = useI18n(frontendEngineeringLocale)
 
 const nodes = ref([
   { id: 'main', name: 'main.js', icon: '🚀', color: '#646cff', r: 22, x: 250, y: 60 },

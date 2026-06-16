@@ -1,17 +1,3 @@
-<!--
-  ContextWindowVisualizer.vue
-  上下文窗口可视化组件
-
-  用途：
-  直观展示 LLM 的 Context Window (上下文窗口) 限制。
-  演示 Token 如何填充窗口，以及当超出限制时会发生什么（溢出/截断）。
-
-  交互功能：
-  - 文本输入：实时计算 Token 数量。
-  - 预设填充：快速填充短/长文本以触发不同状态。
-  - 进度条：可视化展示 Token 占用比例。
-  - 溢出警告：当超出最大 Token 数时显示警告。
--->
 <template>
   <div class="context-visualizer">
     <div class="control-panel">
@@ -21,14 +7,14 @@
             class="value"
             :class="{ error: isOverflow }"
           >{{ usedTokens }}</span>
-          <span class="label">已经写了多少个 token</span>
+          <span class="label">{{ t('contextWindow.usedLabel') }}</span>
         </div>
         <div class="stat-divider">
           /
         </div>
         <div class="stat-item">
           <span class="value">{{ maxTokens }}</span>
-          <span class="label">黑板最多能写几个 token</span>
+          <span class="label">{{ t('contextWindow.maxLabel') }}</span>
         </div>
       </div>
 
@@ -55,7 +41,7 @@
       >
         <div class="window-header">
           <span class="icon">🧠</span>
-          <span>模型能看到的“小黑板”（上下文窗口）</span>
+          <span>{{ t('contextWindow.header') }}</span>
         </div>
         
         <div class="token-stream">
@@ -76,38 +62,38 @@
           class="overflow-indicator"
         >
           <div class="overflow-line" />
-          <span class="overflow-text">⚠️ 达到上下文上限 (已截断)</span>
+          <span class="overflow-text">{{ t('contextWindow.overflow') }}</span>
         </div>
       </div>
     </div>
 
     <div class="input-section">
       <div class="input-header">
-        <label>输入内容（看黑板怎么被一点点写满）</label>
+        <label>{{ t('contextWindow.inputLabel') }}</label>
         <div class="actions">
           <button
             class="action-btn"
             @click="fillLorem(10)"
           >
-            填一段短文本
+            {{ t('contextWindow.shortButton') }}
           </button>
           <button
             class="action-btn"
             @click="fillLorem(60)"
           >
-            一下子塞满黑板
+            {{ t('contextWindow.longButton') }}
           </button>
           <button
             class="action-btn outline"
             @click="clear"
           >
-            清空
+            {{ t('contextWindow.clearButton') }}
           </button>
         </div>
       </div>
       <textarea
         v-model="inputText"
-        placeholder="在这里输入几句话，看看小黑板是怎么逐渐被写满的..."
+        :placeholder="t('contextWindow.placeholder')"
         rows="4"
       />
     </div>
@@ -115,9 +101,8 @@
     <div class="info-box">
       <p>
         <span class="icon">💡</span>
-        <strong>说明：</strong>
-        上下文窗口可以理解成模型的“小黑板”。黑板只有这么大，写满了就必须擦掉旧的才能写新的。
-        一旦溢出，最早写的那部分内容就会被擦掉，模型会完全“看不见”它们。
+        <strong>{{ t('contextWindow.infoStrong') }}</strong>
+        {{ t('contextWindow.info') }}
       </p>
     </div>
   </div>
@@ -125,9 +110,13 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { contextEngineeringLocale } from '../../../locales/context-engineering/index.js'
+
+const { t, messages } = useI18n(contextEngineeringLocale)
 
 const maxTokens = 100
-const inputText = ref('上下文工程（Context Engineering）是指优化提供给大语言模型（LLM）的提示词。')
+const inputText = ref(t('contextWindow.defaultText'))
 
 // Simple mock tokenizer: split by space for demonstration
 // In reality, tokens are subwords, but space-split is good enough for concept
@@ -157,10 +146,7 @@ const getTokenClass = (index) => {
 }
 
 const fillLorem = (count) => {
-  const words = [
-    '人工智能', '深度学习', '神经网络', '大模型', 'Transformer', '注意力机制', 
-    '上下文窗口', 'Token', 'Embedding', '微调', '预训练', '推理', '生成', 'RAG'
-  ]
+  const words = messages.value.contextWindow.words
   const newText = Array.from({ length: count }, () => words[Math.floor(Math.random() * words.length)]).join(' ')
   inputText.value = newText
 }

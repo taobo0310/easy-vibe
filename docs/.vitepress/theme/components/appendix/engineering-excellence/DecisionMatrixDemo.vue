@@ -2,12 +2,12 @@
   <div class="decision-matrix-demo">
     <div class="demo-header">
       <span class="icon">📊</span>
-      <span class="title">决策矩阵</span>
-      <span class="subtitle">量化对比，科学选型</span>
+      <span class="title">{{ t('decisionMatrix.title') }}</span>
+      <span class="subtitle">{{ t('decisionMatrix.subtitle') }}</span>
     </div>
 
     <div class="section">
-      <h6 class="section-title">待比较技术</h6>
+      <h6 class="section-title">{{ t('decisionMatrix.technologies') }}</h6>
       <div class="options-row">
         <span
           v-for="opt in options"
@@ -20,7 +20,7 @@
         <div v-if="options.length < 5" class="add-option">
           <input
             v-model="newOption"
-            placeholder="添加技术..."
+            :placeholder="t('decisionMatrix.addPlaceholder')"
             class="add-input"
             @keyup.enter="addOption"
           />
@@ -30,7 +30,7 @@
     </div>
 
     <div class="section">
-      <h6 class="section-title">评估维度与权重</h6>
+      <h6 class="section-title">{{ t('decisionMatrix.dimensionsTitle') }}</h6>
       <div class="dimensions-list">
         <div
           v-for="dim in dimensions"
@@ -52,12 +52,12 @@
     </div>
 
     <div class="section">
-      <h6 class="section-title">打分（1-5）</h6>
+      <h6 class="section-title">{{ t('decisionMatrix.scoringTitle') }}</h6>
       <div class="score-table-wrapper">
         <table class="score-table">
           <thead>
             <tr>
-              <th>维度</th>
+              <th>{{ t('decisionMatrix.dimensionColumn') }}</th>
               <th v-for="opt in options" :key="opt">{{ opt }}</th>
             </tr>
           </thead>
@@ -84,7 +84,7 @@
     </div>
 
     <div v-if="hasAllScores" class="section results">
-      <h6 class="section-title">加权总分排名</h6>
+      <h6 class="section-title">{{ t('decisionMatrix.rankingTitle') }}</h6>
       <div class="bar-chart">
         <div
           v-for="(r, i) in ranked"
@@ -110,30 +110,26 @@
     </div>
 
     <div class="actions">
-      <button class="reset-btn" @click="resetAll">重置全部</button>
-      <button class="preset-btn" @click="loadPreset">加载预设</button>
+      <button class="reset-btn" @click="resetAll">{{ t('decisionMatrix.reset') }}</button>
+      <button class="preset-btn" @click="loadPreset">{{ t('decisionMatrix.preset') }}</button>
     </div>
 
     <div class="info-box">
       <span class="icon">💡</span>
-      <strong>使用方法：</strong>
-      调整权重反映你的项目优先级，为每个技术在各维度打分，系统自动计算加权总分。权重越高的维度对最终结果影响越大。
+      <strong>{{ t('decisionMatrix.usageTitle') }}</strong>
+      {{ t('decisionMatrix.usage') }}
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref, reactive, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { engineeringExcellenceLocale } from '../../../locales/engineering-excellence/index.js'
 
+const { t, messages } = useI18n(engineeringExcellenceLocale)
 const barColors = ['#22c55e', '#3b82f6', '#f59e0b', '#8b5cf6', '#ec4899']
-
-const dimensions = [
-  { key: 'learning', label: '学习曲线' },
-  { key: 'ecosystem', label: '生态系统' },
-  { key: 'performance', label: '性能' },
-  { key: 'community', label: '社区活跃度' },
-  { key: 'hiring', label: '招聘难度' }
-]
+const dimensions = computed(() => messages.value.decisionMatrix.dimensions)
 
 const options = ref(['React', 'Vue', 'Svelte'])
 const newOption = ref('')
@@ -173,7 +169,7 @@ const setScore = (opt, dim, val) => {
 
 const hasAllScores = computed(() => {
   return options.value.every((opt) =>
-    dimensions.every((dim) => scores[opt]?.[dim.key])
+    dimensions.value.every((dim) => scores[opt]?.[dim.key])
   )
 })
 
@@ -181,7 +177,7 @@ const ranked = computed(() => {
   return options.value
     .map((opt) => {
       let total = 0
-      dimensions.forEach((dim) => {
+      dimensions.value.forEach((dim) => {
         total += (scores[opt]?.[dim.key] || 0) * weights[dim.key]
       })
       return { name: opt, score: total }

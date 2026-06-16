@@ -3,7 +3,7 @@
     <div class="sc-terminal">
       <div class="term-bar">
         <span class="dot r" /><span class="dot y" /><span class="dot g" />
-        <span class="term-title">HTTP 状态码演示</span>
+        <span class="term-title">{{ t('status.terminalTitle') }}</span>
       </div>
       <div ref="termEl" class="term-body">
         <div v-for="(l, i) in lines" :key="i" class="t-line">
@@ -31,15 +31,15 @@
         <code>{{ op.cmd }}</code>
       </button>
       <button class="sc-btn sc-btn--reset" :disabled="running" @click="reset">
-        重置
+        {{ t('status.reset') }}
       </button>
     </div>
 
     <div class="sc-codes">
       <div class="code-section">
         <div class="section-header success">
-          <span class="section-icon">✅</span>
-          <span class="section-title">2xx 成功</span>
+          <span class="section-icon" v-html="t('status.sections.success.icon')" />
+          <span class="section-title">{{ t('status.sections.success.title') }}</span>
         </div>
         <div class="section-body">
           <div
@@ -57,8 +57,8 @@
 
       <div class="code-section">
         <div class="section-header client">
-          <span class="section-icon">⚠️</span>
-          <span class="section-title">4xx 客户端错误</span>
+          <span class="section-icon" v-html="t('status.sections.client.icon')" />
+          <span class="section-title">{{ t('status.sections.client.title') }}</span>
         </div>
         <div class="section-body">
           <div
@@ -76,8 +76,8 @@
 
       <div class="code-section">
         <div class="section-header server">
-          <span class="section-icon">🔴</span>
-          <span class="section-title">5xx 服务端错误</span>
+          <span class="section-icon" v-html="t('status.sections.server.icon')" />
+          <span class="section-title">{{ t('status.sections.server.title') }}</span>
         </div>
         <div class="section-body">
           <div
@@ -99,152 +99,25 @@
 </template>
 
 <script setup>
-import { ref, nextTick } from 'vue'
+import { ref, nextTick, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { apiDesignLocale } from '../../../locales/api-design/index.js'
 
+const { t, messages } = useI18n(apiDesignLocale)
 const termEl = ref(null)
-const lines = ref([{ kind: 'dim', text: '// 点击按钮查看不同状态码的含义' }])
+const lines = ref([{ kind: 'dim', text: t('status.initialLine') }])
 const typing = ref('')
 const running = ref(false)
 const active = ref(null)
 const activeCode = ref(null)
-const hint = ref('点击命令按钮，了解常见的 HTTP 状态码。')
-
-const successCodes = ref([
-  { code: 200, name: 'OK', desc: '请求成功' },
-  { code: 201, name: 'Created', desc: '创建成功' },
-  { code: 204, name: 'No Content', desc: '成功但无返回内容' }
-])
-
-const clientCodes = ref([
-  { code: 400, name: 'Bad Request', desc: '请求格式错误' },
-  { code: 401, name: 'Unauthorized', desc: '未认证' },
-  { code: 403, name: 'Forbidden', desc: '无权限' },
-  { code: 404, name: 'Not Found', desc: '资源不存在' },
-  { code: 422, name: 'Unprocessable', desc: '语义错误' },
-  { code: 429, name: 'Too Many', desc: '请求过多' }
-])
-
-const serverCodes = ref([
-  { code: 500, name: 'Server Error', desc: '服务器内部错误' },
-  { code: 502, name: 'Bad Gateway', desc: '网关错误' },
-  { code: 503, name: 'Unavailable', desc: '服务不可用' }
-])
+const hint = ref(t('status.initialHint'))
+const successCodes = computed(() => messages.value.status.successCodes)
+const clientCodes = computed(() => messages.value.status.clientCodes)
+const serverCodes = computed(() => messages.value.status.serverCodes)
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
 
-const ops = [
-  {
-    id: '200',
-    cmd: '200 OK',
-    ok: () => true,
-    output: [
-      { kind: 'dim', text: '// 最常用的成功状态码' },
-      { kind: 'grn', text: 'HTTP/1.1 200 OK' },
-      { kind: 'dim', text: 'Content-Type: application/json' },
-      { kind: 'dim', text: '' },
-      { kind: 'grn', text: '{ "code": 0, "data": { ... } }' }
-    ],
-    hint: '200 表示请求成功处理。GET 查询、PUT/PATCH 更新成功时常用。',
-    do: () => {
-      activeCode.value = 200
-    }
-  },
-  {
-    id: '201',
-    cmd: '201 Created',
-    ok: () => true,
-    output: [
-      { kind: 'dim', text: '// 创建资源成功' },
-      { kind: 'grn', text: 'HTTP/1.1 201 Created' },
-      { kind: 'dim', text: 'Location: /api/users/123' },
-      { kind: 'dim', text: '' },
-      { kind: 'grn', text: '{ "code": 0, "data": { "id": 123 } }' }
-    ],
-    hint: '201 表示资源创建成功。响应头 Location 指向新资源的地址。',
-    do: () => {
-      activeCode.value = 201
-    }
-  },
-  {
-    id: '400',
-    cmd: '400 Bad Request',
-    ok: () => true,
-    output: [
-      { kind: 'dim', text: '// 客户端请求有问题' },
-      { kind: 'red', text: 'HTTP/1.1 400 Bad Request' },
-      { kind: 'dim', text: '' },
-      { kind: 'red', text: '{ "code": 10001, "message": "参数格式错误" }' }
-    ],
-    hint: '400 表示请求语法错误。比如 JSON 格式不对、缺少必填参数。',
-    do: () => {
-      activeCode.value = 400
-    }
-  },
-  {
-    id: '401',
-    cmd: '401 Unauthorized',
-    ok: () => true,
-    output: [
-      { kind: 'dim', text: '// 需要登录认证' },
-      { kind: 'red', text: 'HTTP/1.1 401 Unauthorized' },
-      { kind: 'dim', text: 'WWW-Authenticate: Bearer' },
-      { kind: 'dim', text: '' },
-      { kind: 'red', text: '{ "code": 10018, "message": "请先登录" }' }
-    ],
-    hint: '401 表示未认证。Token 过期、未登录时返回，客户端应引导用户登录。',
-    do: () => {
-      activeCode.value = 401
-    }
-  },
-  {
-    id: '403',
-    cmd: '403 Forbidden',
-    ok: () => true,
-    output: [
-      { kind: 'dim', text: '// 已登录但无权限' },
-      { kind: 'red', text: 'HTTP/1.1 403 Forbidden' },
-      { kind: 'dim', text: '' },
-      { kind: 'red', text: '{ "code": 10021, "message": "需要管理员权限" }' }
-    ],
-    hint: '403 表示已认证但无权限。普通用户访问管理员接口时返回。',
-    do: () => {
-      activeCode.value = 403
-    }
-  },
-  {
-    id: '404',
-    cmd: '404 Not Found',
-    ok: () => true,
-    output: [
-      { kind: 'dim', text: '// 资源不存在' },
-      { kind: 'red', text: 'HTTP/1.1 404 Not Found' },
-      { kind: 'dim', text: '' },
-      { kind: 'red', text: '{ "code": 10002, "message": "用户不存在" }' }
-    ],
-    hint: '404 表示请求的资源不存在。URL 错误或资源已被删除。',
-    do: () => {
-      activeCode.value = 404
-    }
-  },
-  {
-    id: '500',
-    cmd: '500 Server Error',
-    ok: () => true,
-    output: [
-      { kind: 'dim', text: '// 服务器内部错误' },
-      { kind: 'red', text: 'HTTP/1.1 500 Internal Server Error' },
-      { kind: 'dim', text: '' },
-      {
-        kind: 'red',
-        text: '{ "code": 10000, "message": "服务器错误，请联系管理员" }'
-      }
-    ],
-    hint: '500 表示服务器内部错误。代码 bug、数据库连接失败等，不要暴露堆栈信息！',
-    do: () => {
-      activeCode.value = 500
-    }
-  }
-]
+const ops = computed(() => messages.value.status.ops.map((op) => ({ ...op, ok: () => true })))
 
 async function run(op) {
   if (running.value) return
@@ -272,7 +145,7 @@ async function run(op) {
     await sleep(50)
   }
 
-  op.do()
+  activeCode.value = op.code
   await sleep(120)
   hint.value = op.hint
   running.value = false
@@ -283,10 +156,10 @@ function scroll() {
 }
 
 function reset() {
-  lines.value = [{ kind: 'dim', text: '// 点击按钮查看不同状态码的含义' }]
+  lines.value = [{ kind: 'dim', text: t('status.initialLine') }]
   active.value = null
   activeCode.value = null
-  hint.value = '点击命令按钮，了解常见的 HTTP 状态码。'
+  hint.value = t('status.initialHint')
   typing.value = ''
   running.value = false
 }
@@ -424,7 +297,6 @@ function reset() {
   display: none;
 }
 .sc-btn--reset::after {
-  content: '重置';
   font-size: 0.7rem;
   color: #585b70;
 }

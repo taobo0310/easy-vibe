@@ -10,80 +10,77 @@
           >
           <span class="slider" />
         </label>
-        <span class="label">开启“背课文加速”（前缀复用 / KV Cache）</span>
+        <span class="label">{{ t('kvCache.toggle') }}</span>
       </div>
       <button 
         class="action-btn" 
         :disabled="isProcessing"
         @click="sendRequest"
       >
-        {{ isProcessing ? '生成中...' : '发送新请求' }}
+        {{ isProcessing ? t('kvCache.generating') : t('kvCache.send') }}
       </button>
     </div>
 
     <div class="visualization-area">
       <div class="memory-blocks">
-        <!-- System Prompt Block -->
         <div 
           class="memory-block system"
           :class="{ 'cached': isCacheEnabled && hasCache, 'processing': processingStep === 'system' }"
         >
           <div class="block-header">
             <span class="icon">⚙️</span>
-            <span>固定开场白（System Prompt）</span>
+            <span>{{ t('kvCache.systemTitle') }}</span>
             <span
               v-if="isCacheEnabled && hasCache"
               class="badge"
-            >已背过</span>
+            >{{ t('kvCache.cached') }}</span>
           </div>
           <div class="block-content">
-            你是一个乐于助人的 AI 助手... （大约 500 个 token）
+            {{ t('kvCache.systemContent') }}
           </div>
           <div
             v-if="processingStep === 'system'"
             class="process-indicator"
           >
-            计算中...
+            {{ t('kvCache.calculating') }}
           </div>
         </div>
 
-        <!-- History Block -->
         <div 
           class="memory-block history"
           :class="{ 'processing': processingStep === 'history' }"
         >
           <div class="block-header">
             <span class="icon">💬</span>
-            <span>最近几轮聊天记录</span>
+            <span>{{ t('kvCache.historyTitle') }}</span>
           </div>
           <div class="block-content">
-            用户：你好... （大约 200 个 token）
+            {{ t('kvCache.historyContent') }}
           </div>
           <div
             v-if="processingStep === 'history'"
             class="process-indicator"
           >
-            计算中...
+            {{ t('kvCache.calculating') }}
           </div>
         </div>
 
-        <!-- New Query Block -->
         <div 
           class="memory-block query"
           :class="{ 'processing': processingStep === 'query' }"
         >
           <div class="block-header">
             <span class="icon">❓</span>
-            <span>这一次的新问题</span>
+            <span>{{ t('kvCache.queryTitle') }}</span>
           </div>
           <div class="block-content">
-            {{ currentQuery }} （大约 50 个 token）
+            {{ currentQuery }} {{ t('kvCache.queryTokens') }}
           </div>
           <div
             v-if="processingStep === 'query'"
             class="process-indicator"
           >
-            计算中...
+            {{ t('kvCache.calculating') }}
           </div>
         </div>
       </div>
@@ -95,14 +92,14 @@
           {{ metrics.ttft }}ms
         </div>
         <div class="metric-label">
-          开口速度（首字延迟 TTFT）
+          {{ t('kvCache.ttft') }}
         </div>
         <div
           v-if="metrics.savedTime > 0"
           class="metric-diff"
           :class="{ 'good': metrics.savedTime > 0 }"
         >
-          节省 {{ metrics.savedTime }}ms
+          {{ t('kvCache.saved', { time: metrics.savedTime }) }}
         </div>
       </div>
       <div class="metric-card">
@@ -110,7 +107,7 @@
           {{ metrics.processedTokens }}
         </div>
         <div class="metric-label">
-          这次一共算了多少个 token
+          {{ t('kvCache.processed') }}
         </div>
       </div>
       <div class="metric-card">
@@ -118,7 +115,7 @@
           {{ metrics.cost }}
         </div>
         <div class="metric-label">
-          大致算力消耗（越少越省钱）
+          {{ t('kvCache.cost') }}
         </div>
       </div>
     </div>
@@ -126,11 +123,11 @@
     <div class="info-box">
       <p v-if="isCacheEnabled">
         <span class="icon">⚡</span>
-        <strong>命中时在干嘛：</strong>前面的固定开场白不再重复计算，直接用“上一次背过的结果”，所以又快又省。
+        <strong>{{ t('kvCache.hitStrong') }}</strong>{{ t('kvCache.hit') }}
       </p>
       <p v-else>
-        <span class="icon">🐌</span>
-        <strong>没开缓存时：</strong>每次都要从头把所有 token 重新算一遍注意力，就像每次都从第一页开始重读课文，又慢又费钱。
+        <span class="icon">⏱️</span>
+        <strong>{{ t('kvCache.missStrong') }}</strong>{{ t('kvCache.miss') }}
       </p>
     </div>
   </div>
@@ -138,12 +135,16 @@
 
 <script setup>
 import { ref, reactive } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { contextEngineeringLocale } from '../../../locales/context-engineering/index.js'
+
+const { t } = useI18n(contextEngineeringLocale)
 
 const isCacheEnabled = ref(false)
 const hasCache = ref(false)
 const isProcessing = ref(false)
 const processingStep = ref('') // 'system', 'history', 'query'
-const currentQuery = ref('帮我写一段 Python 代码')
+const currentQuery = ref(t('kvCache.queryA'))
 
 const metrics = reactive({
   ttft: 0,
@@ -156,7 +157,6 @@ const sendRequest = async () => {
   if (isProcessing.value) return
   isProcessing.value = true
   
-  // Reset metrics display
   metrics.ttft = 0
   metrics.processedTokens = 0
   metrics.cost = 0
@@ -166,26 +166,18 @@ const sendRequest = async () => {
   const historyTokens = 200
   const queryTokens = 50
   
-  // Step 1: System Prompt
   processingStep.value = 'system'
   const systemDelay = (isCacheEnabled.value && hasCache.value) ? 100 : 800
   await new Promise(r => setTimeout(r, systemDelay))
   
-  // Step 2: Chat History
   processingStep.value = 'history'
   await new Promise(r => setTimeout(r, 400))
   
-  // Step 3: New Query
   processingStep.value = 'query'
   await new Promise(r => setTimeout(r, 200))
   
-  // Calculate final metrics
   processingStep.value = ''
   isProcessing.value = false
-  
-  // Logic: 
-  // Without Cache: Process all (500 + 200 + 50) = 750 tokens
-  // With Cache: Process only (200 + 50) = 250 tokens (System is reused)
   
   if (isCacheEnabled.value && hasCache.value) {
     metrics.ttft = 150 // Fast
@@ -197,16 +189,14 @@ const sendRequest = async () => {
     metrics.processedTokens = systemTokens + historyTokens + queryTokens
     metrics.cost = 10 // High cost
     
-    // First run with cache enabled establishes the cache
     if (isCacheEnabled.value) {
       hasCache.value = true
     }
   }
   
-  // Update query for next run to simulate conversation
-  currentQuery.value = currentQuery.value === '帮我写一段 Python 代码' 
-    ? '这段代码怎么运行？' 
-    : '帮我写一段 Python 代码'
+  currentQuery.value = currentQuery.value === t('kvCache.queryA')
+    ? t('kvCache.queryB')
+    : t('kvCache.queryA')
 }
 </script>
 

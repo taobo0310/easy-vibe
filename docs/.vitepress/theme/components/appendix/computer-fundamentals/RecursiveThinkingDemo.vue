@@ -1,26 +1,30 @@
 <template>
   <div class="recursive-thinking-demo">
     <div class="demo-header">
-      <span class="title">递归思维：自己调用自己</span>
-      <span class="subtitle">把大问题分解成相同的小问题</span>
+      <span class="title">{{ t('algorithmThinking.recursive.title') }}</span>
+      <span class="subtitle">{{ t('algorithmThinking.recursive.subtitle') }}</span>
     </div>
 
     <div class="analogy-section">
       <div class="analogy-box">
         <div class="analogy-icon">🪆</div>
         <div class="analogy-content">
-          <div class="analogy-title">俄罗斯套娃</div>
+          <div class="analogy-title">
+            {{ t('algorithmThinking.recursive.analogyTitle') }}
+          </div>
           <div class="analogy-desc">
-            打开一个大娃娃，里面有个小一点的娃娃<br />
-            再打开还有更小的...直到最小的一个<br />
-            <strong>这就是递归！</strong>
+            {{ t('algorithmThinking.recursive.analogyLine1') }}<br />
+            {{ t('algorithmThinking.recursive.analogyLine2') }}<br />
+            <strong>{{ t('algorithmThinking.recursive.analogyStrong') }}</strong>
           </div>
         </div>
       </div>
     </div>
 
     <div class="example-selector">
-      <div class="selector-title">递归示例</div>
+      <div class="selector-title">
+        {{ t('algorithmThinking.recursive.examplesTitle') }}
+      </div>
       <div class="selector-buttons">
         <button
           v-for="example in examples"
@@ -33,9 +37,10 @@
       </div>
     </div>
 
-    <!-- 阶乘示例 -->
     <div v-if="activeExample === 'factorial'" class="example-content">
-      <div class="example-title">阶乘：n! = n × (n-1)!</div>
+      <div class="example-title">
+        {{ t('algorithmThinking.recursive.factorialTitle') }}
+      </div>
       <div class="factorial-visual">
         <div class="factorial-call">
           <div class="call-box">5! = 5 × 4!</div>
@@ -46,21 +51,22 @@
           <div class="call-arrow">↓</div>
           <div class="call-box">2! = 2 × 1!</div>
           <div class="call-arrow">↓</div>
-          <div class="call-box base">1! = 1 (基准情况)</div>
+          <div class="call-box base">
+            {{ t('algorithmThinking.recursive.factorialBase') }}
+          </div>
         </div>
         <div class="factorial-return">
-          <div class="return-arrow">↑ 返回 1</div>
-          <div class="return-arrow">↑ 返回 2 × 1 = 2</div>
-          <div class="return-arrow">↑ 返回 3 × 2 = 6</div>
-          <div class="return-arrow">↑ 返回 4 × 6 = 24</div>
-          <div class="return-arrow">↑ 返回 5 × 24 = 120</div>
+          <div v-for="line in factorialReturns" :key="line" class="return-arrow">
+            {{ line }}
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- 斐波那契示例 -->
     <div v-if="activeExample === 'fibonacci'" class="example-content">
-      <div class="example-title">斐波那契数列</div>
+      <div class="example-title">
+        {{ t('algorithmThinking.recursive.fibonacciTitle') }}
+      </div>
       <div class="fibonacci-visual">
         <div class="fib-rule">F(n) = F(n-1) + F(n-2)</div>
         <div class="fib-tree">
@@ -80,9 +86,10 @@
       </div>
     </div>
 
-    <!-- 目录遍历示例 -->
     <div v-if="activeExample === 'directory'" class="example-content">
-      <div class="example-title">遍历文件目录</div>
+      <div class="example-title">
+        {{ t('algorithmThinking.recursive.directoryTitle') }}
+      </div>
       <div class="directory-visual">
         <div class="dir-tree">
           <div class="dir-node root">📁 /home</div>
@@ -100,14 +107,16 @@
           </div>
         </div>
         <div class="dir-pseudocode">
-          <div class="pseudo-title">伪代码</div>
+          <div class="pseudo-title">
+            {{ t('algorithmThinking.recursive.pseudocodeTitle') }}
+          </div>
           <pre>
 function traverse(folder) {
   for each item in folder {
     if item is file {
       print(item)
     } else if item is folder {
-      traverse(item)  // 递归调用！
+      traverse(item)  // recursive call
     }
   }
 }</pre>
@@ -115,49 +124,39 @@ function traverse(folder) {
       </div>
     </div>
 
-    <!-- 递归三要素 -->
     <div class="recursive-elements">
-      <div class="elements-title">递归的三要素</div>
+      <div class="elements-title">
+        {{ t('algorithmThinking.recursive.elementsTitle') }}
+      </div>
       <div class="elements-grid">
-        <div class="element-card">
-          <div class="element-number">1</div>
-          <div class="element-title">基准情况</div>
-          <div class="element-desc">什么时候停止递归？必须有一个终止条件</div>
-          <div class="element-example">例：n! 中 1! = 1</div>
-        </div>
-        <div class="element-card">
-          <div class="element-number">2</div>
-          <div class="element-title">递归调用</div>
-          <div class="element-desc">
-            如何让问题规模变小？调用自己处理更小的规模
-          </div>
-          <div class="element-example">例：n! 转换成 (n-1)!</div>
-        </div>
-        <div class="element-card">
-          <div class="element-number">3</div>
-          <div class="element-title">返回结果</div>
-          <div class="element-desc">如何利用子问题的结果解决当前问题？</div>
-          <div class="element-example">例：n × (n-1)! 的结果</div>
+        <div
+          v-for="(element, index) in elements"
+          :key="element.title"
+          class="element-card"
+        >
+          <div class="element-number">{{ index + 1 }}</div>
+          <div class="element-title">{{ element.title }}</div>
+          <div class="element-desc">{{ element.desc }}</div>
+          <div class="element-example">{{ element.example }}</div>
         </div>
       </div>
     </div>
 
-    <!-- 优缺点 -->
     <div class="pros-cons">
       <div class="pros-column">
-        <div class="column-title">✓ 优点</div>
+        <div class="column-title">
+          {{ t('algorithmThinking.recursive.prosTitle') }}
+        </div>
         <ul class="column-list">
-          <li>代码简洁优雅</li>
-          <li>自然表达递归结构</li>
-          <li>适合树和图的遍历</li>
+          <li v-for="item in pros" :key="item">{{ item }}</li>
         </ul>
       </div>
       <div class="cons-column">
-        <div class="column-title">✗ 缺点</div>
+        <div class="column-title">
+          {{ t('algorithmThinking.recursive.consTitle') }}
+        </div>
         <ul class="column-list">
-          <li>可能重复计算</li>
-          <li>栈空间消耗大</li>
-          <li>调试较困难</li>
+          <li v-for="item in cons" :key="item">{{ item }}</li>
         </ul>
       </div>
     </div>
@@ -165,15 +164,21 @@ function traverse(folder) {
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
+import { useI18n } from '../../../composables/useI18n'
+import { computerFundamentalsLocale } from '../../../locales/computer-fundamentals'
+
+const { t, messages } = useI18n(computerFundamentalsLocale)
 
 const activeExample = ref('factorial')
 
-const examples = [
-  { id: 'factorial', name: '阶乘', icon: '🔢' },
-  { id: 'fibonacci', name: '斐波那契', icon: '🐚' },
-  { id: 'directory', name: '目录遍历', icon: '📁' }
-]
+const examples = computed(() => messages.value.algorithmThinking.recursive.examples)
+const factorialReturns = computed(
+  () => messages.value.algorithmThinking.recursive.factorialReturns
+)
+const elements = computed(() => messages.value.algorithmThinking.recursive.elements)
+const pros = computed(() => messages.value.algorithmThinking.recursive.pros)
+const cons = computed(() => messages.value.algorithmThinking.recursive.cons)
 </script>
 
 <style scoped>

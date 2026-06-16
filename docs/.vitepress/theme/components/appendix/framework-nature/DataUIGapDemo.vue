@@ -3,77 +3,91 @@
     <div class="two-panels">
       <div class="panel data-panel">
         <div class="panel-header">
-          <span class="panel-badge data">数据（JavaScript 变量）</span>
+          <span class="panel-badge data">{{ t('dataUIGap.dataBadge') }}</span>
         </div>
         <div class="data-display">
           <div class="data-row">
-            <span class="data-key">商品数量</span>
+            <span class="data-key">{{ t('dataUIGap.productCount') }}</span>
             <span class="data-val">{{ dataCount }}</span>
           </div>
           <div class="data-row">
-            <span class="data-key">总价</span>
+            <span class="data-key">{{ t('dataUIGap.totalPrice') }}</span>
             <span class="data-val">¥{{ dataCount * 99 }}</span>
           </div>
           <div class="data-row">
-            <span class="data-key">状态</span>
-            <span class="data-val">{{ dataCount > 5 ? '过多' : '正常' }}</span>
+            <span class="data-key">{{ t('dataUIGap.status') }}</span>
+            <span class="data-val">{{ statusText(dataCount) }}</span>
           </div>
         </div>
-        <button class="action-btn" @click="addItem">添加商品（修改数据）</button>
+        <button class="action-btn" @click="addItem">
+          {{ t('dataUIGap.addProduct') }}
+        </button>
       </div>
 
       <div class="gap-indicator" :class="{ desynced: isDesynced }">
         <div class="gap-line" />
-        <span class="gap-label">{{ isDesynced ? '❌ 不同步' : '✅ 同步' }}</span>
+        <span class="gap-label">
+          {{ isDesynced ? t('dataUIGap.desynced') : t('dataUIGap.synced') }}
+        </span>
         <div class="gap-line" />
       </div>
 
       <div class="panel ui-panel">
         <div class="panel-header">
-          <span class="panel-badge ui">界面（用户看到的）</span>
+          <span class="panel-badge ui">{{ t('dataUIGap.uiBadge') }}</span>
         </div>
         <div class="ui-display">
           <div class="ui-row" :class="{ stale: uiCount !== dataCount }">
-            <span class="ui-key">购物车</span>
-            <span class="ui-val">{{ uiCount }} 件</span>
+            <span class="ui-key">{{ t('dataUIGap.cart') }}</span>
+            <span class="ui-val">{{ t('dataUIGap.itemUnit', { count: uiCount }) }}</span>
           </div>
           <div class="ui-row" :class="{ stale: uiCount !== dataCount }">
-            <span class="ui-key">总价</span>
+            <span class="ui-key">{{ t('dataUIGap.totalPrice') }}</span>
             <span class="ui-val">¥{{ uiCount * 99 }}</span>
           </div>
           <div class="ui-row" :class="{ stale: uiCount !== dataCount }">
-            <span class="ui-key">状态</span>
-            <span class="ui-val">{{ uiCount > 5 ? '过多' : '正常' }}</span>
+            <span class="ui-key">{{ t('dataUIGap.status') }}</span>
+            <span class="ui-val">{{ statusText(uiCount) }}</span>
           </div>
         </div>
         <button class="sync-btn" :disabled="!isDesynced" @click="syncUI">
-          {{ isDesynced ? '手动同步界面' : '已同步' }}
+          {{ isDesynced ? t('dataUIGap.syncUI') : t('dataUIGap.syncedButton') }}
         </button>
       </div>
     </div>
 
     <div class="controls-row">
-      <button class="action-btn outline" @click="reset">重置</button>
+      <button class="action-btn outline" @click="reset">
+        {{ t('dataUIGap.reset') }}
+      </button>
       <span v-if="desyncCount > 0" class="desync-stat">
-        累计不同步 {{ desyncCount }} 次
+        {{ t('dataUIGap.desyncStat', { count: desyncCount }) }}
       </span>
     </div>
 
     <div class="info-box">
-      <strong>核心问题：</strong>
-      <span>在没有框架的情况下，数据变了，界面不会自动跟着变。你必须自己写代码去更新界面，一旦忘了，用户看到的就是过时的、错误的信息。</span>
+      <strong>{{ t('dataUIGap.infoStrong') }}</strong>
+      <span>{{ t('dataUIGap.info') }}</span>
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { frameworkNatureLocale } from '../../../locales/framework-nature/index.js'
+
+const { t } = useI18n(frameworkNatureLocale)
 
 const dataCount = ref(0)
 const uiCount = ref(0)
 const desyncCount = ref(0)
 
 const isDesynced = computed(() => dataCount.value !== uiCount.value)
+
+function statusText(count) {
+  return count > 5 ? t('dataUIGap.tooMany') : t('dataUIGap.normal')
+}
 
 function addItem() {
   dataCount.value++

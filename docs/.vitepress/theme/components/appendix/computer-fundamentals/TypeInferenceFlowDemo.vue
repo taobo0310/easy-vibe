@@ -1,7 +1,7 @@
 <template>
   <div class="type-inference-demo">
-    <h4>🧠 类型推断：编译器如何"猜"出类型</h4>
-    <p class="desc">点击代码行，看编译器如何一步步推断类型</p>
+    <h4>{{ t('typeSystems.inference.title') }}</h4>
+    <p class="desc">{{ t('typeSystems.inference.desc') }}</p>
 
     <div class="code-area">
       <div
@@ -19,7 +19,7 @@
     </div>
 
     <div v-if="activeLine !== null" class="explanation">
-      <div class="explain-header">推断过程</div>
+      <div class="explain-header">{{ t('typeSystems.inference.processTitle') }}</div>
       <div class="explain-steps">
         <div v-for="(step, j) in codeLines[activeLine].steps" :key="j" class="step">
           <span class="step-num">{{ j + 1 }}</span>
@@ -29,7 +29,7 @@
     </div>
 
     <div class="lang-support">
-      <div class="support-title">各语言的类型推断能力</div>
+      <div class="support-title">{{ t('typeSystems.inference.supportTitle') }}</div>
       <div class="support-grid">
         <div v-for="lang in langs" :key="lang.name" class="support-item">
           <span class="support-name">{{ lang.name }}</span>
@@ -44,66 +44,15 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n'
+import { computerFundamentalsLocale } from '../../../locales/computer-fundamentals'
 
+const { t, messages } = useI18n(computerFundamentalsLocale)
 const activeLine = ref(0)
 
-const codeLines = [
-  {
-    code: '<span class="kw">let</span> x = <span class="num">42</span>',
-    inferred: 'number',
-    steps: [
-      '右侧是字面量 42',
-      '42 是整数，类型为 number',
-      '推断 x 的类型为 number'
-    ]
-  },
-  {
-    code: '<span class="kw">let</span> names = [<span class="str">"Alice"</span>, <span class="str">"Bob"</span>]',
-    inferred: 'string[]',
-    steps: [
-      '右侧是数组字面量 [...]',
-      '数组元素 "Alice"、"Bob" 都是 string',
-      '推断数组类型为 string[]'
-    ]
-  },
-  {
-    code: '<span class="kw">let</span> result = x > 10 ? <span class="str">"big"</span> : <span class="str">"small"</span>',
-    inferred: 'string',
-    steps: [
-      '三元表达式的两个分支都是 string',
-      '两个分支类型一致',
-      '推断 result 类型为 string'
-    ]
-  },
-  {
-    code: '<span class="kw">const</span> add = (a: <span class="type">number</span>, b: <span class="type">number</span>) => a + b',
-    inferred: '(a: number, b: number) => number',
-    steps: [
-      '参数 a 和 b 显式标注为 number',
-      'number + number 的结果是 number',
-      '推断返回值类型为 number'
-    ]
-  },
-  {
-    code: '<span class="kw">let</span> mixed = [<span class="num">1</span>, <span class="str">"two"</span>, <span class="kw">true</span>]',
-    inferred: '(number | string | boolean)[]',
-    steps: [
-      '数组包含 number、string、boolean 三种类型',
-      '取所有元素类型的联合类型',
-      '推断为 (number | string | boolean)[]'
-    ]
-  }
-]
-
-const langs = [
-  { name: 'Rust', level: 95, label: '几乎全推断' },
-  { name: 'TypeScript', level: 85, label: '大部分可推断' },
-  { name: 'Kotlin', level: 80, label: '局部推断强' },
-  { name: 'Go', level: 50, label: '仅 := 短声明' },
-  { name: 'Java', level: 40, label: 'var 关键字（Java 10+）' },
-  { name: 'C', level: 5, label: '几乎不推断' }
-]
+const codeLines = computed(() => messages.value.typeSystems.inference.codeLines)
+const langs = computed(() => messages.value.typeSystems.inference.langs)
 </script>
 
 <style scoped>

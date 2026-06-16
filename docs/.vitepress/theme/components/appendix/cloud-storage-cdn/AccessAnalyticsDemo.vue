@@ -2,30 +2,30 @@
   <div class="access-analytics-demo">
     <div class="demo-header">
       <span class="icon">📊</span>
-      <span class="title">访问分析</span>
-      <span class="subtitle">理解 CDN 访问统计和日志分析</span>
+      <span class="title">{{ t('placeholders.analytics.title') }}</span>
+      <span class="subtitle">{{ t('placeholders.analytics.subtitle') }}</span>
     </div>
     <div class="demo-content">
       <el-alert
         type="info"
         :closable="false"
       >
-        访问分析演示组件占位符 - 待实现具体交互
+        {{ t('placeholders.analytics.placeholder') }}
       </el-alert>
     </div>
 
     <div class="info-box">
       <span class="icon">💡</span>
-      <strong>核心思想：</strong>通过日志分析，可以了解谁在何时访问了什么资源，帮助发现异常访问模式和安全事件。
+      <strong>{{ t('common.coreIdea') }}</strong>{{ t('placeholders.analytics.idea') }}
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { cloudStorageCdnLocale } from '../../../locales/cloud-storage-cdn/index.js'
 
-const title = ref('访问分析演示')
-const description = ref('展示CDN和对象存储的访问统计分析，包括流量、带宽、访问热点等')
+const { t } = useI18n(cloudStorageCdnLocale)
 </script>
 
 <style scoped>

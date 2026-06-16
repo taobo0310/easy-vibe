@@ -1,13 +1,9 @@
-<!--
-  DecouplingDemo.vue
-  系统解耦演示 - 同步 vs 异步对比
--->
 <template>
   <div class="decoupling-demo">
     <div class="demo-header">
       <span class="icon">🔗</span>
-      <span class="title">系统解耦演示</span>
-      <span class="subtitle">从紧耦合到松耦合的演进</span>
+      <span class="title">{{ t('decoupling.title') }}</span>
+      <span class="subtitle">{{ t('decoupling.subtitle') }}</span>
     </div>
 
     <div class="mode-switch">
@@ -16,34 +12,33 @@
         :class="{ active: !useAsync }"
         @click="useAsync = false"
       >
-        🔗 紧耦合 (同步)
+        {{ t('decoupling.syncMode') }}
       </button>
       <button
         class="mode-btn"
         :class="{ active: useAsync }"
         @click="useAsync = true"
       >
-        🔓 松耦合 (异步)
+        {{ t('decoupling.asyncMode') }}
       </button>
     </div>
 
     <div class="demo-content">
-      <!-- 紧耦合模式 -->
       <div
         v-if="!useAsync"
         class="synchronous-mode"
       >
         <div class="scenario">
           <div class="scenario-title">
-            ❌ 紧耦合的致命问题
+            {{ t('decoupling.syncTitle') }}
           </div>
           <div class="flow-diagram">
             <div class="service-box order">
               <div class="service-name">
-                订单服务
+                {{ t('decoupling.orderService') }}
               </div>
               <div class="service-desc">
-                创建订单
+                {{ t('decoupling.createOrder') }}
               </div>
             </div>
 
@@ -72,33 +67,28 @@
               :class="{ failed: notificationFailed }"
             >
               <div class="service-name">
-                通知服务
+                {{ t('decoupling.notificationService') }}
               </div>
               <div class="service-desc">
-                发送短信/邮件
+                {{ t('decoupling.notificationDesc') }}
               </div>
               <div
                 v-if="notificationFailed"
                 class="error-msg"
               >
-                服务宕机 ❌
+                {{ t('decoupling.serviceDown') }}
               </div>
             </div>
           </div>
 
           <div class="problem-list">
-            <div class="problem-item">
+            <div
+              v-for="item in problems"
+              :key="item.term"
+              class="problem-item"
+            >
               <span class="icon">⚠️</span>
-              <span><strong>依赖性强：</strong>通知服务宕机,订单创建失败</span>
-            </div>
-            <div class="problem-item">
-              <span class="icon">⚠️</span>
-              <span><strong>响应慢：</strong>总耗时 = 300ms + 500ms + 400ms =
-                1200ms</span>
-            </div>
-            <div class="problem-item">
-              <span class="icon">⚠️</span>
-              <span><strong>扩展难：</strong>增加新服务需要修改订单代码</span>
+              <span><strong>{{ item.term }}</strong>{{ item.desc }}</span>
             </div>
           </div>
 
@@ -106,27 +96,26 @@
             class="test-btn fail"
             @click="testSyncCall"
           >
-            模拟通知服务故障
+            {{ t('decoupling.simulateFailure') }}
           </button>
         </div>
       </div>
 
-      <!-- 松耦合模式 -->
       <div
         v-else
         class="asynchronous-mode"
       >
         <div class="scenario">
           <div class="scenario-title">
-            ✅ 松耦合的核心优势
+            {{ t('decoupling.asyncTitle') }}
           </div>
           <div class="flow-diagram">
             <div class="service-box order">
               <div class="service-name">
-                订单服务
+                {{ t('decoupling.orderService') }}
               </div>
               <div class="service-desc">
-                创建订单 + 发送消息
+                {{ t('decoupling.createOrderAndSend') }}
               </div>
             </div>
 
@@ -136,13 +125,13 @@
                   📨
                 </div>
                 <div class="mq-label">
-                  消息队列
+                  {{ t('decoupling.messageQueue') }}
                 </div>
                 <div
                   v-if="messageInQueue"
                   class="msg-indicator"
                 >
-                  消息已发送
+                  {{ t('decoupling.messageSent') }}
                 </div>
               </div>
               <div class="flow-arrow">
@@ -156,43 +145,35 @@
                 :class="{ failed: consumerFailed }"
               >
                 <div class="consumer-name">
-                  短信服务
+                  {{ t('decoupling.smsService') }}
                 </div>
                 <div class="consumer-status">
-                  {{ consumerFailed ? '离线(不影响订单)' : '运行中' }}
+                  {{ consumerFailed ? t('decoupling.offline') : t('decoupling.running') }}
                 </div>
               </div>
               <div class="consumer-box">
                 <div class="consumer-name">
-                  邮件服务
+                  {{ t('decoupling.emailService') }}
                 </div>
-                <div class="consumer-status">
-                  运行中
-                </div>
+                <div class="consumer-status">{{ t('decoupling.running') }}</div>
               </div>
               <div class="consumer-box">
                 <div class="consumer-name">
-                  积分服务
+                  {{ t('decoupling.pointsService') }}
                 </div>
-                <div class="consumer-status">
-                  运行中
-                </div>
+                <div class="consumer-status">{{ t('decoupling.running') }}</div>
               </div>
             </div>
           </div>
 
           <div class="benefit-list">
-            <div class="benefit-item">
+            <div
+              v-for="item in benefits"
+              :key="item.term"
+              class="benefit-item"
+            >
               <span class="icon">✅</span>
-              <span><strong>独立运行：</strong>通知服务宕机不影响订单创建</span>
-            </div>
-            <div class="benefit-item">
-              <span class="icon">✅</span>
-              <span><strong>响应快：</strong>订单服务只耗时 50ms(发送消息)</span>
-            </div>
-            <div class="benefit-item">
-              <span class="icon">✅</span>
-              <span><strong>易扩展：</strong>增加新消费者无需修改订单代码</span>
+              <span><strong>{{ item.term }}</strong>{{ item.desc }}</span>
             </div>
           </div>
 
@@ -200,7 +181,7 @@
             class="test-btn success"
             @click="testAsyncCall"
           >
-            发送订单消息
+            {{ t('decoupling.sendOrderMessage') }}
           </button>
         </div>
       </div>
@@ -208,39 +189,42 @@
 
     <div class="info-box">
       <span class="icon">💡</span>
-      <strong>核心思想:</strong>同步调用强依赖、响应慢;异步消息解耦、响应快、易扩展
+      <strong>{{ t('decoupling.ideaTitle') }}</strong>{{ t('decoupling.idea') }}
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { queueDesignLocale } from '../../../locales/queue-design/index.js'
+
+const { t, messages } = useI18n(queueDesignLocale)
 
 const useAsync = ref(false)
 const notificationFailed = ref(false)
 const consumerFailed = ref(false)
 const messageInQueue = ref(false)
 
-const syncCalls = ref([
-  { id: 1, service: '调用库存服务', active: false, status: '处理中...' },
-  { id: 2, service: '调用积分服务', active: false, status: '处理中...' },
-  {
-    id: 3,
-    service: '调用通知服务',
-    active: false,
-    status: '失败!订单回滚'
-  }
-])
+const syncCalls = computed(() =>
+  messages.value.decoupling.syncCalls.map((call) => ({
+    ...call,
+    active: activeSyncCall.value === call.id
+  }))
+)
+const activeSyncCall = ref(null)
+const problems = computed(() => messages.value.decoupling.problems)
+const benefits = computed(() => messages.value.decoupling.benefits)
 
 const testSyncCall = () => {
   notificationFailed.value = true
 
   syncCalls.value.forEach((call, index) => {
     setTimeout(() => {
-      call.active = true
+      activeSyncCall.value = call.id
       if (index === syncCalls.value.length - 1) {
         setTimeout(() => {
-          call.active = false
+          activeSyncCall.value = null
         }, 2000)
       }
     }, index * 800)

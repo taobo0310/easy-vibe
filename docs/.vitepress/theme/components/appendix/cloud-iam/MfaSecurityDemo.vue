@@ -2,8 +2,8 @@
   <div class="mfa-security-demo">
     <div class="demo-header">
       <span class="icon">🔐</span>
-      <span class="title">多因素认证</span>
-      <span class="subtitle">MFA 双因素认证流程</span>
+      <span class="title">{{ t('mfa.title') }}</span>
+      <span class="subtitle">{{ t('mfa.subtitle') }}</span>
     </div>
 
     <div class="main-area">
@@ -13,7 +13,7 @@
           :class="{ active: step >= 1, completed: step > 1 }"
         >
           <span class="step-icon">🔐</span>
-          <span class="step-label">密码</span>
+          <span class="step-label">{{ t('mfa.password') }}</span>
         </div>
         <span class="step-arrow">→</span>
         <div
@@ -29,7 +29,7 @@
           :class="{ active: step >= 3 }"
         >
           <span class="step-icon">✅</span>
-          <span class="step-label">成功</span>
+          <span class="step-label">{{ t('mfa.success') }}</span>
         </div>
       </div>
 
@@ -38,19 +38,19 @@
         class="auth-panel"
       >
         <div class="panel-title">
-          请输入密码
+          {{ t('mfa.passwordTitle') }}
         </div>
         <input
           v-model="password"
           type="password"
-          placeholder="输入任意密码"
+          :placeholder="t('mfa.passwordPlaceholder')"
           @keyup.enter="verifyPassword"
         >
         <button
           :disabled="!password"
           @click="verifyPassword"
         >
-          验证密码
+          {{ t('mfa.verifyPassword') }}
         </button>
       </div>
 
@@ -59,18 +59,18 @@
         class="auth-panel"
       >
         <div class="panel-title">
-          MFA 验证码
+          {{ t('mfa.codeTitle') }}
         </div>
         <div class="totp-display">
           <span class="totp-code">{{ totpCode }}</span>
           <div class="totp-hint">
-            模拟验证码
+            {{ t('mfa.codeHint') }}
           </div>
         </div>
         <input
           v-model="userCode"
           type="text"
-          placeholder="输入上方验证码"
+          :placeholder="t('mfa.codePlaceholder')"
           maxlength="6"
           @keyup.enter="verifyMFA"
         >
@@ -78,7 +78,7 @@
           :disabled="userCode.length !== 6"
           @click="verifyMFA"
         >
-          验证
+          {{ t('mfa.verify') }}
         </button>
       </div>
 
@@ -88,27 +88,30 @@
       >
         <span class="success-icon">🎉</span>
         <div class="success-title">
-          登录成功！
+          {{ t('mfa.successTitle') }}
         </div>
         <div class="success-desc">
-          已通过 MFA 双因素认证
+          {{ t('mfa.successDesc') }}
         </div>
         <button @click="reset">
-          重新演示
+          {{ t('mfa.reset') }}
         </button>
       </div>
     </div>
 
     <div class="info-box">
       <span class="icon">💡</span>
-      <strong>核心思想：</strong>启用 MFA 可降低 99.9% 的账号被盗风险。即使密码泄露，攻击者没有你的 MFA 设备也无法登录。
+      <strong>{{ t('common.coreIdea') }}</strong>{{ t('mfa.info') }}
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { cloudIamLocale } from '../../../locales/cloud-iam/index.js'
 
+const { t } = useI18n(cloudIamLocale)
 const step = ref(1)
 const password = ref('')
 const userCode = ref('')

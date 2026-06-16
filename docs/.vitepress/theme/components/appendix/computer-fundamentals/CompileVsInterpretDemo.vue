@@ -1,7 +1,7 @@
 <template>
   <div class="compile-vs-interpret-demo">
-    <h4>🔄 编译型 vs 解释型 vs JIT</h4>
-    <p class="desc">点击不同执行模式，观察代码从源码到运行的过程</p>
+    <h4>{{ t('compilers.compileVsInterpret.title') }}</h4>
+    <p class="desc">{{ t('compilers.compileVsInterpret.desc') }}</p>
 
     <div class="mode-selector">
       <button
@@ -30,7 +30,7 @@
     </div>
 
     <div class="metrics">
-      <div class="metric" v-for="m in modes[selected].metrics" :key="m.label">
+      <div v-for="m in modes[selected].metrics" :key="m.label" class="metric">
         <span class="metric-label">{{ m.label }}</span>
         <div class="metric-bar-bg">
           <div class="metric-bar" :style="{ width: m.value + '%', background: m.color }"></div>
@@ -40,21 +40,26 @@
     </div>
 
     <div class="examples">
-      <span class="ex-label">代表语言：</span>
-      <span class="ex-lang" v-for="l in modes[selected].langs" :key="l">{{ l }}</span>
+      <span class="ex-label">{{ t('compilers.compileVsInterpret.examplesLabel') }}</span>
+      <span v-for="l in modes[selected].langs" :key="l" class="ex-lang">
+        {{ l }}
+      </span>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { computed, ref, onMounted, onUnmounted } from 'vue'
+import { useI18n } from '../../../composables/useI18n'
+import { computerFundamentalsLocale } from '../../../locales/computer-fundamentals'
+
+const { t, messages } = useI18n(computerFundamentalsLocale)
 
 const selected = ref(0)
 const visibleSteps = ref(0)
 let timer = null
 
 onMounted(() => {
-  // 组件挂载后开始动画，避免模块加载时启动定时器导致 build 卡住
   selectMode(0)
 })
 
@@ -75,53 +80,7 @@ function selectMode(i) {
   }, 300)
 }
 
-const modes = [
-  {
-    name: '编译型',
-    steps: [
-      { icon: '📝', name: '源代码', desc: 'main.c' },
-      { icon: '⚙️', name: '编译器', desc: '全量编译' },
-      { icon: '📦', name: '机器码', desc: '二进制可执行文件' },
-      { icon: '🚀', name: '直接执行', desc: 'CPU 直接运行' }
-    ],
-    metrics: [
-      { label: '运行速度', value: 95, text: '极快', color: '#22c55e' },
-      { label: '启动速度', value: 30, text: '慢（需编译）', color: '#ef4444' },
-      { label: '跨平台', value: 20, text: '需重新编译', color: '#ef4444' }
-    ],
-    langs: ['C', 'C++', 'Rust', 'Go']
-  },
-  {
-    name: '解释型',
-    steps: [
-      { icon: '📝', name: '源代码', desc: 'app.py' },
-      { icon: '🔍', name: '解释器', desc: '逐行读取' },
-      { icon: '🔄', name: '逐行执行', desc: '边翻译边运行' }
-    ],
-    metrics: [
-      { label: '运行速度', value: 30, text: '较慢', color: '#ef4444' },
-      { label: '启动速度', value: 90, text: '快（直接运行）', color: '#22c55e' },
-      { label: '跨平台', value: 90, text: '天然跨平台', color: '#22c55e' }
-    ],
-    langs: ['Python', 'Ruby', 'PHP', 'Bash']
-  },
-  {
-    name: 'JIT 即时编译',
-    steps: [
-      { icon: '📝', name: '源代码', desc: 'app.js' },
-      { icon: '🔍', name: '解释执行', desc: '先解释运行' },
-      { icon: '🔥', name: '热点检测', desc: '发现高频代码' },
-      { icon: '⚡', name: 'JIT 编译', desc: '编译为机器码' },
-      { icon: '🚀', name: '高速执行', desc: '接近原生速度' }
-    ],
-    metrics: [
-      { label: '运行速度', value: 75, text: '快（热点接近原生）', color: '#22c55e' },
-      { label: '启动速度', value: 60, text: '中等（需预热）', color: '#eab308' },
-      { label: '跨平台', value: 85, text: '跨平台', color: '#22c55e' }
-    ],
-    langs: ['JavaScript (V8)', 'Java (JVM)', 'C# (.NET)']
-  }
-]
+const modes = computed(() => messages.value.compilers.compileVsInterpret.modes)
 </script>
 
 <style scoped>

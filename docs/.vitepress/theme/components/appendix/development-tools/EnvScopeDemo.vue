@@ -1,8 +1,8 @@
 <template>
   <div class="demo-root">
     <div class="demo-header">
-      <span class="title">环境变量的三个层级</span>
-      <span class="subtitle">变量从外到内单向传递，子进程继承父进程的副本</span>
+      <span class="title">{{ t('envScope.title') }}</span>
+      <span class="subtitle">{{ t('envScope.subtitle') }}</span>
     </div>
 
     <div class="scope-stack">
@@ -10,8 +10,8 @@
         <div class="layer-header">
           <span class="layer-icon">🖥️</span>
           <div>
-            <div class="layer-title">系统级 <code>/etc/environment</code></div>
-            <div class="layer-desc">所有用户、所有进程都能看到，由管理员配置</div>
+            <div class="layer-title">{{ t('envScope.layers.system.title') }} <code>{{ t('envScope.layers.system.code') }}</code></div>
+            <div class="layer-desc">{{ t('envScope.layers.system.desc') }}</div>
           </div>
         </div>
         <div class="var-list">
@@ -23,7 +23,7 @@
 
       <div class="arrow-row">
         <span class="arrow-line" />
-        <span class="arrow-label">▼ 子进程继承父进程环境</span>
+        <span class="arrow-label">{{ t('envScope.inheritedLabel') }}</span>
         <span class="arrow-line" />
       </div>
 
@@ -31,8 +31,8 @@
         <div class="layer-header">
           <span class="layer-icon">👤</span>
           <div>
-            <div class="layer-title">用户级 <code>~/.zshrc</code></div>
-            <div class="layer-desc">只影响当前用户，登录 Shell 启动时自动加载</div>
+            <div class="layer-title">{{ t('envScope.layers.user.title') }} <code>{{ t('envScope.layers.user.code') }}</code></div>
+            <div class="layer-desc">{{ t('envScope.layers.user.desc') }}</div>
           </div>
         </div>
         <div class="var-list">
@@ -50,7 +50,7 @@
 
       <div class="arrow-row">
         <span class="arrow-line" />
-        <span class="arrow-label">▼ 启动子进程（如 node app.js）</span>
+        <span class="arrow-label">{{ t('envScope.startChildLabel') }}</span>
         <span class="arrow-line" />
       </div>
 
@@ -58,27 +58,31 @@
         <div class="layer-header">
           <span class="layer-icon">⚙️</span>
           <div>
-            <div class="layer-title">进程级（当前运行的程序）</div>
-            <div class="layer-desc">继承所有上层变量，退出后消失，修改不影响父进程</div>
+            <div class="layer-title">{{ t('envScope.layers.process.title') }}</div>
+            <div class="layer-desc">{{ t('envScope.layers.process.desc') }}</div>
           </div>
         </div>
         <div class="var-list">
           <div v-for="v in processVars" :key="v.key" class="var-chip process-chip" :class="{ 'is-new': v.isNew }">
             <span class="chip-key">{{ v.key }}</span><span class="chip-eq">=</span><span class="chip-val">{{ v.value }}</span>
-            <span v-if="v.isNew" class="new-badge">你加的</span>
+            <span v-if="v.isNew" class="new-badge">{{ t('envScope.addedBadge') }}</span>
           </div>
         </div>
       </div>
     </div>
 
     <div class="info-box">
-      <strong>单向传递：</strong>变量只能向下继承，子进程修改变量值不会影响父进程。关闭终端后，直接 <code>export</code> 的变量也会消失。
+      <strong>{{ t('envScope.infoStrong') }}</strong>{{ t('envScope.info') }}
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { developmentToolsLocale } from '../../../locales/development-tools/index.js'
+
+const { t } = useI18n(developmentToolsLocale)
 
 const systemVars = [
   { key: 'PATH', value: '/usr/local/bin:/usr/bin:/bin' },

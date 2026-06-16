@@ -1,15 +1,14 @@
 <template>
   <div class="demo-root">
     <div class="demo-header">
-      <span class="title">硬编码密钥 vs 用环境变量</span>
-      <span class="subtitle">同样的功能，两种写法，安全性天壤之别</span>
+      <span class="title">{{ t('apiKeyDanger.title') }}</span>
+      <span class="subtitle">{{ t('apiKeyDanger.subtitle') }}</span>
     </div>
 
     <div class="two-col">
-      <!-- Bad -->
       <div class="panel bad">
         <div class="panel-title">
-          <span class="icon">❌</span> 危险写法：密钥写在代码里
+          <span class="icon">❌</span> {{ t('apiKeyDanger.badTitle') }}
         </div>
         <div class="code-area">
           <div class="code-line comment"># Python</div>
@@ -26,10 +25,9 @@
         </div>
       </div>
 
-      <!-- Good -->
       <div class="panel good">
         <div class="panel-title">
-          <span class="icon">✅</span> 正确写法：从环境变量读取
+          <span class="icon">✅</span> {{ t('apiKeyDanger.goodTitle') }}
         </div>
         <div class="code-area">
           <div class="code-line comment"># Python</div>
@@ -48,25 +46,20 @@
     </div>
 
     <div class="info-box">
-      <strong>黄金法则：</strong>代码里出现密钥字符串 = 密钥已泄露。GitHub 的 Secret Scanner 会在推送后秒级扫描，发现 <code>sk-</code> 等前缀就通知厂商吊销。即使立刻删除提交，Git 历史里仍然保存着。
+      <strong>{{ t('apiKeyDanger.ruleStrong') }}</strong>{{ t('apiKeyDanger.rule') }}
     </div>
   </div>
 </template>
 
 <script setup>
-const badConsequences = [
-  'git push 后，密钥就公开在 GitHub 上',
-  '爬虫秒级扫描，密钥被盗用并产生费用',
-  'GitHub Secret Scanner 自动吊销密钥',
-  '删除提交也没用，Git 历史仍保留'
-]
+import { computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { developmentToolsLocale } from '../../../locales/development-tools/index.js'
 
-const goodConsequences = [
-  '代码里没有任何密钥信息，可以安全开源',
-  '不同环境（开发/测试/生产）用不同密钥',
-  '密钥泄露时只需重新生成，不用改代码',
-  '团队成员各用各的密钥，互不影响'
-]
+const { t, messages } = useI18n(developmentToolsLocale)
+
+const badConsequences = computed(() => messages.value.apiKeyDanger.badConsequences)
+const goodConsequences = computed(() => messages.value.apiKeyDanger.goodConsequences)
 </script>
 
 <style scoped>

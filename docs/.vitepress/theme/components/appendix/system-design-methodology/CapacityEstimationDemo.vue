@@ -1,60 +1,56 @@
-<!--
-  CapacityEstimationDemo.vue
-  容量估算计算器：信封背面估算交互演示
--->
 <template>
   <div class="capacity-demo">
     <div class="header">
-      <div class="title">信封背面估算器</div>
-      <div class="subtitle">输入基础数据，自动计算系统容量需求</div>
+      <div class="title">{{ t('capacity.title') }}</div>
+      <div class="subtitle">{{ t('capacity.subtitle') }}</div>
     </div>
 
     <div class="inputs">
       <div class="input-group">
-        <label>日活用户（万）</label>
+        <label>{{ t('capacity.inputLabels.dau') }}</label>
         <input v-model.number="dau" type="number" min="1" max="100000" />
       </div>
       <div class="input-group">
-        <label>人均请求数/天</label>
+        <label>{{ t('capacity.inputLabels.reqPerUser') }}</label>
         <input v-model.number="reqPerUser" type="number" min="1" max="1000" />
       </div>
       <div class="input-group">
-        <label>单次响应大小（KB）</label>
+        <label>{{ t('capacity.inputLabels.responseSize') }}</label>
         <input v-model.number="responseSize" type="number" min="0.1" max="1000" />
       </div>
       <div class="input-group">
-        <label>峰值系数</label>
+        <label>{{ t('capacity.inputLabels.peakFactor') }}</label>
         <input v-model.number="peakFactor" type="number" min="1" max="10" step="0.5" />
       </div>
     </div>
 
     <div class="results">
       <div class="result-card">
-        <div class="result-label">日请求量</div>
+        <div class="result-label">{{ t('capacity.resultLabels.dailyRequests') }}</div>
         <div class="result-value">{{ formatNumber(dailyRequests) }}</div>
       </div>
       <div class="result-card">
-        <div class="result-label">平均 QPS</div>
+        <div class="result-label">{{ t('capacity.resultLabels.avgQps') }}</div>
         <div class="result-value">{{ formatNumber(avgQps) }}</div>
       </div>
       <div class="result-card">
-        <div class="result-label">峰值 QPS</div>
+        <div class="result-label">{{ t('capacity.resultLabels.peakQps') }}</div>
         <div class="result-value">{{ formatNumber(peakQps) }}</div>
       </div>
       <div class="result-card">
-        <div class="result-label">日带宽</div>
+        <div class="result-label">{{ t('capacity.resultLabels.dailyBandwidth') }}</div>
         <div class="result-value">{{ formatBandwidth(dailyBandwidth) }}</div>
       </div>
       <div class="result-card">
-        <div class="result-label">峰值带宽</div>
-        <div class="result-value">{{ formatBandwidth(peakBandwidthPerSec) }}/s</div>
+        <div class="result-label">{{ t('capacity.resultLabels.peakBandwidth') }}</div>
+        <div class="result-value">{{ formatBandwidth(peakBandwidthPerSec) }}{{ t('capacity.perSecondSuffix') }}</div>
       </div>
     </div>
 
     <div class="reference">
-      <div class="ref-title">常用估算参考值</div>
+      <div class="ref-title">{{ t('capacity.referenceTitle') }}</div>
       <div class="ref-grid">
-        <div class="ref-item" v-for="r in references" :key="r.label">
+        <div v-for="r in references" :key="r.label" class="ref-item">
           <span class="ref-label">{{ r.label }}</span>
           <span class="ref-value">{{ r.value }}</span>
         </div>
@@ -65,6 +61,10 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { systemDesignMethodologyLocale } from '../../../locales/system-design-methodology/index.js'
+
+const { t, messages } = useI18n(systemDesignMethodologyLocale)
 
 const dau = ref(100)
 const reqPerUser = ref(20)
@@ -77,18 +77,11 @@ const peakQps = computed(() => Math.round(avgQps.value * peakFactor.value))
 const dailyBandwidth = computed(() => dailyRequests.value * responseSize.value * 1024)
 const peakBandwidthPerSec = computed(() => peakQps.value * responseSize.value * 1024)
 
-const references = [
-  { label: '1 天', value: '86,400 秒' },
-  { label: '1 月', value: '≈ 250 万秒' },
-  { label: 'QPS 1000', value: '≈ 1 台 8 核服务器' },
-  { label: '1 亿/天', value: '≈ 1,200 QPS' },
-  { label: 'MySQL 单机', value: '≈ 5,000 QPS' },
-  { label: 'Redis 单机', value: '≈ 100,000 QPS' }
-]
+const references = computed(() => messages.value.capacity.references)
 
 function formatNumber(n) {
-  if (n >= 1e8) return (n / 1e8).toFixed(1) + ' 亿'
-  if (n >= 1e4) return (n / 1e4).toFixed(1) + ' 万'
+  if (n >= 1e8) return (n / 1e8).toFixed(1) + t('capacity.units.hundredMillion')
+  if (n >= 1e4) return (n / 1e4).toFixed(1) + t('capacity.units.tenThousand')
   return n.toLocaleString()
 }
 

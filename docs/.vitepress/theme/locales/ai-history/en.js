@@ -226,5 +226,69 @@ export default {
         examples: ['AI Programmer', 'Embodied AI']
       }
     ]
+  },
+
+  expertSystemWave: {
+    successTitle: '🌟 The Rise of Expert Systems',
+    flows: [
+      ['Human expert experience', 'Converted into IF-THEN rule bases'],
+      ['Domain-specific problems', 'Reasoned answers (diagnosis/configuration)']
+    ],
+    tags: ['1965: Dendral (chemistry)', '1977: MYCIN (medicine)', '1980: XCON (configuration)'],
+    winterArrow: '⬇️ Limits became obvious ⬇️',
+    winterTitle: 'First AI Winter (1974-1980)',
+    reasons: [
+      {
+        icon: '📝',
+        title: 'Knowledge acquisition bottleneck',
+        desc: 'Polanyi\'s paradox: humans cannot fully explain everything they know. Large amounts of common sense could not be manually encoded.'
+      },
+      {
+        icon: '💥',
+        title: 'Combinatorial explosion and brittleness',
+        desc: 'Real situations were too numerous to enumerate, and systems collapsed when inputs drifted beyond their rule bases.'
+      },
+      {
+        icon: '📉',
+        title: 'Insufficient compute and funding cuts',
+        desc: 'Hardware could not support explosive logical inference, and DARPA sharply reduced AI research funding.'
+      }
+    ]
+  },
+
+  ruleBasedVsLearning: {
+    title: 'Summary of the Key Development Path',
+    path: [
+      {
+        name: 'Theoretical foundations',
+        years: '1940s-1950s',
+        desc: 'Turing Test, Dartmouth workshop, and the birth of symbolic AI',
+        color: '#3b82f6'
+      },
+      {
+        name: 'Symbolism dominates',
+        years: '1960s-1980s',
+        desc: 'Expert systems rose, followed by two AI winters',
+        color: '#059669'
+      },
+      {
+        name: 'Shift to machine learning',
+        years: '1990s-2000s',
+        desc: 'Statistical methods replaced hand-written rules, and connectionism revived',
+        color: '#d97706'
+      },
+      {
+        name: 'Deep learning revolution',
+        years: '2010s',
+        desc: 'AlexNet, AlphaGo, and Transformer architectures made connectionism mainstream',
+        color: '#dc2626'
+      },
+      {
+        name: 'Large model era',
+        years: '2018-present',
+        desc: 'GPT series and multimodal systems brought early signs of general intelligence',
+        color: '#7c3aed'
+      }
+    ]
   }
 }

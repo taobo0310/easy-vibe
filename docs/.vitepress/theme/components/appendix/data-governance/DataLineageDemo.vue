@@ -1,12 +1,8 @@
-<!--
-  DataLineageDemo.vue
-  数据血缘追踪演示：展示数据从源头到消费的流转路径
--->
 <template>
   <div class="lineage-demo">
     <div class="header">
-      <div class="title">数据血缘追踪</div>
-      <div class="subtitle">点击任意节点，查看上下游依赖关系</div>
+      <div class="title">{{ t('lineage.title') }}</div>
+      <div class="subtitle">{{ t('lineage.subtitle') }}</div>
     </div>
 
     <div class="lineage-graph">
@@ -28,45 +24,34 @@
 
     <div v-if="activeNode && activeInfo" class="info-panel">
       <div class="info-title">{{ activeInfo.name }}</div>
-      <div class="info-row"><span class="info-label">上游依赖：</span>{{ activeInfo.upstreamNames || '无（数据源头）' }}</div>
-      <div class="info-row"><span class="info-label">下游消费：</span>{{ activeInfo.downstreamNames || '无（最终消费）' }}</div>
-      <div class="info-row"><span class="info-label">负责人：</span>{{ activeInfo.owner }}</div>
+      <div class="info-row"><span class="info-label">{{ t('lineage.labels.upstream') }}</span>{{ activeInfo.upstreamNames || t('lineage.labels.noUpstream') }}</div>
+      <div class="info-row"><span class="info-label">{{ t('lineage.labels.downstream') }}</span>{{ activeInfo.downstreamNames || t('lineage.labels.noDownstream') }}</div>
+      <div class="info-row"><span class="info-label">{{ t('lineage.labels.owner') }}</span>{{ activeInfo.owner }}</div>
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { dataGovernanceLocale } from '../../../locales/data-governance/index.js'
+
+const { t, messages } = useI18n(dataGovernanceLocale)
 
 const activeNode = ref(null)
 
-const nodes = {
-  mysql_user: { name: 'MySQL 用户表', icon: '🗄️', upstream: [], downstream: ['ods_user'], owner: '业务开发组' },
-  mysql_order: { name: 'MySQL 订单表', icon: '🗄️', upstream: [], downstream: ['ods_order'], owner: '业务开发组' },
-  log_click: { name: '点击日志', icon: '📝', upstream: [], downstream: ['ods_click'], owner: '前端团队' },
-  ods_user: { name: 'ODS 用户', icon: '📥', upstream: ['mysql_user'], downstream: ['dwd_user'], owner: '数据工程师' },
-  ods_order: { name: 'ODS 订单', icon: '📥', upstream: ['mysql_order'], downstream: ['dwd_order'], owner: '数据工程师' },
-  ods_click: { name: 'ODS 点击', icon: '📥', upstream: ['log_click'], downstream: ['dwd_click'], owner: '数据工程师' },
-  dwd_user: { name: 'DWD 用户明细', icon: '🔧', upstream: ['ods_user'], downstream: ['dws_user_profile'], owner: '数据开发' },
-  dwd_order: { name: 'DWD 订单明细', icon: '🔧', upstream: ['ods_order'], downstream: ['dws_gmv'], owner: '数据开发' },
-  dwd_click: { name: 'DWD 点击明细', icon: '🔧', upstream: ['ods_click'], downstream: ['dws_user_profile'], owner: '数据开发' },
-  dws_user_profile: { name: 'DWS 用户画像', icon: '📊', upstream: ['dwd_user', 'dwd_click'], downstream: ['ads_report'], owner: '数据分析师' },
-  dws_gmv: { name: 'DWS GMV 汇总', icon: '📊', upstream: ['dwd_order'], downstream: ['ads_report'], owner: '数据分析师' },
-  ads_report: { name: 'ADS 经营报表', icon: '📈', upstream: ['dws_user_profile', 'dws_gmv'], downstream: [], owner: '数据产品' }
-}
-
-const layers = [
-  { label: '数据源', nodes: [{ id: 'mysql_user', ...nodes.mysql_user }, { id: 'mysql_order', ...nodes.mysql_order }, { id: 'log_click', ...nodes.log_click }] },
-  { label: 'ODS 层', nodes: [{ id: 'ods_user', ...nodes.ods_user }, { id: 'ods_order', ...nodes.ods_order }, { id: 'ods_click', ...nodes.ods_click }] },
-  { label: 'DWD 层', nodes: [{ id: 'dwd_user', ...nodes.dwd_user }, { id: 'dwd_order', ...nodes.dwd_order }, { id: 'dwd_click', ...nodes.dwd_click }] },
-  { label: 'DWS 层', nodes: [{ id: 'dws_user_profile', ...nodes.dws_user_profile }, { id: 'dws_gmv', ...nodes.dws_gmv }] },
-  { label: 'ADS 层', nodes: [{ id: 'ads_report', ...nodes.ads_report }] }
-]
+const nodes = computed(() => messages.value.lineage.nodes)
+const layers = computed(() =>
+  messages.value.lineage.layers.map(layer => ({
+    ...layer,
+    nodes: layer.nodeIds.map(id => ({ id, ...nodes.value[id] }))
+  }))
+)
 
 function getAllUpstream(id, visited = new Set()) {
   if (visited.has(id)) return []
   visited.add(id)
-  const node = nodes[id]
+  const node = nodes.value[id]
   if (!node) return []
   let result = [...node.upstream]
   node.upstream.forEach(uid => { result = result.concat(getAllUpstream(uid, visited)) })
@@ -76,7 +61,7 @@ function getAllUpstream(id, visited = new Set()) {
 function getAllDownstream(id, visited = new Set()) {
   if (visited.has(id)) return []
   visited.add(id)
-  const node = nodes[id]
+  const node = nodes.value[id]
   if (!node) return []
   let result = [...node.downstream]
   node.downstream.forEach(did => { result = result.concat(getAllDownstream(did, visited)) })
@@ -87,12 +72,12 @@ const upstreamIds = computed(() => activeNode.value ? getAllUpstream(activeNode.
 const downstreamIds = computed(() => activeNode.value ? getAllDownstream(activeNode.value) : [])
 
 const activeInfo = computed(() => {
-  if (!activeNode.value || !nodes[activeNode.value]) return null
-  const n = nodes[activeNode.value]
+  if (!activeNode.value || !nodes.value[activeNode.value]) return null
+  const n = nodes.value[activeNode.value]
   return {
     ...n,
-    upstreamNames: n.upstream.map(id => nodes[id]?.name).join('、'),
-    downstreamNames: n.downstream.map(id => nodes[id]?.name).join('、')
+    upstreamNames: n.upstream.map(id => nodes.value[id]?.name).join(t('lineage.labels.joiner')),
+    downstreamNames: n.downstream.map(id => nodes.value[id]?.name).join(t('lineage.labels.joiner'))
   }
 })
 

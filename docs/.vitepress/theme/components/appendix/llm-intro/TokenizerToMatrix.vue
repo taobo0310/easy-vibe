@@ -1,23 +1,10 @@
-<!--
-  TokenizerToMatrix.vue
-  从分词到矩阵的转换过程演示
-  
-  用途：
-  详细展示 LLM 处理文本的第一步：
-  Text (文本) -> Tokens (分词) -> IDs (数字索引) -> One-hot (独热编码) / Embedding Lookup (查表) -> Matrix (输入矩阵)
-  
-  交互功能：
-  - 步骤导航：分步演示每个转换阶段。
-  - 动态输入：允许用户输入短语，实时看到转换结果。
-  - 矩阵可视化：直观展示最终生成的数字矩阵。
--->
 <template>
   <div class="matrix-demo">
     <div class="control-bar">
       <input
         v-model="inputText"
         type="text"
-        placeholder="输入一段文本..."
+        :placeholder="t('matrix.inputPlaceholder')"
         class="text-input"
         :disabled="currentStep > 0"
       >
@@ -27,7 +14,7 @@
           :disabled="currentStep === 0"
           @click="currentStep--"
         >
-          ← 上一步
+          {{ t('matrix.prev') }}
         </button>
         <div class="step-indicator">
           Step {{ currentStep + 1 }} / 4
@@ -37,7 +24,7 @@
           :disabled="currentStep === 3"
           @click="currentStep++"
         >
-          下一步 →
+          {{ t('matrix.next') }}
         </button>
       </div>
     </div>
@@ -49,10 +36,10 @@
         class="stage-content"
       >
         <h3 class="stage-title">
-          Step 1: Tokenization (分词)
+          {{ currentStepData.title }}
         </h3>
         <p class="stage-desc">
-          计算机首先将文本切分为最小的语义单位（Token）。
+          {{ currentStepData.desc }}
           <span
             style="
               font-size: 0.85em;
@@ -61,8 +48,7 @@
               margin-top: 4px;
             "
           >
-            (注：此处演示简化为按字切分，真实模型通常使用 BPE
-            算法，如“人工智能”可能合并为一个 Token)
+            ({{ currentStepData.note }})
           </span>
         </p>
         <div class="token-container">
@@ -83,10 +69,10 @@
         class="stage-content"
       >
         <h3 class="stage-title">
-          Step 2: ID Mapping (索引映射)
+          {{ currentStepData.title }}
         </h3>
         <p class="stage-desc">
-          在词表（Vocabulary）中查找每个 Token 对应的唯一数字 ID。
+          {{ currentStepData.desc }}
         </p>
         <div class="mapping-container">
           <div
@@ -122,10 +108,10 @@
         class="stage-content"
       >
         <h3 class="stage-title">
-          Step 3: Embedding Lookup (向量查表)
+          {{ currentStepData.title }}
         </h3>
         <p class="stage-desc">
-          每个 ID 对应一个预训练好的高维向量（这里简化为 4 维）。
+          {{ currentStepData.desc }}
         </p>
         <div class="lookup-container">
           <div
@@ -160,11 +146,10 @@
         class="stage-content"
       >
         <h3 class="stage-title">
-          Step 4: Matrix Construction (构建矩阵)
+          {{ currentStepData.title }}
         </h3>
         <p class="stage-desc">
-          所有向量堆叠在一起，形成了输入矩阵（Shape: [Batch, Seq_Len,
-          Dim]）。这就是 LLM 真正“看见”的东西。
+          {{ currentStepData.desc }}
         </p>
         <div class="matrix-container">
           <div class="matrix-bracket left" />
@@ -197,29 +182,31 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { llmIntroLocale } from '../../../locales/llm-intro/index.js'
 
-const inputText = ref('我爱人工智能')
+const { t, messages } = useI18n(llmIntroLocale)
+
+const inputText = ref(t('matrix.sampleText'))
 const currentStep = ref(0)
+const currentStepData = computed(() => messages.value.matrix.steps[currentStep.value])
 
 const colors = ['#f87171', '#60a5fa', '#fbbf24', '#34d399', '#a78bfa']
 
-// 模拟 Tokenizer 和 Embedding
 const tokens = computed(() => {
   const text = inputText.value || ''
-  // 简单按字/词切分模拟
   const rawTokens = text.match(/[\u4e00-\u9fa5]|[a-zA-Z]+|\s+|./g) || []
 
-  return rawTokens.map((t, i) => {
-    // 确定性伪随机生成 ID 和 Vector
+  return rawTokens.map((t) => {
+    // Deterministic pseudo-random ID and vector.
     let hash = 0
     for (let j = 0; j < t.length; j++)
       hash = t.charCodeAt(j) + ((hash << 5) - hash)
     const id = Math.abs(hash) % 10000
 
-    // 生成 4 维向量
     const vector = []
     for (let k = 0; k < 4; k++) {
-      const val = Math.sin(id * (k + 1)) // 伪随机值 -1 ~ 1
+      const val = Math.sin(id * (k + 1))
       vector.push(val)
     }
 

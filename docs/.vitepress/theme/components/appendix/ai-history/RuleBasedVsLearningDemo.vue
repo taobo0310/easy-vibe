@@ -1,7 +1,7 @@
 <template>
   <div class="demo-card">
     <div class="demo-header">
-      <span class="title">关键发展路径总结</span>
+      <span class="title">{{ t('ruleBasedVsLearning.title') }}</span>
     </div>
     <div class="path-flow">
       <div v-for="(item, i) in path" :key="i" class="path-item">
@@ -24,13 +24,12 @@
 </template>
 
 <script setup>
-const path = [
-  { name: '理论奠基', years: '1940s-1950s', desc: '图灵测试、达特茅斯会议，符号主义诞生', color: '#3b82f6' },
-  { name: '符号主义主导', years: '1960s-1980s', desc: '专家系统兴起与两次 AI 寒冬', color: '#059669' },
-  { name: '机器学习转型', years: '1990s-2000s', desc: '统计方法取代规则，连接主义复苏', color: '#d97706' },
-  { name: '深度学习革命', years: '2010s', desc: 'AlexNet、AlphaGo、Transformer 架构，连接主义成为主流', color: '#dc2626' },
-  { name: '大模型时代', years: '2018 至今', desc: 'GPT 系列、多模态融合，通用智能曙光初现', color: '#7c3aed' },
-]
+import { computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { aiHistoryLocale } from '../../../locales/ai-history/index.js'
+
+const { t, messages } = useI18n(aiHistoryLocale)
+const path = computed(() => messages.value.ruleBasedVsLearning.path)
 </script>
 
 <style scoped>

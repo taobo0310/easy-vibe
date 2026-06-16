@@ -1,15 +1,11 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { typescriptIntroLocale } from '../../../locales/typescript-intro/index.js'
 
-// 用户数据
-const user = ref({
-  id: 1,
-  name: '张三',
-  email: 'zhangsan@example.com',
-  age: 25
-})
+const { t, messages, locale } = useI18n(typescriptIntroLocale)
+const user = ref({ ...messages.value.interfaceDemo.initialUser })
 
-// 显示错误信息
 const showError = ref(false)
 const errorMessage = ref('')
 
@@ -22,56 +18,43 @@ const setMessage = (msg, isError = false) => {
   }, 3000)
 }
 
-// 尝试添加错误类型的属性
 const addErrorProperty = () => {
   showError.value = true
-  errorMessage.value = '❌ TypeScript 错误：类型 "string" 不可分配给类型 "number"'
+  errorMessage.value = `❌ ${t('interfaceDemo.messages.typeError')}`
   setTimeout(() => {
     showError.value = false
     errorMessage.value = ''
   }, 3000)
 }
 
-// 添加新用户
 const addNewUser = () => {
-  user.value = {
-    id: 2,
-    name: '李四',
-    email: 'lisi@example.com',
-    age: 30
-  }
-  setMessage('✅ 创建新用户成功！类型检查通过', false)
+  user.value = { ...messages.value.interfaceDemo.newUser }
+  setMessage(`✅ ${t('interfaceDemo.messages.newUser')}`, false)
 }
 
-// 修改用户年龄
 const modifyAge = () => {
   user.value.age = user.value.age + 1
-  setMessage(`✅ 年龄更新为 ${user.value.age}`, false)
+  setMessage(`✅ ${t('interfaceDemo.messages.ageUpdated', { age: user.value.age })}`, false)
 }
 
-// 重置
 const reset = () => {
-  user.value = {
-    id: 1,
-    name: '张三',
-    email: 'zhangsan@example.com',
-    age: 25
-  }
+  user.value = { ...messages.value.interfaceDemo.initialUser }
   errorMessage.value = ''
   showError.value = false
 }
+
+watch(locale, reset)
 </script>
 
 <template>
   <div class="interface-demo">
-    <h3>🎯 Interface 接口演示</h3>
+    <h3>🎯 {{ t('interfaceDemo.title') }}</h3>
 
     <div class="demo-container">
-      <!-- 接口定义 -->
       <div class="interface-definition">
         <div class="code-header">
           <span class="typescript-logo">TS</span>
-          <span>User Interface 定义</span>
+          <span>{{ t('interfaceDemo.definitionTitle') }}</span>
         </div>
         <pre><code class="typescript">interface User {
   id: number
@@ -81,7 +64,6 @@ const reset = () => {
 }</code></pre>
       </div>
 
-      <!-- 用户对象展示 -->
       <div class="user-display">
         <div class="user-card">
           <div class="card-header">
@@ -104,7 +86,7 @@ const reset = () => {
               <span class="type-badge">number</span>
             </div>
             <div class="detail-item">
-              <span class="label">年龄:</span>
+              <span class="label">{{ t('interfaceDemo.ageLabel') }}</span>
               <span class="value">{{ user.age }}</span>
               <span class="type-badge">number</span>
             </div>
@@ -112,7 +94,6 @@ const reset = () => {
         </div>
       </div>
 
-      <!-- 错误消息显示 -->
       <div
         v-if="errorMessage"
         :class="['message-box', showError ? 'error' : 'success']"
@@ -120,58 +101,46 @@ const reset = () => {
         {{ errorMessage }}
       </div>
 
-      <!-- 操作按钮 -->
       <div class="controls">
         <button
           class="btn-primary"
           @click="modifyAge"
         >
-          增加年龄
+          {{ t('interfaceDemo.buttons.increaseAge') }}
         </button>
         <button
           class="btn-danger"
           @click="addErrorProperty"
         >
-          尝试赋值错误类型
+          {{ t('interfaceDemo.buttons.typeError') }}
         </button>
         <button
           class="btn-secondary"
           @click="addNewUser"
         >
-          创建新用户
+          {{ t('interfaceDemo.buttons.newUser') }}
         </button>
         <button
           class="btn-ghost"
           @click="reset"
         >
-          重置
+          {{ t('common.reset') }}
         </button>
       </div>
 
-      <!-- 代码示例 -->
       <div class="code-examples">
         <div class="example-item">
           <div class="example-header">
-            ✅ 正确使用
+            ✅ {{ t('interfaceDemo.examples.correctTitle') }}
           </div>
-          <pre><code class="typescript">const user: User = {
-  id: 1,
-  name: "张三",
-  email: "zhangsan@example.com",
-  age: 25
-} // ✅ 类型完全匹配</code></pre>
+          <pre><code class="typescript">{{ t('interfaceDemo.examples.correctCode') }}</code></pre>
         </div>
 
         <div class="example-item error">
           <div class="example-header">
-            ❌ 错误使用
+            ❌ {{ t('interfaceDemo.examples.errorTitle') }}
           </div>
-          <pre><code class="typescript">const user: User = {
-  id: 1,
-  name: "张三",
-  email: "zhangsan@example.com",
-  age: "25"  // ❌ 错误：age 应该是 number，不是 string
-}</code></pre>
+          <pre><code class="typescript">{{ t('interfaceDemo.examples.errorCode') }}</code></pre>
         </div>
       </div>
     </div>

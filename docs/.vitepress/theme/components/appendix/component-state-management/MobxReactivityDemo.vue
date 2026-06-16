@@ -2,19 +2,19 @@
   <div class="mobx-reactivity-demo">
     <div class="demo-header">
       <span class="icon">⚡</span>
-      <span class="title">MobX 响应式原理</span>
-      <span class="subtitle">自动追踪依赖的魔法</span>
+      <span class="title">{{ t('mobx.title') }}</span>
+      <span class="subtitle">{{ t('mobx.subtitle') }}</span>
     </div>
 
     <div class="intro-text">
-      想象你在<span class="highlight">魔术表演</span>现场：魔术师（Observable）改变物品，所有盯着看的观众（Reaction）都会自动注意到变化，不需要一个个去通知他们。
+      {{ t('mobx.introPrefix') }}<span class="highlight">{{ t('mobx.introHighlight') }}</span>{{ t('mobx.introSuffix') }}
     </div>
 
     <div class="demo-content">
       <div class="state-display">
         <div class="state-header">
           <span class="state-icon">📦</span>
-          <span class="state-title">Observable 状态</span>
+          <span class="state-title">{{ t('mobx.stateTitle') }}</span>
         </div>
         <div class="todo-list">
           <div
@@ -33,16 +33,16 @@
       <div class="reaction-display">
         <div class="reaction-header">
           <span class="reaction-icon">🔄</span>
-          <span class="reaction-title">自动响应</span>
+          <span class="reaction-title">{{ t('mobx.reactionTitle') }}</span>
         </div>
         <div class="reaction-stats">
           <div class="stat-item">
-            <span class="stat-label">总计：</span>
-            <span class="stat-value">{{ todos.length }} 项</span>
+            <span class="stat-label">{{ t('mobx.total') }}</span>
+            <span class="stat-value">{{ todos.length }} {{ t('mobx.itemUnit') }}</span>
           </div>
           <div class="stat-item">
-            <span class="stat-label">已完成：</span>
-            <span class="stat-value completed">{{ completedCount }} 项</span>
+            <span class="stat-label">{{ t('mobx.completed') }}</span>
+            <span class="stat-value completed">{{ completedCount }} {{ t('mobx.itemUnit') }}</span>
           </div>
         </div>
       </div>
@@ -50,7 +50,7 @@
       <div class="interaction-area">
         <input
           v-model="newTodoText"
-          placeholder="输入待办事项..."
+          :placeholder="t('mobx.inputPlaceholder')"
           class="todo-input"
           @keyup.enter="addTodo"
         >
@@ -58,24 +58,27 @@
           class="add-btn"
           @click="addTodo"
         >
-          ➕ 添加
+          {{ t('mobx.add') }}
         </button>
       </div>
     </div>
 
     <div class="info-box">
       <span class="icon">💡</span>
-      <strong>核心思想：</strong>MobX 自动追踪状态和响应的关系，状态变化时自动触发相关更新。就像魔术，你只管改变数据，UI 会自动更新。
+      <strong>{{ t('common.coreIdea') }}</strong>{{ t('mobx.idea') }}
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { ref, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { componentStateManagementLocale } from '../../../locales/component-state-management/index.js'
+
+const { t, messages } = useI18n(componentStateManagementLocale)
 
 const todos = ref([
-  { id: 1, text: '学习 MobX', completed: false },
-  { id: 2, text: '理解响应式原理', completed: true }
+  ...messages.value.mobx.todos.map(todo => ({ ...todo }))
 ])
 
 const newTodoText = ref('')

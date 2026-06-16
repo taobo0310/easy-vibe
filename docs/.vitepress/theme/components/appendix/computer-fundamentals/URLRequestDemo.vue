@@ -1,15 +1,15 @@
 <template>
   <div class="url-demo">
     <div class="demo-header">
-      <div class="demo-title">URL 访问全流程</div>
-      <button class="play-btn" @click="autoPlay" :disabled="playing">
-        {{ playing ? '播放中...' : '▶ 自动演示' }}
+      <div class="demo-title">{{ t('powerOnToWeb.url.title') }}</div>
+      <button class="play-btn" :disabled="playing" @click="autoPlay">
+        {{ playing ? t('powerOnToWeb.url.playing') : t('powerOnToWeb.url.autoPlay') }}
       </button>
     </div>
 
     <div class="flow">
       <div class="flow-side client-side">
-        <div class="side-label">浏览器</div>
+        <div class="side-label">{{ t('powerOnToWeb.url.browser') }}</div>
       </div>
 
       <div class="flow-steps">
@@ -36,29 +36,23 @@
       </div>
 
       <div class="flow-side server-side">
-        <div class="side-label">服务器</div>
+        <div class="side-label">{{ t('powerOnToWeb.url.server') }}</div>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onUnmounted } from 'vue'
+import { ref, computed, onUnmounted } from 'vue'
+import { useI18n } from '../../../composables/useI18n'
+import { computerFundamentalsLocale } from '../../../locales/computer-fundamentals'
 
+const { t, messages } = useI18n(computerFundamentalsLocale)
 const current = ref(-1)
 const playing = ref(false)
 let timer = null
 
-const steps = [
-  { name: 'URL 解析', dir: 'right', detail: 'https://example.com → 协议: https, 域名: example.com, 路径: /' },
-  { name: 'DNS 解析', dir: 'right', detail: '向 DNS 服务器查询，将域名翻译为 IP 地址 93.184.216.34' },
-  { name: 'TCP 三次握手', dir: 'right', detail: 'SYN → SYN-ACK → ACK，建立可靠的传输连接' },
-  { name: 'TLS 握手', dir: 'right', detail: '交换密钥、验证证书，建立 HTTPS 加密通道' },
-  { name: '发送 HTTP 请求', dir: 'right', detail: 'GET /index.html HTTP/1.1  Host: example.com' },
-  { name: '服务器处理', dir: 'left', detail: '解析请求 → 执行业务逻辑 → 查询数据库 → 组装响应' },
-  { name: '返回 HTTP 响应', dir: 'left', detail: 'HTTP/1.1 200 OK  Content-Type: text/html' },
-  { name: '浏览器渲染', dir: 'left', detail: 'HTML → DOM 树 → 样式计算 → 布局 → 绘制到屏幕' }
-]
+const steps = computed(() => messages.value.powerOnToWeb.url.steps)
 
 const autoPlay = () => {
   if (timer) clearInterval(timer)
@@ -68,7 +62,7 @@ const autoPlay = () => {
   timer = setInterval(() => {
     current.value = i
     i++
-    if (i >= steps.length) {
+    if (i >= steps.value.length) {
       if (timer) clearInterval(timer)
       playing.value = false
     }

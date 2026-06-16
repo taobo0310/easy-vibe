@@ -1,8 +1,8 @@
 <template>
   <div class="search-algorithm-demo">
     <div class="demo-header">
-      <span class="title">查找算法</span>
-      <span class="subtitle">如何在数据中找到目标</span>
+      <span class="title">{{ t('algorithmThinking.search.title') }}</span>
+      <span class="subtitle">{{ t('algorithmThinking.search.subtitle') }}</span>
     </div>
 
     <div class="algorithm-selector">
@@ -10,19 +10,20 @@
         :class="['algo-btn', { active: activeAlgo === 'linear' }]"
         @click="activeAlgo = 'linear'"
       >
-        顺序查找
+        {{ t('algorithmThinking.search.linearTab') }}
       </button>
       <button
         :class="['algo-btn', { active: activeAlgo === 'binary' }]"
         @click="activeAlgo = 'binary'"
       >
-        二分查找
+        {{ t('algorithmThinking.search.binaryTab') }}
       </button>
     </div>
 
-    <!-- 顺序查找 -->
     <div v-if="activeAlgo === 'linear'" class="algo-content">
-      <div class="content-title">顺序查找：一个一个找</div>
+      <div class="content-title">
+        {{ t('algorithmThinking.search.linearTitle') }}
+      </div>
       <div class="linear-demo">
         <div class="search-array">
           <div
@@ -41,12 +42,14 @@
         </div>
         <div class="search-controls">
           <button class="search-btn" @click="startLinearSearch">
-            开始查找
+            {{ t('algorithmThinking.search.startSearch') }}
           </button>
-          <button class="reset-btn" @click="reset">重置</button>
+          <button class="reset-btn" @click="reset">
+            {{ t('algorithmThinking.search.reset') }}
+          </button>
         </div>
         <div class="search-info">
-          目标数字：<input
+          {{ t('algorithmThinking.search.targetNumber') }}<input
             v-model="targetNumber"
             type="number"
             class="target-input"
@@ -54,14 +57,17 @@
         </div>
       </div>
       <div class="algo-stats">
-        <div class="stat-item">时间复杂度：O(n)</div>
-        <div class="stat-item">适用：无序数组</div>
+        <div class="stat-item">
+          {{ t('algorithmThinking.search.timeComplexity', { value: 'O(n)' }) }}
+        </div>
+        <div class="stat-item">{{ t('algorithmThinking.search.linearUse') }}</div>
       </div>
     </div>
 
-    <!-- 二分查找 -->
     <div v-if="activeAlgo === 'binary'" class="algo-content">
-      <div class="content-title">二分查找：每次排除一半</div>
+      <div class="content-title">
+        {{ t('algorithmThinking.search.binaryTitle') }}
+      </div>
       <div class="binary-demo">
         <div class="sorted-array">
           <div
@@ -81,40 +87,51 @@
         </div>
         <div class="binary-info">
           <div class="info-step">
-            查找范围：[{{ binaryLeft }}, {{ binaryRight }}]
+            {{ t('algorithmThinking.search.range', { left: binaryLeft, right: binaryRight }) }}
           </div>
-          <div class="info-mid">中间位置：{{ binaryMid }}</div>
+          <div class="info-mid">
+            {{ t('algorithmThinking.search.middle', { mid: binaryMid }) }}
+          </div>
           <div class="info-comparison">
             {{ sortedNumbers[binaryMid] }} vs {{ binaryTarget }}
           </div>
         </div>
         <div class="search-controls">
-          <button class="search-btn" @click="binaryStep">下一步</button>
-          <button class="reset-btn" @click="resetBinary">重置</button>
+          <button class="search-btn" @click="binaryStep">
+            {{ t('algorithmThinking.search.nextStep') }}
+          </button>
+          <button class="reset-btn" @click="resetBinary">
+            {{ t('algorithmThinking.search.reset') }}
+          </button>
         </div>
       </div>
       <div class="algo-stats">
-        <div class="stat-item">时间复杂度：O(log n)</div>
-        <div class="stat-item">适用：有序数组</div>
+        <div class="stat-item">
+          {{ t('algorithmThinking.search.timeComplexity', { value: 'O(log n)' }) }}
+        </div>
+        <div class="stat-item">{{ t('algorithmThinking.search.binaryUse') }}</div>
       </div>
     </div>
 
-    <!-- 对比 -->
     <div class="comparison">
-      <div class="comparison-title">性能对比</div>
+      <div class="comparison-title">
+        {{ t('algorithmThinking.search.comparisonTitle') }}
+      </div>
       <table class="comparison-table">
         <thead>
           <tr>
-            <th>数据量</th>
-            <th>顺序查找</th>
-            <th>二分查找</th>
+            <th>{{ t('algorithmThinking.search.dataSize') }}</th>
+            <th>{{ t('algorithmThinking.search.linearTab') }}</th>
+            <th>{{ t('algorithmThinking.search.binaryTab') }}</th>
           </tr>
         </thead>
         <tbody>
           <tr v-for="n in [10, 100, 1000, 10000]" :key="n">
             <td>{{ n }}</td>
-            <td>最多 {{ n }} 次</td>
-            <td>最多 {{ Math.ceil(Math.log2(n)) }} 次</td>
+            <td>{{ t('algorithmThinking.search.atMostTimes', { count: n }) }}</td>
+            <td>
+              {{ t('algorithmThinking.search.atMostTimes', { count: Math.ceil(Math.log2(n)) }) }}
+            </td>
           </tr>
         </tbody>
       </table>
@@ -124,6 +141,10 @@
 
 <script setup>
 import { ref, onUnmounted } from 'vue'
+import { useI18n } from '../../../composables/useI18n'
+import { computerFundamentalsLocale } from '../../../locales/computer-fundamentals'
+
+const { t } = useI18n(computerFundamentalsLocale)
 
 const activeAlgo = ref('linear')
 const targetNumber = ref(7)

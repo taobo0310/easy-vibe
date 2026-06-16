@@ -1,15 +1,15 @@
 <template>
   <div class="demo-wrapper">
-    <div class="demo-header">Server-Sent Events / 单向流推送演示</div>
+    <div class="demo-header">{{ t('sse.title') }}</div>
     
     <div class="network-stage">
-      <!-- 客户端 -->
+      
       <div class="node client">
         <div class="node-icon">📱</div>
         <div class="node-label">Client</div>
       </div>
 
-      <!-- 通信链路（带动画的管道） -->
+      
       <div class="channel">
         <div class="pipe" v-show="isConnected">
           <div class="pipe-flow"></div>
@@ -23,28 +23,28 @@
         </div>
       </div>
 
-      <!-- 服务端 -->
+      
       <div class="node server">
         <div class="node-icon">☁️</div>
-        <div class="node-label">Server (流管道)</div>
-        <button 
-          v-if="isConnected" 
-          class="action-btn" 
+        <div class="node-label">{{ t('sse.server') }}</div>
+        <button
+          v-if="isConnected"
+          class="action-btn"
           @click="pushEvent"
         >
-          推送大盘数据 👇
+          {{ t('sse.pushData') }}
         </button>
       </div>
     </div>
 
     <div class="status-panel">
       <div class="status-controls">
-        <button 
-          class="toggle-btn" 
-          :class="{ active: isConnected }" 
+        <button
+          class="toggle-btn"
+          :class="{ active: isConnected }"
           @click="toggleConnection"
         >
-          {{ isConnected ? '⏹ 断开 SSE 连接' : '▶ 建立 SSE 流连接' }}
+          {{ isConnected ? t('sse.disconnect') : t('sse.connect') }}
         </button>
       </div>
       <div class="log-box">
@@ -58,6 +58,10 @@
 
 <script setup>
 import { ref, onUnmounted } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { browserFrontendLocale } from '../../../locales/browser-frontend/index.js'
+
+const { t } = useI18n(browserFrontendLocale)
 
 const isConnected = ref(false)
 const activeMessages = ref([])
@@ -72,29 +76,29 @@ const addLog = (msg) => {
 const toggleConnection = () => {
   if (isConnected.value) {
     isConnected.value = false
-    addLog('客户端：主动断开连接 (Connection: close)')
+    addLog(t('sse.logClientDisconnect'))
     activeMessages.value = []
   } else {
     isConnected.value = true
-    addLog('客户端：发起 HTTP Get, Accept: text/event-stream')
+    addLog(t('sse.logClientConnect'))
     setTimeout(() => {
-      addLog('服务端：保持连接不断开，随时准备单向下发数据。')
+      addLog(t('sse.logServerReady'))
     }, 600)
   }
 }
 
 const pushEvent = () => {
-  const stockPrices = ['上证指数 3012.3', '茅台 ¥1750', '宁德时代涨停', '中石油跌 -1%']
+  const stockPrices = ['SSE 3012.3', 'Moutai ¥1750', 'CATL Limit Up', 'PetroChina -1%']
   const randomMsg = stockPrices[Math.floor(Math.random() * stockPrices.length)]
-  
+
   const msgObj = { id: msgId++, text: randomMsg }
   activeMessages.value.push(msgObj)
-  addLog(`服务端：向管道喷射数据 "data: ${randomMsg}\\n\\n"`)
-  
-  // 模拟动画结束移除
+  addLog(t('sse.logServerPush').replace('{data}', randomMsg))
+
+
   setTimeout(() => {
     activeMessages.value = activeMessages.value.filter(m => m.id !== msgObj.id)
-    addLog(`客户端：触发 onmessage 事件，拿到数据：${randomMsg}`)
+    addLog(t('sse.logClientReceive').replace('{data}', randomMsg))
   }, 1200)
 }
 

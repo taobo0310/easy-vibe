@@ -2,49 +2,38 @@
   <div class="mpa-routing-demo">
     <div class="demo-header">
       <span class="icon">🔄</span>
-      <span class="title">MPA vs SPA</span>
-      <span class="subtitle">多页面 vs 单页面导航</span>
+      <span class="title">{{ t('mpa.title') }}</span>
+      <span class="subtitle">{{ t('mpa.subtitle') }}</span>
     </div>
 
     <div class="intro-text">
-      想象你在<span class="highlight">餐厅吃饭</span>：MPA像是每次点菜都<span class="highlight">换一家餐厅</span>（重新加载整个页面），SPA则是在同一家餐厅换菜品（只更新需要变化的部分）。显然，SPA体验更流畅！
+      {{ t('mpa.intro.prefix') }}<span class="highlight">{{ t('mpa.intro.highlight1') }}</span>{{ t('mpa.intro.middle') }}<span class="highlight">{{ t('mpa.intro.highlight2') }}</span>{{ t('mpa.intro.suffix') }}
     </div>
 
     <div class="comparison-container">
       <div class="mode-box mpa">
         <div class="mode-header">
           <span class="mode-icon">🏢</span>
-          <span class="mode-title">MPA (多页面应用)</span>
+          <span class="mode-title">{{ t('mpa.mpaTitle') }}</span>
         </div>
         <div class="flow-steps">
-          <div class="step">
-            1. 用户点击链接
-          </div>
-          <div class="step">
-            2. 浏览器发送 HTTP 请求
-          </div>
-          <div class="step">
-            3. 服务器返回完整 HTML
-          </div>
-          <div class="step">
-            4. 浏览器解析并渲染新页面
-          </div>
-          <div class="step">
-            5. 页面资源重新加载 (JS/CSS)
+          <div
+            v-for="step in mpaSteps"
+            :key="step"
+            class="step"
+          >
+            {{ step }}
           </div>
         </div>
         <div class="mode-features">
-          <div class="feature">
-            <span class="feature-icon">✓</span>
-            <span>SEO 友好</span>
-          </div>
-          <div class="feature">
-            <span class="feature-icon">✓</span>
-            <span>首屏快</span>
-          </div>
-          <div class="feature bad">
-            <span class="feature-icon">✗</span>
-            <span>页面有白屏</span>
+          <div
+            v-for="feature in mpaFeatures"
+            :key="feature.text"
+            class="feature"
+            :class="{ bad: feature.bad }"
+          >
+            <span class="feature-icon">{{ feature.icon }}</span>
+            <span>{{ feature.text }}</span>
           </div>
         </div>
       </div>
@@ -52,40 +41,26 @@
       <div class="mode-box spa">
         <div class="mode-header">
           <span class="mode-icon">⚡</span>
-          <span class="mode-title">SPA (单页面应用)</span>
+          <span class="mode-title">{{ t('mpa.spaTitle') }}</span>
         </div>
         <div class="flow-steps">
-          <div class="step">
-            1. 用户点击链接
-          </div>
-          <div class="step">
-            2. 拦截默认行为
-          </div>
-          <div class="step">
-            3. 更新 URL (History API)
-          </div>
-          <div class="step">
-            4. 匹配路由配置
-          </div>
-          <div class="step">
-            5. 动态渲染新组件
-          </div>
-          <div class="step">
-            6. 页面无刷新更新
+          <div
+            v-for="step in spaSteps"
+            :key="step"
+            class="step"
+          >
+            {{ step }}
           </div>
         </div>
         <div class="mode-features">
-          <div class="feature">
-            <span class="feature-icon">✓</span>
-            <span>过渡流畅</span>
-          </div>
-          <div class="feature">
-            <span class="feature-icon">✓</span>
-            <span>体验好</span>
-          </div>
-          <div class="feature bad">
-            <span class="feature-icon">✗</span>
-            <span>需要 SSR 支持 SEO</span>
+          <div
+            v-for="feature in spaFeatures"
+            :key="feature.text"
+            class="feature"
+            :class="{ bad: feature.bad }"
+          >
+            <span class="feature-icon">{{ feature.icon }}</span>
+            <span>{{ feature.text }}</span>
           </div>
         </div>
       </div>
@@ -93,19 +68,21 @@
 
     <div class="info-box">
       <span class="icon">💡</span>
-      <strong>核心区别：</strong>MPA每次跳转都要重新下载整个页面，SPA只在首次加载时下载，后续只更新变化的内容。这就是为什么SPA感觉"更快"的原因。
+      <strong>{{ t('common.coreDifference') }}</strong>{{ t('mpa.info') }}
     </div>
   </div>
 </template>
 
 <script setup>
-const comparisonData = [
-  { feature: '页面加载', mpa: '每次跳转加载完整页面', spa: '首次加载后只更新内容' },
-  { feature: 'URL 变化', mpa: '浏览器地址栏正常变化', spa: 'History API 控制 URL' },
-  { feature: '用户体验', mpa: '页面有白屏闪烁', spa: '过渡流畅无刷新' },
-  { feature: 'SEO 友好', mpa: '天生对搜索引擎友好', spa: '需要 SSR/预渲染优化' },
-  { feature: '首屏时间', mpa: '较快（只加载当前页）', spa: '较慢（需加载完整应用）' }
-]
+import { computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { frontendRoutingLocale } from '../../../locales/frontend-routing/index.js'
+
+const { t, messages } = useI18n(frontendRoutingLocale)
+const mpaSteps = computed(() => messages.value.mpa.mpaSteps)
+const spaSteps = computed(() => messages.value.mpa.spaSteps)
+const mpaFeatures = computed(() => messages.value.mpa.mpaFeatures)
+const spaFeatures = computed(() => messages.value.mpa.spaFeatures)
 </script>
 
 <style scoped>

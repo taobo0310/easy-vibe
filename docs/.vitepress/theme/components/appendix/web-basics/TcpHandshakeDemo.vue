@@ -1,17 +1,16 @@
 <template>
   <div class="tcp-handshake-demo custom-demo-base">
-    <div class="demo-label">TCP 三次握手 ── 建立可靠通话渠道</div>
+    <div class="demo-label">{{ t('network.tcpHandshake.label') }}</div>
     <div class="demo-panel">
       
       <!-- Sequence Diagram area -->
       <div class="sequence-container">
         
-        <!-- Computer Left -->
         <div class="endpoint client">
           <div class="icon">💻</div>
-          <div class="name">浏览器 (你)</div>
+          <div class="name">{{ t('network.tcpHandshake.client') }}</div>
           <div class="state" :class="{ established: step >= 3 }">
-            {{ step >= 3 ? '连接成功' : '等待连接' }}
+            {{ step >= 3 ? t('network.tcpHandshake.connected') : t('network.tcpHandshake.waiting') }}
           </div>
         </div>
 
@@ -20,50 +19,46 @@
           <div class="timeline-line client-line"></div>
           <div class="timeline-line server-line"></div>
 
-          <!-- Step 1: SYN -->
           <transition name="msg-right">
             <div v-if="step >= 1" class="message msg-syn">
               <div class="msg-box">
-                <div class="msg-title">第1次握手: SYN</div>
-                <div class="msg-desc">"喂，服务器老哥在吗？我能发信息，你能收到吗？"</div>
+                <div class="msg-title">{{ messagesList[0].title }}</div>
+                <div class="msg-desc">{{ messagesList[0].desc }}</div>
               </div>
             </div>
           </transition>
 
-          <!-- Step 2: SYN-ACK -->
           <transition name="msg-left">
             <div v-if="step >= 2" class="message msg-syn-ack">
               <div class="msg-box">
-                <div class="msg-title">第2次握手: SYN-ACK</div>
-                <div class="msg-desc">"在！我收到了！那你现在能听到我说话吗？"</div>
+                <div class="msg-title">{{ messagesList[1].title }}</div>
+                <div class="msg-desc">{{ messagesList[1].desc }}</div>
               </div>
             </div>
           </transition>
 
-          <!-- Step 3: ACK -->
           <transition name="msg-right">
             <div v-if="step >= 3" class="message msg-ack">
               <div class="msg-box">
-                <div class="msg-title">第3次握手: ACK</div>
-                <div class="msg-desc">"我就知道你听到了，证实通道没问题，准备聊正事！"</div>
+                <div class="msg-title">{{ messagesList[2].title }}</div>
+                <div class="msg-desc">{{ messagesList[2].desc }}</div>
               </div>
             </div>
           </transition>
         </div>
 
-        <!-- Server Right -->
         <div class="endpoint server">
           <div class="icon">🖥️</div>
-          <div class="name">Google 服务器</div>
+          <div class="name">{{ t('network.tcpHandshake.server') }}</div>
           <div class="state" :class="{ established: step >= 3 }">
-            {{ step >= 3 ? '连接成功' : '等待连接' }}
+            {{ step >= 3 ? t('network.tcpHandshake.connected') : t('network.tcpHandshake.waiting') }}
           </div>
         </div>
       </div>
 
       <div class="action-bar">
-        <button v-if="step === 0" class="action-btn" @click="startHandshake">发起连接</button>
-        <button v-if="step >= 3" class="action-btn outline" @click="reset">断开重连</button>
+        <button v-if="step === 0" class="action-btn" @click="startHandshake">{{ t('network.tcpHandshake.start') }}</button>
+        <button v-if="step >= 3" class="action-btn outline" @click="reset">{{ t('network.tcpHandshake.reset') }}</button>
       </div>
 
     </div>
@@ -75,16 +70,16 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { webBasicsLocale } from '../../../locales/web-basics/index.js'
+
+const { t, messages } = useI18n(webBasicsLocale)
 
 const step = ref(0)
-const statusList = [
-  '点击【发起连接】模拟 TCP 三次握手过程',
-  '发送 SYN 包: 浏览器试探服务器接收能力...',
-  '回复 SYN-ACK 包: 服务器确认接收并试探浏览器...',
-  '回复 ACK 包: 浏览器再次确认。双方通道建立完毕，可以正式发请求！'
-]
 
-const statusText = computed(() => statusList[step.value])
+const messagesList = computed(() => messages.value.network.tcpHandshake.messages)
+const statusList = computed(() => messages.value.network.tcpHandshake.status)
+const statusText = computed(() => statusList.value[step.value])
 
 const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
 

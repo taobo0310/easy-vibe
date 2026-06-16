@@ -1,28 +1,24 @@
-<!--
-  AgentFutureDemo.vue
-  Agent 未来方向：点选趋势，看看“会带来什么变化”和“现在就能做的准备”。
--->
 <template>
   <div class="future">
     <div class="header">
       <div>
         <div class="title">
-          Agent 的未来：更稳、更强、更协作
+          {{ t('future.title') }}
         </div>
         <div class="subtitle">
-          点一个趋势，看它意味着什么。
+          {{ t('future.subtitle') }}
         </div>
       </div>
     </div>
 
     <div class="chips">
       <button
-        v-for="t in trends"
-        :key="t.id"
-        :class="['chip', { active: current.id === t.id }]"
-        @click="current = t"
+        v-for="trend in trends"
+        :key="trend.id"
+        :class="['chip', { active: current.id === trend.id }]"
+        @click="current = trend"
       >
-        {{ t.label }}
+        {{ trend.label }}
       </button>
     </div>
 
@@ -36,7 +32,7 @@
       <div class="grid">
         <div class="card">
           <div class="k">
-            会带来什么？
+            {{ t('future.impact') }}
           </div>
           <div class="v">
             {{ current.impact }}
@@ -44,7 +40,7 @@
         </div>
         <div class="card">
           <div class="k">
-            你现在能做什么准备？
+            {{ t('future.prepare') }}
           </div>
           <div class="v">
             {{ current.prepare }}
@@ -56,40 +52,18 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { computed, ref, watch } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { agentIntroLocale } from '../../../locales/agent-intro/index.js'
 
-const trends = [
-  {
-    id: 'planning',
-    label: '更强规划',
-    desc: '把大目标拆成更合理的子任务，并能动态改计划。',
-    impact: '更少跑题、更少漏步骤，复杂任务成功率更高。',
-    prepare: '学会写“计划/检查点”，并把任务拆成可验收小块。'
-  },
-  {
-    id: 'memory',
-    label: '更好记忆',
-    desc: '长期记住偏好、事实与项目状态，跨任务复用。',
-    impact: '更像长期同事：越用越懂你，重复工作更少。',
-    prepare: '设计记忆结构：短期/长期/工作记忆，并做好隐私与脱敏。'
-  },
-  {
-    id: 'multi',
-    label: '多 Agent 协作',
-    desc: '多个角色并行处理，再由协调者合并输出。',
-    impact: '大任务并行化，质量更稳（研究/实现/评审分工）。',
-    prepare: '先把“角色边界”和“交付格式”定义清楚。'
-  },
-  {
-    id: 'safety',
-    label: '更强安全护栏',
-    desc: '更细的权限、确认与审计，降低工具滥用风险。',
-    impact: '更容易上线到真实业务场景，减少事故。',
-    prepare: '默认开启：最大步数、预算上限、危险操作确认、沙箱。'
-  }
-]
+const { t, messages } = useI18n(agentIntroLocale)
+const trends = computed(() => messages.value.future.trends)
 
-const current = ref(trends[0])
+const current = ref(trends.value[0])
+
+watch(trends, (next) => {
+  current.value = next.find((item) => item.id === current.value?.id) || next[0]
+})
 </script>
 
 <style scoped>

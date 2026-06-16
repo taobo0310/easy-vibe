@@ -1,8 +1,8 @@
 <template>
   <div class="psw-demo">
     <div class="demo-header">
-      <span class="title">程序状态字 (PSW)</span>
-      <span class="subtitle">CPU 的"状态指示灯"</span>
+      <span class="title">{{ t('computerOrganization.psw.title') }}</span>
+      <span class="subtitle">{{ t('computerOrganization.psw.subtitle') }}</span>
     </div>
 
     <div class="flags-layout">
@@ -15,42 +15,42 @@
       </div>
     </div>
 
-    <div class="flag-details" v-if="selectedFlag">
+    <div v-if="selectedFlag" class="flag-details">
       <div class="details-header">
         <span class="flag-title">{{ selectedFlag.name }} - {{ selectedFlag.fullName }}</span>
       </div>
       <div class="details-content">
         <div class="detail-row">
-          <span class="detail-label">英文名：</span>
+          <span class="detail-label">{{ t('computerOrganization.psw.englishName') }}</span>
           <span class="detail-value">{{ selectedFlag.english }}</span>
         </div>
         <div class="detail-row">
-          <span class="detail-label">作用：</span>
+          <span class="detail-label">{{ t('computerOrganization.psw.role') }}</span>
           <span class="detail-value">{{ selectedFlag.description }}</span>
         </div>
         <div class="detail-row">
-          <span class="detail-label">设置条件：</span>
+          <span class="detail-label">{{ t('computerOrganization.psw.setCondition') }}</span>
           <span class="detail-value">{{ selectedFlag.setCondition }}</span>
         </div>
         <div class="detail-row">
-          <span class="detail-label">用途：</span>
+          <span class="detail-label">{{ t('computerOrganization.psw.usage') }}</span>
           <span class="detail-value">{{ selectedFlag.usage }}</span>
         </div>
       </div>
     </div>
 
     <div class="operation-demo">
-      <div class="demo-title">运算结果对标志位的影响</div>
+      <div class="demo-title">{{ t('computerOrganization.psw.operationTitle') }}</div>
       
       <div class="operation-panel">
         <div class="operand-inputs">
           <div class="input-group">
-            <label>操作数 A：</label>
-            <input type="number" v-model.number="operandA" class="num-input" />
+            <label>{{ t('computerOrganization.psw.operandA') }}</label>
+            <input v-model.number="operandA" type="number" class="num-input" />
           </div>
           <div class="input-group">
-            <label>操作数 B：</label>
-            <input type="number" v-model.number="operandB" class="num-input" />
+            <label>{{ t('computerOrganization.psw.operandB') }}</label>
+            <input v-model.number="operandB" type="number" class="num-input" />
           </div>
         </div>
         
@@ -62,7 +62,7 @@
         </div>
         
         <div class="result-display">
-          <div class="result-label">运算结果：</div>
+          <div class="result-label">{{ t('computerOrganization.psw.resultLabel') }}</div>
           <div class="result-value">{{ result }}</div>
         </div>
         
@@ -77,22 +77,12 @@
     </div>
 
     <div class="psw-usage">
-      <div class="usage-title">标志位的典型用途</div>
+      <div class="usage-title">{{ t('computerOrganization.psw.usageTitle') }}</div>
       <div class="usage-grid">
-        <div class="usage-card">
-          <div class="usage-icon">🔀</div>
-          <div class="usage-name">条件跳转</div>
-          <div class="usage-desc">JE (相等跳转)、JNE、JG、JL 等指令根据 ZF、SF、OF 决定是否跳转</div>
-        </div>
-        <div class="usage-card">
-          <div class="usage-icon">➕</div>
-          <div class="usage-name">算术运算</div>
-          <div class="usage-desc">多位数运算需要 CF 判断进位，OF 判断溢出</div>
-        </div>
-        <div class="usage-card">
-          <div class="usage-icon">🔄</div>
-          <div class="usage-name">循环控制</div>
-          <div class="usage-desc">循环指令使用 ZF 判断循环结束条件</div>
+        <div v-for="card in usageCards" :key="card.name" class="usage-card">
+          <div class="usage-icon">{{ card.icon }}</div>
+          <div class="usage-name">{{ card.name }}</div>
+          <div class="usage-desc">{{ card.desc }}</div>
         </div>
       </div>
     </div>
@@ -100,51 +90,41 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { computed, ref, watch } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { computerFundamentalsLocale } from '../../../locales/computer-fundamentals/index.js'
+
+const { t, messages } = useI18n(computerFundamentalsLocale)
 
 const selectedFlag = ref(null)
 const operandA = ref(10)
 const operandB = ref(5)
 const result = ref(0)
 
-const flags = ref([
-  { name: 'CF', fullName: '进位标志', english: 'Carry Flag', value: 0, 
-    description: '无符号数运算产生进位或借位时置 1',
-    setCondition: '加法产生进位，或减法产生借位',
-    usage: '多位数无符号运算、循环计数' },
-  { name: 'PF', fullName: '奇偶标志', english: 'Parity Flag', value: 0,
-    description: '结果的低 8 位中 1 的个数为偶数时置 1',
-    setCondition: '结果低 8 位有偶数个 1',
-    usage: '数据通信中的错误检测' },
-  { name: 'AF', fullName: '辅助进位', english: 'Auxiliary Carry Flag', value: 0,
-    description: '低 4 位产生进位或借位时置 1',
-    setCondition: '第 3 位（低 4 位）产生进位',
-    usage: 'BCD 码运算调整' },
-  { name: 'ZF', fullName: '零标志', english: 'Zero Flag', value: 0,
-    description: '运算结果为 0 时置 1',
-    setCondition: '结果 = 0',
-    usage: '条件跳转、循环控制、比较操作' },
-  { name: 'SF', fullName: '符号标志', english: 'Sign Flag', value: 0,
-    description: '运算结果为负数时置 1（等于结果最高位）',
-    setCondition: '结果最高位 = 1（负数）',
-    usage: '有符号数大小比较、负数判断' },
-  { name: 'TF', fullName: '陷阱标志', english: 'Trap Flag', value: 0,
-    description: '置 1 时 CPU 进入单步调试模式',
-    setCondition: '软件设置',
-    usage: '程序调试' },
-  { name: 'IF', fullName: '中断标志', english: 'Interrupt Flag', value: 1,
-    description: '置 1 时 CPU 响应可屏蔽中断',
-    setCondition: '软件设置',
-    usage: '中断开关' },
-  { name: 'DF', fullName: '方向标志', english: 'Direction Flag', value: 0,
-    description: '置 1 时字符串操作从高地址向低地址',
-    setCondition: '软件设置',
-    usage: '字符串操作方向控制' },
-  { name: 'OF', fullName: '溢出标志', english: 'Overflow Flag', value: 0,
-    description: '有符号数运算结果超出表示范围时置 1',
-    setCondition: '正溢出或负溢出',
-    usage: '有符号数运算、溢出检测' }
-])
+const createFlags = () =>
+  messages.value.computerOrganization.psw.flags.map((flag) => ({
+    name: flag[0],
+    fullName: flag[1],
+    english: flag[2],
+    value: flag[3],
+    description: flag[4],
+    setCondition: flag[5],
+    usage: flag[6]
+  }))
+
+const flags = ref(createFlags())
+const usageCards = computed(() => messages.value.computerOrganization.psw.usageCards)
+
+watch(messages, () => {
+  const values = new Map(flags.value.map(flag => [flag.name, flag.value]))
+  flags.value = createFlags().map(flag => ({
+    ...flag,
+    value: values.has(flag.name) ? values.get(flag.name) : flag.value
+  }))
+  if (selectedFlag.value) {
+    selectedFlag.value = flags.value.find(flag => flag.name === selectedFlag.value.name) ?? null
+  }
+})
 
 const toggleFlag = (flag) => {
   flag.value = flag.value === 1 ? 0 : 1

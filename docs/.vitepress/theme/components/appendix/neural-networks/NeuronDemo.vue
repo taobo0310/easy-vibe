@@ -1,17 +1,13 @@
-<!--
-  NeuronDemo.vue
-  神经元结构演示：展示单个神经元的工作原理
--->
 <template>
   <div class="neuron-demo">
     <div class="header">
-      <div class="title">神经元工作原理</div>
-      <div class="subtitle">调整输入和权重，观察神经元的输出变化</div>
+      <div class="title">{{ t('neuron.title') }}</div>
+      <div class="subtitle">{{ t('neuron.subtitle') }}</div>
     </div>
 
     <div class="neuron-layout">
       <div class="inputs-col">
-        <div class="col-label">输入 × 权重</div>
+        <div class="col-label">{{ t('neuron.inputWeightLabel') }}</div>
         <div v-for="(inp, i) in inputs" :key="i" class="input-row">
           <div class="input-pair">
             <label>x{{ i + 1 }}</label>
@@ -31,22 +27,22 @@
 
       <div class="output-col">
         <div class="sum-box">
-          <div class="sum-label">加权求和 + 偏置({{ bias.toFixed(1) }})</div>
+          <div class="sum-label">{{ t('neuron.weightedSumLabel', { bias: bias.toFixed(1) }) }}</div>
           <div class="sum-value">{{ weightedSum.toFixed(2) }}</div>
         </div>
         <div class="arrow">↓</div>
         <div class="activation-box">
-          <div class="act-label">激活函数: {{ activationName }}</div>
+          <div class="act-label">{{ t('neuron.activationLabel', { name: activationName }) }}</div>
           <div class="act-value">{{ activationOutput.toFixed(4) }}</div>
         </div>
         <div class="controls">
           <div class="control-row">
-            <label>偏置 b</label>
+            <label>{{ t('neuron.biasLabel') }}</label>
             <input v-model.number="bias" type="range" min="-2" max="2" step="0.1" />
             <span class="val">{{ bias.toFixed(1) }}</span>
           </div>
           <div class="control-row">
-            <label>激活函数</label>
+            <label>{{ t('neuron.activationSelectLabel') }}</label>
             <select v-model="activation">
               <option value="sigmoid">Sigmoid</option>
               <option value="relu">ReLU</option>
@@ -61,6 +57,10 @@
 
 <script setup>
 import { ref, reactive, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { neuralNetworksLocale } from '../../../locales/neural-networks/index.js'
+
+const { t, messages } = useI18n(neuralNetworksLocale)
 
 const inputs = reactive([
   { value: 0.5, weight: 0.8 },
@@ -72,8 +72,7 @@ const bias = ref(0.1)
 const activation = ref('sigmoid')
 
 const activationName = computed(() => {
-  const names = { sigmoid: 'Sigmoid', relu: 'ReLU', tanh: 'Tanh' }
-  return names[activation.value]
+  return messages.value.neuron.activations[activation.value]
 })
 
 const weightedSum = computed(() => {

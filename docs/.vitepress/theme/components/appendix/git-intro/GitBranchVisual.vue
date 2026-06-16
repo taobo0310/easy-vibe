@@ -31,23 +31,20 @@
       >
         <code>{{ op.cmd }}</code>
       </button>
-      <button class="gb-btn gb-btn--reset" :disabled="running" @click="reset">重置</button>
+      <button class="gb-btn gb-btn--reset" :disabled="running" @click="reset">{{ t('common.reset') }}</button>
     </div>
 
     <!-- SVG Graph -->
     <div class="gb-graph-wrap">
       <div class="gb-legend">
-        <span class="leg-item"><span class="leg-dot main-c" />main 主分支</span>
-        <span v-if="featLog.length" class="leg-item"><span class="leg-dot feat-c" />feature-login 功能分支</span>
-        <span v-if="mergeNode" class="leg-item"><span class="leg-dot merge-c" />Merge 合并节点</span>
-        <span class="leg-item head-leg"><span class="leg-head">HEAD</span> 你当前所在位置</span>
+        <span class="leg-item"><span class="leg-dot main-c" />{{ t('branch.legend.main') }}</span>
+        <span v-if="featLog.length" class="leg-item"><span class="leg-dot feat-c" />{{ t('branch.legend.feature') }}</span>
+        <span v-if="mergeNode" class="leg-item"><span class="leg-dot merge-c" />{{ t('branch.legend.merge') }}</span>
+        <span class="leg-item head-leg"><span class="leg-head">HEAD</span> {{ t('branch.legend.head') }}</span>
       </div>
 
       <div class="svg-scroll">
         <svg :width="svgW" :height="svgH" class="gb-svg">
-          <!-- ── 连接线 ── -->
-
-          <!-- main 主轨道横线 -->
           <line
             v-if="mainLog.length > 1"
             :x1="nodeX(0) + NODE_R"
@@ -57,14 +54,12 @@
             stroke="#5b9cf6" stroke-width="2.5"
           />
 
-          <!-- 分叉弧线：从 main 最后一个原始节点向下弯到 feat 第一个节点 -->
           <path
             v-if="featLog.length"
             :d="forkPath"
             fill="none" stroke="#f9e2af" stroke-width="2.5" stroke-linecap="round"
           />
 
-          <!-- feature 轨道横线 -->
           <line
             v-if="featLog.length > 1"
             :x1="featNodeX(0) + NODE_R"
@@ -74,16 +69,12 @@
             stroke="#f9e2af" stroke-width="2.5"
           />
 
-          <!-- merge 收束弧线：从 feat 最后节点弯回 main merge 节点 -->
           <path
             v-if="mergeNode"
             :d="mergePath"
             fill="none" stroke="#a6e3a1" stroke-width="2.5" stroke-linecap="round"
           />
 
-          <!-- ── 节点 ── -->
-
-          <!-- main 节点 -->
           <g v-for="(c, i) in mainLog" :key="'m'+i">
             <circle
               :cx="nodeX(i)"
@@ -92,7 +83,6 @@
               :fill="c.merge ? '#a6e3a1' : '#5b9cf6'"
               stroke="#1a1a2e" stroke-width="2"
             />
-            <!-- HEAD 标签 -->
             <g v-if="branch === 'main' && i === mainLog.length - 1">
               <rect
                 :x="nodeX(i) - 18"
@@ -107,14 +97,12 @@
                 font-family="monospace" fill="white" font-weight="bold"
               >HEAD</text>
             </g>
-            <!-- commit hash -->
             <text
               :x="nodeX(i)"
               :y="MAIN_Y + NODE_R + 14"
               text-anchor="middle" font-size="9"
               font-family="monospace" :fill="c.merge ? '#a6e3a1' : '#7f849c'"
             >{{ c.hash }}</text>
-            <!-- commit msg -->
             <text
               :x="nodeX(i)"
               :y="MAIN_Y + NODE_R + 25"
@@ -123,7 +111,6 @@
             >{{ c.shortMsg }}</text>
           </g>
 
-          <!-- feature 节点 -->
           <g v-for="(c, i) in featLog" :key="'f'+i">
             <circle
               :cx="featNodeX(i)"
@@ -132,7 +119,6 @@
               fill="#f9e2af"
               stroke="#1a1a2e" stroke-width="2"
             />
-            <!-- HEAD 标签 -->
             <g v-if="branch === 'feature-login' && i === featLog.length - 1">
               <rect
                 :x="featNodeX(i) - 18"
@@ -147,7 +133,6 @@
                 font-family="monospace" fill="#1a1a2e" font-weight="bold"
               >HEAD</text>
             </g>
-            <!-- hash & msg above -->
             <text
               :x="featNodeX(i)"
               :y="FEAT_Y - NODE_R - 14"
@@ -162,7 +147,6 @@
             >{{ c.shortMsg }}</text>
           </g>
 
-          <!-- 分支名标签 -->
           <text
             :x="svgPad"
             :y="MAIN_Y - NODE_R - 26"
@@ -184,40 +168,36 @@
 </template>
 
 <script setup>
-import { ref, computed, nextTick } from 'vue'
+import { ref, computed, nextTick, watch } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { gitIntroLocale } from '../../../locales/git-intro/index.js'
 
+const { t, messages, locale } = useI18n(gitIntroLocale)
 const NODE_R = 10
-const STEP = 100      // horizontal spacing between commits
-const svgPad = 50     // left padding
-const MAIN_Y = 70     // main track y
-const FEAT_Y = 170    // feature track y
+const STEP = 100
+const svgPad = 50
+const MAIN_Y = 70
+const FEAT_Y = 170
 
 const termEl = ref(null)
-const lines = ref([{ kind: 'dim', text: '# main 分支上已有 2 次提交，按步骤演示分支操作' }])
+const lines = ref([])
 const typing = ref('')
 const running = ref(false)
 const active = ref(null)
-const hint = ref('👆 依次点击上方命令按钮，观察下方分支图的变化')
+const hint = ref('')
 const branch = ref('main')
 
-const mainLog = ref([
-  { hash: '9f3e1b2', shortMsg: 'init', merge: false },
-  { hash: 'c4d8a31', shortMsg: '首页', merge: false },
-])
+const mainLog = ref([])
 const featLog = ref([])
 const mergeNode = ref(false)
 let s = { created: false, c1: false, c2: false, merged: false }
 
-// X position of the i-th main commit
 function nodeX(i) { return svgPad + i * STEP }
 
-// fork point = last original main commit (before any merge)
 const forkIdx = computed(() => mainLog.value.filter(c => !c.merge).length - 1)
 
-// X of feature commit i: starts one step after fork point
 function featNodeX(i) { return nodeX(forkIdx.value) + (i + 1) * STEP }
 
-// SVG dimensions
 const svgW = computed(() => {
   const lastMain = nodeX(mainLog.value.length - 1)
   const lastFeat = featLog.value.length ? featNodeX(featLog.value.length - 1) : 0
@@ -225,18 +205,15 @@ const svgW = computed(() => {
 })
 const svgH = computed(() => featLog.value.length ? 240 : 130)
 
-// Arc from last original main node down to first feat node
 const forkPath = computed(() => {
   if (!featLog.value.length) return ''
   const x1 = nodeX(forkIdx.value)
   const y1 = MAIN_Y
   const x2 = featNodeX(0)
   const y2 = FEAT_Y
-  // cubic bezier: go right then down
   return `M ${x1} ${y1} C ${x1 + 40} ${y1}, ${x2 - 20} ${y2}, ${x2} ${y2}`
 })
 
-// Arc from last feat node back up to merge node on main
 const mergePath = computed(() => {
   if (!mergeNode.value || !featLog.value.length) return ''
   const x1 = featNodeX(featLog.value.length - 1)
@@ -252,51 +229,40 @@ const ops = [
     id: 'create',
     cmd: 'git checkout -b feature-login',
     ok: () => !s.created,
-    output: [
-      { kind: 'grn', text: "Switched to a new branch 'feature-login'" },
-    ],
-    hint: '新分支创建了！它和 main 指向同一个提交，但是独立的"时间线"。现在你在 feature-login 上，main 的时间线不会动。',
+    output: () => messages.value.branch.ops.create.output,
+    hint: () => messages.value.branch.ops.create.hint,
     do: () => { s.created = true; branch.value = 'feature-login' },
   },
   {
     id: 'c1',
-    cmd: 'git commit -m "feat: 登录表单"',
+    cmd: () => messages.value.branch.ops.c1.cmd,
     ok: () => s.created && !s.c1,
-    output: [
-      { kind: 'dim', text: '[feature-login e1a2b3c] feat: 登录表单' },
-      { kind: 'dim', text: ' 1 file changed, 38 insertions(+)' },
-    ],
-    hint: '看图！feature-login 向右延伸了一个新节点，而 main 纹丝不动。这就是"平行宇宙"——两条线同时存在，互不影响。',
-    do: () => { s.c1 = true; featLog.value.push({ hash: 'e1a2b3c', shortMsg: '登录表单' }) },
+    output: () => messages.value.branch.ops.c1.output,
+    hint: () => messages.value.branch.ops.c1.hint,
+    do: () => { s.c1 = true; featLog.value.push({ hash: 'e1a2b3c', shortMsg: messages.value.branch.ops.c1.shortMsg }) },
   },
   {
     id: 'c2',
-    cmd: 'git commit -m "feat: 登录接口"',
+    cmd: () => messages.value.branch.ops.c2.cmd,
     ok: () => s.c1 && !s.c2,
-    output: [
-      { kind: 'dim', text: '[feature-login f4d5e6f] feat: 登录接口' },
-      { kind: 'dim', text: ' 1 file changed, 22 insertions(+)' },
-    ],
-    hint: 'feature-login 又多了一个提交。此时它比 main 多了 2 个节点。功能开发完毕，准备合并回主线。',
-    do: () => { s.c2 = true; featLog.value.push({ hash: 'f4d5e6f', shortMsg: '登录接口' }) },
+    output: () => messages.value.branch.ops.c2.output,
+    hint: () => messages.value.branch.ops.c2.hint,
+    do: () => { s.c2 = true; featLog.value.push({ hash: 'f4d5e6f', shortMsg: messages.value.branch.ops.c2.shortMsg }) },
   },
   {
     id: 'back',
     cmd: 'git checkout main',
     ok: () => s.c2 && branch.value !== 'main',
-    output: [{ kind: 'grn', text: "Switched to branch 'main'" }],
-    hint: '切回 main。HEAD 标签跳回到 main 最后的节点。feature-login 里写的代码，现在工作区完全看不到——两条线彻底隔离。',
+    output: () => messages.value.branch.ops.back.output,
+    hint: () => messages.value.branch.ops.back.hint,
     do: () => { branch.value = 'main' },
   },
   {
     id: 'merge',
     cmd: 'git merge feature-login',
     ok: () => s.c2 && branch.value === 'main' && !s.merged,
-    output: [
-      { kind: 'dim', text: "Merge made by the 'ort' strategy." },
-      { kind: 'grn', text: ' login.js | 60 ++++++ 1 file changed' },
-    ],
-    hint: '合并完成！看图：feature-login 的弧线收束回了 main，形成一个绿色合并节点。两条时间线重新汇合，登录功能进入主线。',
+    output: () => messages.value.branch.ops.merge.output,
+    hint: () => messages.value.branch.ops.merge.hint,
     do: () => {
       s.merged = true
       mergeNode.value = true
@@ -311,26 +277,27 @@ function scroll() { if (termEl.value) termEl.value.scrollTop = termEl.value.scro
 async function run(op) {
   if (running.value) return
   running.value = true; active.value = op.id; hint.value = ''; typing.value = ''
-  for (const ch of op.cmd) { typing.value += ch; await sleep(22) }
+  const cmd = typeof op.cmd === 'function' ? op.cmd() : op.cmd
+  for (const ch of cmd) { typing.value += ch; await sleep(22) }
   await sleep(80)
-  lines.value.push({ kind: 'cmd', text: op.cmd }); typing.value = ''
+  lines.value.push({ kind: 'cmd', text: cmd }); typing.value = ''
   await nextTick(); scroll(); await sleep(150)
-  for (const l of op.output) { lines.value.push(l); await nextTick(); scroll(); await sleep(50) }
-  op.do(); await sleep(100); hint.value = op.hint; running.value = false
+  for (const l of op.output()) { lines.value.push(l); await nextTick(); scroll(); await sleep(50) }
+  op.do(); await sleep(100); hint.value = op.hint(); running.value = false
 }
 
 function reset() {
-  lines.value = [{ kind: 'dim', text: '# main 分支上已有 2 次提交，按步骤演示分支操作' }]
-  mainLog.value = [
-    { hash: '9f3e1b2', shortMsg: 'init', merge: false },
-    { hash: 'c4d8a31', shortMsg: '首页', merge: false },
-  ]
+  lines.value = [{ kind: 'dim', text: messages.value.branch.initialLine }]
+  mainLog.value = messages.value.branch.mainInitial.map(c => ({ ...c }))
   featLog.value = []; branch.value = 'main'; mergeNode.value = false
   s = { created: false, c1: false, c2: false, merged: false }
   active.value = null
-  hint.value = '👆 依次点击上方命令按钮，观察下方分支图的变化'
+  hint.value = messages.value.branch.initialHint
   typing.value = ''; running.value = false
 }
+
+reset()
+watch(locale, reset)
 </script>
 
 <style scoped>
@@ -377,7 +344,7 @@ function reset() {
 .gb-btn--on code { color: var(--vp-c-brand); }
 .gb-btn--dim { opacity: 0.3; cursor: not-allowed; }
 .gb-btn--reset { background: transparent; border-color: #313244; margin-left: auto; }
-.gb-btn--reset::after { content: '重置'; font-size: 0.7rem; color: #585b70; }
+.gb-btn--reset { font-size: 0.7rem; color: #585b70; }
 
 /* Graph */
 .gb-graph-wrap {

@@ -1,42 +1,46 @@
 <script setup>
 import { ref, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { portsLocalhostLocale } from '../../../locales/ports-localhost/index.js'
+
+const { t } = useI18n(portsLocalhostLocale)
 
 const selectedProblem = ref(0)
 
-const problems = [
+const problems = computed(() => [
   {
-    symptom: '端口被占用',
-    error: 'Error: listen EADDRINUSE :::3000',
+    symptom: t('portTroubleshoot.occupied'),
+    error: t('portTroubleshoot.occupiedError'),
     icon: '🔴',
     steps: [
-      { cmd: 'lsof -i :3000', desc: '查看谁在用这个端口', output: 'COMMAND  PID   USER   FD   TYPE  SIZE/OFF NODE NAME\nnode     1234  sanbu  22u  IPv6  0t0      TCP  *:3000 (LISTEN)' },
-      { cmd: 'kill -9 1234', desc: '强制结束该进程（PID 为 1234）', output: '（进程已终止）' },
-      { cmd: 'npm run dev', desc: '重新启动你的服务', output: '✅ Server running at http://localhost:3000' }
+      { cmd: t('portTroubleshoot.step1OccupiedCmd'), desc: t('portTroubleshoot.step1OccupiedDesc'), output: 'COMMAND  PID   USER   FD   TYPE  SIZE/OFF NODE NAME\nnode     1234  sanbu  22u  IPv6  0t0      TCP  *:3000 (LISTEN)' },
+      { cmd: t('portTroubleshoot.step2OccupiedCmd'), desc: t('portTroubleshoot.step2OccupiedDesc'), output: '（进程已终止）' },
+      { cmd: t('portTroubleshoot.step3OccupiedCmd'), desc: t('portTroubleshoot.step3OccupiedDesc'), output: '✅ Server running at http://localhost:3000' }
     ]
   },
   {
-    symptom: '拒绝连接',
-    error: 'ERR_CONNECTION_REFUSED (localhost:8080)',
+    symptom: t('portTroubleshoot.refused'),
+    error: t('portTroubleshoot.refusedError'),
     icon: '🚫',
     steps: [
-      { cmd: 'curl http://localhost:8080', desc: '确认服务是否真的在运行', output: 'curl: (7) Failed to connect to localhost port 8080: Connection refused' },
-      { cmd: 'lsof -i :8080', desc: '检查是否有程序在监听', output: '（没有输出 = 没有程序在监听）' },
-      { cmd: 'npm run dev', desc: '启动你的后端服务', output: '✅ API server listening on port 8080' }
+      { cmd: t('portTroubleshoot.step1RefusedCmd'), desc: t('portTroubleshoot.step1RefusedDesc'), output: 'curl: (7) Failed to connect to localhost port 8080: Connection refused' },
+      { cmd: t('portTroubleshoot.step2RefusedCmd'), desc: t('portTroubleshoot.step2RefusedDesc'), output: '（没有输出 = 没有程序在监听）' },
+      { cmd: t('portTroubleshoot.step3RefusedCmd'), desc: t('portTroubleshoot.step3RefusedDesc'), output: '✅ API server listening on port 8080' }
     ]
   },
   {
-    symptom: '跨域被拦截',
-    error: 'Access-Control-Allow-Origin 错误',
+    symptom: t('portTroubleshoot.cors'),
+    error: t('portTroubleshoot.corsError'),
     icon: '🛡️',
     steps: [
-      { cmd: '检查前端请求地址', desc: '确认是否从 localhost:5173 请求 localhost:3000', output: '前端 http://localhost:5173 → 后端 http://localhost:3000/api\n不同端口 = 不同源 = 触发跨域策略！' },
-      { cmd: '后端添加 CORS 配置', desc: '允许前端域名跨域访问', output: "app.use(cors({ origin: 'http://localhost:5173' }))" },
-      { cmd: '或者配置前端代理', desc: '在 vite.config.js 中设置 proxy', output: "server: {\n  proxy: {\n    '/api': 'http://localhost:3000'\n  }\n}" }
+      { cmd: t('portTroubleshoot.step1CorsCmd'), desc: t('portTroubleshoot.step1CorsDesc'), output: '前端 http://localhost:5173 → 后端 http://localhost:3000/api\n不同端口 = 不同源 = 触发跨域策略！' },
+      { cmd: t('portTroubleshoot.step2CorsCmd'), desc: t('portTroubleshoot.step2CorsDesc'), output: "app.use(cors({ origin: 'http://localhost:5173' }))" },
+      { cmd: t('portTroubleshoot.step3CorsCmd'), desc: t('portTroubleshoot.step3CorsDesc'), output: "server: {\n  proxy: {\n    '/api': 'http://localhost:3000'\n  }\n}" }
     ]
   }
-]
+])
 
-const currentProblem = computed(() => problems[selectedProblem.value])
+const currentProblem = computed(() => problems.value[selectedProblem.value])
 const currentStepIndex = ref(0)
 const showingOutput = ref(false)
 
@@ -66,7 +70,7 @@ function resetSteps() {
 <template>
   <div class="port-troubleshoot-demo">
     <div class="control-panel">
-      <span class="panel-label">选择一个常见问题：</span>
+      <span class="panel-label">{{ t('portTroubleshoot.selectProblem') }}</span>
       <div class="problem-tabs">
         <button
           v-for="(p, i) in problems"
@@ -90,8 +94,8 @@ function resetSteps() {
 
       <div class="fix-steps">
         <div class="fix-header">
-          <span>排查步骤 ({{ currentStepIndex + 1 }}/{{ currentProblem.steps.length }})</span>
-          <button class="reset-btn" @click="resetSteps">重来</button>
+          <span>{{ t('portTroubleshoot.fixSteps') }} ({{ currentStepIndex + 1 }}/{{ currentProblem.steps.length }})</span>
+          <button class="reset-btn" @click="resetSteps">{{ t('portTroubleshoot.retry') }}</button>
         </div>
 
         <div class="step-content">
@@ -103,7 +107,7 @@ function resetSteps() {
             {{ currentProblem.steps[currentStepIndex].desc }}
           </div>
           <button v-if="!showingOutput" class="run-btn" @click="runStep">
-            ▶ 执行
+            {{ t('portTroubleshoot.execute') }}
           </button>
           <transition name="fade">
             <div v-if="showingOutput" class="step-output">
@@ -115,20 +119,20 @@ function resetSteps() {
             class="next-btn"
             @click="nextStep"
           >
-            下一步 →
+            {{ t('portTroubleshoot.nextStep') }}
           </button>
           <div
             v-if="showingOutput && currentStepIndex === currentProblem.steps.length - 1"
             class="done-badge"
           >
-            ✅ 问题解决！
+            {{ t('portTroubleshoot.solved') }}
           </div>
         </div>
       </div>
     </div>
 
     <div class="info-box">
-      <strong>排查口诀：</strong>先确认服务有没有启动（lsof / netstat），再确认端口对不对，最后确认是不是跨域问题。90% 的 localhost 问题都逃不出这三步。
+      <strong>{{ t('portTroubleshoot.mantra') }}</strong>先确认服务有没有启动（lsof / netstat），再确认端口对不对，最后确认是不是跨域问题。90% 的 localhost 问题都逃不出这三步。
     </div>
   </div>
 </template>

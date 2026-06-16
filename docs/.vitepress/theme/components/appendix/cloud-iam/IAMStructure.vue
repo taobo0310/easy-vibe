@@ -2,8 +2,8 @@
   <div class="iam-structure">
     <div class="demo-header">
       <span class="icon">🏗️</span>
-      <span class="title">IAM 五大核心概念</span>
-      <span class="subtitle">云上权限管理的基础构件</span>
+      <span class="title">{{ t('structure.title') }}</span>
+      <span class="subtitle">{{ t('structure.subtitle') }}</span>
     </div>
 
     <div class="main-area">
@@ -30,7 +30,7 @@
           {{ selectedLayerData.description }}
         </div>
         <div class="detail-examples">
-          <span class="example-label">示例：</span>
+          <span class="example-label">{{ t('structure.exampleLabel') }}</span>
           <span
             v-for="(example, i) in selectedLayerData.examples.slice(0, 2)"
             :key="i"
@@ -42,55 +42,21 @@
 
     <div class="info-box">
       <span class="icon">💡</span>
-      <strong>核心思想：</strong>IAM 就像公司的门禁系统——根账号是老板，用户是员工，角色是临时访客证，策略是"谁能进哪些门"的规则。
+      <strong>{{ t('common.coreIdea') }}</strong>{{ t('structure.info') }}
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { cloudIamLocale } from '../../../locales/cloud-iam/index.js'
 
+const { t, messages } = useI18n(cloudIamLocale)
 const selectedLayer = ref(0)
+const layers = computed(() => messages.value.structure.layers)
 
-const layers = [
-  {
-    icon: '👑',
-    name: '根账号',
-    shortDesc: '最高权限',
-    description: '云账号的所有者，拥有全部资源的完全控制权限。建议仅用于初始设置。',
-    examples: ['创建/删除 IAM 用户', '管理账单和支付方式']
-  },
-  {
-    icon: '👤',
-    name: 'IAM 用户',
-    shortDesc: '个人身份',
-    description: '为具体人员创建的长期凭证，用于日常登录和操作云服务。',
-    examples: ['开发人员账号', '运维人员账号']
-  },
-  {
-    icon: '👥',
-    name: '用户组',
-    shortDesc: '批量管理',
-    description: '将多个用户归为一组，统一分配权限，简化管理。',
-    examples: ['开发组', '运维组']
-  },
-  {
-    icon: '🎭',
-    name: '角色',
-    shortDesc: '临时授权',
-    description: '一种临时身份，可以被切换或赋予其他账号/服务，具有时效性更安全。',
-    examples: ['跨账号访问角色', '服务角色']
-  },
-  {
-    icon: '📋',
-    name: '策略',
-    shortDesc: '权限规则',
-    description: '定义"谁可以对什么资源执行什么操作"的规则文档，以 JSON 格式编写。',
-    examples: ['允许访问 S3', '禁止删除 EC2']
-  }
-]
-
-const selectedLayerData = computed(() => layers[selectedLayer.value])
+const selectedLayerData = computed(() => layers.value[selectedLayer.value])
 
 function selectLayer(index) {
   selectedLayer.value = index

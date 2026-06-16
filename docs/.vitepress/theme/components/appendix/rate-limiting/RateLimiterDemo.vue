@@ -1,12 +1,8 @@
-<!--
-  RateLimiterDemo.vue
-  限流算法演示：令牌桶 vs 滑动窗口
--->
 <template>
   <div class="rate-limiter-demo">
     <div class="header">
-      <div class="title">限流算法可视化</div>
-      <div class="subtitle">选择算法，点击发送请求观察限流效果</div>
+      <div class="title">{{ t('visualizer.title') }}</div>
+      <div class="subtitle">{{ t('visualizer.subtitle') }}</div>
     </div>
 
     <div class="algo-tabs">
@@ -20,26 +16,26 @@
 
     <div class="sim-area">
       <div class="controls">
-        <button class="send-btn" @click="sendRequest">发送请求</button>
-        <button class="burst-btn" @click="sendBurst">模拟突发 (10个)</button>
-        <button class="reset-btn" @click="reset">重置</button>
+        <button class="send-btn" @click="sendRequest">{{ t('visualizer.buttons.send') }}</button>
+        <button class="burst-btn" @click="sendBurst">{{ t('visualizer.buttons.burst') }}</button>
+        <button class="reset-btn" @click="reset">{{ t('visualizer.buttons.reset') }}</button>
       </div>
 
       <div class="stats">
         <div class="stat">
-          <span class="stat-label">已发送</span>
+          <span class="stat-label">{{ t('visualizer.stats.totalSent') }}</span>
           <span class="stat-value">{{ totalSent }}</span>
         </div>
         <div class="stat">
-          <span class="stat-label">通过</span>
+          <span class="stat-label">{{ t('visualizer.stats.passed') }}</span>
           <span class="stat-value pass">{{ passed }}</span>
         </div>
         <div class="stat">
-          <span class="stat-label">拒绝</span>
+          <span class="stat-label">{{ t('visualizer.stats.rejected') }}</span>
           <span class="stat-value reject">{{ rejected }}</span>
         </div>
-        <div class="stat" v-if="algo === 'token'">
-          <span class="stat-label">剩余令牌</span>
+        <div v-if="algo === 'token'" class="stat">
+          <span class="stat-label">{{ t('visualizer.stats.tokens') }}</span>
           <span class="stat-value">{{ tokens }}</span>
         </div>
       </div>
@@ -51,7 +47,7 @@
           :class="['req-item', req.status]"
         >
           <span>{{ req.status === 'pass' ? '✅' : '❌' }}</span>
-          <span>请求 #{{ req.id }}</span>
+          <span>{{ t('visualizer.requestLabel', { id: req.id }) }}</span>
           <span class="req-time">{{ req.time }}</span>
         </div>
       </div>
@@ -66,6 +62,10 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { rateLimitingLocale } from '../../../locales/rate-limiting/index.js'
+
+const { t, messages } = useI18n(rateLimitingLocale)
 
 const algo = ref('token')
 const totalSent = ref(0)
@@ -74,13 +74,8 @@ const rejected = ref(0)
 const tokens = ref(5)
 const recentRequests = ref([])
 
-const algorithms = [
-  { key: 'token', label: '令牌桶', desc: '以固定速率往桶里放令牌，每个请求消耗一个令牌。桶满时多余令牌丢弃。允许一定程度的突发流量（桶里有存量令牌时）。' },
-  { key: 'sliding', label: '滑动窗口', desc: '在一个滑动的时间窗口内统计请求数，超过阈值则拒绝。比固定窗口更平滑，避免窗口边界的突发问题。' },
-  { key: 'leaky', label: '漏桶', desc: '请求先进入桶中排队，以固定速率流出处理。无论请求多快到达，处理速率恒定。适合需要严格匀速的场景。' }
-]
-
-const currentAlgo = computed(() => algorithms.find(a => a.key === algo.value))
+const algorithms = computed(() => messages.value.algorithms)
+const currentAlgo = computed(() => algorithms.value.find(a => a.key === algo.value))
 
 // Sliding window state
 const windowRequests = ref([])
@@ -105,12 +100,10 @@ function reset() {
   recentRequests.value = []
   windowRequests.value = []
   if (tokenInterval) clearInterval(tokenInterval)
-  // 只在令牌桶模式下启动补充
   if (algo.value === 'token') startTokenRefill()
 }
 
 onMounted(() => {
-  // 组件挂载后启动令牌补充，避免模块加载时启动定时器导致 build 卡住
   startTokenRefill()
 })
 

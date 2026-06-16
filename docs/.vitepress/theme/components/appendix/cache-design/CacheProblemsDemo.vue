@@ -1,15 +1,11 @@
-<!--
-  CacheProblemsDemo.vue
-  缓存三大问题演示 - 缓存穿透、缓存击穿、缓存雪崩
--->
 <template>
   <div class="cache-problems-demo">
     <div class="header">
       <div class="title">
-        缓存的三大问题
+        {{ t('problems.title') }}
       </div>
       <div class="subtitle">
-        穿透、击穿、雪崩的场景与解决方案
+        {{ t('problems.subtitle') }}
       </div>
     </div>
 
@@ -27,24 +23,20 @@
     </div>
 
     <div class="problem-content">
-      <!-- 缓存穿透 -->
       <div
         v-if="activeProblem === 'penetration'"
         class="problem-detail"
       >
         <div class="problem-intro">
           <div class="intro-title">
-            什么是缓存穿透？
+            {{ activeProblemData.introTitle }}
           </div>
-          <div class="intro-text">
-            查询一个<strong>不存在的数据</strong>（如恶意请求
-            id=-1），缓存没有，数据库也没有。 导致每次请求都直接打到数据库。
-          </div>
+          <div class="intro-text" v-html="activeProblemData.introHtml" />
         </div>
 
         <div class="problem-scenario">
           <div class="scenario-title">
-            场景模拟
+            {{ t('problems.scenarioTitle') }}
           </div>
           <div class="scenario-diagram">
             <div class="flow-item request">
@@ -52,7 +44,7 @@
                 🔥
               </div>
               <div class="flow-text">
-                请求 id=-999
+                {{ activeProblemData.flow[0] }}
               </div>
             </div>
             <div class="flow-arrow">
@@ -66,7 +58,7 @@
                 ❌
               </div>
               <div class="flow-text">
-                缓存未命中
+                {{ activeProblemData.flow[1] }}
               </div>
             </div>
             <div class="flow-arrow">
@@ -80,7 +72,7 @@
                 🗄️
               </div>
               <div class="flow-text">
-                数据库查询（不存在）
+                {{ activeProblemData.flow[2] }}
               </div>
             </div>
           </div>
@@ -91,13 +83,13 @@
               :disabled="simulating"
               @click="simulatePenetration"
             >
-              {{ simulating ? '攻击中...' : '模拟恶意攻击' }}
+              {{ simulating ? t('problems.simulatingAttack') : t('problems.simulateAttack') }}
             </button>
           </div>
 
           <div class="pressure-meter">
             <div class="meter-label">
-              数据库压力
+              {{ t('problems.dbPressure') }}
             </div>
             <div class="meter-bar">
               <div
@@ -113,61 +105,59 @@
 
         <div class="solutions">
           <div class="solutions-title">
-            解决方案
+            {{ t('problems.solutionsTitle') }}
           </div>
           <div class="solution-list">
-            <div class="solution-item">
+            <div
+              v-for="solution in activeProblemData.solutions"
+              :key="solution.number"
+              class="solution-item"
+            >
               <div class="solution-header">
-                <span class="solution-number">1</span>
-                <span class="solution-name">布隆过滤器 (Bloom Filter)</span>
+                <span class="solution-number">{{ solution.number }}</span>
+                <span class="solution-name">{{ solution.name }}</span>
               </div>
               <div class="solution-desc">
-                在缓存前加一层过滤器，快速判断"这个 id 肯定不存在"。
-                <br>
-                <span class="note">100% 判断不存在，但可能有误判</span>
-              </div>
-            </div>
-            <div class="solution-item">
-              <div class="solution-header">
-                <span class="solution-number">2</span>
-                <span class="solution-name">缓存空对象</span>
-              </div>
-              <div class="solution-desc">
-                查询不存在时，缓存一个 NULL 值（TTL 设置短一点，如 5 分钟）。
+                {{ solution.desc }}
+                <template v-if="solution.note">
+                  <br>
+                  <span class="note">{{ solution.note }}</span>
+                </template>
+                <template v-if="solution.code">
+                  <br>
+                  <span class="code">{{ solution.code }}</span>
+                </template>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- 缓存击穿 -->
       <div
         v-if="activeProblem === 'breakdown'"
         class="problem-detail"
       >
         <div class="problem-intro">
           <div class="intro-title">
-            什么是缓存击穿？
+            {{ activeProblemData.introTitle }}
           </div>
-          <div class="intro-text">
-            某个<strong>热点数据</strong>过期（如微博热搜），瞬间几百万请求同时打到数据库。
-          </div>
+          <div class="intro-text" v-html="activeProblemData.introHtml" />
         </div>
 
         <div class="problem-scenario">
           <div class="scenario-title">
-            场景模拟
+            {{ t('problems.scenarioTitle') }}
           </div>
           <div class="hotkey-scenario">
             <div class="hotkey-badge">
-              🔥 热点数据
+              🔥 {{ activeProblemData.hotData }}
               <br>
               <span class="key">user:12345</span>
             </div>
 
             <div class="concurrent-requests">
               <div class="requests-title">
-                并发请求
+                {{ activeProblemData.concurrentRequests }}
               </div>
               <div class="requests-container">
                 <div
@@ -177,7 +167,7 @@
                   :class="req.status"
                 >
                   <div class="request-id">
-                    请求 {{ req.id }}
+                    {{ activeProblemData.requestPrefix }} {{ req.id }}
                   </div>
                   <div class="request-status">
                     {{ req.statusText }}
@@ -191,10 +181,10 @@
               class="mutex-visual"
             >
               <div class="mutex-badge">
-                🔒 互斥锁
+                🔒 {{ activeProblemData.mutex }}
               </div>
               <div class="mutex-text">
-                只有一个线程能查数据库
+                {{ activeProblemData.mutexText }}
               </div>
             </div>
           </div>
@@ -205,60 +195,51 @@
               :disabled="simulating"
               @click="simulateBreakdown"
             >
-              {{ simulating ? '模拟中...' : '模拟热点过期' }}
+              {{ simulating ? t('problems.simulating') : t('problems.simulateHotExpire') }}
             </button>
           </div>
         </div>
 
         <div class="solutions">
           <div class="solutions-title">
-            解决方案
+            {{ t('problems.solutionsTitle') }}
           </div>
           <div class="solution-list">
-            <div class="solution-item">
+            <div
+              v-for="solution in activeProblemData.solutions"
+              :key="solution.number"
+              class="solution-item"
+            >
               <div class="solution-header">
-                <span class="solution-number">1</span>
-                <span class="solution-name">互斥锁 (Mutex Lock)</span>
+                <span class="solution-number">{{ solution.number }}</span>
+                <span class="solution-name">{{ solution.name }}</span>
               </div>
               <div class="solution-desc">
-                只允许一个线程查数据库，其他线程等待。
-                <br>
-                <span class="note">优点：简单；缺点：阻塞其他请求</span>
-              </div>
-            </div>
-            <div class="solution-item">
-              <div class="solution-header">
-                <span class="solution-number">2</span>
-                <span class="solution-name">逻辑过期 (Logical Expiration)</span>
-              </div>
-              <div class="solution-desc">
-                不设置 TTL，而是在 value 里存一个过期时间字段。
-                <br>
-                <span class="note">查询时发现"逻辑过期"，异步更新缓存，同时返回旧数据</span>
+                {{ solution.desc }}
+                <template v-if="solution.note">
+                  <br>
+                  <span class="note">{{ solution.note }}</span>
+                </template>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- 缓存雪崩 -->
       <div
         v-if="activeProblem === 'avalanche'"
         class="problem-detail"
       >
         <div class="problem-intro">
           <div class="intro-title">
-            什么是缓存雪崩？
+            {{ activeProblemData.introTitle }}
           </div>
-          <div class="intro-text">
-            大量缓存<strong>同时过期</strong>（如系统重启后，所有缓存都在
-            00:00:00 过期）， 数据库瞬间被打爆。
-          </div>
+          <div class="intro-text" v-html="activeProblemData.introHtml" />
         </div>
 
         <div class="problem-scenario">
           <div class="scenario-title">
-            场景模拟
+            {{ t('problems.scenarioTitle') }}
           </div>
           <div class="avalanche-visual">
             <div class="cache-items">
@@ -285,7 +266,7 @@
                 💥
               </div>
               <div class="explosion-text">
-                同时过期！
+                {{ activeProblemData.expiredTogether }}
               </div>
             </div>
 
@@ -297,7 +278,7 @@
                 🗄️
               </div>
               <div class="db-status">
-                数据库负载: {{ dbPressure }}%
+                {{ t('problems.dbLoad') }}: {{ dbPressure }}%
               </div>
             </div>
           </div>
@@ -308,53 +289,41 @@
               :disabled="simulating"
               @click="simulateAvalanche"
             >
-              {{ simulating ? '模拟中...' : '模拟缓存雪崩' }}
+              {{ simulating ? t('problems.simulating') : t('problems.simulateAvalanche') }}
             </button>
             <button
               class="solution-btn"
               @click="applyRandomTTL"
             >
-              应用解决方案（随机 TTL）
+              {{ t('problems.applyRandomTtl') }}
             </button>
           </div>
         </div>
 
         <div class="solutions">
           <div class="solutions-title">
-            解决方案
+            {{ t('problems.solutionsTitle') }}
           </div>
           <div class="solution-list">
-            <div class="solution-item">
+            <div
+              v-for="solution in activeProblemData.solutions"
+              :key="solution.number"
+              class="solution-item"
+            >
               <div class="solution-header">
-                <span class="solution-number">1</span>
-                <span class="solution-name">随机 TTL</span>
+                <span class="solution-number">{{ solution.number }}</span>
+                <span class="solution-name">{{ solution.name }}</span>
               </div>
               <div class="solution-desc">
-                避免同时过期，TTL 加上随机值。
-                <br>
-                <span class="code">ttl = 600 + random.randint(-60, 60) # 600 ± 60 秒</span>
-              </div>
-            </div>
-            <div class="solution-item">
-              <div class="solution-header">
-                <span class="solution-number">2</span>
-                <span class="solution-name">缓存预热</span>
-              </div>
-              <div class="solution-desc">
-                系统启动时，主动加载热点数据到缓存。
-                <br>
-                <span class="note">使用定时任务，提前刷新即将过期的热点数据</span>
-              </div>
-            </div>
-            <div class="solution-item">
-              <div class="solution-header">
-                <span class="solution-number">3</span>
-                <span class="solution-name">熔断降级</span>
-              </div>
-              <div class="solution-desc">
-                当数据库压力过大时，暂时停止更新缓存，直接返回降级数据。
-                <br>
-                <span class="note">如"系统繁忙，请稍后再试"</span>
+                {{ solution.desc }}
+                <template v-if="solution.note">
+                  <br>
+                  <span class="note">{{ solution.note }}</span>
+                </template>
+                <template v-if="solution.code">
+                  <br>
+                  <span class="code">{{ solution.code }}</span>
+                </template>
               </div>
             </div>
           </div>
@@ -364,35 +333,25 @@
 
     <div class="comparison-table">
       <div class="table-title">
-        三大问题对比
+        {{ t('problems.comparisonTitle') }}
       </div>
       <table class="problems-table">
         <thead>
           <tr>
-            <th>问题</th>
-            <th>原因</th>
-            <th>影响</th>
-            <th>主要解决方案</th>
+            <th v-for="header in tableHeaders" :key="header">
+              {{ header }}
+            </th>
           </tr>
         </thead>
         <tbody>
-          <tr :class="{ active: activeProblem === 'penetration' }">
-            <td>缓存穿透</td>
-            <td>查询不存在的数据</td>
-            <td>数据库压力增加</td>
-            <td>布隆过滤器、缓存空对象</td>
-          </tr>
-          <tr :class="{ active: activeProblem === 'breakdown' }">
-            <td>缓存击穿</td>
-            <td>热点数据过期</td>
-            <td>数据库瞬间压力</td>
-            <td>互斥锁、逻辑过期</td>
-          </tr>
-          <tr :class="{ active: activeProblem === 'avalanche' }">
-            <td>缓存雪崩</td>
-            <td>大量缓存同时过期</td>
-            <td>数据库被打爆</td>
-            <td>随机 TTL、缓存预热</td>
+          <tr
+            v-for="row in comparisonRows"
+            :key="row[0]"
+            :class="{ active: activeProblemData.name === row[0] }"
+          >
+            <td v-for="cell in row" :key="cell">
+              {{ cell }}
+            </td>
           </tr>
         </tbody>
       </table>
@@ -401,7 +360,11 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { cacheDesignLocale } from '../../../locales/cache-design/index.js'
+
+const { t, messages } = useI18n(cacheDesignLocale)
 
 const activeProblem = ref('penetration')
 const simulating = ref(false)
@@ -411,11 +374,12 @@ const showMutex = ref(false)
 const cacheItems = ref([])
 const massExplosion = ref(false)
 
-const problems = [
-  { id: 'penetration', name: '缓存穿透', icon: '🕳️' },
-  { id: 'breakdown', name: '缓存击穿', icon: '🔥' },
-  { id: 'avalanche', name: '缓存雪崩', icon: '❄️' }
-]
+const problems = computed(() => messages.value.problems.problems)
+const tableHeaders = computed(() => messages.value.problems.tableHeaders)
+const comparisonRows = computed(() => messages.value.problems.comparisonRows)
+const activeProblemData = computed(
+  () => problems.value.find((problem) => problem.id === activeProblem.value) || problems.value[0]
+)
 
 const initializeCacheItems = () => {
   cacheItems.value = Array.from({ length: 8 }, (_, i) => ({
@@ -445,7 +409,7 @@ const simulateBreakdown = async () => {
   concurrentRequests.value = Array.from({ length: 10 }, (_, i) => ({
     id: i + 1,
     status: 'waiting',
-    statusText: '等待中'
+    statusText: messages.value.problems.problems[1].statuses.waiting
   }))
 
   showMutex.value = true
@@ -453,17 +417,16 @@ const simulateBreakdown = async () => {
   // First request gets the lock
   await new Promise((resolve) => setTimeout(resolve, 300))
   concurrentRequests.value[0].status = 'processing'
-  concurrentRequests.value[0].statusText = '查询数据库...'
+  concurrentRequests.value[0].statusText = messages.value.problems.problems[1].statuses.processing
 
   await new Promise((resolve) => setTimeout(resolve, 1000))
   concurrentRequests.value[0].status = 'done'
-  concurrentRequests.value[0].statusText = '✅ 完成'
+  concurrentRequests.value[0].statusText = messages.value.problems.problems[1].statuses.done
 
-  // Other requests wait and get from cache
   for (let i = 1; i < concurrentRequests.value.length; i++) {
     await new Promise((resolve) => setTimeout(resolve, 200))
     concurrentRequests.value[i].status = 'done'
-    concurrentRequests.value[i].statusText = '✅ 从缓存获取'
+    concurrentRequests.value[i].statusText = messages.value.problems.problems[1].statuses.fromCache
   }
 
   showMutex.value = false
@@ -480,7 +443,6 @@ const simulateAvalanche = async () => {
 
   initializeCacheItems()
 
-  // Countdown to expiration
   for (let i = 10; i > 0; i--) {
     await new Promise((resolve) => setTimeout(resolve, 200))
     cacheItems.value.forEach((item) => {
@@ -488,13 +450,11 @@ const simulateAvalanche = async () => {
     })
   }
 
-  // Mass expiration
   massExplosion.value = true
   cacheItems.value.forEach((item) => {
     item.expired = true
   })
 
-  // Database pressure spike
   for (let i = 0; i < 20; i++) {
     await new Promise((resolve) => setTimeout(resolve, 100))
     dbPressure.value = Math.min(100, dbPressure.value + 5)
@@ -513,12 +473,10 @@ const applyRandomTTL = async () => {
 
   initializeCacheItems()
 
-  // Apply random TTL
   cacheItems.value.forEach((item) => {
     item.ttl = 10 + Math.floor(Math.random() * 10) - 5
   })
 
-  // Gradual expiration
   const maxTTL = Math.max(...cacheItems.value.map((item) => item.ttl))
 
   for (let t = maxTTL; t > 0; t--) {

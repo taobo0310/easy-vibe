@@ -2,12 +2,12 @@
   <div class="syntax-comparison-demo">
     <div class="demo-header">
       <span class="icon">📝</span>
-      <span class="title">语法对比镜</span>
-      <span class="subtitle">同样的功能，不同的表达方式</span>
+      <span class="title">{{ t('syntax.title') }}</span>
+      <span class="subtitle">{{ t('syntax.subtitle') }}</span>
     </div>
 
     <div class="intro-text">
-      想象你在<span class="highlight">写信</span>：有人喜欢简洁明了（Python、Ruby），有人喜欢正式严谨（Java、C#），有人喜欢直接高效（Go）。不同语言的语法反映了不同的设计哲学。
+      {{ t('syntax.introPrefix') }}<span class="highlight">{{ t('syntax.introHighlight') }}</span>{{ t('syntax.introSuffix') }}
     </div>
 
     <div class="language-tabs">
@@ -47,11 +47,11 @@
 
         <div class="code-stats">
           <div class="stat-item">
-            <span class="stat-label">代码行数：</span>
-            <span class="stat-value">{{ getLineCount(selectedLang) }} 行</span>
+            <span class="stat-label">{{ t('syntax.lineCount') }}</span>
+            <span class="stat-value">{{ getLineCount(selectedLang) }}{{ t('syntax.lineUnit') }}</span>
           </div>
           <div class="stat-item">
-            <span class="stat-label">复杂度：</span>
+            <span class="stat-label">{{ t('syntax.complexity') }}</span>
             <span class="stat-value">{{ getCode(selectedLang).complexity }}</span>
           </div>
         </div>
@@ -60,70 +60,28 @@
 
     <div class="info-box">
       <span class="icon">💡</span>
-      <strong>核心思想：</strong>简洁的语法（Python、Ruby）让开发更快，但冗长的语法（Java、C#）提供了更强的类型安全性和可维护性。没有"最好"的语法，只有最适合团队的语法。
+      <strong>{{ t('syntax.infoStrong') }}</strong>{{ t('syntax.info') }}
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { backendLanguagesLocale } from '../../../locales/backend-languages/index.js'
+
+const { t, messages } = useI18n(backendLanguagesLocale)
 
 const selectedLang = ref('Python')
-
-const languages = [
-  { name: 'Python', icon: '🐍' },
-  { name: 'Go', icon: '🐹' },
-  { name: 'Node.js', icon: '💚' },
-  { name: 'Java', icon: '☕' },
-  { name: 'Rust', icon: '🦀' }
-]
-
-const codes = {
-  Python: {
-    code: `print("Hello, World!")`,
-    filename: 'hello.py',
-    complexity: '极简'
-  },
-  Go: {
-    code: `package main
-
-import "fmt"
-
-func main() {
-    fmt.Println("Hello, World!")
-}`,
-    filename: 'hello.go',
-    complexity: '简洁'
-  },
-  'Node.js': {
-    code: `console.log("Hello, World!");`,
-    filename: 'hello.js',
-    complexity: '极简'
-  },
-  Java: {
-    code: `public class HelloWorld {
-    public static void main(String[] args) {
-        System.out.println("Hello, World!");
-    }
-}`,
-    filename: 'HelloWorld.java',
-    complexity: '冗长'
-  },
-  Rust: {
-    code: `fn main() {
-    println!("Hello, World!");
-}`,
-    filename: 'main.rs',
-    complexity: '简洁'
-  }
-}
+const languages = computed(() => messages.value.syntax.languages)
+const codes = computed(() => messages.value.syntax.codes)
 
 const getCode = (lang) => {
-  return codes[lang]
+  return codes.value[lang]
 }
 
 const getLineCount = (lang) => {
-  return codes[lang].code.split('\n').length
+  return codes.value[lang].code.split('\n').length
 }
 </script>
 

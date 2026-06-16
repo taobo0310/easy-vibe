@@ -1,15 +1,11 @@
-<!--
-  SessionCookieDemo.vue
-  Session + Cookie（手动推进，更贴近真实 Web 登录态）
--->
 <template>
   <div class="session-demo">
     <div class="header">
       <div class="title">
-        🍪 Session + Cookie：有状态登录
+        {{ t('sessionCookie.title') }}
       </div>
       <div class="subtitle">
-        默认手动推进：先看清楚状态再进入下一步（避免“自动下一步”误解）。
+        {{ t('sessionCookie.subtitle') }}
       </div>
     </div>
 
@@ -19,27 +15,27 @@
         :disabled="step !== 0"
         @click="start"
       >
-        开始
+        {{ t('sessionCookie.start') }}
       </button>
       <button
         class="btn"
         :disabled="step <= 1"
         @click="prev"
       >
-        上一步
+        {{ t('sessionCookie.prev') }}
       </button>
       <button
         class="btn primary"
         :disabled="step === 0 || step >= maxStep"
         @click="next"
       >
-        下一步
+        {{ t('sessionCookie.next') }}
       </button>
       <button
         class="btn"
         @click="reset"
       >
-        重置
+        {{ t('sessionCookie.reset') }}
       </button>
     </div>
 
@@ -47,13 +43,13 @@
       v-if="step > 0"
       class="progress"
     >
-      Step {{ step }} / {{ maxStep }} · {{ steps[step - 1]?.title }}
+      {{ t('sessionCookie.progress', { step, maxStep, title: activeStep?.title }) }}
     </div>
 
     <div class="grid">
       <div class="card">
         <div class="card-title">
-          浏览器（客户端）
+          {{ t('sessionCookie.browserTitle') }}
         </div>
         <div class="box">
           <div class="box-title">
@@ -74,13 +70,13 @@
             v-else
             class="empty"
           >
-            暂无 Cookie
+            {{ t('sessionCookie.noCookie') }}
           </div>
         </div>
 
         <div class="box">
           <div class="box-title">
-            本步请求
+            {{ t('sessionCookie.requestTitle') }}
           </div>
           <pre class="code"><code>{{ clientRequest }}</code></pre>
         </div>
@@ -88,7 +84,7 @@
 
       <div class="card">
         <div class="card-title">
-          服务器
+          {{ t('sessionCookie.serverTitle') }}
         </div>
         <div class="box">
           <div class="box-title">
@@ -117,13 +113,13 @@
             v-else
             class="empty"
           >
-            暂无 Session
+            {{ t('sessionCookie.noSession') }}
           </div>
         </div>
 
         <div class="box">
           <div class="box-title">
-            本步响应
+            {{ t('sessionCookie.responseTitle') }}
           </div>
           <pre class="code"><code>{{ serverResponse }}</code></pre>
         </div>
@@ -132,20 +128,20 @@
 
     <div class="card">
       <div class="card-title">
-        {{ steps[step - 1]?.title || '流程说明' }}
+        {{ activeStep?.title || t('sessionCookie.fallbackTitle') }}
       </div>
       <div class="desc">
-        {{ steps[step - 1]?.desc }}
+        {{ activeStep?.desc }}
       </div>
       <div
-        v-if="steps[step - 1]?.warn"
+        v-if="activeStep?.warn"
         class="warn"
       >
         <div class="warn-title">
-          注意
+          {{ t('sessionCookie.warning') }}
         </div>
         <div class="warn-text">
-          {{ steps[step - 1]?.warn }}
+          {{ activeStep?.warn }}
         </div>
       </div>
     </div>
@@ -154,6 +150,10 @@
 
 <script setup>
 import { computed, ref } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { authDesignLocale } from '../../../locales/auth-design/index.js'
+
+const { t, messages } = useI18n(authDesignLocale)
 
 const maxStep = 5
 const step = ref(0)
@@ -161,29 +161,8 @@ const step = ref(0)
 const cookie = ref('')
 const session = ref(false)
 
-const steps = [
-  {
-    title: '1) 登录请求（POST /login）',
-    desc: '用户提交用户名/密码，服务器验证成功后创建 Session。'
-  },
-  {
-    title: '2) 服务器 Set-Cookie',
-    desc: '服务器返回 Set-Cookie: session_id=...；浏览器保存 Cookie。',
-    warn: 'Cookie 建议加 HttpOnly + Secure + SameSite；同时要考虑 CSRF 防护。'
-  },
-  {
-    title: '3) 后续请求自动带 Cookie',
-    desc: '浏览器对同域请求会自动带上 Cookie，服务器用 session_id 查 Session。'
-  },
-  {
-    title: '4) 授权判断（role/权限）',
-    desc: '认证（你是谁）之后，仍需要授权（你能做什么）。比如 admin 才能访问管理接口。'
-  },
-  {
-    title: '5) 注销',
-    desc: '服务器删除 Session（或让其过期），并让浏览器清理 Cookie。'
-  }
-]
+const steps = computed(() => messages.value.sessionCookie.steps)
+const activeStep = computed(() => steps.value[step.value - 1])
 
 const start = () => {
   step.value = 1
@@ -218,21 +197,17 @@ const applyState = () => {
       cookie.value = 'sess_' + Math.random().toString(36).slice(2, 10)
     session.value = true
   }
-  if (step.value >= 5) {
-    // logout (show as empty state by step title/response)
-    // We don't auto-clear state; keep it visible until reset to avoid “auto” confusion.
-  }
 }
 
 const clientRequest = computed(() => {
-  if (step.value === 0) return '（点击开始）'
+  if (step.value === 0) return t('sessionCookie.clickStart')
   if (step.value === 1) {
     return `POST /login
 Content-Type: application/json
 
 {"username":"alice","password":"******"}`
   }
-  if (step.value === 2) return '（等待服务器响应并写入 Cookie）'
+  if (step.value === 2) return t('sessionCookie.waitCookie')
   if (step.value === 3) {
     return `GET /api/user/profile
 Cookie: session_id=${cookie.value}`

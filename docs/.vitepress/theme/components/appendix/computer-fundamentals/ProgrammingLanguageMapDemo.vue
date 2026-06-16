@@ -1,8 +1,8 @@
 <template>
   <div class="language-map-demo">
     <div class="demo-header">
-      <span class="title">编程语言分类</span>
-      <span class="subtitle">不同维度看语言</span>
+      <span class="title">{{ t('computerOrganization.vibeCodingFullstack.languageMap.title') }}</span>
+      <span class="subtitle">{{ t('computerOrganization.vibeCodingFullstack.languageMap.subtitle') }}</span>
     </div>
 
     <div class="classification-tabs">
@@ -28,39 +28,24 @@
     </div>
 
     <div class="info-box">
-      <strong>选择建议：</strong>先学一门主流语言深入，理解编程思想，再学其他语言会容易很多。
+      <strong>{{ t('computerOrganization.vibeCodingFullstack.languageMap.adviceLabel') }}</strong>{{ t('computerOrganization.vibeCodingFullstack.languageMap.advice') }}
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { computerFundamentalsLocale } from '../../../locales/computer-fundamentals/index.js'
+
+const { t, messages } = useI18n(computerFundamentalsLocale)
 
 const activeTab = ref('type')
 
-const tabs = [
-  { key: 'type', label: '按类型系统' },
-  { key: 'level', label: '按抽象层级' },
-  { key: 'paradigm', label: '按编程范式' }
-]
+const tabs = computed(() => messages.value.computerOrganization.vibeCodingFullstack.languageMap.tabs)
+const classifications = computed(() => messages.value.computerOrganization.vibeCodingFullstack.languageMap.classifications)
 
-const classifications = {
-  type: [
-    { name: '静态类型', desc: '变量类型在编译时确定', examples: ['Java', 'C++', 'Go', 'TypeScript'] },
-    { name: '动态类型', desc: '变量类型在运行时确定', examples: ['Python', 'JavaScript', 'Ruby'] }
-  ],
-  level: [
-    { name: '低级语言', desc: '接近硬件，执行效率高', examples: ['C', '汇编'] },
-    { name: '高级语言', desc: '接近人类语言，开发效率高', examples: ['Python', 'Java', 'JavaScript'] }
-  ],
-  paradigm: [
-    { name: '面向对象', desc: '以对象为中心组织代码', examples: ['Java', 'C++', 'Python'] },
-    { name: '函数式', desc: '以函数为中心，强调不可变', examples: ['Haskell', 'Elixir', 'Clojure'] },
-    { name: '多范式', desc: '支持多种编程风格', examples: ['Python', 'JavaScript', 'Rust'] }
-  ]
-}
-
-const currentItems = computed(() => classifications[activeTab.value])
+const currentItems = computed(() => classifications.value[activeTab.value])
 </script>
 
 <style scoped>

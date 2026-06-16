@@ -1,22 +1,10 @@
-<!--
-  BundlerComparisonDemo.vue
-  打包工具对比演示 (Vite/Webpack/Rollup)
-
-  用途：
-  直观对比三大主流打包工具的差异和适用场景。
-
-  交互功能：
-  - 工具切换：对比 Vite、Webpack、Rollup
-  - 维度对比：构建速度、配置复杂度、生态丰富度等
-  - 场景推荐：根据项目类型推荐最适合的工具
--->
 <template>
   <div class="bundler-comparison-demo">
     <div class="control-panel">
       <div class="title-section">
         <span class="icon">⚖️</span>
-        <span class="title">打包工具对比</span>
-        <span class="subtitle">Vite vs Webpack vs Rollup</span>
+        <span class="title">{{ t('bundlerComparison.title') }}</span>
+        <span class="subtitle">{{ t('bundlerComparison.subtitle') }}</span>
       </div>
       <div class="view-controls">
         <button
@@ -31,7 +19,7 @@
       </div>
     </div>
 
-    <!-- 雷达图对比视图 -->
+    <!-- radar chart view -->
     <div
       v-if="currentView === 'radar'"
       class="radar-view"
@@ -41,7 +29,6 @@
           viewBox="0 0 400 400"
           class="radar-chart"
         >
-          <!-- 背景网格 -->
           <g class="grid">
             <polygon
               v-for="i in 5"
@@ -51,7 +38,6 @@
               stroke="var(--vp-c-divider)"
               stroke-width="1"
             />
-            <!-- 轴线 -->
             <line
               v-for="(dim, i) in dimensions"
               :key="i"
@@ -64,7 +50,6 @@
             />
           </g>
 
-          <!-- 数据区域 -->
           <g class="data-areas">
             <polygon
               v-for="tool in bundlers"
@@ -81,7 +66,6 @@
             />
           </g>
 
-          <!-- 维度标签 -->
           <g class="labels">
             <text
               v-for="(dim, i) in dimensions"
@@ -100,7 +84,7 @@
         </svg>
       </div>
 
-      <!-- 图例 -->
+      <!-- legend -->
       <div class="legend">
         <div
           v-for="tool in bundlers"
@@ -120,7 +104,7 @@
       </div>
     </div>
 
-    <!-- 表格对比视图 -->
+    <!-- table comparison view -->
     <div
       v-else-if="currentView === 'table'"
       class="table-view"
@@ -128,7 +112,7 @@
       <table class="comparison-table">
         <thead>
           <tr>
-            <th>对比维度</th>
+            <th>{{ t('bundlerComparison.dimensionLabel') }}</th>
             <th
               v-for="tool in bundlers"
               :key="tool.id"
@@ -173,7 +157,7 @@
       </table>
     </div>
 
-    <!-- 场景推荐视图 -->
+    <!-- scenario recommendation view -->
     <div
       v-else-if="currentView === 'recommend'"
       class="recommend-view"
@@ -203,7 +187,7 @@
           >
             <div class="recommendation">
               <div class="best-choice">
-                <span class="choice-label">🏆 首选推荐</span>
+                <span class="choice-label">🏆 {{ t('bundlerComparison.bestChoice') }}</span>
                 <div class="choice-content">
                   <span
                     class="tool-badge"
@@ -221,7 +205,7 @@
                 v-if="scenario.alternative"
                 class="alternative"
               >
-                <span class="choice-label">🥈 备选方案</span>
+                <span class="choice-label">🥈 {{ t('bundlerComparison.alternative') }}</span>
                 <div class="choice-content">
                   <span
                     class="tool-badge alt"
@@ -243,10 +227,10 @@
     <div class="info-box">
       <p>
         <span class="icon">💡</span>
-        <strong>选择建议：</strong>
-        {{ currentView === 'radar' ? '雷达图展示了各工具在多个维度的能力分布，面积越大代表综合能力越强。' :
-          currentView === 'table' ? '表格详细对比了各工具在每个维度的具体得分，方便精确对比。' :
-          '根据你的项目类型和团队情况，选择最适合的工具往往比选择"最好"的工具更重要。' }}
+        <strong>{{ t('common.choiceAdvice') }}</strong>
+        {{ currentView === 'radar' ? t('bundlerComparison.radarInfo') :
+          currentView === 'table' ? t('bundlerComparison.tableInfo') :
+          t('bundlerComparison.recommendInfo') }}
       </p>
     </div>
   </div>
@@ -254,103 +238,103 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { frontendEngineeringLocale } from '../../../locales/frontend-engineering/index.js'
+
+const { t } = useI18n(frontendEngineeringLocale)
 
 const currentView = ref('radar')
 const highlightedTool = ref(null)
 const expandedScenario = ref(null)
 
-const viewModes = [
-  { id: 'radar', name: '雷达图', icon: '📊' },
-  { id: 'table', name: '对比表', icon: '📋' },
-  { id: 'recommend', name: '场景推荐', icon: '🎯' }
-]
+const viewModes = computed(() => [
+  { id: 'radar', name: t('bundlerComparison.viewRadar'), icon: '📊' },
+  { id: 'table', name: t('bundlerComparison.viewTable'), icon: '📋' },
+  { id: 'recommend', name: t('bundlerComparison.viewRecommend'), icon: '🎯' }
+])
 
-const dimensions = [
-  { key: 'speed', name: '构建速度', icon: '⚡' },
-  { key: 'config', name: '配置难度', icon: '🔧' },
-  { key: 'ecosystem', name: '生态丰富', icon: '📦' },
-  { key: 'hmr', name: '热更新速度', icon: '🔥' },
-  { key: 'output', name: '产物优化', icon: '✨' },
-  { key: 'memory', name: '内存占用', icon: '💾' }
-]
+const dimensions = computed(() => [
+  { key: 'speed', name: t('bundlerComparison.dimensions.speed'), icon: '⚡' },
+  { key: 'config', name: t('bundlerComparison.dimensions.config'), icon: '🔧' },
+  { key: 'ecosystem', name: t('bundlerComparison.dimensions.ecosystem'), icon: '📦' },
+  { key: 'hmr', name: t('bundlerComparison.dimensions.hmr'), icon: '🔥' },
+  { key: 'output', name: t('bundlerComparison.dimensions.output'), icon: '✨' },
+  { key: 'memory', name: t('bundlerComparison.dimensions.memory'), icon: '💾' }
+])
 
 const bundlers = [
   {
     id: 'vite',
     name: 'Vite',
     icon: '⚡',
-    shortDesc: '下一代前端构建工具',
+    shortDesc: t('bundlerComparison.bundlers.vite.shortDesc'),
     color: 'rgba(100, 108, 255, 0.3)',
     borderColor: '#646cff',
-    scores: [10, 8, 7, 10, 8, 9],
-    features: ['原生 ESM', '极速 HMR', '基于 esbuild']
+    scores: [10, 8, 7, 10, 8, 9]
   },
   {
     id: 'webpack',
     name: 'Webpack',
     icon: '📦',
-    shortDesc: '老牌强大的打包工具',
+    shortDesc: t('bundlerComparison.bundlers.webpack.shortDesc'),
     color: 'rgba(142, 214, 251, 0.3)',
     borderColor: '#8ed6fb',
-    scores: [5, 5, 10, 6, 9, 5],
-    features: ['生态最丰富', 'loader/plugin 多', '配置灵活']
+    scores: [5, 5, 10, 6, 9, 5]
   },
   {
     id: 'rollup',
     name: 'Rollup',
     icon: '📜',
-    shortDesc: 'JavaScript 模块打包器',
+    shortDesc: t('bundlerComparison.bundlers.rollup.shortDesc'),
     color: 'rgba(255, 107, 107, 0.3)',
     borderColor: '#ff6b6b',
-    scores: [7, 7, 6, 7, 10, 8],
-    features: ['Tree Shaking', '输出最优', '适合库开发']
+    scores: [7, 7, 6, 7, 10, 8]
   }
 ]
 
-const scenarios = [
+const scenarios = computed(() => [
   {
     id: 'spa',
     icon: '🚀',
-    name: '中小型 SPA 项目',
-    shortDesc: '单页应用，快速开发',
+    name: t('bundlerComparison.scenarios.spa.name'),
+    shortDesc: t('bundlerComparison.scenarios.spa.shortDesc'),
     bestChoice: 'vite',
-    bestReason: 'Vite 的极速冷启动和热更新让开发体验极佳，配置简单，是中小型项目的首选。',
+    bestReason: t('bundlerComparison.scenarios.spa.bestReason'),
     alternative: 'webpack',
-    altReason: '如果需要大量自定义配置或依赖特定的 webpack loader，webpack 仍然是可靠的选择。'
+    altReason: t('bundlerComparison.scenarios.spa.altReason')
   },
   {
     id: 'library',
     icon: '📚',
-    name: 'JavaScript 库/组件库',
-    shortDesc: '打包发布 npm 包',
+    name: t('bundlerComparison.scenarios.library.name'),
+    shortDesc: t('bundlerComparison.scenarios.library.shortDesc'),
     bestChoice: 'rollup',
-    bestReason: 'Rollup 生成的代码最干净，Tree Shaking 效果最好，非常适合打包 JavaScript 库。',
+    bestReason: t('bundlerComparison.scenarios.library.bestReason'),
     alternative: 'vite',
-    altReason: 'Vite 使用 Rollup 进行生产构建，同时提供更好的开发体验，也是现代库开发的好选择。'
+    altReason: t('bundlerComparison.scenarios.library.altReason')
   },
   {
     id: 'enterprise',
     icon: '🏢',
-    name: '大型企业级应用',
-    shortDesc: '复杂业务，多人协作',
+    name: t('bundlerComparison.scenarios.enterprise.name'),
+    shortDesc: t('bundlerComparison.scenarios.enterprise.shortDesc'),
     bestChoice: 'webpack',
-    bestReason: 'Webpack 生态最成熟，loader 和 plugin 最丰富，能应对各种复杂场景和定制化需求。',
+    bestReason: t('bundlerComparison.scenarios.enterprise.bestReason'),
     alternative: 'vite',
-    altReason: '如果团队追求更好的开发体验，且项目不需要太多自定义构建逻辑，Vite 也是值得考虑的选项。'
+    altReason: t('bundlerComparison.scenarios.enterprise.altReason')
   },
   {
     id: 'ssg',
     icon: '📝',
-    name: '静态站点生成 (SSG)',
-    shortDesc: '文档站、博客、营销页',
+    name: t('bundlerComparison.scenarios.ssg.name'),
+    shortDesc: t('bundlerComparison.scenarios.ssg.shortDesc'),
     bestChoice: 'vite',
-    bestReason: 'VitePress、Astro 等现代 SSG 工具都基于 Vite，开发体验好，构建速度快。',
+    bestReason: t('bundlerComparison.scenarios.ssg.bestReason'),
     alternative: 'rollup',
-    altReason: '一些轻量级 SSG 工具直接使用 Rollup，如果对产物体积要求极高可以考虑。'
+    altReason: t('bundlerComparison.scenarios.ssg.altReason')
   }
-]
+])
 
-// 雷达图计算
 const getGridPoints = (radius) => {
   const points = []
   for (let i = 0; i < 6; i++) {
@@ -394,14 +378,6 @@ const getTool = (id) => bundlers.find(b => b.id === id)
 
 const toggleScenario = (id) => {
   expandedScenario.value = expandedScenario.value === id ? null : id
-}
-
-const togglePlay = () => {
-  // Placeholder for play functionality in this component
-}
-
-const reset = () => {
-  // Placeholder for reset functionality
 }
 </script>
 
@@ -475,7 +451,7 @@ const reset = () => {
   border-color: var(--vp-c-brand);
 }
 
-/* 雷达图视图 */
+/* radar view */
 .radar-view {
   display: grid;
   grid-template-columns: 1fr 280px;
@@ -558,7 +534,7 @@ const reset = () => {
   margin-left: auto;
 }
 
-/* 表格视图 */
+/* table view */
 .table-view {
   margin-bottom: 1rem;
   overflow-x: auto;
@@ -636,7 +612,7 @@ const reset = () => {
   white-space: nowrap;
 }
 
-/* 推荐视图 */
+/* recommend view */
 .recommend-view {
   margin-bottom: 1rem;
 }

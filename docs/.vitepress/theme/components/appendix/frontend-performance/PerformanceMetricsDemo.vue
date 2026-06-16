@@ -1,18 +1,14 @@
-<!--
-  PerformanceMetricsDemo.vue
-  Core Web Vitals 性能指标演示
--->
 <template>
   <div class="metrics-demo">
     <div class="demo-header">
       <span class="icon">📊</span>
       <span class="title">Core Web Vitals</span>
-      <span class="subtitle">调整加载时间，观察性能指标变化</span>
+      <span class="subtitle">{{ t('metrics.subtitle') }}</span>
     </div>
 
     <div class="simulation-controls">
       <label>
-        模拟加载时间：<strong>{{ loadTime }}</strong> 秒
+        {{ t('metrics.loadTimeLabel') }}<strong>{{ loadTime }}</strong> {{ t('metrics.secondsUnit') }}
       </label>
       <input
         v-model.number="loadTime"
@@ -40,7 +36,7 @@
           {{ fcp }} s
         </div>
         <div class="metric-desc">
-          首次内容绘制
+          {{ t('metrics.desc.fcp') }}
         </div>
         <div class="metric-status">
           {{ fcpStatus.text }}
@@ -67,7 +63,7 @@
           {{ lcp }} s
         </div>
         <div class="metric-desc">
-          最大内容绘制
+          {{ t('metrics.desc.lcp') }}
         </div>
         <div class="metric-status">
           {{ lcpStatus.text }}
@@ -94,7 +90,7 @@
           {{ fid }} ms
         </div>
         <div class="metric-desc">
-          首次输入延迟
+          {{ t('metrics.desc.fid') }}
         </div>
         <div class="metric-status">
           {{ fidStatus.text }}
@@ -121,7 +117,7 @@
           {{ cls }}
         </div>
         <div class="metric-desc">
-          累积布局偏移
+          {{ t('metrics.desc.cls') }}
         </div>
         <div class="metric-status">
           {{ clsStatus.text }}
@@ -136,29 +132,32 @@
     <div class="standards">
       <div class="standard-item">
         <span class="color-box good" />
-        <span>良好</span>
+        <span>{{ t('metrics.statuses.good') }}</span>
       </div>
       <div class="standard-item">
         <span class="color-box needs-improvement" />
-        <span>需改进</span>
+        <span>{{ t('metrics.statuses.needsImprovement') }}</span>
       </div>
       <div class="standard-item">
         <span class="color-box poor" />
-        <span>差</span>
+        <span>{{ t('metrics.statuses.poor') }}</span>
       </div>
     </div>
 
     <div class="info-box">
       <span class="icon">💡</span>
-      <strong>核心指标：</strong>FCP（首次绘制）≤1.8s，LCP（最大内容绘制）≤2.5s，FID（输入延迟）≤100ms，CLS（布局偏移）≤0.1。目标是让所有指标都达到"良好"标准。
+      <strong>{{ t('metrics.infoPrefix') }}</strong>{{ t('metrics.infoText') }}
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { frontendPerformanceLocale } from '../../../locales/frontend-performance/index.js'
 
 const loadTime = ref(2.5)
+const { t } = useI18n(frontendPerformanceLocale)
 
 const fcp = computed(() => (loadTime.value * 0.3).toFixed(1))
 const lcp = computed(() => (loadTime.value * 0.7).toFixed(1))
@@ -169,30 +168,30 @@ const cls = computed(() =>
 
 const fcpStatus = computed(() => {
   const value = parseFloat(fcp.value)
-  if (value <= 1.8) return { class: 'good', text: '良好' }
-  if (value <= 3) return { class: 'needs-improvement', text: '需改进' }
-  return { class: 'poor', text: '差' }
+  if (value <= 1.8) return { class: 'good', text: t('metrics.statuses.good') }
+  if (value <= 3) return { class: 'needs-improvement', text: t('metrics.statuses.needsImprovement') }
+  return { class: 'poor', text: t('metrics.statuses.poor') }
 })
 
 const lcpStatus = computed(() => {
   const value = parseFloat(lcp.value)
-  if (value <= 2.5) return { class: 'good', text: '良好' }
-  if (value <= 4) return { class: 'needs-improvement', text: '需改进' }
-  return { class: 'poor', text: '差' }
+  if (value <= 2.5) return { class: 'good', text: t('metrics.statuses.good') }
+  if (value <= 4) return { class: 'needs-improvement', text: t('metrics.statuses.needsImprovement') }
+  return { class: 'poor', text: t('metrics.statuses.poor') }
 })
 
 const fidStatus = computed(() => {
   const value = fid.value
-  if (value <= 100) return { class: 'good', text: '良好' }
-  if (value <= 300) return { class: 'needs-improvement', text: '需改进' }
-  return { class: 'poor', text: '差' }
+  if (value <= 100) return { class: 'good', text: t('metrics.statuses.good') }
+  if (value <= 300) return { class: 'needs-improvement', text: t('metrics.statuses.needsImprovement') }
+  return { class: 'poor', text: t('metrics.statuses.poor') }
 })
 
 const clsStatus = computed(() => {
   const value = parseFloat(cls.value)
-  if (value <= 0.1) return { class: 'good', text: '良好' }
-  if (value <= 0.25) return { class: 'needs-improvement', text: '需改进' }
-  return { class: 'poor', text: '差' }
+  if (value <= 0.1) return { class: 'good', text: t('metrics.statuses.good') }
+  if (value <= 0.25) return { class: 'needs-improvement', text: t('metrics.statuses.needsImprovement') }
+  return { class: 'poor', text: t('metrics.statuses.poor') }
 })
 </script>
 

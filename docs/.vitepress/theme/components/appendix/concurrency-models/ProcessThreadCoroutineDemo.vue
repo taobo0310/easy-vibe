@@ -1,6 +1,6 @@
 <template>
   <div class="demo-container">
-    <h4>进程 / 线程 / 协程 对比演示</h4>
+    <h4>{{ t('processThreadCoroutine.title') }}</h4>
 
     <div class="controls">
       <el-radio-group
@@ -8,13 +8,13 @@
         size="small"
       >
         <el-radio-button label="process">
-          多进程
+          {{ t('processThreadCoroutine.multiProcess') }}
         </el-radio-button>
         <el-radio-button label="thread">
-          多线程
+          {{ t('processThreadCoroutine.multiThread') }}
         </el-radio-button>
         <el-radio-button label="coroutine">
-          协程
+          {{ t('processThreadCoroutine.coroutine') }}
         </el-radio-button>
       </el-radio-group>
 
@@ -24,26 +24,26 @@
         :disabled="isRunning"
         @click="startSimulation"
       >
-        {{ isRunning ? '运行中...' : '开始模拟' }}
+        {{ isRunning ? t('common.running') : t('processThreadCoroutine.startSimulation') }}
       </el-button>
     </div>
 
     <div class="stats-bar">
       <el-statistic
-        title="内存占用"
+        :title="t('processThreadCoroutine.memoryUsage')"
         :value="memoryUsage"
         suffix="MB"
       />
       <el-statistic
-        title="上下文切换"
+        :title="t('processThreadCoroutine.contextSwitch')"
         :value="contextSwitches"
       />
       <el-statistic
-        title="完成任务"
+        :title="t('processThreadCoroutine.completedTasks')"
         :value="completedTasks"
       />
       <el-statistic
-        title="耗时"
+        :title="t('processThreadCoroutine.elapsedTime')"
         :value="elapsedTime"
         suffix="ms"
       />
@@ -68,7 +68,7 @@
       </div>
 
       <div class="task-queue">
-        <h5>任务队列</h5>
+        <h5>{{ t('processThreadCoroutine.taskQueue') }}</h5>
         <div class="queue-items">
           <div
             v-for="(task, idx) in pendingTasks"
@@ -84,9 +84,9 @@
 
     <div class="explanation">
       <el-alert
-        :title="explanationTitle"
-        :type="explanationType"
-        :description="explanationText"
+        :title="t('processThreadCoroutine.explanationTitles.' + model)"
+        :type="t('processThreadCoroutine.explanationTypes.' + model)"
+        :description="t('processThreadCoroutine.explanationTexts.' + model)"
         show-icon
         :closable="false"
       />
@@ -95,7 +95,11 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { ref, watch } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { concurrencyModelsLocale } from '../../../locales/concurrency-models/index.js'
+
+const { t } = useI18n(concurrencyModelsLocale)
 
 const model = ref('process')
 const isRunning = ref(false)
@@ -113,35 +117,7 @@ const cpuCores = ref([
 
 const pendingTasks = ref([])
 
-const explanationTitle = computed(() => {
-  const titles = {
-    process: '多进程模型',
-    thread: '多线程模型',
-    coroutine: '协程模型'
-  }
-  return titles[model.value]
-})
-
-const explanationType = computed(() => {
-  const types = {
-    process: 'success',
-    thread: 'warning',
-    coroutine: 'info'
-  }
-  return types[model.value]
-})
-
-const explanationText = computed(() => {
-  const texts = {
-    process: '每个进程拥有独立的内存空间，隔离性强但开销大。进程间通信需要 IPC 机制。适合需要强隔离的场景，如浏览器标签页、沙箱程序。',
-    thread: '线程共享进程内存，切换开销较小，但需要同步机制保护共享数据。适合 CPU 密集型任务和需要共享数据的场景。',
-    coroutine: '用户态轻量级线程，由运行时调度，切换极快。适合 I/O 密集型高并发场景，如 Web 服务器、网关、长连接服务。'
-  }
-  return texts[model.value]
-})
-
 watch(model, () => {
-  // 重置状态
   resetSimulation()
 })
 
@@ -166,16 +142,13 @@ async function startSimulation() {
   const startTime = Date.now()
   const baseSwitchCost = model.value === 'process' ? 10 : model.value === 'thread' ? 2 : 1
 
-  // 模拟任务处理
   while (pendingTasks.value.length > 0 && isRunning.value) {
-    // 分配任务到 CPU 核心
     for (let i = 0; i < cpuCores.value.length; i++) {
       if (!cpuCores.value[i].active && pendingTasks.value.length > 0) {
         const task = pendingTasks.value.shift()
         cpuCores.value[i].active = true
         cpuCores.value[i].task = task.id
 
-        // 模拟任务执行时间
         setTimeout(() => {
           if (isRunning.value) {
             cpuCores.value[i].active = false
@@ -194,7 +167,6 @@ async function startSimulation() {
   isRunning.value = false
 }
 
-// 初始化
 resetSimulation()
 </script>
 

@@ -1,8 +1,8 @@
 <template>
   <div class="language-selection-demo">
     <div class="demo-header">
-      <span class="title">语言选择指南</span>
-      <span class="subtitle">根据目标选语言</span>
+      <span class="title">{{ t('computerOrganization.vibeCodingFullstack.languageSelection.title') }}</span>
+      <span class="subtitle">{{ t('computerOrganization.vibeCodingFullstack.languageSelection.subtitle') }}</span>
     </div>
 
     <div class="selection-grid">
@@ -10,29 +10,25 @@
         <div class="goal-name">{{ item.goal }}</div>
         <div class="goal-desc">{{ item.desc }}</div>
         <div class="goal-langs">
-          <span class="lang-label">推荐：</span>
+          <span class="lang-label">{{ t('computerOrganization.vibeCodingFullstack.languageSelection.recommend') }}</span>
           <span v-for="lang in item.langs" :key="lang" class="lang-tag">{{ lang }}</span>
         </div>
       </div>
     </div>
 
     <div class="info-box">
-      <strong>核心原则：</strong>语言只是工具，重要的是解决问题的能力。先精通一门，再触类旁通。
+      <strong>{{ t('computerOrganization.vibeCodingFullstack.languageSelection.principleLabel') }}</strong>{{ t('computerOrganization.vibeCodingFullstack.languageSelection.principle') }}
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { computerFundamentalsLocale } from '../../../locales/computer-fundamentals/index.js'
 
-const selections = ref([
-  { goal: 'Web 前端', desc: '网页、小程序、H5', langs: ['JavaScript', 'TypeScript'] },
-  { goal: 'Web 后端', desc: 'API 服务、业务系统', langs: ['Node.js', 'Go', 'Java', 'Python'] },
-  { goal: '移动端', desc: 'iOS / Android 应用', langs: ['Swift', 'Kotlin', 'Flutter'] },
-  { goal: 'AI / 数据科学', desc: '机器学习、数据分析', langs: ['Python'] },
-  { goal: '系统编程', desc: '操作系统、嵌入式', langs: ['C', 'C++', 'Rust'] },
-  { goal: '快速原型', desc: '脚本、自动化、小工具', langs: ['Python', 'Shell'] }
-])
+const { t, messages } = useI18n(computerFundamentalsLocale)
+const selections = computed(() => messages.value.computerOrganization.vibeCodingFullstack.languageSelection.selections)
 </script>
 
 <style scoped>

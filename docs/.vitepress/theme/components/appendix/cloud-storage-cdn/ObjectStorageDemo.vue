@@ -2,21 +2,20 @@
   <div class="object-storage-demo">
     <div class="demo-header">
       <span class="icon">🗄️</span>
-      <span class="title">对象存储架构</span>
-      <span class="subtitle">理解 Bucket、Object 和 Metadata 的关系</span>
+      <span class="title">{{ t('objectStorage.title') }}</span>
+      <span class="subtitle">{{ t('objectStorage.subtitle') }}</span>
     </div>
 
     <div class="storage-architecture">
-      <!-- 账户层 -->
       <div class="account-layer">
         <div class="account-icon">
           👤
         </div>
         <div class="account-name">
-          云账户 (Account)
+          {{ t('objectStorage.accountName') }}
         </div>
         <div class="account-desc">
-          管理权限、计费、全局配置
+          {{ t('objectStorage.accountDesc') }}
         </div>
       </div>
 
@@ -24,12 +23,11 @@
         ▼
       </div>
 
-      <!-- 桶层 -->
       <div class="buckets-container">
         <div class="section-title">
           <span>📦</span>
-          <span>存储桶 (Buckets)</span>
-          <span class="section-desc">命名空间隔离，权限控制</span>
+          <span>{{ t('objectStorage.bucketsTitle') }}</span>
+          <span class="section-desc">{{ t('objectStorage.bucketsDesc') }}</span>
         </div>
 
         <div class="buckets-row">
@@ -47,7 +45,7 @@
               {{ bucket.name }}
             </div>
             <div class="bucket-meta">
-              {{ bucket.objects }} 对象
+              {{ t('objectStorage.objectCount', { count: bucket.objects }) }}
             </div>
             <div class="bucket-size">
               {{ bucket.size }}
@@ -60,12 +58,11 @@
         ▼
       </div>
 
-      <!-- 对象层 -->
       <div class="objects-container">
         <div class="section-title">
           <span>📄</span>
-          <span>对象 (Objects)</span>
-          <span class="section-desc">文件数据 + 元数据</span>
+          <span>{{ t('objectStorage.objectsTitle') }}</span>
+          <span class="section-desc">{{ t('objectStorage.objectsDesc') }}</span>
         </div>
 
         <div
@@ -100,7 +97,7 @@
           v-else
           class="objects-placeholder"
         >
-          点击上方存储桶查看对象列表
+          {{ t('objectStorage.objectsPlaceholder') }}
         </div>
       </div>
 
@@ -108,12 +105,11 @@
         ▼
       </div>
 
-      <!-- 元数据层 -->
       <div class="metadata-container">
         <div class="section-title">
           <span>🏷️</span>
-          <span>元数据 (Metadata)</span>
-          <span class="section-desc">系统元数据 + 自定义元数据</span>
+          <span>{{ t('objectStorage.metadataTitle') }}</span>
+          <span class="section-desc">{{ t('objectStorage.metadataDesc') }}</span>
         </div>
 
         <div
@@ -122,7 +118,7 @@
         >
           <div class="metadata-section">
             <div class="metadata-section-title">
-              系统元数据 (System)
+              {{ t('objectStorage.systemMetadata') }}
             </div>
             <div class="metadata-list">
               <div
@@ -138,7 +134,7 @@
 
           <div class="metadata-section">
             <div class="metadata-section-title">
-              自定义元数据 (Custom)
+              {{ t('objectStorage.customMetadata') }}
             </div>
             <div class="metadata-list">
               <div
@@ -157,108 +153,42 @@
           v-else
           class="metadata-placeholder"
         >
-          点击左侧对象查看详细元数据
+          {{ t('objectStorage.metadataPlaceholder') }}
         </div>
       </div>
     </div>
 
     <div class="info-box">
       <span class="icon">💡</span>
-      <strong>核心思想：</strong>对象存储采用三层架构：Account（账户）→ Bucket（桶）→ Object（对象），每个对象都附带丰富的元数据用于检索和管理。理解这个层次结构是掌握对象存储的第一步。
+      <strong>{{ t('common.coreIdea') }}</strong>{{ t('objectStorage.idea') }}
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { cloudStorageCdnLocale } from '../../../locales/cloud-storage-cdn/index.js'
 
-// 存储桶数据
-const buckets = [
-  {
-    name: 'myapp-images-prod',
-    icon: '🖼️',
-    objects: 12543,
-    size: '256 GB'
-  },
-  {
-    name: 'myapp-videos-prod',
-    icon: '🎬',
-    objects: 892,
-    size: '1.2 TB'
-  },
-  {
-    name: 'myapp-backups',
-    icon: '💾',
-    objects: 3456,
-    size: '500 GB'
-  }
-]
+const { t, messages } = useI18n(cloudStorageCdnLocale)
 
-// 对象数据
-const objectsData = {
-  'myapp-images-prod': [
-    { key: 'avatars/user123.jpg', type: 'image/jpeg', size: '156 KB', lastModified: '2024-01-15' },
-    { key: 'products/shoes-01.png', type: 'image/png', size: '2.3 MB', lastModified: '2024-01-14' },
-    { key: 'banners/sale-2024.webp', type: 'image/webp', size: '456 KB', lastModified: '2024-01-13' }
-  ],
-  'myapp-videos-prod': [
-    { key: 'tutorials/intro.mp4', type: 'video/mp4', size: '156 MB', lastModified: '2024-01-15' },
-    { key: 'ads/promo-2024.mp4', type: 'video/mp4', size: '234 MB', lastModified: '2024-01-14' }
-  ],
-  'myapp-backups': [
-    { key: 'db/daily-20240115.sql.gz', type: 'application/gzip', size: '456 MB', lastModified: '2024-01-15' },
-    { key: 'logs/access-20240114.log.gz', type: 'application/gzip', size: '123 MB', lastModified: '2024-01-14' }
-  ]
-}
+const buckets = computed(() => messages.value.objectStorage.buckets)
+const objectsData = computed(() => messages.value.objectStorage.objectsData)
+const metadataData = computed(() => messages.value.objectStorage.metadataData)
 
-// 元数据
-const metadataData = {
-  'avatars/user123.jpg': {
-    system: {
-      'Content-Type': 'image/jpeg',
-      'Content-Length': '159745',
-      'Last-Modified': '2024-01-15T08:30:00Z',
-      'ETag': '"abc123def456"',
-      'x-oss-storage-class': 'Standard'
-    },
-    custom: {
-      'x-oss-meta-owner': 'user123',
-      'x-oss-meta-usage': 'avatar',
-      'x-oss-meta-uploaded-by': 'web-upload'
-    }
-  },
-  'products/shoes-01.png': {
-    system: {
-      'Content-Type': 'image/png',
-      'Content-Length': '2412555',
-      'Last-Modified': '2024-01-14T16:20:00Z',
-      'ETag': '"xyz789ghi012"',
-      'x-oss-storage-class': 'Standard'
-    },
-    custom: {
-      'x-oss-meta-product-id': 'shoes-01',
-      'x-oss-meta-category': 'footwear',
-      'x-oss-meta-price': '199.99'
-    }
-  }
-}
-
-// 状态
 const selectedBucket = ref(null)
 const selectedObject = ref(null)
 
-// 计算属性
 const currentObjects = computed(() => {
   if (!selectedBucket.value) return []
-  return objectsData[selectedBucket.value] || []
+  return objectsData.value[selectedBucket.value] || []
 })
 
 const currentMetadata = computed(() => {
   if (!selectedObject.value) return null
-  return metadataData[selectedObject.value] || null
+  return metadataData.value[selectedObject.value] || null
 })
 
-// 方法
 const selectBucket = (name) => {
   selectedBucket.value = name
   selectedObject.value = null

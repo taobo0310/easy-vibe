@@ -1,14 +1,14 @@
 <template>
   <div class="flip-flop-wrapper">
     <div class="header">
-      <div class="title">从触发器到寄存器：记忆的闭环机制</div>
-      <div class="desc">试着改变数据并观察，没有时钟信号的允许，输出重新反馈回输入端的"闭环"长久保护了记忆。</div>
+      <div class="title">{{ t('flipFlop.title') }}</div>
+      <div class="desc">{{ t('flipFlop.desc') }}</div>
     </div>
     
     <div class="interactive-panel">
       <!-- Left side: Controllable Data inputs -->
       <div class="data-input-sec">
-        <div class="sec-label">数据总线 (Data Input)</div>
+        <div class="sec-label">{{ t('flipFlop.dataInput') }}</div>
         <div class="bus-lines">
           <div 
             v-for="(bit, idx) in inputBits" :key="'in'+idx" 
@@ -24,7 +24,7 @@
 
       <!-- Arrow indicating flow, blocked by a 'gate' if no clock -->
       <div class="gate-sec">
-        <div class="sec-label transparent">大门</div>
+        <div class="sec-label transparent">{{ t('flipFlop.gate') }}</div>
         <div class="gate-door-container">
           <div class="flow-paths">
             <div v-for="(bit, idx) in inputBits" :key="'path'+idx" class="flow-line" :class="{ active: bit === 1, open: isClockPulsing }">
@@ -40,7 +40,7 @@
 
       <!-- Right side: The flip-flops (registers) -->
       <div class="register-sec" :class="{ writing: isClockPulsing }">
-        <div class="sec-label">4位寄存器 (存储状态)</div>
+        <div class="sec-label">{{ t('flipFlop.registerState') }}</div>
         <div class="stored-bits">
           <div 
             v-for="(bit, idx) in storedBits" :key="'s'+idx" 
@@ -61,9 +61,9 @@
 
     <!-- Clock button at bottom -->
     <div class="clock-sec">
-      <div class="sec-label">控制中心</div>
+      <div class="sec-label">{{ t('flipFlop.controlCenter') }}</div>
       <button class="clock-btn" :class="{ active: isClockPulsing }" @click="triggerClock">
-        <span class="icon">⚡</span> 发送时钟脉冲 (Clock)
+        <span class="icon">⚡</span> {{ t('flipFlop.clockButton') }}
       </button>
       <div class="status-msg">
         <strong :class="{ 'warning-text': pendingChanges, 'success-text': !pendingChanges && !isClockPulsing, 'action-text': isClockPulsing }">
@@ -76,6 +76,10 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { computerFundamentalsLocale } from '../../../locales/computer-fundamentals/index.js'
+
+const { t } = useI18n(computerFundamentalsLocale)
 
 const inputBits = ref([1, 0, 1, 0])
 const storedBits = ref([0, 0, 0, 0])
@@ -88,18 +92,18 @@ const pendingChanges = computed(() => {
 
 const statusMessage = computed(() => {
   if (isClockPulsing.value) {
-    return '脉冲到达！突破闭环防线，正并行读入新数据...'
+    return t('flipFlop.statusPulsing')
   }
   if (manualStatus.value) return manualStatus.value;
-  return '尝试改变左侧输入，闭环保护期间寄存器值无法更改。'
+  return t('flipFlop.statusIdle')
 })
 
 const toggleInput = (idx) => {
   inputBits.value[idx] = inputBits.value[idx] === 1 ? 0 : 1
   if (pendingChanges.value) {
-    manualStatus.value = '准备写入新数据，请点击"发送时钟脉冲"打破锁死。'
+    manualStatus.value = t('flipFlop.statusReady')
   } else {
-    manualStatus.value = '输入总线与当前存储状态相同。'
+    manualStatus.value = t('flipFlop.statusSame')
   }
 }
 
@@ -116,9 +120,9 @@ const triggerClock = () => {
   setTimeout(() => {
     isClockPulsing.value = false
     if (pendingChanges.value) {
-      manualStatus.value = '闭环重新生效，但还有未写入的新数据？'
+      manualStatus.value = t('flipFlop.statusPending')
     } else {
-      manualStatus.value = '脉冲消退。反馈闭环恢复，当前状态被长久稳固保存。'
+      manualStatus.value = t('flipFlop.statusSaved')
     }
   }, 600)
 }

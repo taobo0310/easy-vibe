@@ -1,23 +1,19 @@
-<!--
-  FileUploadFlowDemo.vue
-  文件上传流程演示：直传 vs 服务端中转
--->
 <template>
   <div class="upload-flow-demo">
     <div class="header">
-      <div class="title">文件上传方式对比</div>
-      <div class="subtitle">点击切换查看两种上传方式的流程差异</div>
+      <div class="title">{{ t('uploadFlow.title') }}</div>
+      <div class="subtitle">{{ t('uploadFlow.subtitle') }}</div>
     </div>
 
     <div class="mode-tabs">
       <button
         :class="['tab', { active: mode === 'proxy' }]"
         @click="mode = 'proxy'; reset()"
-      >服务端中转</button>
+      >{{ t('uploadFlow.tabs.proxy') }}</button>
       <button
         :class="['tab', { active: mode === 'direct' }]"
         @click="mode = 'direct'; reset()"
-      >客户端直传</button>
+      >{{ t('uploadFlow.tabs.direct') }}</button>
     </div>
 
     <div class="flow-steps">
@@ -35,44 +31,28 @@
       </div>
     </div>
 
-    <button class="play-btn" @click="playFlow" :disabled="playing">
-      {{ playing ? '演示中...' : '播放流程' }}
+    <button class="play-btn" :disabled="playing" @click="playFlow">
+      {{ playing ? t('uploadFlow.playingLabel') : t('uploadFlow.playLabel') }}
     </button>
 
-    <div :class="['verdict', mode]" v-if="currentStep >= currentSteps.length">
-      <template v-if="mode === 'proxy'">
-        ⚠️ 服务端中转：文件经过你的服务器，占用带宽和内存，大文件容易超时
-      </template>
-      <template v-else>
-        ✅ 客户端直传：文件直接上传到 OSS，服务器只负责签发凭证，高效且省资源
-      </template>
+    <div v-if="currentStep >= currentSteps.length" :class="['verdict', mode]">
+      {{ t(`uploadFlow.verdicts.${mode}`) }}
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { fileStorageLocale } from '../../../locales/file-storage/index.js'
+
+const { t, messages } = useI18n(fileStorageLocale)
 
 const mode = ref('proxy')
 const currentStep = ref(-1)
 const playing = ref(false)
 
-const proxySteps = [
-  { title: '客户端 → 服务器', desc: '用户选择文件，上传到你的后端服务器', note: '大文件会占用服务器带宽和内存' },
-  { title: '服务器接收文件', desc: '后端将文件暂存到本地磁盘或内存', note: '可能触发 Nginx 的 body size 限制' },
-  { title: '服务器 → OSS', desc: '后端再将文件转发到对象存储', note: '文件传输了两次，效率低' },
-  { title: 'OSS 返回 URL', desc: '对象存储返回文件的访问地址', note: '' },
-  { title: '服务器 → 客户端', desc: '后端将文件 URL 返回给前端', note: '' }
-]
-
-const directSteps = [
-  { title: '客户端 → 服务器', desc: '前端请求一个临时上传凭证（Pre-signed URL）', note: '只传少量 JSON 数据，毫秒级' },
-  { title: '服务器签发凭证', desc: '后端用 OSS SDK 生成带签名的临时上传 URL', note: '凭证有效期通常 5-15 分钟' },
-  { title: '客户端 → OSS', desc: '前端直接将文件上传到对象存储', note: '文件不经过你的服务器，节省带宽' },
-  { title: 'OSS 回调通知', desc: '上传完成后 OSS 回调你的服务器确认', note: '服务器记录文件元信息到数据库' }
-]
-
-const currentSteps = computed(() => mode.value === 'proxy' ? proxySteps : directSteps)
+const currentSteps = computed(() => messages.value.uploadFlow.steps[mode.value])
 
 function reset() {
   currentStep.value = -1

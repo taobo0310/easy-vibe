@@ -2,8 +2,8 @@
   <div class="tech-stack-timeline-demo">
     <div class="demo-header">
       <span class="icon">📚</span>
-      <span class="title">技术栈演进时间线</span>
-      <span class="subtitle">每个时代的主流技术栈</span>
+      <span class="title">{{ t('techStackTimeline.title') }}</span>
+      <span class="subtitle">{{ t('techStackTimeline.subtitle') }}</span>
     </div>
 
     <div class="timeline">
@@ -54,56 +54,14 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { backendEvolutionLocale } from '../../../locales/backend-evolution/index.js'
+
+const { t, messages } = useI18n(backendEvolutionLocale)
 
 const activeEra = ref(0)
-
-const eras = [
-  {
-    icon: '🖥️',
-    name: '物理机时代',
-    period: '1990s',
-    categories: [
-      { name: 'Web服务器', techs: ['Apache', 'Nginx', 'IIS'] },
-      { name: '后端语言', techs: ['Perl', 'PHP', 'ASP'] },
-      { name: '数据库', techs: ['MySQL', 'PostgreSQL', 'Oracle'] },
-      { name: '部署方式', techs: ['FTP', 'SSH', '手动'] }
-    ]
-  },
-  {
-    icon: '🏢',
-    name: '单体架构',
-    period: '2000s',
-    categories: [
-      { name: '后端框架', techs: ['Spring', 'Django', 'Rails', 'Laravel'] },
-      { name: '前端技术', techs: ['jQuery', 'Bootstrap', 'JSP'] },
-      { name: '数据库', techs: ['MySQL', 'Redis', 'MongoDB'] },
-      { name: '构建工具', techs: ['Maven', 'Gradle', 'Ant'] }
-    ]
-  },
-  {
-    icon: '🏭',
-    name: '微服务',
-    period: '2010s',
-    categories: [
-      { name: '容器化', techs: ['Docker', 'Kubernetes', 'Helm'] },
-      { name: '服务框架', techs: ['Spring Cloud', 'gRPC', 'Dubbo'] },
-      { name: '数据存储', techs: ['Redis', 'MongoDB', 'Kafka', 'ES'] },
-      { name: '可观测', techs: ['Prometheus', 'Grafana', 'Jaeger'] }
-    ]
-  },
-  {
-    icon: '☁️',
-    name: 'Serverless',
-    period: '2020s+',
-    categories: [
-      { name: '函数计算', techs: ['Lambda', 'Vercel', 'Cloudflare'] },
-      { name: 'BaaS', techs: ['Supabase', 'Firebase', 'Auth0'] },
-      { name: '前端框架', techs: ['Next.js', 'Nuxt', 'SvelteKit'] },
-      { name: '数据库', techs: ['PlanetScale', 'Neon', 'Turso'] }
-    ]
-  }
-]
+const eras = computed(() => messages.value.techStackTimeline.eras)
 </script>
 
 <style scoped>

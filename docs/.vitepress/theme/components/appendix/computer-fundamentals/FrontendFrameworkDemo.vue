@@ -1,8 +1,8 @@
 <template>
   <div class="framework-demo">
     <div class="demo-header">
-      <span class="title">前端框架演进</span>
-      <span class="subtitle">从 jQuery 到现代框架</span>
+      <span class="title">{{ t('computerOrganization.vibeCodingFullstack.frontendFramework.title') }}</span>
+      <span class="subtitle">{{ t('computerOrganization.vibeCodingFullstack.frontendFramework.subtitle') }}</span>
     </div>
 
     <div class="timeline">
@@ -25,46 +25,18 @@
     </div>
 
     <div class="info-box">
-      <strong>框架的本质：</strong>解决"数据变化后如何高效更新 UI"的问题。现代框架让你只需关注"数据是什么"，框架自动处理"UI 怎么变"。
+      <strong>{{ t('computerOrganization.vibeCodingFullstack.frontendFramework.essenceLabel') }}</strong>{{ t('computerOrganization.vibeCodingFullstack.frontendFramework.essence') }}
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { computerFundamentalsLocale } from '../../../locales/computer-fundamentals/index.js'
 
-const eras = ref([
-  {
-    name: '原生时代',
-    time: '1990s',
-    desc: '直接用代码操控页面元素，一切从零开始',
-    techs: ['HTML', 'CSS', 'JavaScript']
-  },
-  {
-    name: 'jQuery 时代',
-    time: '2006-2015',
-    desc: '简化页面操控，跨浏览器兼容',
-    techs: ['jQuery', 'Bootstrap']
-  },
-  {
-    name: 'MVVM 时代',
-    time: '2010-2015',
-    desc: '数据驱动视图，双向绑定',
-    techs: ['Angular.js', 'Knockout']
-  },
-  {
-    name: '组件化时代',
-    time: '2013-至今',
-    desc: '声明式、组件化，框架自动更新页面',
-    techs: ['React', 'Vue', 'Angular']
-  },
-  {
-    name: '新时代',
-    time: '2020-至今',
-    desc: '编译时优化，更少运行时开销',
-    techs: ['Svelte', 'Solid']
-  }
-])
+const { t, messages } = useI18n(computerFundamentalsLocale)
+const eras = computed(() => messages.value.computerOrganization.vibeCodingFullstack.frontendFramework.eras)
 </script>
 
 <style scoped>

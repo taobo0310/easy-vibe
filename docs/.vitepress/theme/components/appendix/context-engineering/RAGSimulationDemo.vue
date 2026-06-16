@@ -5,38 +5,18 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { contextEngineeringLocale } from '../../../locales/context-engineering/index.js'
 
-const query = ref('如何重置密码？')
+const { t, messages } = useI18n(contextEngineeringLocale)
+
+const query = ref(t('ragSimulation.defaultQuery'))
 const lastQuery = ref('')
 const isSearching = ref(false)
 const currentStep = ref(0) // 0: Idle, 1: Searching/Scanning, 2: Retrieved/Assembling, 3: Done
 
-const documents = ref([
-  {
-    id: 1,
-    title: '密码重置指南',
-    content: '用户可以通过点击设置页面的"忘记密码"链接来重置密码。系统会发送验证邮件。',
-    score: 0
-  },
-  {
-    id: 2,
-    title: '定价策略',
-    content: '基础版每月 $10，专业版每月 $29。企业版需要联系销售团队获取报价。',
-    score: 0
-  },
-  {
-    id: 3,
-    title: 'API 文档',
-    content: '所有 API 请求都需要在 Header 中包含 Bearer Token 进行身份验证。',
-    score: 0
-  },
-  {
-    id: 4,
-    title: '账户安全',
-    content: '为了账户安全，建议开启双重认证 (2FA)。定期修改密码也是好习惯。',
-    score: 0
-  }
-])
+const createDocuments = () => messages.value.ragSimulation.documents.map((doc) => ({ ...doc }))
+const documents = ref(createDocuments())
 
 const retrievedDocs = computed(() => {
   return documents.value
@@ -45,12 +25,12 @@ const retrievedDocs = computed(() => {
 })
 
 const calculateSimilarity = (q, docContent) => {
-  // Simple keyword matching simulation
-  if (q.includes('密码') && (docContent.includes('密码') || docContent.includes('安全'))) return 0.95
-  if (q.includes('价格') && docContent.includes('价')) return 0.9
-  if (q.includes('API') && docContent.includes('API')) return 0.9
-  
-  // Random noise for non-matches
+  const keywords = messages.value.ragSimulation.keywords
+  const lowerQuery = q.toLowerCase()
+  const lowerContent = docContent.toLowerCase()
+  if (lowerQuery.includes(keywords.password.toLowerCase()) && (lowerContent.includes(keywords.password.toLowerCase()) || lowerContent.includes(keywords.security.toLowerCase()))) return 0.95
+  if (lowerQuery.includes(keywords.price.toLowerCase()) && lowerContent.includes(keywords.priceShort.toLowerCase())) return 0.9
+  if (lowerQuery.includes(keywords.api.toLowerCase()) && lowerContent.includes(keywords.api.toLowerCase())) return 0.9
   return Math.random() * 0.3
 }
 
@@ -61,24 +41,20 @@ const search = async () => {
   lastQuery.value = query.value
   currentStep.value = 1
   
-  // Reset scores
   documents.value.forEach(d => d.score = 0)
 
-  // Step 1: Simulate Scanning (1.5s)
   await new Promise(r => setTimeout(r, 600))
   
-  // Calculate scores
   documents.value.forEach(doc => {
     doc.score = calculateSimilarity(query.value, doc.content + doc.title)
   })
   
-  await new Promise(r => setTimeout(r, 800)) // Wait for scan animation to finish visual impact
+  await new Promise(r => setTimeout(r, 800))
   
-  currentStep.value = 2 // Transition to retrieval
+  currentStep.value = 2
   
-  // Step 2: Assemble Context (1s)
   await new Promise(r => setTimeout(r, 1000))
-  currentStep.value = 3 // Done
+  currentStep.value = 3
   
   isSearching.value = false
 }
@@ -86,17 +62,16 @@ const search = async () => {
 
 <template>
   <div class="rag-demo">
-    <!-- Step 1: User Input -->
     <div class="step-section input-section">
       <div class="step-label">
         <span class="step-num">1</span>
-        <span class="step-text">用户提问 (User Query)</span>
+        <span class="step-text">{{ t('ragSimulation.inputStep') }}</span>
       </div>
       <div class="search-box">
         <input 
           v-model="query" 
           type="text" 
-          placeholder="输入问题..."
+          :placeholder="t('ragSimulation.placeholder')"
           :disabled="isSearching"
           @keyup.enter="search"
         >
@@ -105,12 +80,11 @@ const search = async () => {
           :disabled="isSearching || !query"
           @click="search"
         >
-          {{ isSearching ? '检索中...' : '🚀 开始检索' }}
+          {{ isSearching ? t('ragSimulation.searching') : t('ragSimulation.search') }}
         </button>
       </div>
     </div>
 
-    <!-- Arrow Connection -->
     <div
       class="flow-arrow"
       :class="{ active: currentStep >= 1 }"
@@ -121,22 +95,21 @@ const search = async () => {
       </div>
     </div>
 
-    <!-- Step 2: Library Scanning -->
     <div
       class="step-section library-section"
       :class="{ 'is-scanning': currentStep === 1 }"
     >
       <div class="step-label">
         <span class="step-num">2</span>
-        <span class="step-text">图书馆检索 (Retrieval)</span>
+        <span class="step-text">{{ t('ragSimulation.retrievalStep') }}</span>
         <span
           v-if="currentStep === 1"
           class="status-badge"
-        >正在扫描...</span>
+        >{{ t('ragSimulation.scanning') }}</span>
         <span
           v-if="currentStep >= 2"
           class="status-badge success"
-        >命中 {{ retrievedDocs.length }} 条</span>
+        >{{ t('ragSimulation.hitCount', { count: retrievedDocs.length }) }}</span>
       </div>
       
       <div class="docs-grid">
@@ -156,14 +129,13 @@ const search = async () => {
               v-if="currentStep >= 2 && doc.score > 0.6"
               class="doc-score"
             >
-              {{ (doc.score * 100).toFixed(0) }}% 相关
+              {{ t('ragSimulation.relevance', { score: (doc.score * 100).toFixed(0) }) }}
             </span>
           </div>
           <div class="doc-content">
             {{ doc.content }}
           </div>
           
-          <!-- Visual effect for scanning -->
           <div
             v-if="currentStep === 1"
             class="scan-line"
@@ -172,31 +144,29 @@ const search = async () => {
       </div>
     </div>
 
-    <!-- Arrow Connection -->
     <div
       class="flow-arrow"
       :class="{ active: currentStep >= 2 }"
     >
       <div class="line" />
       <div class="icon">
-        ✂️ 复制粘贴
+        {{ t('ragSimulation.copyPaste') }}
       </div>
     </div>
 
-    <!-- Step 3: Context Assembly -->
     <div
       class="step-section context-section"
       :class="{ active: currentStep >= 3 }"
     >
       <div class="step-label">
         <span class="step-num">3</span>
-        <span class="step-text">最终上下文 (Final Prompt)</span>
+        <span class="step-text">{{ t('ragSimulation.finalPrompt') }}</span>
       </div>
       
       <div class="blackboard">
         <div class="chalk-text system">
           <span class="role-badge">SYSTEM</span>
-          你是一个专业的 AI 助手。请基于下方【检索到的资料】回答用户的提问。
+          {{ t('ragSimulation.systemPrompt') }}
         </div>
         
         <div
@@ -204,7 +174,7 @@ const search = async () => {
           class="retrieved-block"
         >
           <div class="block-header">
-            📚 检索到的资料 (Context)
+            {{ t('ragSimulation.retrievedTitle') }}
           </div>
           <div v-if="retrievedDocs.length > 0">
             <div
@@ -219,13 +189,13 @@ const search = async () => {
             v-else
             class="empty-state"
           >
-            (未找到相关资料)
+            {{ t('ragSimulation.noDocs') }}
           </div>
         </div>
         
         <div class="chalk-text user">
           <span class="role-badge">USER</span>
-          {{ lastQuery || '等待提问...' }}
+          {{ lastQuery || t('ragSimulation.waiting') }}
         </div>
       </div>
     </div>

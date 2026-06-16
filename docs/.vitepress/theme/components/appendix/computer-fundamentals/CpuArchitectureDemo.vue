@@ -1,25 +1,25 @@
 <template>
   <div class="cpu-demo">
-    <div class="demo-title">CPU 指令执行周期详细演示</div>
+    <div class="demo-title">{{ t('cpuArchitecture.title') }}</div>
 
     <div class="main-layout">
       <!-- LEFT: CPU internals -->
       <div class="cpu-box">
-        <div class="cpu-label">CPU</div>
+        <div class="cpu-label">{{ t('cpuArchitecture.cpuLabel') }}</div>
 
         <!-- Control Unit -->
         <div class="unit cu-unit" :class="{ active: isActive('CU') }">
-          <div class="unit-title">控制单元 CU</div>
+          <div class="unit-title">{{ t('cpuArchitecture.controlUnit') }}</div>
           <div class="regs-row">
             <div class="reg-cell" :class="{ highlight: isHighlight('PC') }">
               <span class="reg-name">PC</span>
               <span class="reg-val">{{ fmt(regs.PC) }}</span>
-              <span class="reg-hint">程序计数器</span>
+              <span class="reg-hint">{{ t('cpuArchitecture.programCounter') }}</span>
             </div>
             <div class="reg-cell" :class="{ highlight: isHighlight('IR') }">
               <span class="reg-name">IR</span>
               <span class="reg-val ir-val">{{ regs.IR || '—' }}</span>
-              <span class="reg-hint">指令寄存器</span>
+              <span class="reg-hint">{{ t('cpuArchitecture.instructionRegister') }}</span>
             </div>
           </div>
         </div>
@@ -30,34 +30,34 @@
             <div class="reg-cell" :class="{ highlight: isHighlight('MAR') }">
               <span class="reg-name">MAR</span>
               <span class="reg-val">{{ fmt(regs.MAR) }}</span>
-              <span class="reg-hint">内存地址寄存器</span>
+              <span class="reg-hint">{{ t('cpuArchitecture.memoryAddressRegister') }}</span>
             </div>
             <div class="reg-cell" :class="{ highlight: isHighlight('MDR') }">
               <span class="reg-name">MDR</span>
               <span class="reg-val">{{ regs.MDR !== null ? regs.MDR : '—' }}</span>
-              <span class="reg-hint">内存数据寄存器</span>
+              <span class="reg-hint">{{ t('cpuArchitecture.memoryDataRegister') }}</span>
             </div>
           </div>
         </div>
 
         <!-- ALU -->
         <div class="unit alu-unit" :class="{ active: isActive('ALU') }">
-          <div class="unit-title">算术逻辑单元 ALU</div>
+          <div class="unit-title">{{ t('cpuArchitecture.alu') }}</div>
           <div class="regs-row">
             <div class="reg-cell" :class="{ highlight: isHighlight('ACC') }">
               <span class="reg-name">ACC</span>
               <span class="reg-val">{{ fmt(regs.ACC) }}</span>
-              <span class="reg-hint">累加器</span>
+              <span class="reg-hint">{{ t('cpuArchitecture.accumulator') }}</span>
             </div>
             <div class="alu-op" :class="{ running: isActive('ALU') }">
-              {{ aluOp }}
+              {{ t(`cpuArchitecture.aluOps.${aluOp}`) }}
             </div>
           </div>
         </div>
 
         <!-- General Registers -->
         <div class="unit reg-unit">
-          <div class="unit-title">通用寄存器组</div>
+          <div class="unit-title">{{ t('cpuArchitecture.registerGroup') }}</div>
           <div class="regs-row">
             <div
               v-for="r in ['R0','R1','R2','R3']"
@@ -75,16 +75,16 @@
       <!-- CENTER: Buses -->
       <div class="bus-col">
         <div class="bus addr-bus" :class="{ active: busActive === 'addr' }">
-          <span class="bus-label">地址总线</span>
-          <span class="bus-val" v-if="busActive === 'addr'">{{ fmt(regs.MAR) }}</span>
+          <span class="bus-label">{{ t('cpuArchitecture.addressBus') }}</span>
+          <span v-if="busActive === 'addr'" class="bus-val">{{ fmt(regs.MAR) }}</span>
         </div>
         <div class="bus data-bus" :class="{ active: busActive === 'data' }">
-          <span class="bus-label">数据总线</span>
-          <span class="bus-val" v-if="busActive === 'data'">{{ regs.MDR !== null ? regs.MDR : '' }}</span>
+          <span class="bus-label">{{ t('cpuArchitecture.dataBus') }}</span>
+          <span v-if="busActive === 'data'" class="bus-val">{{ regs.MDR !== null ? regs.MDR : '' }}</span>
         </div>
         <div class="bus ctrl-bus" :class="{ active: busActive === 'ctrl' }">
-          <span class="bus-label">控制总线</span>
-          <span class="bus-val" v-if="busActive === 'ctrl'">{{ ctrlSignal }}</span>
+          <span class="bus-label">{{ t('cpuArchitecture.controlBus') }}</span>
+          <span v-if="busActive === 'ctrl'" class="bus-val">{{ ctrlSignal }}</span>
         </div>
         <!-- arrows -->
         <div class="arrow-row">
@@ -96,7 +96,7 @@
 
       <!-- RIGHT: Memory -->
       <div class="mem-box">
-        <div class="mem-label">主存 Memory</div>
+        <div class="mem-label">{{ t('cpuArchitecture.mainMemory') }}</div>
         <div class="mem-rows">
           <div
             v-for="(inst, i) in program"
@@ -114,7 +114,7 @@
           </div>
         </div>
         <div class="mem-data-area">
-          <div class="mem-label-sm">数据区</div>
+          <div class="mem-label-sm">{{ t('cpuArchitecture.dataArea') }}</div>
           <div
             v-for="(val, addr) in dataMemory"
             :key="addr"
@@ -144,33 +144,37 @@
 
     <!-- Step detail -->
     <div class="step-detail">
-      <div class="step-badge">步骤 {{ stepIndex }} / {{ totalSteps }}</div>
+      <div class="step-badge">{{ t('cpuArchitecture.stepBadge', { step: stepIndex, total: totalSteps }) }}</div>
       <div class="step-msg">{{ currentStep.msg }}</div>
-      <div class="step-signal" v-if="currentStep.signal">
-        信号：<code>{{ currentStep.signal }}</code>
+      <div v-if="currentStep.signal" class="step-signal">
+        {{ t('cpuArchitecture.signalLabel') }}<code>{{ currentStep.signal }}</code>
       </div>
     </div>
 
     <!-- Controls -->
     <div class="controls">
-      <button class="btn-clock" @click="advance" :disabled="done">
-        ⟳ 时钟脉冲 (下一步)
+      <button class="btn-clock" :disabled="done" @click="advance">
+        {{ t('cpuArchitecture.clockButton') }}
       </button>
-      <button class="btn-auto" @click="toggleAuto" :disabled="done">
-        {{ autoRunning ? '⏸ 暂停' : '▶ 自动运行' }}
+      <button class="btn-auto" :disabled="done" @click="toggleAuto">
+        {{ autoRunning ? t('cpuArchitecture.autoPause') : t('cpuArchitecture.autoRun') }}
       </button>
-      <button class="btn-reset" @click="reset">↺ 重置</button>
+      <button class="btn-reset" @click="reset">{{ t('cpuArchitecture.reset') }}</button>
     </div>
 
-    <div class="done-msg" v-if="done">
-      ✅ 程序执行完毕！共执行 {{ program.length }} 条指令，{{ stepIndex }} 个时钟步骤。
-      <button class="btn-reset inline" @click="reset">重新开始</button>
+    <div v-if="done" class="done-msg">
+      {{ t('cpuArchitecture.done', { programLength: program.length, stepIndex }) }}
+      <button class="btn-reset inline" @click="reset">{{ t('cpuArchitecture.restart') }}</button>
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref, computed, onUnmounted } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { computerFundamentalsLocale } from '../../../locales/computer-fundamentals/index.js'
+
+const { t, messages } = useI18n(computerFundamentalsLocale)
 
 const BASE_ADDR = 0x100
 const DATA_BASE = 0x200
@@ -183,15 +187,18 @@ const program = [
   { asm: 'STORE [0x201], R0', op: 'STORE', addr: DATA_BASE + 1, src: 'R0' },
 ]
 
-const phases = [
-  { en: 'Fetch',   zh: '取指' },
-  { en: 'Decode',  zh: '译码' },
-  { en: 'Execute', zh: '执行' },
-  { en: 'Write Back', zh: '写回' },
-]
+const phases = computed(() =>
+  messages.value.cpuArchitecture.phases.map(([en, zh]) => ({ en, zh }))
+)
 
 function hex(n) { return n != null ? '0x' + n.toString(16).toUpperCase().padStart(3, '0') : '—' }
 function fmt(v) { return v != null ? v : '—' }
+function msg(key, params = {}) {
+  return { key, params }
+}
+function sig(key, params = {}) {
+  return { key, params }
+}
 
 // Build step sequence for all instructions
 function buildSteps() {
@@ -206,31 +213,31 @@ function buildSteps() {
       highlights: ['PC'],
       bus: 'ctrl',
       ctrlSignal: 'READ',
-      aluOp: '—',
+      aluOp: 'idle',
       regUpdates: { MAR: pc },
-      msg: `[取指 1/3] PC=${hex(pc)}，控制单元发出读信号，将 PC 值送入 MAR（内存地址寄存器）`,
-      signal: `MAR ← PC (${hex(pc)})`,
+      msg: msg('fetch1', { pc: hex(pc) }),
+      signal: sig('marPc', { pc: hex(pc) }),
     })
     steps.push({
       phase: 0,
       highlights: ['MAR'],
       bus: 'addr',
       ctrlSignal: 'READ',
-      aluOp: '—',
+      aluOp: 'idle',
       regUpdates: {},
-      msg: `[取指 2/3] MAR=${hex(pc)} 通过地址总线送到主存，主存定位该地址`,
-      signal: `地址总线: ${hex(pc)}`,
+      msg: msg('fetch2', { pc: hex(pc) }),
+      signal: sig('addr', { pc: hex(pc) }),
     })
     steps.push({
       phase: 0,
       highlights: ['MDR', 'IR'],
       bus: 'data',
       ctrlSignal: 'READ',
-      aluOp: '—',
+      aluOp: 'idle',
       regUpdates: { MDR: inst.asm, IR: inst.asm, PC: pc + 1 },
       fetchedAddr: pc,
-      msg: `[取指 3/3] 主存将指令 "${inst.asm}" 经数据总线送入 MDR，再转存到 IR；PC 自增 → ${hex(pc + 1)}`,
-      signal: `MDR ← MEM[${hex(pc)}]；IR ← MDR；PC++`,
+      msg: msg('fetch3', { inst: inst.asm, nextPc: hex(pc + 1) }),
+      signal: sig('mdrIrPc', { pc: hex(pc) }),
     })
 
     // ── DECODE (2 sub-steps) ─────────────────────────────────────────
@@ -239,20 +246,20 @@ function buildSteps() {
       highlights: ['IR'],
       bus: null,
       ctrlSignal: '',
-      aluOp: '译码',
+      aluOp: 'decode',
       regUpdates: {},
-      msg: `[译码 1/2] 控制单元解析 IR 中的指令 "${inst.asm}"，识别操作码与操作数`,
-      signal: `IR → 操作码: ${inst.op}`,
+      msg: msg('decode1', { inst: inst.asm }),
+      signal: sig('opcode', { op: inst.op }),
     })
     steps.push({
       phase: 1,
       highlights: ['CU'],
       bus: 'ctrl',
       ctrlSignal: inst.op,
-      aluOp: '准备',
+      aluOp: 'prepare',
       regUpdates: {},
-      msg: `[译码 2/2] 控制单元生成控制信号 "${inst.op}"，激活对应功能部件，准备操作数路径`,
-      signal: `控制信号: ${inst.op}`,
+      msg: msg('decode2', { op: inst.op }),
+      signal: sig('control', { op: inst.op }),
     })
 
     // ── EXECUTE ──────────────────────────────────────────────────────
@@ -262,20 +269,20 @@ function buildSteps() {
         highlights: ['MAR'],
         bus: 'addr',
         ctrlSignal: 'READ',
-        aluOp: '读内存',
+        aluOp: 'readMemory',
         regUpdates: { MAR: inst.src },
-        msg: `[执行 1/2] 将操作数地址 ${hex(inst.src)} 送入 MAR，通过地址总线访问主存`,
-        signal: `MAR ← ${hex(inst.src)}`,
+        msg: msg('load1', { src: hex(inst.src) }),
+        signal: sig('load1', { src: hex(inst.src) }),
       })
       steps.push({
         phase: 2,
         highlights: ['MDR', 'R0'],
         bus: 'data',
         ctrlSignal: 'READ',
-        aluOp: '读内存',
+        aluOp: 'readMemory',
         regUpdates: { MDR: 42, [inst.dst]: 42 },
-        msg: `[执行 2/2] 主存数据 42 经数据总线送入 MDR，再写入目标寄存器 ${inst.dst}`,
-        signal: `MDR ← MEM[${hex(inst.src)}]；${inst.dst} ← MDR`,
+        msg: msg('load2', { src: hex(inst.src), dst: inst.dst }),
+        signal: sig('load2', { src: hex(inst.src), dst: inst.dst }),
       })
     } else if (inst.op === 'LOADI') {
       steps.push({
@@ -283,10 +290,10 @@ function buildSteps() {
         highlights: ['IR', inst.dst],
         bus: null,
         ctrlSignal: 'LOADI',
-        aluOp: '立即数',
+        aluOp: 'immediate',
         regUpdates: { [inst.dst]: inst.imm },
-        msg: `[执行] 立即数 #${inst.imm} 直接从 IR 中提取，写入寄存器 ${inst.dst}`,
-        signal: `${inst.dst} ← #${inst.imm}`,
+        msg: msg('loadi', { imm: inst.imm, dst: inst.dst }),
+        signal: sig('loadi', { imm: inst.imm, dst: inst.dst }),
       })
     } else if (inst.op === 'ADD') {
       steps.push({
@@ -296,18 +303,18 @@ function buildSteps() {
         ctrlSignal: 'ADD',
         aluOp: 'R0 + R1',
         regUpdates: { ACC: null }, // computed at runtime
-        msg: `[执行 1/2] ALU 读取 R0 和 R1 的值，开始加法运算`,
-        signal: `ALU: R0 + R1`,
+        msg: msg('add1'),
+        signal: sig('add1'),
       })
       steps.push({
         phase: 2,
         highlights: ['ACC'],
         bus: null,
         ctrlSignal: 'ADD',
-        aluOp: '= 结果',
+        aluOp: 'result',
         regUpdates: { ACC: '__ADD_RESULT__' },
-        msg: `[执行 2/2] ALU 完成加法，结果暂存到累加器 ACC`,
-        signal: `ACC ← R0 + R1`,
+        msg: msg('add2'),
+        signal: sig('add2'),
       })
     } else if (inst.op === 'STORE') {
       steps.push({
@@ -315,20 +322,20 @@ function buildSteps() {
         highlights: ['MAR', 'MDR'],
         bus: 'addr',
         ctrlSignal: 'WRITE',
-        aluOp: '写内存',
+        aluOp: 'writeMemory',
         regUpdates: { MAR: inst.addr, MDR: '__FROM_R0__' },
-        msg: `[执行 1/2] 将目标地址 ${hex(inst.addr)} 送入 MAR，将 ${inst.src} 的值送入 MDR，准备写入主存`,
-        signal: `MAR ← ${hex(inst.addr)}；MDR ← ${inst.src}`,
+        msg: msg('store1', { addr: hex(inst.addr), src: inst.src }),
+        signal: sig('store1', { addr: hex(inst.addr), src: inst.src }),
       })
       steps.push({
         phase: 2,
         highlights: ['MDR'],
         bus: 'data',
         ctrlSignal: 'WRITE',
-        aluOp: '写内存',
+        aluOp: 'writeMemory',
         regUpdates: { '__MEM__': inst.addr },
-        msg: `[执行 2/2] MDR 的值经数据总线写入主存地址 ${hex(inst.addr)}`,
-        signal: `MEM[${hex(inst.addr)}] ← MDR`,
+        msg: msg('store2', { addr: hex(inst.addr) }),
+        signal: sig('store2', { addr: hex(inst.addr) }),
       })
     }
 
@@ -339,20 +346,20 @@ function buildSteps() {
         highlights: ['ACC', 'R0'],
         bus: null,
         ctrlSignal: 'WB',
-        aluOp: '写回',
+        aluOp: 'writeBack',
         regUpdates: { R0: '__ACC__' },
-        msg: `[写回 1/2] 将 ACC 中的运算结果写回目标寄存器 R0`,
-        signal: `R0 ← ACC`,
+        msg: msg('wbAdd1'),
+        signal: sig('wbAdd'),
       })
       steps.push({
         phase: 3,
         highlights: ['PC'],
         bus: null,
         ctrlSignal: 'WB',
-        aluOp: '—',
+        aluOp: 'idle',
         regUpdates: {},
-        msg: `[写回 2/2] 写回完成，PC 已在取指阶段自增，指向下一条指令 ${hex(pc + 1)}`,
-        signal: `PC = ${hex(pc + 1)}`,
+        msg: msg('wbAdd2', { nextPc: hex(pc + 1) }),
+        signal: sig('wbAddPc', { nextPc: hex(pc + 1) }),
       })
     } else if (inst.op === 'STORE') {
       steps.push({
@@ -360,10 +367,10 @@ function buildSteps() {
         highlights: ['PC'],
         bus: null,
         ctrlSignal: 'WB',
-        aluOp: '—',
+        aluOp: 'idle',
         regUpdates: {},
-        msg: `[写回] STORE 指令结果已在执行阶段写入主存，写回阶段确认完成，PC=${hex(pc + 1)}`,
-        signal: `完成`,
+        msg: msg('wbStore', { nextPc: hex(pc + 1) }),
+        signal: sig('wbStore'),
       })
     } else {
       steps.push({
@@ -371,10 +378,10 @@ function buildSteps() {
         highlights: ['PC'],
         bus: null,
         ctrlSignal: 'WB',
-        aluOp: '—',
+        aluOp: 'idle',
         regUpdates: {},
-        msg: `[写回] 结果已写入目标寄存器，PC 已自增至 ${hex(pc + 1)}，准备执行下一条指令`,
-        signal: `PC = ${hex(pc + 1)}`,
+        msg: msg('wbDefault', { nextPc: hex(pc + 1) }),
+        signal: sig('wbDefault', { nextPc: hex(pc + 1) }),
       })
     }
   }
@@ -393,20 +400,38 @@ let autoTimer = null
 const regs = ref({ PC: BASE_ADDR, IR: '', MAR: null, MDR: null, ACC: 0, R0: 0, R1: 0, R2: 0, R3: 0 })
 const busActive = ref(null)
 const ctrlSignal = ref('')
-const aluOp = ref('—')
+const aluOp = ref('idle')
 const fetchedAddr = ref(null)
 const dataMemory = ref({ [DATA_BASE]: 42, [DATA_BASE + 1]: 0 })
 const activeHighlights = ref([])
 const currentPhase = ref(-1)
 
 const currentStep = computed(() => {
-  if (stepIndex.value === 0) return { msg: '点击"时钟脉冲"开始逐步执行，或点击"自动运行"连续播放。', signal: null }
-  return allSteps[Math.min(stepIndex.value - 1, totalSteps - 1)]
+  if (stepIndex.value === 0) {
+    return {
+      msg: t('cpuArchitecture.startHint'),
+      signal: null
+    }
+  }
+  const step = allSteps[Math.min(stepIndex.value - 1, totalSteps - 1)]
+  return {
+    ...step,
+    msg: t(`cpuArchitecture.steps.${step.msg.key}`, step.msg.params),
+    signal: step.signal
+      ? t(`cpuArchitecture.steps.signal.${step.signal.key}`, step.signal.params)
+      : null
+  }
 })
 function isHighlight(name) { return activeHighlights.value.includes(name) }
 function isActive(unit) {
   if (unit === 'CU') return currentPhase.value === 0 || currentPhase.value === 1
-  if (unit === 'ALU') return currentPhase.value === 2 && aluOp.value !== '读内存' && aluOp.value !== '写内存'
+  if (unit === 'ALU') {
+    return (
+      currentPhase.value === 2 &&
+      aluOp.value !== 'readMemory' &&
+      aluOp.value !== 'writeMemory'
+    )
+  }
   return false
 }
 
@@ -414,7 +439,7 @@ function applyStep(step) {
   currentPhase.value = step.phase
   busActive.value = step.bus
   ctrlSignal.value = step.ctrlSignal || ''
-  aluOp.value = step.aluOp || '—'
+  aluOp.value = step.aluOp || 'idle'
   activeHighlights.value = step.highlights || []
   if (step.fetchedAddr != null) fetchedAddr.value = step.fetchedAddr
 
@@ -475,7 +500,7 @@ function reset() {
   regs.value = { PC: BASE_ADDR, IR: '', MAR: null, MDR: null, ACC: 0, R0: 0, R1: 0, R2: 0, R3: 0 }
   busActive.value = null
   ctrlSignal.value = ''
-  aluOp.value = '—'
+  aluOp.value = 'idle'
   fetchedAddr.value = null
   dataMemory.value = { [DATA_BASE]: 42, [DATA_BASE + 1]: 0 }
   activeHighlights.value = []

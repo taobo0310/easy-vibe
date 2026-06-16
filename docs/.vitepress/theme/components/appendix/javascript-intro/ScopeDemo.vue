@@ -1,54 +1,20 @@
 <script setup>
-import { ref, watch } from 'vue'
+import { computed, ref } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { javascriptIntroLocale } from '../../../locales/javascript-intro/index.js'
 
+const { t, messages } = useI18n(javascriptIntroLocale)
 const activeScope = ref('global')
-const explanation = ref('')
 
-const scopes = [
-  {
-    id: 'global',
-    name: '全局作用域',
-    color: '#a0aec0',
-    vars: [{ name: 'appName', value: '"Todo"', own: true }]
-  },
-  {
-    id: 'function',
-    name: '函数 greet() 作用域',
-    color: '#4299e1',
-    vars: [
-      { name: 'appName', value: '"Todo"', own: false, from: '全局' },
-      { name: 'message', value: '"你好"', own: true }
-    ]
-  },
-  {
-    id: 'block',
-    name: 'if 块作用域',
-    color: '#38a169',
-    vars: [
-      { name: 'appName', value: '"Todo"', own: false, from: '全局' },
-      { name: 'message', value: '"你好"', own: false, from: '函数' },
-      { name: 'greeting', value: 'message+appName', own: true }
-    ]
-  }
-]
-
-const updateExplanation = () => {
-  const texts = {
-    global: '在全局作用域，只能使用全局变量 appName',
-    function:
-      '在函数作用域，可以使用自己的 message 和全局的 appName（作用域链查找）',
-    block:
-      '在块级作用域，可以使用自己的 greeting，以及外层的 message 和 appName'
-  }
-  explanation.value = texts[activeScope.value]
-}
-
-updateExplanation()
+const scopes = computed(() => messages.value.scope.scopes)
+const activeScopeData = computed(
+  () => scopes.value.find((scope) => scope.id === activeScope.value) || scopes.value[0]
+)
 </script>
 
 <template>
   <div class="scope-demo">
-    <h3>🔍 作用域：变量的"可见范围"</h3>
+    <h3>{{ t('scope.title') }}</h3>
 
     <div class="scope-selector">
       <button
@@ -57,14 +23,13 @@ updateExplanation()
         class="scope-btn"
         :class="{ active: activeScope === scope.id }"
         :style="{ borderColor: scope.color }"
-        @click="activeScope = scope.id; updateExplanation()"
+        @click="activeScope = scope.id"
       >
         {{ scope.name }}
       </button>
     </div>
 
     <div class="scope-visual">
-      <!-- 作用域层级图 -->
       <div class="scope-levels">
         <div
           v-for="scope in scopes"
@@ -94,29 +59,17 @@ updateExplanation()
         </div>
       </div>
 
-      <!-- 说明 -->
       <div class="explanation-box">
-        <div class="explanation-title">💡 当前位置可见的变量</div>
+        <div class="explanation-title">{{ t('scope.visibleVariables') }}</div>
         <div class="explanation-text">
-          {{ explanation }}
+          {{ activeScopeData.explanation }}
         </div>
       </div>
     </div>
 
     <div class="code-display">
-      <h4>对应代码</h4>
-      <pre><code>const appName = "Todo"  // 全局作用域
-
-function greet() {
-  const message = "你好"  // 函数作用域
-
-  if (true) {
-    const greeting = message + appName  // 块级作用域
-    console.log(greeting)
-  }
-
-  console.log(greeting)  // ❌ 报错！外层看不到内层
-}</code></pre>
+      <h4>{{ t('scope.codeTitle') }}</h4>
+      <pre><code>{{ t('scope.code') }}</code></pre>
     </div>
   </div>
 </template>

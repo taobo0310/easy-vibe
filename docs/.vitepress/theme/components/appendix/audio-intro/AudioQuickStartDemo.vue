@@ -1,28 +1,15 @@
-<!--
-  AudioQuickStartDemo.vue
-  音频 AI 快速体验组件
-
-  用途：
-  让用户快速体验 AI 音频的核心能力：语音合成、语音识别、声音克隆。
-
-  交互功能：
-  - 快速场景选择
-  - 实时模拟音频处理效果
-  - 可视化反馈
--->
 <template>
   <div class="audio-quick-start">
     <div class="header">
       <div class="title">
-        🎙️ AI 音频初体验：让机器开口说话
+        {{ t('quickStart.title') }}
       </div>
       <div class="subtitle">
-        从语音合成到声音克隆，探索 AI 如何让机器拥有"声音"
+        {{ t('quickStart.subtitle') }}
       </div>
     </div>
 
     <div class="demo-window">
-      <!-- 场景选择 -->
       <div class="scene-selector">
         <button
           v-for="scene in scenes"
@@ -36,7 +23,6 @@
         </button>
       </div>
 
-      <!-- 演示区域 -->
       <div class="demo-area">
         <div
           v-if="!currentScene"
@@ -45,10 +31,9 @@
           <div class="emoji">
             🎵
           </div>
-          <p>选择一个场景开始体验 AI 音频</p>
+          <p>{{ t('quickStart.empty') }}</p>
         </div>
 
-        <!-- TTS 场景 -->
         <div
           v-else-if="currentScene.id === 'tts'"
           class="tts-demo"
@@ -57,11 +42,11 @@
             <textarea
               v-model="ttsText"
               rows="3"
-              placeholder="输入要合成的文本..."
+              :placeholder="t('quickStart.ttsPlaceholder')"
             />
           </div>
           <div class="voice-selector">
-            <span class="label">声音:</span>
+            <span class="label">{{ t('quickStart.voiceLabel') }}</span>
             <button
               v-for="voice in voices"
               :key="voice.id"
@@ -77,11 +62,10 @@
             :disabled="isProcessing"
             @click="synthesize"
           >
-            <span v-if="isProcessing">合成中...</span>
-            <span v-else>🎙️ 合成语音</span>
+            <span v-if="isProcessing">{{ t('quickStart.processing') }}</span>
+            <span v-else>{{ t('quickStart.synthesize') }}</span>
           </button>
 
-          <!-- 波形可视化 -->
           <div
             v-if="showWaveform"
             class="waveform-container"
@@ -108,7 +92,6 @@
           </div>
         </div>
 
-        <!-- ASR 场景 -->
         <div
           v-else-if="currentScene.id === 'asr'"
           class="asr-demo"
@@ -120,11 +103,10 @@
               @click="toggleRecording"
             >
               <span class="record-icon">{{ isRecording ? '⏹️' : '🎤' }}</span>
-              <span>{{ isRecording ? '停止录音' : '开始录音' }}</span>
+              <span>{{ isRecording ? t('quickStart.stopRecording') : t('quickStart.startRecording') }}</span>
             </button>
           </div>
 
-          <!-- 录音波形 -->
           <div
             v-if="isRecording || hasRecorded"
             class="waveform-container"
@@ -136,13 +118,12 @@
             />
           </div>
 
-          <!-- 识别结果 -->
           <div
             v-if="transcription"
             class="result-box"
           >
             <div class="result-label">
-              识别结果:
+              {{ t('quickStart.resultLabel') }}
             </div>
             <div class="result-text">
               {{ transcription }}
@@ -150,7 +131,6 @@
           </div>
         </div>
 
-        <!-- 声音克隆场景 -->
         <div
           v-else-if="currentScene.id === 'clone'"
           class="clone-demo"
@@ -165,14 +145,14 @@
               </div>
               <div class="step-content">
                 <div class="step-title">
-                  录制参考音频
+                  {{ t('quickStart.stepReference') }}
                 </div>
                 <button
                   class="step-btn"
                   :disabled="cloneStep !== 1"
                   @click="recordReference"
                 >
-                  {{ cloneStep > 1 ? '✓ 已完成' : '🎙️ 录制 5 秒' }}
+                  {{ cloneStep > 1 ? t('quickStart.done') : t('quickStart.recordFiveSeconds') }}
                 </button>
               </div>
             </div>
@@ -188,14 +168,14 @@
               </div>
               <div class="step-content">
                 <div class="step-title">
-                  提取声纹特征
+                  {{ t('quickStart.extractVoiceprint') }}
                 </div>
                 <div
                   v-if="cloneStep === 2"
                   class="processing"
                 >
                   <div class="spinner" />
-                  <span>分析中...</span>
+                  <span>{{ t('quickStart.analyzing') }}</span>
                 </div>
               </div>
             </div>
@@ -211,7 +191,7 @@
               </div>
               <div class="step-content">
                 <div class="step-title">
-                  合成克隆语音
+                  {{ t('quickStart.synthesizeCloned') }}
                 </div>
                 <div
                   v-if="cloneStep === 3"
@@ -219,32 +199,31 @@
                 >
                   <input
                     v-model="cloneText"
-                    placeholder="输入要合成的文本"
+                    :placeholder="t('quickStart.clonePlaceholder')"
                   >
                   <button
                     class="step-btn"
                     @click="synthesizeClone"
                   >
-                    合成
+                    {{ t('quickStart.synthesizeShort') }}
                   </button>
                 </div>
                 <div
                   v-if="cloneStep > 3"
                   class="success-msg"
                 >
-                  ✓ 克隆成功!
+                  {{ t('quickStart.cloneSuccess') }}
                 </div>
               </div>
             </div>
           </div>
 
-          <!-- 声纹可视化 -->
           <div
             v-if="cloneStep >= 2"
             class="embedding-viz"
           >
             <div class="viz-title">
-              声纹特征向量 (256维)
+              {{ t('quickStart.embeddingTitle') }}
             </div>
             <div class="embedding-bars">
               <div
@@ -260,36 +239,27 @@
     </div>
 
     <div class="tips">
-      <div class="tip-item">
-        <span class="tip-icon">💡</span>
-        <span>TTS: 文本转语音，让 AI 朗读任意文字</span>
-      </div>
-      <div class="tip-item">
-        <span class="tip-icon">🎯</span>
-        <span>ASR: 语音识别，将语音转为文字</span>
-      </div>
-      <div class="tip-item">
-        <span class="tip-icon">🎭</span>
-        <span>声音克隆: 只需几秒音频，复制任何人的声音</span>
+      <div
+        v-for="tip in tips"
+        :key="tip.text"
+        class="tip-item"
+      >
+        <span class="tip-icon">{{ tip.icon }}</span>
+        <span>{{ tip.text }}</span>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, nextTick, onMounted, onUnmounted } from 'vue'
+import { ref, computed, nextTick, onUnmounted } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { audioIntroLocale } from '../../../locales/audio-intro/index.js'
 
-const scenes = [
-  { id: 'tts', name: '语音合成', icon: '🗣️' },
-  { id: 'asr', name: '语音识别', icon: '🎤' },
-  { id: 'clone', name: '声音克隆', icon: '🎭' }
-]
-
-const voices = [
-  { id: 'female1', name: '女声A', icon: '👩' },
-  { id: 'male1', name: '男声B', icon: '👨' },
-  { id: 'female2', name: '女声C', icon: '👧' }
-]
+const { t, messages } = useI18n(audioIntroLocale)
+const scenes = computed(() => messages.value.quickStart.scenes)
+const voices = computed(() => messages.value.quickStart.voices)
+const tips = computed(() => messages.value.quickStart.tips)
 
 const currentScene = ref(null)
 const isProcessing = ref(false)
@@ -302,12 +272,10 @@ const progress = ref(0)
 const cloneStep = ref(1)
 const embeddingValues = ref([])
 
-// TTS
-const ttsText = ref('你好，我是 AI 语音助手。')
+const ttsText = ref(t('quickStart.defaultTtsText'))
 const selectedVoice = ref('female1')
 
-// Clone
-const cloneText = ref('这是用我的声音克隆合成的语音。')
+const cloneText = ref(t('quickStart.defaultCloneText'))
 
 const waveformCanvas = ref(null)
 const recordCanvas = ref(null)
@@ -333,7 +301,6 @@ const resetState = () => {
   if (progressInterval) clearInterval(progressInterval)
 }
 
-// TTS 合成
 const synthesize = async () => {
   isProcessing.value = true
   showWaveform.value = true
@@ -370,15 +337,13 @@ const togglePlay = () => {
   }
 }
 
-// ASR 录音
 const toggleRecording = () => {
   if (isRecording.value) {
     isRecording.value = false
     hasRecorded.value = true
     stopRecordingAnimation()
-    // 模拟识别
     setTimeout(() => {
-      transcription.value = '今天天气真不错，适合出去散步。'
+      transcription.value = t('quickStart.transcription')
     }, 800)
   } else {
     isRecording.value = true
@@ -401,7 +366,6 @@ const stopRecordingAnimation = () => {
   if (animationId) cancelAnimationFrame(animationId)
 }
 
-// 声音克隆
 const recordReference = async () => {
   isRecording.value = true
   startRecordingAnimation()
@@ -411,7 +375,6 @@ const recordReference = async () => {
     stopRecordingAnimation()
     cloneStep.value = 2
 
-    // 模拟提取声纹
     setTimeout(() => {
       embeddingValues.value = Array.from({ length: 32 }, () => Math.random() * 80 + 10)
       cloneStep.value = 3
@@ -427,7 +390,6 @@ const synthesizeClone = () => {
   })
 }
 
-// 绘制波形
 const drawWaveform = (canvas, isDynamic = false) => {
   if (!canvas) return
   const ctx = canvas.getContext('2d')

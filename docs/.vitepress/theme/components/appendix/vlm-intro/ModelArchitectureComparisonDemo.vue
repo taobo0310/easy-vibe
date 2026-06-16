@@ -14,16 +14,16 @@
           </div>
         </div>
         <div class="toggle-label">
-          <span :class="{ active: !isVLM }">Pure LLM (纯文本)</span>
+          <span :class="{ active: !isVLM }">{{ t('modelArchitecture.pureLlm') }}</span>
           <span class="arrow">→</span>
-          <span :class="{ active: isVLM }">Multimodal VLM (多模态)</span>
+          <span :class="{ active: isVLM }">{{ t('modelArchitecture.vlm') }}</span>
         </div>
       </div>
       <div class="status-desc">
         {{
           isVLM
-            ? 'Tokens from vision are translated and placed before text tokens. (视觉信息被翻译成 Token，放在文字 Token 之前。)'
-            : 'Text-only tokens flow into the LLM. (只有文字 Token 流入大模型。)'
+            ? t('modelArchitecture.vlmDesc')
+            : t('modelArchitecture.llmDesc')
         }}
       </div>
     </div>
@@ -35,27 +35,27 @@
           class="lane lane-vision"
         >
           <div class="lane-title">
-            Vision Path (视觉路径)
+            {{ t('modelArchitecture.visionPath') }}
           </div>
           <div class="lane-flow">
             <div class="node input-node">
               <span class="icon">🖼️</span>
-              <span class="label">Image (图片)</span>
+              <span class="label">{{ t('modelArchitecture.image') }}</span>
             </div>
             <span class="mini-arrow">→</span>
             <div class="node process-node vit-node">
               <span class="icon">👁️</span>
-              <span class="label">ViT (视觉模型)</span>
+              <span class="label">{{ t('modelArchitecture.vit') }}</span>
             </div>
             <span class="mini-arrow">→</span>
             <div class="node adapter-node">
               <span class="icon">🔌</span>
-              <span class="label">Projector (投影器)</span>
+              <span class="label">{{ t('modelArchitecture.projector') }}</span>
             </div>
             <span class="mini-arrow">→</span>
             <div class="token-box token-box-vision">
               <div class="token-box-title">
-                Vision Tokens (视觉 Token)
+                {{ t('modelArchitecture.visionTokens') }}
               </div>
               <div class="tokens">
                 <span class="token vision">v1</span>
@@ -69,22 +69,22 @@
 
         <div class="lane lane-text">
           <div class="lane-title">
-            Text Path (文字路径)
+            {{ t('modelArchitecture.textPath') }}
           </div>
           <div class="lane-flow">
             <div class="node input-node">
               <span class="icon">⌨️</span>
-              <span class="label">Prompt (提示词)</span>
+              <span class="label">{{ t('modelArchitecture.prompt') }}</span>
             </div>
             <span class="mini-arrow">→</span>
             <div class="node process-node">
               <span class="icon">🔤</span>
-              <span class="label">Embed (向量化)</span>
+              <span class="label">{{ t('modelArchitecture.embed') }}</span>
             </div>
             <span class="mini-arrow">→</span>
             <div class="token-box">
               <div class="token-box-title">
-                Text Tokens (文字 Token)
+                {{ t('modelArchitecture.textTokens') }}
               </div>
               <div class="tokens">
                 <span class="token text">t1</span>
@@ -98,14 +98,14 @@
 
         <div class="merge-stage">
           <div class="merge-title">
-            Token Sequence (输入序列)
+            {{ t('modelArchitecture.tokenSequence') }}
           </div>
           <div class="sequence">
             <div
               v-if="isVLM"
               class="sequence-row"
             >
-              <span class="sequence-tag vision">Vision (视觉)</span>
+              <span class="sequence-tag vision">{{ t('modelArchitecture.visionTag') }}</span>
               <div class="tokens">
                 <span class="token vision">v1</span>
                 <span class="token vision">v2</span>
@@ -114,7 +114,7 @@
               </div>
             </div>
             <div class="sequence-row">
-              <span class="sequence-tag text">Text (文字)</span>
+              <span class="sequence-tag text">{{ t('modelArchitecture.textTag') }}</span>
               <div class="tokens">
                 <span class="token text">t1</span>
                 <span class="token text">t2</span>
@@ -123,9 +123,8 @@
               </div>
             </div>
             <div class="sequence-hint">
-              <span v-if="isVLM">Concat: [Vision Tokens] + [Text Tokens]
-                (拼接：视觉在前，文字在后)</span>
-              <span v-else>Only [Text Tokens] (只有文字 Token)</span>
+              <span v-if="isVLM">{{ t('modelArchitecture.concatHint') }}</span>
+              <span v-else>{{ t('modelArchitecture.onlyTextHint') }}</span>
             </div>
           </div>
 
@@ -133,12 +132,12 @@
             <span class="big-arrow">→</span>
             <div class="node core-node">
               <span class="icon">🧠</span>
-              <span class="label">LLM Backbone (大模型)</span>
+              <span class="label">{{ t('modelArchitecture.backbone') }}</span>
             </div>
             <span class="big-arrow">→</span>
             <div class="node output-node">
               <span class="icon">💬</span>
-              <span class="label">Response (回复)</span>
+              <span class="label">{{ t('modelArchitecture.response') }}</span>
             </div>
           </div>
         </div>
@@ -155,24 +154,18 @@
           key="llm"
           class="info-card"
         >
-          <h3>Standard LLM Flow (标准大模型流程)</h3>
-          <p>Prompt → Embedding → Token Sequence → LLM → Response。</p>
+          <h3>{{ t('modelArchitecture.standardTitle') }}</h3>
+          <p>{{ t('modelArchitecture.standardFlow') }}</p>
         </div>
         <div
           v-else
           key="vlm"
           class="info-card vlm-info"
         >
-          <h3>VLM = LLM + Vision Encoder (视觉大模型原理)</h3>
+          <h3>{{ t('modelArchitecture.vlmTitle') }}</h3>
           <ul>
-            <li><strong>ViT (The Eye):</strong> 把图片编码成视觉特征。</li>
-            <li>
-              <strong>Projector (The Translator):</strong> 把视觉特征映射到 LLM
-              的 Token 空间。
-            </li>
-            <li>
-              <strong>Concatenation (拼接):</strong> 把视觉 Token 放在文字 Token
-              之前，作为同一条输入序列。
+            <li v-for="item in principles" :key="item.strong">
+              <strong>{{ item.strong }}</strong> {{ item.text }}
             </li>
           </ul>
         </div>
@@ -182,9 +175,13 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { vlmIntroLocale } from '../../../locales/vlm-intro/index.js'
 
+const { t, messages } = useI18n(vlmIntroLocale)
 const isVLM = ref(false)
+const principles = computed(() => messages.value.modelArchitecture.principles)
 
 const toggleMode = () => {
   isVLM.value = !isVLM.value

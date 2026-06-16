@@ -2,28 +2,28 @@
   <div class="state-management-comparison">
     <div class="demo-header">
       <span class="icon">📊</span>
-      <span class="title">状态管理方案对比</span>
-      <span class="subtitle">不同工具的适用场景</span>
+      <span class="title">{{ t('comparison.title') }}</span>
+      <span class="subtitle">{{ t('comparison.subtitle') }}</span>
     </div>
 
     <div class="intro-text">
-      想象你在<span class="highlight">超市</span>采购：小买小卖用购物篮（Zustand），大采购用手推车（Pinia），企业级采购用专业物流（Redux）。根据需求选对工具！
+      {{ t('comparison.introPrefix') }}<span class="highlight">{{ t('comparison.introHighlight') }}</span>{{ t('comparison.introSuffix') }}
     </div>
 
     <div class="demo-content">
       <div class="comparison-table">
         <div class="table-header">
           <div class="header-col first">
-            工具
+            {{ t('comparison.headers.tool') }}
           </div>
           <div class="header-col">
-            难度
+            {{ t('comparison.headers.difficulty') }}
           </div>
           <div class="header-col">
-            大小
+            {{ t('comparison.headers.size') }}
           </div>
           <div class="header-col">
-            框架
+            {{ t('comparison.headers.framework') }}
           </div>
         </div>
         <div class="table-body">
@@ -78,28 +78,28 @@
           <div class="detail-grid">
             <div class="detail-section compact">
               <div class="section-title">
-                🎯 适用场景
+                {{ t('comparison.scenariosTitle') }}
               </div>
               <div class="section-content">
-                {{ selectedLibrary.scenarios.join('、') }}
+                {{ selectedLibrary.scenarios.join(t('common.listSeparator')) }}
               </div>
             </div>
 
             <div class="detail-section compact">
               <div class="section-title green">
-                ✅ 优点
+                {{ t('comparison.prosTitle') }}
               </div>
               <div class="section-content">
-                {{ selectedLibrary.pros.slice(0, 2).join('；') }}
+                {{ selectedLibrary.pros.slice(0, 2).join(t('common.semicolonSeparator')) }}
               </div>
             </div>
 
             <div class="detail-section compact">
               <div class="section-title red">
-                ❌ 缺点
+                {{ t('comparison.consTitle') }}
               </div>
               <div class="section-content">
-                {{ selectedLibrary.cons.slice(0, 2).join('；') }}
+                {{ selectedLibrary.cons.slice(0, 2).join(t('common.semicolonSeparator')) }}
               </div>
             </div>
           </div>
@@ -109,69 +109,24 @@
 
     <div class="info-box">
       <span class="icon">💡</span>
-      <strong>选择建议：</strong>Vue 3 新项目推荐 Pinia，React 中小型项目推荐 Zustand，大型企业级应用推荐 Redux Toolkit。根据项目规模选择最合适的工具。
+      <strong>{{ t('common.recommendation') }}</strong>{{ t('comparison.idea') }}
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { componentStateManagementLocale } from '../../../locales/component-state-management/index.js'
+
+const { t, messages } = useI18n(componentStateManagementLocale)
 
 const selectedLib = ref('pinia')
 
-const libraries = [
-  {
-    id: 'redux',
-    name: 'Redux',
-    icon: '🔄',
-    tagline: 'JavaScript 应用的可预测状态容器',
-    scenarios: ['大型企业级应用', '需要严格数据流控制', '复杂的状态逻辑'],
-    pros: ['严格的数据流，易于调试', '强大的中间件生态'],
-    cons: ['学习曲线陡峭', '样板代码较多'],
-    learningCurve: 80,
-    bundleSize: '7KB',
-    framework: 'React/Vue/Angular'
-  },
-  {
-    id: 'vuex',
-    name: 'Vuex',
-    icon: '🌿',
-    tagline: 'Vue.js 的官方状态管理库',
-    scenarios: ['Vue 2/3 中大型项目', '需要模块化管理状态', '团队成员熟悉 Vue 生态'],
-    pros: ['与 Vue 深度集成', '响应式系统'],
-    cons: ['仅适用于 Vue', 'Vue 3 中被 Pinia 取代'],
-    learningCurve: 60,
-    bundleSize: '4KB',
-    framework: 'Vue Only'
-  },
-  {
-    id: 'pinia',
-    name: 'Pinia',
-    icon: '🍍',
-    tagline: '直观、类型安全、灵活的 Vue Store',
-    scenarios: ['Vue 3 新项目首选', '重视 TypeScript 支持', '希望简化状态管理'],
-    pros: ['轻量级设计', '原生 TypeScript 支持'],
-    cons: ['Vue 3 专属', '生态系统相对年轻'],
-    learningCurve: 30,
-    bundleSize: '2KB',
-    framework: 'Vue 3 Only'
-  },
-  {
-    id: 'zustand',
-    name: 'Zustand',
-    icon: '🐻',
-    tagline: '极简的 React 状态管理',
-    scenarios: ['React 中小型项目', '追求简洁 API', '不需要复杂中间件'],
-    pros: ['极简 API', '无需 Provider'],
-    cons: ['生态相对较小', '调试工具不如 Redux'],
-    learningCurve: 25,
-    bundleSize: '1KB',
-    framework: 'React Only'
-  }
-]
+const libraries = computed(() => messages.value.comparison.libraries)
 
 const selectedLibrary = computed(() => {
-  return libraries.find(lib => lib.id === selectedLib.value)
+  return libraries.value.find(lib => lib.id === selectedLib.value)
 })
 
 function getCurveColor(value) {
@@ -181,9 +136,10 @@ function getCurveColor(value) {
 }
 
 function getCurveLabel(value) {
-  if (value <= 30) return '简单'
-  if (value <= 60) return '中等'
-  return '复杂'
+  const m = messages.value.comparison
+  if (value <= 30) return m.easy
+  if (value <= 60) return m.medium
+  return m.hard
 }
 
 function getSizeClass(size) {

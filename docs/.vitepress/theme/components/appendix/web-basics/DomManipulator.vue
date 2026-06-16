@@ -1,8 +1,8 @@
 <template>
   <div class="dom-demo">
     <div class="demo-header">
-      <span class="title">DOM 操作演示</span>
-      <span class="subtitle">通过 JavaScript 动态修改页面内容、样式和结构</span>
+      <span class="title">{{ t('layout.domManipulator.title') }}</span>
+      <span class="subtitle">{{ t('layout.domManipulator.subtitle') }}</span>
     </div>
 
     <div class="main-area">
@@ -10,26 +10,26 @@
         <div class="operations">
           <div class="op-group">
             <div class="op-label">
-              修改内容
+              {{ t('layout.domManipulator.editContent') }}
             </div>
             <div class="op-row">
               <input
                 v-model="titleText"
-                placeholder="输入标题"
+                :placeholder="t('layout.domManipulator.placeholder')"
                 class="input"
               >
               <button
                 class="btn"
                 @click="updateTitle"
               >
-                更新标题
+                {{ t('layout.domManipulator.updateTitle') }}
               </button>
             </div>
           </div>
 
           <div class="op-group">
             <div class="op-label">
-              修改样式
+              {{ t('layout.domManipulator.editStyle') }}
             </div>
             <div class="op-row">
               <button 
@@ -45,20 +45,20 @@
 
           <div class="op-group">
             <div class="op-label">
-              添加/删除元素
+              {{ t('layout.domManipulator.editElements') }}
             </div>
             <div class="op-row">
               <button
                 class="btn"
                 @click="addItem"
               >
-                添加项目
+                {{ t('layout.domManipulator.addItem') }}
               </button>
               <button
                 class="btn btn-danger"
                 @click="removeLastItem"
               >
-                删除最后
+                {{ t('layout.domManipulator.removeLast') }}
               </button>
             </div>
           </div>
@@ -69,10 +69,10 @@
           :class="currentStyle"
         >
           <h2 class="card-title">
-            {{ titleText || '点击按钮更新标题' }}
+            {{ titleText || t('layout.domManipulator.fallbackTitle') }}
           </h2>
           <p class="card-desc">
-            这是一个演示 DOM 操作的卡片区域。
+            {{ t('layout.domManipulator.cardDesc') }}
           </p>
           <ul class="card-list">
             <li
@@ -85,7 +85,7 @@
               v-if="items.length === 0"
               class="empty"
             >
-              （列表为空）
+              {{ t('layout.domManipulator.empty') }}
             </li>
           </ul>
         </div>
@@ -94,12 +94,12 @@
       <div class="right-panel">
         <div class="code-block">
           <div class="code-title">
-            对应的 JavaScript 代码
+            {{ t('layout.domManipulator.codeTitle') }}
           </div>
           <div class="code-content">
             <template v-if="lastOp === 'title'">
               <div class="line comment">
-                // 修改文本内容
+                {{ t('layout.domManipulator.comments.title') }}
               </div>
               <div class="line">
                 const el = document.querySelector('.card-title')
@@ -110,7 +110,7 @@
             </template>
             <template v-else-if="lastOp === 'style'">
               <div class="line comment">
-                // 切换 CSS 类
+                {{ t('layout.domManipulator.comments.style') }}
               </div>
               <div class="line">
                 const card = document.querySelector('.preview-card')
@@ -121,7 +121,7 @@
             </template>
             <template v-else-if="lastOp === 'add'">
               <div class="line comment">
-                // 创建并添加新元素
+                {{ t('layout.domManipulator.comments.add') }}
               </div>
               <div class="line">
                 const list = document.querySelector('.card-list')
@@ -130,7 +130,7 @@
                 const li = document.createElement('li')
               </div>
               <div class="line">
-                li.textContent = '新项目 {{ items.length }}'
+                li.textContent = '{{ t('layout.domManipulator.newItem', { n: items.length }) }}'
               </div>
               <div class="line">
                 list.appendChild(li)
@@ -138,7 +138,7 @@
             </template>
             <template v-else-if="lastOp === 'remove'">
               <div class="line comment">
-                // 删除最后一个元素
+                {{ t('layout.domManipulator.comments.remove') }}
               </div>
               <div class="line">
                 const list = document.querySelector('.card-list')
@@ -152,7 +152,7 @@
             </template>
             <template v-else>
               <div class="line comment">
-                // 点击左侧按钮查看对应代码
+                {{ t('layout.domManipulator.comments.idle') }}
               </div>
             </template>
           </div>
@@ -160,32 +160,16 @@
 
         <div class="methods-card">
           <div class="methods-title">
-            常用 DOM 方法
+            {{ t('layout.domManipulator.methodsTitle') }}
           </div>
           <div class="methods-list">
-            <div class="method">
-              <code>querySelector()</code>
-              <span>按选择器查找元素</span>
-            </div>
-            <div class="method">
-              <code>textContent</code>
-              <span>获取/设置文本内容</span>
-            </div>
-            <div class="method">
-              <code>classList</code>
-              <span>操作元素的 CSS 类</span>
-            </div>
-            <div class="method">
-              <code>createElement()</code>
-              <span>创建新元素</span>
-            </div>
-            <div class="method">
-              <code>appendChild()</code>
-              <span>添加子元素</span>
-            </div>
-            <div class="method">
-              <code>remove()</code>
-              <span>删除元素</span>
+            <div
+              v-for="method in methods"
+              :key="method.code"
+              class="method"
+            >
+              <code>{{ method.code }}</code>
+              <span>{{ method.desc }}</span>
             </div>
           </div>
         </div>
@@ -193,31 +177,36 @@
     </div>
 
     <div class="info-box">
-      <strong>注意：</strong>频繁操作 DOM 会影响性能。现代框架（Vue/React）使用虚拟 DOM 来优化这个过程——先在内存中计算差异，再批量更新真实 DOM。
+      <strong>{{ t('layout.domManipulator.noticeTitle') }}</strong>{{ t('layout.domManipulator.notice') }}
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { computed, ref, watch } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { webBasicsLocale } from '../../../locales/web-basics/index.js'
 
-const titleText = ref('欢迎学习 DOM')
+const { t, messages } = useI18n(webBasicsLocale)
+const titleText = ref(t('layout.domManipulator.initialTitle'))
 const currentStyle = ref('')
-const items = ref(['项目 1', '项目 2'])
+const items = ref([...messages.value.layout.domManipulator.initialItems])
 const lastOp = ref('')
 
-const styles = [
-  { id: '', label: '默认' },
-  { id: 'highlight', label: '高亮' },
-  { id: 'dark', label: '深色' }
-]
+const styles = computed(() => messages.value.layout.domManipulator.styles)
+const methods = computed(() => messages.value.layout.domManipulator.methods)
+
+watch(messages, (nextMessages) => {
+  titleText.value = nextMessages.layout.domManipulator.initialTitle
+  items.value = [...nextMessages.layout.domManipulator.initialItems]
+})
 
 const updateTitle = () => {
   lastOp.value = 'title'
 }
 
 const addItem = () => {
-  items.value.push(`新项目 ${items.value.length + 1}`)
+  items.value.push(t('layout.domManipulator.newItem', { n: items.value.length + 1 }))
   lastOp.value = 'add'
 }
 

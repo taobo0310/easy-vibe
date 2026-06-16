@@ -1,13 +1,13 @@
 <template>
   <div class="layered-arch-demo">
     <div class="header">
-      <div class="title">后端四层架构总览</div>
-      <div class="subtitle">点击各层查看详细说明</div>
+      <div class="title">{{ t('overview.title') }}</div>
+      <div class="subtitle">{{ t('overview.subtitle') }}</div>
     </div>
 
     <div class="main">
       <div class="layers">
-        <div class="client-box">客户端 (Web / App)</div>
+        <div class="client-box">{{ t('overview.client') }}</div>
         <div class="arrow">↓ HTTP</div>
 
         <div
@@ -24,7 +24,7 @@
         </div>
 
         <div class="arrow">↓ SQL</div>
-        <div class="client-box db">数据库 (MySQL / PostgreSQL)</div>
+        <div class="client-box db">{{ t('overview.db') }}</div>
       </div>
 
       <div v-if="active" class="info-panel">
@@ -32,7 +32,7 @@
         <p>{{ activeInfo.desc }}</p>
         <div class="info-analogy">{{ activeInfo.analogy }}</div>
         <div class="info-mistakes">
-          <strong>常见错误：</strong>
+          <strong>{{ t('overview.commonMistakes') }}</strong>
           <ul>
             <li v-for="m in activeInfo.mistakes" :key="m">{{ m }}</li>
           </ul>
@@ -44,44 +44,16 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { backendLayeredArchitectureLocale } from '../../../locales/backend-layered-architecture/index.js'
 
+const { t, messages } = useI18n(backendLayeredArchitectureLocale)
 const active = ref('')
 
-const layers = [
-  { id: 'controller', name: 'Controller', badge: '入口', duty: '接收请求、参数校验、调用 Service' },
-  { id: 'service', name: 'Service', badge: '业务核心', duty: '业务逻辑编排、事务管理、跨模块协调' },
-  { id: 'repository', name: 'Repository', badge: '数据访问', duty: '数据持久化、查询封装、ORM 映射' },
-  { id: 'domain', name: 'Domain', badge: '领域模型', duty: '实体定义、业务规则、值对象' }
-]
+const layers = computed(() => messages.value.overview.layers)
+const infoMap = computed(() => messages.value.overview.infoMap)
 
-const infoMap = {
-  controller: {
-    title: 'Controller 层 — 请求的"门童"',
-    desc: '负责接收 HTTP 请求、解析参数、进行基础校验，然后调用 Service 层处理业务。',
-    analogy: '就像餐厅的门童，负责迎接客人、检查预约、引导入座，但不负责做菜。',
-    mistakes: ['在 Controller 里写业务逻辑', '直接操作数据库', '不做参数校验']
-  },
-  service: {
-    title: 'Service 层 — 业务逻辑的"厨师"',
-    desc: '编排业务逻辑、管理事务、协调多个 Repository。包含所有的业务规则和流程。',
-    analogy: '就像餐厅的厨师，按照菜谱做菜，协调各种食材，把控菜品质量。',
-    mistakes: ['Service 之间循环依赖', '直接写 SQL', '单个方法过长包含多个业务场景']
-  },
-  repository: {
-    title: 'Repository 层 — 数据的"仓管"',
-    desc: '封装所有数据访问逻辑，上层不需要关心具体的数据库类型和 SQL 语句。',
-    analogy: '就像仓管员，负责从仓库取食材、存放剩余食材，厨师只需说要什么。',
-    mistakes: ['在 Repository 里写业务逻辑', '直接返回实体给前端', '一个 Repository 操作多个表']
-  },
-  domain: {
-    title: 'Domain 层 — 业务概念的"蓝图"',
-    desc: '定义实体、值对象、业务规则。是所有层的依赖基础，但不依赖任何其他层。',
-    analogy: '就像菜单和菜品标准，定义了什么是"宫保鸡丁"、用什么食材、什么口味。',
-    mistakes: ['Domain 包含持久化注解', '在 Domain 里写数据库操作', 'Domain 对象之间循环依赖']
-  }
-}
-
-const activeInfo = computed(() => infoMap[active.value] || {})
+const activeInfo = computed(() => infoMap.value[active.value] || {})
 </script>
 
 <style scoped>

@@ -1,21 +1,21 @@
 <template>
   <div class="controller-demo">
     <div class="demo-header">
-      <span class="title">控制器工作原理</span>
-      <span class="subtitle">控制信号如何协调 CPU 各个部件</span>
+      <span class="title">{{ t('computerOrganization.controller.title') }}</span>
+      <span class="subtitle">{{ t('computerOrganization.controller.subtitle') }}</span>
     </div>
 
     <div class="control-unit">
       <div class="cu-box">
-        <div class="cu-title">控制单元 CU</div>
+        <div class="cu-title">{{ t('computerOrganization.controller.controlUnit') }}</div>
         <div class="cu-diagram">
           <div class="cu-internal">
-            <div class="cu-component">指令寄存器 IR</div>
-            <div class="cu-component">指令译码器</div>
-            <div class="cu-component">时序发生器</div>
+            <div class="cu-component">{{ t('computerOrganization.controller.instructionRegister') }}</div>
+            <div class="cu-component">{{ t('computerOrganization.controller.decoder') }}</div>
+            <div class="cu-component">{{ t('computerOrganization.controller.timingGenerator') }}</div>
           </div>
           <div class="cu-output">
-            <div class="output-label">输出控制信号：</div>
+            <div class="output-label">{{ t('computerOrganization.controller.outputSignals') }}</div>
             <div class="control-signals">
               <div v-for="sig in controlSignals" :key="sig.name" :class="['sig-box', sig.active ? 'active' : '']">
                 {{ sig.name }}
@@ -30,58 +30,58 @@
       <div class="block-row">
         <div class="cpu-block" :class="{ active: activeBlock === 'pc' }">
           <div class="block-name">PC</div>
-          <div class="block-desc">程序计数器</div>
+          <div class="block-desc">{{ t('computerOrganization.controller.blocks.pc') }}</div>
         </div>
         <div class="arrow" :class="{ active: activeBlock === 'pc' }">→</div>
         <div class="cpu-block" :class="{ active: activeBlock === 'mar' }">
           <div class="block-name">MAR</div>
-          <div class="block-desc">地址寄存器</div>
+          <div class="block-desc">{{ t('computerOrganization.controller.blocks.mar') }}</div>
         </div>
         <div class="arrow" :class="{ active: activeBlock === 'mar' }">→</div>
         <div class="cpu-block" :class="{ active: activeBlock === 'memory' }">
           <div class="block-name">Memory</div>
-          <div class="block-desc">主存</div>
+          <div class="block-desc">{{ t('computerOrganization.controller.blocks.memory') }}</div>
         </div>
       </div>
 
       <div class="block-row">
         <div class="cpu-block" :class="{ active: activeBlock === 'mdr' }">
           <div class="block-name">MDR</div>
-          <div class="block-desc">数据寄存器</div>
+          <div class="block-desc">{{ t('computerOrganization.controller.blocks.mdr') }}</div>
         </div>
         <div class="arrow" :class="{ active: activeBlock === 'mdr' }">→</div>
         <div class="cpu-block" :class="{ active: activeBlock === 'ir' }">
           <div class="block-name">IR</div>
-          <div class="block-desc">指令寄存器</div>
+          <div class="block-desc">{{ t('computerOrganization.controller.blocks.ir') }}</div>
         </div>
         <div class="arrow" :class="{ active: activeBlock === 'ir' }">→</div>
         <div class="cpu-block" :class="{ active: activeBlock === 'decoder' }">
           <div class="block-name">ID</div>
-          <div class="block-desc">译码器</div>
+          <div class="block-desc">{{ t('computerOrganization.controller.blocks.decoder') }}</div>
         </div>
       </div>
 
       <div class="block-row">
         <div class="cpu-block" :class="{ active: activeBlock === 'alu' }">
           <div class="block-name">ALU</div>
-          <div class="block-desc">算术逻辑单元</div>
+          <div class="block-desc">{{ t('computerOrganization.controller.blocks.alu') }}</div>
         </div>
         <div class="arrow" :class="{ active: activeBlock === 'alu' }">↔</div>
         <div class="cpu-block" :class="{ active: activeBlock === 'acc' }">
           <div class="block-name">ACC</div>
-          <div class="block-desc">累加器</div>
+          <div class="block-desc">{{ t('computerOrganization.controller.blocks.acc') }}</div>
         </div>
       </div>
     </div>
 
     <div class="control-panel">
-      <button class="btn" @click="executeFetch">执行取指周期</button>
-      <button class="btn" @click="executeAdd">执行 ADD 指令</button>
-      <button class="btn" @click="executeLoad">执行 LOAD 指令</button>
+      <button class="btn" @click="executeFetch">{{ t('computerOrganization.controller.buttons.fetch') }}</button>
+      <button class="btn" @click="executeAdd">{{ t('computerOrganization.controller.buttons.add') }}</button>
+      <button class="btn" @click="executeLoad">{{ t('computerOrganization.controller.buttons.load') }}</button>
     </div>
 
     <div class="microinstruction-panel">
-      <div class="panel-title">当前微指令</div>
+      <div class="panel-title">{{ t('computerOrganization.controller.currentMicroinstruction') }}</div>
       <div class="micro-ops">
         <div v-for="(op, i) in microOps" :key="i" :class="['micro-op', op.active ? 'active' : '']">
           <span class="op-cycle">T{{ i + 1 }}</span>
@@ -91,16 +91,10 @@
     </div>
 
     <div class="cu-explanation">
-      <div class="exp-title">控制器核心概念</div>
+      <div class="exp-title">{{ t('computerOrganization.controller.conceptTitle') }}</div>
       <div class="exp-content">
-        <div class="exp-item">
-          <strong>控制信号：</strong>由控制器发出的电信号，用于控制数据通路中各个部件的动作
-        </div>
-        <div class="exp-item">
-          <strong>时序：</strong>CPU 操作按时钟节拍进行，每个节拍执行特定微操作
-        </div>
-        <div class="exp-item">
-          <strong>硬布线 vs 微程序：</strong>硬布线控制器速度快但设计复杂；微程序控制器灵活但速度稍慢
+        <div v-for="item in concepts" :key="item.label" class="exp-item">
+          <strong>{{ item.label }}</strong>{{ item.desc }}
         </div>
       </div>
     </div>
@@ -108,7 +102,11 @@
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue'
+import { computed, reactive, ref } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { computerFundamentalsLocale } from '../../../locales/computer-fundamentals/index.js'
+
+const { t, messages } = useI18n(computerFundamentalsLocale)
 
 const activeBlock = ref('')
 
@@ -122,6 +120,7 @@ const controlSignals = reactive([
 ])
 
 const microOps = reactive([])
+const concepts = computed(() => messages.value.computerOrganization.controller.concepts)
 
 const clearSignals = () => {
   controlSignals.forEach(s => s.active = false)
@@ -132,22 +131,22 @@ const executeFetch = async () => {
   clearSignals()
   microOps.splice(0, microOps.length)
   
-  microOps.push({ desc: 'PC→MAR: 将PC中的地址送入MAR', active: true })
+  microOps.push({ desc: t('computerOrganization.controller.ops.fetch1'), active: true })
   controlSignals[0].active = true
   activeBlock.value = 'pc'
   await wait(1000)
 
-  microOps.push({ desc: 'MEM→MDR: 从内存读取指令到MDR', active: true })
+  microOps.push({ desc: t('computerOrganization.controller.ops.fetch2'), active: true })
   controlSignals[1].active = true
   activeBlock.value = 'memory'
   await wait(1000)
 
-  microOps.push({ desc: 'MDR→IR: 将指令送入IR', active: true })
+  microOps.push({ desc: t('computerOrganization.controller.ops.fetch3'), active: true })
   controlSignals[2].active = true
   activeBlock.value = 'mar'
   await wait(1000)
 
-  microOps.push({ desc: 'IR→ID: 指令送入译码器', active: true })
+  microOps.push({ desc: t('computerOrganization.controller.ops.fetch4'), active: true })
   controlSignals[3].active = true
   activeBlock.value = 'ir'
   await wait(1000)
@@ -157,16 +156,16 @@ const executeAdd = async () => {
   clearSignals()
   microOps.splice(0, microOps.length)
   
-  microOps.push({ desc: '指令译码：识别为ADD指令', active: true })
+  microOps.push({ desc: t('computerOrganization.controller.ops.add1'), active: true })
   activeBlock.value = 'decoder'
   await wait(1000)
 
-  microOps.push({ desc: 'ALU执行加法运算', active: true })
+  microOps.push({ desc: t('computerOrganization.controller.ops.add2'), active: true })
   controlSignals[4].active = true
   activeBlock.value = 'alu'
   await wait(1000)
 
-  microOps.push({ desc: '结果写入ACC', active: true })
+  microOps.push({ desc: t('computerOrganization.controller.ops.add3'), active: true })
   activeBlock.value = 'acc'
   await wait(1000)
 }
@@ -175,21 +174,21 @@ const executeLoad = async () => {
   clearSignals()
   microOps.splice(0, microOps.length)
   
-  microOps.push({ desc: '指令译码：识别为LOAD指令', active: true })
+  microOps.push({ desc: t('computerOrganization.controller.ops.load1'), active: true })
   activeBlock.value = 'decoder'
   await wait(1000)
 
-  microOps.push({ desc: 'PC→MAR: 取操作数地址', active: true })
+  microOps.push({ desc: t('computerOrganization.controller.ops.load2'), active: true })
   controlSignals[0].active = true
   activeBlock.value = 'pc'
   await wait(1000)
 
-  microOps.push({ desc: 'MEM→MDR: 读取数据', active: true })
+  microOps.push({ desc: t('computerOrganization.controller.ops.load3'), active: true })
   controlSignals[1].active = true
   activeBlock.value = 'memory'
   await wait(1000)
 
-  microOps.push({ desc: 'MDR→ACC: 数据送入ACC', active: true })
+  microOps.push({ desc: t('computerOrganization.controller.ops.load4'), active: true })
   controlSignals[5].active = true
   activeBlock.value = 'mdr'
   await wait(1000)

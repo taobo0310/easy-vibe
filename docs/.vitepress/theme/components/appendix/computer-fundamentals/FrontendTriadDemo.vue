@@ -1,8 +1,8 @@
 <template>
   <div class="triad-demo">
     <div class="demo-header">
-      <span class="title">前端三件套</span>
-      <span class="subtitle">网页开发的三大基石</span>
+      <span class="title">{{ t('computerOrganization.vibeCodingFullstack.frontendTriad.title') }}</span>
+      <span class="subtitle">{{ t('computerOrganization.vibeCodingFullstack.frontendTriad.subtitle') }}</span>
     </div>
 
     <div class="triad-grid">
@@ -21,32 +21,18 @@
     </div>
 
     <div class="info-box">
-      <strong>协作关系：</strong>HTML 搭骨架，CSS 穿衣服，JavaScript 让它动起来。三者缺一不可。
+      <strong>{{ t('computerOrganization.vibeCodingFullstack.frontendTriad.relationshipLabel') }}</strong>{{ t('computerOrganization.vibeCodingFullstack.frontendTriad.relationship') }}
     </div>
   </div>
 </template>
 
 <script setup>
-const triad = [
-  {
-    name: 'HTML',
-    role: '结构层',
-    analogy: '房子的骨架：墙、门、窗',
-    examples: ['div', 'span', 'form', 'input']
-  },
-  {
-    name: 'CSS',
-    role: '表现层',
-    analogy: '房子的装修：颜色、位置、大小',
-    examples: ['color', 'flex', 'grid', 'animation']
-  },
-  {
-    name: 'JavaScript',
-    role: '行为层',
-    analogy: '房子的智能：开关灯、开门',
-    examples: ['事件', 'DOM操作', '网络请求']
-  }
-]
+import { computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { computerFundamentalsLocale } from '../../../locales/computer-fundamentals/index.js'
+
+const { t, messages } = useI18n(computerFundamentalsLocale)
+const triad = computed(() => messages.value.computerOrganization.vibeCodingFullstack.frontendTriad.triad)
 </script>
 
 <style scoped>

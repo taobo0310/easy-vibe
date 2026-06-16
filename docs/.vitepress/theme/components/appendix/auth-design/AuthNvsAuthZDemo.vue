@@ -1,25 +1,21 @@
-<!--
-  AuthNvsAuthZDemo.vue
-  AuthN vs AuthZ（更可用：请求模拟器）
--->
 <template>
   <div class="authn-authz-demo">
     <div class="header">
       <div class="title">
-        🪪 AuthN vs 🛂 AuthZ：一个请求到底会经历什么？
+        {{ t('authnAuthz.title') }}
       </div>
       <div class="subtitle">
-        选择“谁在请求”与“要做什么”，看看认证/授权分别在哪一步起作用。
+        {{ t('authnAuthz.subtitle') }}
       </div>
     </div>
 
     <div class="grid">
       <div class="card">
         <div class="card-title">
-          选择请求
+          {{ t('authnAuthz.requestTitle') }}
         </div>
 
-        <label class="label">身份（AuthN：你是谁）</label>
+        <label class="label">{{ t('authnAuthz.identityLabel') }}</label>
         <div class="row">
           <button
             v-for="u in users"
@@ -32,7 +28,7 @@
           </button>
         </div>
 
-        <label class="label">操作（AuthZ：你能做什么）</label>
+        <label class="label">{{ t('authnAuthz.actionLabel') }}</label>
         <div class="row">
           <button
             v-for="a in actions"
@@ -46,33 +42,32 @@
         </div>
 
         <div class="hint">
-          真实系统里：认证先发生（解析
-          cookie/JWT），授权发生在路由/业务逻辑层（RBAC/ABAC）。
+          {{ t('authnAuthz.hint') }}
         </div>
       </div>
 
       <div class="card">
         <div class="card-title">
-          模拟结果
+          {{ t('authnAuthz.resultTitle') }}
         </div>
 
         <div class="result">
           <div class="line">
-            <span class="k">AuthN（认证）</span>
+            <span class="k">{{ t('authnAuthz.authnLabel') }}</span>
             <span
               class="v"
               :class="authn.ok ? 'ok' : 'bad'"
             >
-              {{ authn.ok ? '通过' : '失败' }}
+              {{ authn.ok ? t('authnAuthz.pass') : t('authnAuthz.fail') }}
             </span>
           </div>
           <div class="line">
-            <span class="k">AuthZ（授权）</span>
+            <span class="k">{{ t('authnAuthz.authzLabel') }}</span>
             <span
               class="v"
               :class="authz.ok ? 'ok' : 'bad'"
             >
-              {{ authz.ok ? '允许' : '拒绝' }}
+              {{ authz.ok ? t('authnAuthz.allow') : t('authnAuthz.deny') }}
             </span>
           </div>
           <div class="line">
@@ -87,16 +82,14 @@
 
     <div class="card">
       <div class="card-title">
-        关键点
+        {{ t('authnAuthz.keyPointsTitle') }}
       </div>
       <ul class="list">
-        <li><strong>认证失败：</strong>你是谁都不确定 → 通常返回 401。</li>
-        <li>
-          <strong>认证通过但没权限：</strong>你是谁确定了，但不能做 → 通常返回
-          403。
-        </li>
-        <li>
-          <strong>授权规则要在服务端：</strong>别相信前端的“是否显示按钮”，那只是 UX。
+        <li
+          v-for="item in keyPoints"
+          :key="item.strong"
+        >
+          <strong>{{ item.strong }}</strong>{{ item.text }}
         </li>
       </ul>
     </div>
@@ -105,37 +98,32 @@
 
 <script setup>
 import { computed, ref } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { authDesignLocale } from '../../../locales/auth-design/index.js'
 
-const users = [
-  { id: 'anon', name: '匿名用户' },
-  { id: 'user', name: '普通用户' },
-  { id: 'admin', name: '管理员' }
-]
-
-const actions = [
-  { id: 'view_profile', name: '查看个人资料（/api/me）' },
-  { id: 'create_post', name: '发帖（POST /posts）' },
-  { id: 'delete_user', name: '删除用户（DELETE /users/:id）' }
-]
+const { t, messages } = useI18n(authDesignLocale)
+const users = computed(() => messages.value.authnAuthz.users)
+const actions = computed(() => messages.value.authnAuthz.actions)
+const keyPoints = computed(() => messages.value.authnAuthz.keyPoints)
 
 const userId = ref('anon')
 const actionId = ref('view_profile')
 
 const authn = computed(() => {
   if (userId.value === 'anon')
-    return { ok: false, reason: '缺少有效凭证（cookie/JWT）' }
-  return { ok: true, reason: `识别为 ${userId.value}` }
+    return { ok: false, reason: t('authnAuthz.missingCredential') }
+  return { ok: true, reason: t('authnAuthz.identifiedAs', { id: userId.value }) }
 })
 
 const authz = computed(() => {
   if (!authn.value.ok)
-    return { ok: false, reason: '认证未通过，无法做授权判断' }
+    return { ok: false, reason: t('authnAuthz.authnFailed') }
   if (actionId.value === 'delete_user') {
     return userId.value === 'admin'
-      ? { ok: true, reason: 'admin 允许删除用户' }
-      : { ok: false, reason: '只有 admin 才能删除用户' }
+      ? { ok: true, reason: t('authnAuthz.adminDeleteAllowed') }
+      : { ok: false, reason: t('authnAuthz.adminOnlyDelete') }
   }
-  return { ok: true, reason: '此操作对已登录用户开放' }
+  return { ok: true, reason: t('authnAuthz.loggedInAllowed') }
 })
 
 const finalStatus = computed(() => {

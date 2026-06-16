@@ -2,7 +2,7 @@
   <div class="demo">
     <div class="header">
       <span class="icon">📋</span>
-      <span class="title">API 响应结构设计</span>
+      <span class="title">{{ t('responseStructure.title') }}</span>
     </div>
 
     <div class="tabs">
@@ -12,48 +12,35 @@
         :class="['tab', { active: active === tab.id }]"
         @click="active = tab.id"
       >
-        {{ tab.icon }} {{ tab.name }}
+        <span v-html="tab.icon" />
+        {{ tab.name }}
       </button>
     </div>
 
     <div class="content">
       <div v-if="active === 'why'" class="section">
-        <h4>为什么要统一响应格式？</h4>
+        <h4>{{ t('responseStructure.why.title') }}</h4>
         <div class="problem-box">
-          <div class="problem-title">❌ 问题：不同接口返回格式不一致</div>
-          <pre class="code-sm">
-// 接口 A
-{ "data": { "user": {...} } }
-
-// 接口 B
-{ "result": { "user": {...} } }
-
-// 接口 C
-{ "user": {...} }</pre>
+          <div class="problem-title" v-html="t('responseStructure.why.problemTitle')" />
+          <pre class="code-sm">{{ t('responseStructure.why.problemCode') }}</pre>
           <div class="problem-desc">
-            前端需要针对每个接口单独处理，代码冗余，容易出错
+            {{ t('responseStructure.why.problemDesc') }}
           </div>
         </div>
         <div class="solution-box">
-          <div class="solution-title">✅ 解决：统一响应格式</div>
-          <pre class="code-sm">
-{
-  "code": 0,
-  "message": "success",
-  "data": { ... },
-  "request_id": "req-xxx"
-}</pre>
+          <div class="solution-title" v-html="t('responseStructure.why.solutionTitle')" />
+          <pre class="code-sm">{{ t('responseStructure.why.solutionCode') }}</pre>
         </div>
       </div>
 
       <div v-if="active === 'fields'" class="section">
-        <h4>响应字段说明</h4>
+        <h4>{{ t('responseStructure.fieldsTitle') }}</h4>
         <div class="field-list">
           <div v-for="field in fields" :key="field.name" class="field-item">
             <div class="field-header">
               <code class="field-name">{{ field.name }}</code>
               <span class="field-type">{{ field.type }}</span>
-              <span v-if="field.required" class="field-required">必填</span>
+              <span v-if="field.required" class="field-required">{{ t('responseStructure.required') }}</span>
             </div>
             <div class="field-desc">{{ field.desc }}</div>
           </div>
@@ -61,27 +48,15 @@
       </div>
 
       <div v-if="active === 'codes'" class="section">
-        <h4>业务状态码设计</h4>
+        <h4>{{ t('responseStructure.codesTitle') }}</h4>
         <div class="code-ranges">
-          <div class="range-item">
-            <span class="range-num">0</span>
-            <span class="range-label">成功</span>
-          </div>
-          <div class="range-item">
-            <span class="range-num">1xxxx</span>
-            <span class="range-label">客户端错误</span>
-          </div>
-          <div class="range-item">
-            <span class="range-num">2xxxx</span>
-            <span class="range-label">业务错误</span>
-          </div>
-          <div class="range-item">
-            <span class="range-num">3xxxx</span>
-            <span class="range-label">认证/权限错误</span>
-          </div>
-          <div class="range-item">
-            <span class="range-num">5xxxx</span>
-            <span class="range-label">系统错误</span>
+          <div
+            v-for="range in codeRanges"
+            :key="range.num"
+            class="range-item"
+          >
+            <span class="range-num">{{ range.num }}</span>
+            <span class="range-label">{{ range.label }}</span>
           </div>
         </div>
         <div class="code-examples">
@@ -93,7 +68,7 @@
       </div>
 
       <div v-if="active === 'examples'" class="section">
-        <h4>不同场景响应示例</h4>
+        <h4>{{ t('responseStructure.examplesTitle') }}</h4>
         <div class="example-tabs">
           <button
             v-for="ex in examples"
@@ -111,35 +86,24 @@
       </div>
 
       <div v-if="active === 'pagination'" class="section">
-        <h4>分页参数设计</h4>
+        <h4>{{ t('responseStructure.pagination.title') }}</h4>
         <div class="pg-row">
           <div class="pg-col">
-            <div class="pg-title">请求参数</div>
+            <div class="pg-title">{{ t('responseStructure.pagination.requestTitle') }}</div>
             <div class="pg-params">
-              <div class="pg-item">
-                <code>page</code>
-                <span>页码，从 1 开始</span>
-              </div>
-              <div class="pg-item">
-                <code>page_size</code>
-                <span>每页数量，默认 20</span>
-              </div>
-              <div class="pg-item">
-                <code>sort</code>
-                <span>排序，如 created_desc</span>
+              <div
+                v-for="param in pagination.params"
+                :key="param.code"
+                class="pg-item"
+              >
+                <code>{{ param.code }}</code>
+                <span>{{ param.desc }}</span>
               </div>
             </div>
           </div>
           <div class="pg-col">
-            <div class="pg-title">响应格式</div>
-            <pre class="code-sm">
-"pagination": {
-  "page": 1,
-  "page_size": 20,
-  "total": 156,
-  "total_pages": 8,
-  "has_next": true
-}</pre>
+            <div class="pg-title">{{ t('responseStructure.pagination.responseTitle') }}</div>
+            <pre class="code-sm">{{ pagination.responseCode }}</pre>
           </div>
         </div>
       </div>
@@ -147,130 +111,28 @@
 
     <div class="tips">
       <span class="tips-icon">💡</span>
-      <span class="tips-text">request_id 用于问题追踪，建议使用 UUID v4 或雪花算法生成</span>
+      <span class="tips-text">{{ t('responseStructure.tip') }}</span>
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { apiDesignLocale } from '../../../locales/api-design/index.js'
 
+const { t, messages } = useI18n(apiDesignLocale)
 const active = ref('why')
 const exId = ref('success')
-
-const tabs = [
-  { id: 'why', icon: '❓', name: '为什么统一' },
-  { id: 'fields', icon: '📝', name: '字段说明' },
-  { id: 'codes', icon: '🔢', name: '状态码' },
-  { id: 'examples', icon: '📄', name: '示例' },
-  { id: 'pagination', icon: '📑', name: '分页' }
-]
-
-const fields = [
-  {
-    name: 'code',
-    type: 'number',
-    required: true,
-    desc: '业务状态码，0 表示成功'
-  },
-  { name: 'message', type: 'string', required: true, desc: '状态描述信息' },
-  {
-    name: 'data',
-    type: 'any',
-    required: false,
-    desc: '业务数据，失败时可为 null'
-  },
-  {
-    name: 'request_id',
-    type: 'string',
-    required: true,
-    desc: '请求唯一标识，用于追踪'
-  },
-  {
-    name: 'timestamp',
-    type: 'string',
-    required: false,
-    desc: '响应时间戳，ISO 8601 格式'
-  }
-]
-
-const codeExamples = [
-  { code: 0, message: 'success - 成功' },
-  { code: 10001, message: '参数错误：缺少必填字段' },
-  { code: 10002, message: '资源不存在' },
-  { code: 20001, message: '余额不足' },
-  { code: 30001, message: '未登录' },
-  { code: 50001, message: '系统繁忙，请稍后重试' }
-]
-
-const examples = [
-  {
-    id: 'success',
-    name: '成功-单对象',
-    code: `{
-  "code": 0,
-  "message": "success",
-  "data": {
-    "id": 123,
-    "name": "张三",
-    "email": "zhangsan@example.com"
-  },
-  "request_id": "req-abc123"
-}`,
-    note: '成功响应：data 包含具体业务数据'
-  },
-  {
-    id: 'list',
-    name: '成功-列表',
-    code: `{
-  "code": 0,
-  "message": "success",
-  "data": {
-    "items": [
-      { "id": 1, "name": "商品A" },
-      { "id": 2, "name": "商品B" }
-    ],
-    "pagination": {
-      "page": 1,
-      "page_size": 20,
-      "total": 156
-    }
-  },
-  "request_id": "req-def456"
-}`,
-    note: '列表响应：items 数组 + pagination 分页信息'
-  },
-  {
-    id: 'error',
-    name: '业务错误',
-    code: `{
-  "code": 20001,
-  "message": "余额不足，当前余额 50.00 元",
-  "data": null,
-  "request_id": "req-ghi789"
-}`,
-    note: '业务错误：code 非 0，message 说明原因'
-  },
-  {
-    id: 'validate',
-    name: '参数校验',
-    code: `{
-  "code": 10001,
-  "message": "参数校验失败",
-  "data": {
-    "errors": [
-      { "field": "email", "message": "邮箱格式不正确" },
-      { "field": "password", "message": "密码长度至少 8 位" }
-    ]
-  },
-  "request_id": "req-jkl012"
-}`,
-    note: '参数错误：data.errors 列出所有错误字段'
-  }
-]
+const tabs = computed(() => messages.value.responseStructure.tabs)
+const fields = computed(() => messages.value.responseStructure.fields)
+const codeRanges = computed(() => messages.value.responseStructure.codeRanges)
+const codeExamples = computed(() => messages.value.responseStructure.codeExamples)
+const examples = computed(() => messages.value.responseStructure.examples)
+const pagination = computed(() => messages.value.responseStructure.pagination)
 
 const currentExample = computed(() => {
-  return examples.find((e) => e.id === exId.value) || examples[0]
+  return examples.value.find((e) => e.id === exId.value) || examples.value[0]
 })
 </script>
 

@@ -2,17 +2,17 @@
   <div class="route-matching-demo">
     <div class="demo-header">
       <span class="icon">🎯</span>
-      <span class="title">路由匹配</span>
-      <span class="subtitle">URL如何找到对应组件</span>
+      <span class="title">{{ t('routeMatching.title') }}</span>
+      <span class="subtitle">{{ t('routeMatching.subtitle') }}</span>
     </div>
 
     <div class="intro-text">
-      想象你在<span class="highlight">查字典</span>：输入一个词，字典会帮你找到对应的解释。路由匹配也是这样，浏览器根据URL路径，在路由配置中找到最匹配的那一项，然后渲染对应组件。
+      {{ t('routeMatching.intro.prefix') }}<span class="highlight">{{ t('routeMatching.intro.highlight') }}</span>{{ t('routeMatching.intro.suffix') }}
     </div>
 
     <div class="demo-content">
       <div class="input-section">
-        <h5>📍 测试路径</h5>
+        <h5>{{ t('routeMatching.testPathTitle') }}</h5>
         <div class="input-group">
           <span class="input-prefix">/</span>
           <input
@@ -24,12 +24,12 @@
           >
         </div>
         <div class="hint-text">
-          试试：user/123 或 products/electronics/456
+          {{ t('routeMatching.hint') }}
         </div>
       </div>
 
       <div class="result-section">
-        <h5>🎯 匹配结果</h5>
+        <h5>{{ t('routeMatching.resultTitle') }}</h5>
         <div
           v-if="matchResult && matchResult.matched"
           class="match-success"
@@ -39,14 +39,14 @@
           </div>
           <div class="result-details">
             <div class="result-row">
-              <span class="label">匹配路由:</span>
+              <span class="label">{{ t('routeMatching.matchedRoute') }}</span>
               <code class="value">{{ matchResult.route.path }}</code>
             </div>
             <div
               v-if="Object.keys(matchResult.params).length"
               class="params-box"
             >
-              <span class="label">提取参数:</span>
+              <span class="label">{{ t('routeMatching.extractedParams') }}</span>
               <div class="params-list">
                 <span
                   v-for="(value, key) in matchResult.params"
@@ -66,13 +66,13 @@
           <div class="fail-icon">
             ❌
           </div>
-          <div>未找到匹配的路由</div>
+          <div>{{ t('routeMatching.noMatch') }}</div>
         </div>
       </div>
     </div>
 
     <div class="routes-list">
-      <h5>📋 已定义的路由</h5>
+      <h5>{{ t('routeMatching.definedRoutes') }}</h5>
       <div class="routes-grid">
         <div
           v-for="route in routes"
@@ -87,26 +87,22 @@
 
     <div class="info-box">
       <span class="icon">💡</span>
-      <strong>匹配规则：</strong>路由按定义顺序匹配，先定义的优先。动态参数（:id）可以匹配任意值，但精确匹配优先级更高。
+      <strong>{{ t('common.matchRule') }}</strong>{{ t('routeMatching.info') }}
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { frontendRoutingLocale } from '../../../locales/frontend-routing/index.js'
 
+const { t, messages } = useI18n(frontendRoutingLocale)
 const testPath = ref('user/123')
 const matchResult = ref(null)
 const matchedRoute = ref(null)
 
-const routes = [
-  { path: '/', name: '首页', hasParams: false },
-  { path: '/user', name: '用户列表', hasParams: false },
-  { path: '/user/:id', name: '用户详情', hasParams: true },
-  { path: '/user/:id/posts', name: '用户文章', hasParams: true },
-  { path: '/products/:category/:id', name: '产品详情', hasParams: true },
-  { path: '/:path(.*)*', name: '404页面', hasParams: true }
-]
+const routes = computed(() => messages.value.routeMatching.routes)
 
 const parsePath = (path) => {
   const cleanPath = path.replace(/^\//, '')
@@ -165,7 +161,7 @@ const testMatch = () => {
 
   let foundMatch = false
 
-  for (const route of routes) {
+  for (const route of routes.value) {
     const { matched, params } = matchPath(route.path, testPath.value)
 
     if (matched) {

@@ -5,7 +5,7 @@
         <!-- Left: Waveform -->
         <div class="viz-box">
           <div class="viz-header">
-            <span class="viz-title">🌊 波形 (Waveform)</span>
+            <span class="viz-title">{{ t('spectrogramViz.waveformTitle') }}</span>
             <el-tag
               size="small"
               type="success"
@@ -26,17 +26,17 @@
               />
             </div>
             <div class="axis-label x-axis">
-              时间 (Time) →
+              {{ t('spectrogramViz.timeAxis') }}
             </div>
             <div class="axis-label y-axis">
-              振幅 (Amplitude) ↑
+              {{ t('spectrogramViz.amplitudeAxis') }}
             </div>
           </div>
         </div>
 
         <div class="transform-arrow">
           <div class="arrow-content">
-            <span class="fft-text">FFT 变换</span>
+            <span class="fft-text">{{ t('spectrogramViz.fft') }}</span>
             <el-icon><Right /></el-icon>
           </div>
         </div>
@@ -44,7 +44,7 @@
         <!-- Right: Spectrogram -->
         <div class="viz-box">
           <div class="viz-header">
-            <span class="viz-title">🎨 频谱图 (Spectrogram)</span>
+            <span class="viz-title">{{ t('spectrogramViz.spectrogramTitle') }}</span>
             <el-tag
               size="small"
               type="warning"
@@ -59,10 +59,10 @@
               height="100"
             />
             <div class="axis-label x-axis">
-              时间 (Time) →
+              {{ t('spectrogramViz.timeAxis') }}
             </div>
             <div class="axis-label y-axis">
-              频率 (Freq) ↑
+              {{ t('spectrogramViz.frequencyAxis') }}
             </div>
           </div>
         </div>
@@ -71,7 +71,7 @@
       <el-divider />
 
       <el-alert
-        title="像看乐谱一样看声音"
+        :title="t('spectrogramViz.alertTitle')"
         type="info"
         :closable="false"
         show-icon
@@ -80,16 +80,15 @@
           <div class="legend">
             <div class="legend-item">
               <div class="color-box low" />
-              低能量 (安静)
+              {{ t('spectrogramViz.lowEnergy') }}
             </div>
             <div class="legend-item">
               <div class="color-box high" />
-              高能量 (响亮)
+              {{ t('spectrogramViz.highEnergy') }}
             </div>
           </div>
           <p>
-            频谱图将一维的声音信号变成了二维图像，这样我们就可以用
-            <strong>CNN (卷积神经网络)</strong> 等图像模型来处理声音了！
+            <span v-html="t('spectrogramViz.info')" />
           </p>
         </template>
       </el-alert>
@@ -100,7 +99,10 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { Right } from '@element-plus/icons-vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { audioIntroLocale } from '../../../locales/audio-intro/index.js'
 
+const { t } = useI18n(audioIntroLocale)
 const canvasRef = ref(null)
 
 onMounted(() => {

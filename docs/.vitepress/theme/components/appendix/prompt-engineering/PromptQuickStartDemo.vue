@@ -8,14 +8,14 @@
         <div class="header-content">
           <div class="title-group">
             <div class="title">
-              🕹️ 互动体验：提示词进化论
+              {{ t('quickStart.title') }}
             </div>
             <div class="subtitle">
-              不要一次性写好，试着像搭积木一样优化你的指令。
+              {{ t('quickStart.subtitle') }}
             </div>
           </div>
           <div class="controls">
-            <span class="label">选择任务：</span>
+            <span class="label">{{ t('quickStart.selectTask') }}</span>
             <el-select
               v-model="taskId"
               style="width: 160px"
@@ -23,26 +23,26 @@
               @change="reset"
             >
               <el-option
-                v-for="t in tasks"
-                :key="t.id"
-                :label="t.label"
-                :value="t.id"
+                v-for="tk in tasks"
+                :key="tk.id"
+                :label="tk.label"
+                :value="tk.id"
               />
             </el-select>
           </div>
         </div>
       </template>
 
-      <!-- 游戏区 -->
+      <!-- Game Area -->
       <div class="game-area">
-        <!-- 左侧：提示词构建 -->
+        <!-- Left: Prompt Builder -->
         <div class="prompt-builder">
           <div class="section-title">
-            你的指令 (Prompt)
+            {{ t('quickStart.promptLabel') }}
           </div>
-          
+
           <div class="prompt-box">
-            <!-- 基础层 -->
+            <!-- Base Layer -->
             <div
               class="block base"
               :class="{ active: true }"
@@ -51,7 +51,7 @@
               <span class="text">{{ basePrompt }}</span>
             </div>
 
-            <!-- 进阶层：清晰指令 -->
+            <!-- Clear Layer -->
             <div
               v-if="level >= 1"
               class="block clear animate-in"
@@ -60,7 +60,7 @@
               <span class="text">{{ clearPromptAddon }}</span>
             </div>
 
-            <!-- 专家层：结构化 -->
+            <!-- Pro Layer -->
             <div
               v-if="level >= 2"
               class="block pro animate-in"
@@ -70,7 +70,7 @@
             </div>
           </div>
 
-          <!-- 升级按钮 -->
+          <!-- Upgrade Controls -->
           <div class="upgrade-controls">
             <div class="level-info">
               <el-tag
@@ -86,44 +86,44 @@
                 :style="{ color: levelColorCode }"
               >{{ levelLabel }}</span>
             </div>
-            
+
             <div class="actions">
               <el-button-group>
-                <el-button 
+                <el-button
                   :disabled="level === 0"
                   icon="Minus"
                   @click="downgrade"
                 >
-                  ➖ 降级
+                  {{ t('quickStart.downgrade') }}
                 </el-button>
-                <el-button 
-                  type="primary" 
+                <el-button
+                  type="primary"
                   :disabled="level === 2"
                   icon="Plus"
                   @click="upgrade"
                 >
-                  升级 ➕
+                  {{ t('quickStart.upgrade') }}
                 </el-button>
               </el-button-group>
             </div>
           </div>
-          
-          <el-button 
-            type="primary" 
-            size="large" 
+
+          <el-button
+            type="primary"
+            size="large"
             :loading="isRunning"
             style="width: 100%; font-weight: bold; font-size: 1.1rem;"
             @click="run"
           >
-            {{ isRunning ? '生成中...' : '🚀 发送给 AI' }}
+            {{ isRunning ? t('common.running') : t('common.sendToAI') }}
           </el-button>
         </div>
 
-        <!-- 右侧：AI 模拟输出 -->
+        <!-- Right: AI Simulated Output -->
         <div class="chat-preview">
           <div class="section-title">
-            <span>AI 回复 (Output)</span>
-            <!-- 历史记录切换 -->
+            <span>{{ t('quickStart.outputLabel') }}</span>
+            <!-- History Switch -->
             <div
               v-if="hasAnyHistory"
               class="history-tabs"
@@ -132,9 +132,9 @@
                 v-model="viewLevel"
                 size="small"
               >
-                <el-radio-button 
-                  v-for="l in availableLevels" 
-                  :key="l" 
+                <el-radio-button
+                  v-for="l in availableLevels"
+                  :key="l"
                   :label="l"
                 >
                   L{{ l }}
@@ -144,20 +144,20 @@
           </div>
 
           <div class="chat-window">
-            <!-- 空状态 -->
+            <!-- Empty State -->
             <div
               v-if="!hasRun && !hasAnyHistory"
               class="empty-state"
             >
               <el-empty
-                description="点击左侧“发送”按钮，看看 AI 会怎么回。"
+                :description="t('quickStart.emptyHint')"
                 :image-size="100"
               />
             </div>
 
-            <!-- 内容区域 -->
+            <!-- Content Area -->
             <div v-else>
-              <!-- 比较模式提示 -->
+              <!-- Compare Mode Hint -->
               <el-alert
                 v-if="viewLevel !== level"
                 type="info"
@@ -166,14 +166,14 @@
                 style="margin-bottom: 12px;"
               >
                 <template #title>
-                  正在查看 Level {{ viewLevel }} 的历史记录 (当前是 L{{ level }})
+                  {{ t('quickStart.viewingHistory', { viewLevel, currentLevel: level }) }}
                   <el-button
                     link
                     type="primary"
                     style="padding: 0; vertical-align: baseline;"
                     @click="viewLevel = level"
                   >
-                    回到当前
+                    {{ t('quickStart.backToCurrent') }}
                   </el-button>
                 </template>
               </el-alert>
@@ -199,8 +199,8 @@
                   />
                 </div>
               </div>
-              
-              <!-- 点评气泡 -->
+
+              <!-- Feedback Bubble -->
               <div
                 v-if="(!isRunning || viewLevel !== level) && getOutputForLevel(viewLevel)"
                 class="feedback-bubble animate-pop"
@@ -222,12 +222,16 @@
 
 <script setup>
 import { computed, ref } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { promptEngineeringLocale } from '../../../locales/prompt-engineering/index.js'
 
-const tasks = [
-  { id: 'copy', label: '写小红书文案' },
-  { id: 'summary', label: '总结会议纪要' },
-  { id: 'code', label: '写代码函数' }
-]
+const { t } = useI18n(promptEngineeringLocale)
+
+const tasks = computed(() => [
+  { id: 'copy', label: t('quickStart.taskCopy') },
+  { id: 'summary', label: t('quickStart.taskSummary') },
+  { id: 'code', label: t('quickStart.taskCode') }
+])
 
 const taskId = ref('copy')
 const level = ref(0) // 0: vague, 1: clear, 2: pro
@@ -235,9 +239,9 @@ const isRunning = ref(false)
 const hasRun = ref(false)
 const displayedOutput = ref('')
 
-// 存储历史输出：{ 0: "...", 1: "..." }
+// Store history outputs: { 0: "...", 1: "..." }
 const outputs = ref({})
-const viewLevel = ref(0) // 当前查阅的 Level
+const viewLevel = ref(0) // Currently viewed Level
 
 const hasAnyHistory = computed(() => Object.keys(outputs.value).length > 0)
 const availableLevels = computed(() => Object.keys(outputs.value).map(Number).sort())
@@ -252,8 +256,8 @@ const reset = () => {
 
 const upgrade = () => {
   if (level.value < 2) level.value++
-  hasRun.value = false 
-  viewLevel.value = level.value // 切换到新等级时，视角跟随
+  hasRun.value = false
+  viewLevel.value = level.value
 }
 
 const downgrade = () => {
@@ -262,81 +266,31 @@ const downgrade = () => {
   viewLevel.value = level.value
 }
 
-const levelLabel = computed(() => ['随口一说', '清晰指令', '结构化 Prompt'][level.value])
+const levelLabel = computed(() => {
+  const labels = t('quickStart.levelLabels')
+  return labels[level.value] || ''
+})
 const levelColor = computed(() => ['info', 'warning', 'success'][level.value])
 const levelColorCode = computed(() => ['#909399', '#e6a23c', '#67c23a'][level.value])
 
-// Prompt 内容配置
-const promptConfig = {
-  copy: {
-    base: '写个咖啡杯文案',
-    clear: '+ 风格：小红书，轻松活泼。长度：100字左右。卖点：颜值高、保温好。',
-    pro: '+ 角色：资深种草博主\n+ 结构：痛点 -> 卖点 -> 场景 -> 结尾互动\n+ 格式：多用 Emoji，分段清晰'
-  },
-  summary: {
-    base: '帮我总结一下这段文字',
-    clear: '+ 要求：提炼 3 个核心要点，每点不超过 20 字。',
-    pro: '+ 角色：专业秘书\n+ 格式：Markdown 无序列表\n+ 排除：不要客套话，只要干货'
-  },
-  code: {
-    base: '写个排序函数',
-    clear: '+ 语言：JavaScript (ES6)。要求：快速排序，带注释。',
-    pro: '+ 角色：资深前端架构师\n+ 健壮性：处理边界情况（空数组、非数组）\n+ 示例：附带一个测试用例'
-  }
-}
+// Prompt content config
+const basePrompt = computed(() => t(`quickStart.promptConfig.${taskId.value}.base`))
+const clearPromptAddon = computed(() => t(`quickStart.promptConfig.${taskId.value}.clear`))
+const proPromptAddon = computed(() => t(`quickStart.promptConfig.${taskId.value}.pro`))
 
-const basePrompt = computed(() => promptConfig[taskId.value].base)
-const clearPromptAddon = computed(() => promptConfig[taskId.value].clear)
-const proPromptAddon = computed(() => promptConfig[taskId.value].pro)
-
-// 模拟输出内容
-const outputConfig = {
-  copy: [
-    '这个咖啡杯真的很好用，推荐给大家。它颜色很好看，而且保温效果也不错。快去买吧。',
-    '✨ 早八人必备！这个保温杯颜值真的绝绝子！💖 拿在手里超有质感，而且保温效果超级好，早上装的咖啡下午还是热的！☕️ 放在包里也不漏水，集美们冲鸭！',
-    '👋 还在为冷咖啡烦恼？\n\n😫 **痛点**：早起冲的咖啡，还没到公司就凉了？\n\n🌟 **安利**：这款“拿铁杯”必须拥有！\n1️⃣ **颜值主义**：奶油白配色，随手一拍就是大片 📸\n2️⃣ **硬核保温**：实测 6 小时依然烫嘴 🔥\n3️⃣ **办公绝配**：密封圈设计，随便塞包里不漏洒 🎒\n\n👇 评论区告诉我，你最喜欢哪个颜色？'
-  ],
-  summary: [
-    '这段文字主要讲了关于...（此处省略500字流水账）...总之就是这些内容。',
-    '- 核心观点：用户增长放缓\n- 主要原因：市场竞争加剧\n- 建议：加大投放力度',
-    '### 📝 会议核心摘要\n\n* **📉 现状**：Q3 用户增长率下降 15%\n* **🔍 原因**：竞品推出低价策略，分流明显\n* **🚀 行动**：下周启动“老用户回馈”专项活动'
-  ],
-  code: [
-    'function sort(arr) { return arr.sort() } // 没写快排，或者写了但没注释',
-    '// 快速排序\nconst quickSort = (arr) => {\n  if (arr.length <= 1) return arr;\n  const p = arr[0];\n  const left = arr.slice(1).filter(x => x < p);\n  const right = arr.slice(1).filter(x => x >= p);\n  return [...quickSort(left), p, ...quickSort(right)];\n}',
-    '/**\n * 快速排序 (ES6+)\n * @param {Array} arr - 输入数组\n * @returns {Array} - 排序后的新数组\n */\nconst quickSort = (arr) => {\n  // 🛡️ 边界检查\n  if (!Array.isArray(arr)) throw new Error("Input must be an array");\n  if (arr.length <= 1) return arr;\n\n  const pivot = arr[0];\n  const left = [];\n  const right = [];\n\n  // 分区\n  for (let i = 1; i < arr.length; i++) {\n    arr[i] < pivot ? left.push(arr[i]) : right.push(arr[i]);\n  }\n\n  return [...quickSort(left), pivot, ...quickSort(right)];\n};\n\n// ✅ 测试用例\nconsole.log(quickSort([3, 1, 4, 1, 5, 9])); // [1, 1, 3, 4, 5, 9]'
-  ]
-}
-
-const feedbackConfig = {
-  copy: [
-    { title: '太泛了', text: 'AI 不知道你要什么风格，只能给你“说明书”式的文案。' },
-    { title: '好多了', text: '有了风格和卖点，AI 知道怎么“说话”了，但结构还不够抓人。' },
-    { title: '专业级', text: '指定了角色和结构（痛点-卖点），输出逻辑清晰，转化率更高。' }
-  ],
-  summary: [
-    { title: '抓不住重点', text: '没有字数和格式限制，AI 可能会罗嗦一大堆。' },
-    { title: '清晰明了', text: '限制了字数和要点数量，可读性大幅提升。' },
-    { title: '结构化交付', text: '指定 Markdown 格式和角色，直接可用，无需二次编辑。' }
-  ],
-  code: [
-    { title: '不可用', text: '可能偷懒用内置函数，或者缺少注释，难以维护。' },
-    { title: '可用', text: '代码正确，有基本注释，但缺乏健壮性考虑。' },
-    { title: '生产级', text: '考虑了边界情况和类型检查，直接复制就能进项目。' }
-  ]
-}
-
-const getFeedbackForLevel = (l) => feedbackConfig[taskId.value][l]
-
-// 获取某等级的输出（如果是当前等级正在运行，显示实时打字内容；否则显示历史记录）
 const getOutputForLevel = (l) => {
   if (l === level.value && isRunning.value) return displayedOutput.value
   return outputs.value[l] || ''
 }
 
+const getFeedbackForLevel = (l) => {
+  const config = t(`quickStart.feedbackConfig.${taskId.value}`)
+  return config[l] || { title: '', text: '' }
+}
+
 const renderMarkdown = (text) => {
   if (!text) return ''
-  
+
   // 1. HTML Escape (Basic)
   let html = text
     .replace(/&/g, "&amp;")
@@ -347,17 +301,17 @@ const renderMarkdown = (text) => {
 
   // 2. Bold: **text** -> <strong>text</strong>
   html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-  
+
   return html
 }
 
 const run = () => {
   if (isRunning.value) return
-  // 直接显示结果，不进行模拟等待
   hasRun.value = true
-  viewLevel.value = level.value // 强制看当前
-  
-  const fullText = outputConfig[taskId.value][level.value]
+  viewLevel.value = level.value
+
+  const config = t(`quickStart.outputConfig.${taskId.value}`)
+  const fullText = config[level.value]
   displayedOutput.value = fullText
   outputs.value[level.value] = fullText
   isRunning.value = false
@@ -371,7 +325,7 @@ const run = () => {
 
 .quick-start-card {
   border-radius: 12px;
-  overflow: visible; /* Allow selects to overflow if needed, though el-select uses popper */
+  overflow: visible;
 }
 
 .header-content {
@@ -420,7 +374,7 @@ const run = () => {
   }
 }
 
-/* 左侧构建区 */
+/* Left builder area */
 .prompt-builder {
   display: flex;
   flex-direction: column;
@@ -471,7 +425,7 @@ const run = () => {
 }
 
 .block.pro {
-  background: rgba(100, 108, 255, 0.05); /* Indigo-ish */
+  background: rgba(100, 108, 255, 0.05);
   border: 1px solid rgba(100, 108, 255, 0.2);
   border-left: 3px solid #646cff;
 }
@@ -516,7 +470,7 @@ const run = () => {
   font-weight: 700;
 }
 
-/* 右侧预览区 */
+/* Right preview area */
 .chat-preview {
   display: flex;
   flex-direction: column;

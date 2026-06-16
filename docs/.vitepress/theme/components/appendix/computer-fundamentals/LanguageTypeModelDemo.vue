@@ -1,8 +1,8 @@
 <template>
   <div class="language-type-model-demo">
     <div class="demo-header">
-      <span class="title">编程语言的类型模型</span>
-      <span class="subtitle">不同语言的类型系统差异</span>
+      <span class="title">{{ t('typeSystems.languageModel.title') }}</span>
+      <span class="subtitle">{{ t('typeSystems.languageModel.subtitle') }}</span>
     </div>
 
     <div class="dimension-grid">
@@ -18,47 +18,30 @@
     </div>
 
     <div class="quadrant-matrix">
-      <div class="matrix-title">类型系统分类矩阵</div>
+      <div class="matrix-title">{{ t('typeSystems.languageModel.matrixTitle') }}</div>
       <div class="matrix-grid">
-        <div class="matrix-cell">
-          <div class="cell-title">静态 + 强</div>
-          <div class="cell-langs">Java, C++, Rust, Go</div>
-          <div class="cell-desc">编译期检查，类型安全</div>
-        </div>
-        <div class="matrix-cell">
-          <div class="cell-title">静态 + 弱</div>
-          <div class="cell-langs">C</div>
-          <div class="cell-desc">编译期检查，可随意转换</div>
-        </div>
-        <div class="matrix-cell">
-          <div class="cell-title">动态 + 强</div>
-          <div class="cell-langs">Python, Ruby</div>
-          <div class="cell-desc">运行时检查，类型安全</div>
-        </div>
-        <div class="matrix-cell">
-          <div class="cell-title">动态 + 弱</div>
-          <div class="cell-langs">JavaScript, PHP</div>
-          <div class="cell-desc">运行时检查，类型灵活</div>
+        <div v-for="cell in matrixCells" :key="cell.title" class="matrix-cell">
+          <div class="cell-title">{{ cell.title }}</div>
+          <div class="cell-langs">{{ cell.langs }}</div>
+          <div class="cell-desc">{{ cell.desc }}</div>
         </div>
       </div>
     </div>
 
     <div class="type-inference">
-      <div class="inference-title">类型推断</div>
+      <div class="inference-title">{{ t('typeSystems.languageModel.inferenceTitle') }}</div>
       <div class="inference-content">
         <div class="inference-desc">
-          现代语言可以自动推断变量类型，无需显式声明
+          {{ t('typeSystems.languageModel.inferenceDesc') }}
         </div>
         <div class="inference-examples">
-          <div class="example-lang">
-            <div class="lang-header">TypeScript</div>
-            <pre><code>let x = 5; // 推断为 number
-let name = "Alice"; // string</code></pre>
-          </div>
-          <div class="example-lang">
-            <div class="lang-header">Rust</div>
-            <pre><code>let x = 5; // 推断为 i32
-let name = "Alice"; // &str</code></pre>
+          <div
+            v-for="example in inferenceExamples"
+            :key="example.lang"
+            class="example-lang"
+          >
+            <div class="lang-header">{{ example.lang }}</div>
+            <pre><code>{{ example.code }}</code></pre>
           </div>
         </div>
       </div>
@@ -67,24 +50,16 @@ let name = "Alice"; // &str</code></pre>
 </template>
 
 <script setup>
-const dimensions = [
-  {
-    id: 'static',
-    title: '类型检查时机',
-    options: [
-      { name: '静态类型', langs: 'Java, C++, Rust, Go' },
-      { name: '动态类型', langs: 'Python, JavaScript, Ruby' }
-    ]
-  },
-  {
-    id: 'strength',
-    title: '类型强度',
-    options: [
-      { name: '强类型', langs: 'Python, Java, Rust' },
-      { name: '弱类型', langs: 'JavaScript, C, PHP' }
-    ]
-  }
-]
+import { computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n'
+import { computerFundamentalsLocale } from '../../../locales/computer-fundamentals'
+
+const { t, messages } = useI18n(computerFundamentalsLocale)
+const dimensions = computed(() => messages.value.typeSystems.languageModel.dimensions)
+const matrixCells = computed(() => messages.value.typeSystems.languageModel.matrixCells)
+const inferenceExamples = computed(
+  () => messages.value.typeSystems.languageModel.inferenceExamples
+)
 </script>
 
 <style scoped>

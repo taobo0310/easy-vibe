@@ -1,17 +1,17 @@
 <template>
   <div class="algorithm-demo">
     <div class="demo-header">
-      <span class="title">算法思维：解决问题的方法</span>
-      <span class="subtitle">不同策略解决不同类型的问题</span>
+      <span class="title">{{ t('algorithmThinking.algorithm.title') }}</span>
+      <span class="subtitle">{{ t('algorithmThinking.algorithm.subtitle') }}</span>
     </div>
 
     <div class="demo-content">
       <div class="algorithm-tabs">
         <button
           v-for="algo in algorithms"
-          :key="algo.name"
-          :class="['tab-btn', { active: activeAlgo === algo.name }]"
-          @click="activeAlgo = algo.name"
+          :key="algo.id"
+          :class="['tab-btn', { active: activeAlgo === algo.id }]"
+          @click="activeAlgo = algo.id"
         >
           {{ algo.name }}
         </button>
@@ -24,16 +24,18 @@
         </div>
 
         <div class="visual-content">
-          <div v-if="activeAlgo === '二分查找'" class="binary-search">
+          <div v-if="activeAlgo === 'binary'" class="binary-search">
             <div class="search-input">
-              <span>在有序数组中查找：</span>
+              <span>{{ t('algorithmThinking.algorithm.searchLabel') }}</span>
               <input
                 v-model.number="searchTarget"
                 type="number"
                 class="num-input"
-                placeholder="输入数字"
+                :placeholder="t('algorithmThinking.algorithm.numberPlaceholder')"
               />
-              <button class="search-btn" @click="runBinarySearch">查找</button>
+              <button class="search-btn" @click="runBinarySearch">
+                {{ t('algorithmThinking.algorithm.searchButton') }}
+              </button>
             </div>
             <div class="array-display">
               <div
@@ -56,10 +58,14 @@
             </div>
           </div>
 
-          <div v-else-if="activeAlgo === '排序'" class="sorting">
+          <div v-else-if="activeAlgo === 'sort'" class="sorting">
             <div class="sort-controls">
-              <button class="sort-btn" @click="resetArray">重置数组</button>
-              <button class="sort-btn" @click="runSort">开始排序</button>
+              <button class="sort-btn" @click="resetArray">
+                {{ t('algorithmThinking.algorithm.resetArray') }}
+              </button>
+              <button class="sort-btn" @click="runSort">
+                {{ t('algorithmThinking.algorithm.startSort') }}
+              </button>
             </div>
             <div class="array-display">
               <div
@@ -79,9 +85,9 @@
             </div>
           </div>
 
-          <div v-else-if="activeAlgo === '递归'" class="recursion">
+          <div v-else-if="activeAlgo === 'recursion'" class="recursion">
             <div class="recursion-input">
-              <span>计算斐波那契数列第</span>
+              <span>{{ t('algorithmThinking.algorithm.fibPrefix') }}</span>
               <input
                 v-model.number="fibN"
                 type="number"
@@ -89,14 +95,18 @@
                 max="15"
                 class="num-input"
               />
-              <span>项</span>
-              <button class="calc-btn" @click="calcFib">计算</button>
+              <span>{{ t('algorithmThinking.algorithm.fibSuffix') }}</span>
+              <button class="calc-btn" @click="calcFib">
+                {{ t('algorithmThinking.algorithm.calculate') }}
+              </button>
             </div>
             <div v-if="fibResult !== null" class="fib-result">
               <span class="result-value">F({{ fibN }}) = {{ fibResult }}</span>
             </div>
             <div v-if="fibSteps.length" class="recursion-tree">
-              <div class="tree-title">递归调用过程</div>
+              <div class="tree-title">
+                {{ t('algorithmThinking.algorithm.recursionTrace') }}
+              </div>
               <div class="tree-content">
                 <div
                   v-for="(step, i) in fibSteps.slice(0, 8)"
@@ -106,36 +116,42 @@
                   {{ step }}
                 </div>
                 <div v-if="fibSteps.length > 8" class="tree-more">
-                  ... 共 {{ fibSteps.length }} 次调用
+                  {{ t('algorithmThinking.algorithm.moreCalls', { count: fibSteps.length }) }}
                 </div>
               </div>
             </div>
           </div>
 
-          <div v-else-if="activeAlgo === '贪心'" class="greedy">
+          <div v-else-if="activeAlgo === 'greedy'" class="greedy">
             <div class="greedy-desc">
-              硬币找零问题：用最少的硬币凑出指定金额
+              {{ t('algorithmThinking.algorithm.coinChangeDesc') }}
             </div>
             <div class="greedy-input">
-              <span>目标金额：</span>
+              <span>{{ t('algorithmThinking.algorithm.targetAmount') }}</span>
               <input
                 v-model.number="coinTarget"
                 type="number"
                 min="1"
                 class="num-input"
               />
-              <button class="calc-btn" @click="calcCoins">计算</button>
+              <button class="calc-btn" @click="calcCoins">
+                {{ t('algorithmThinking.algorithm.calculate') }}
+              </button>
             </div>
             <div class="coins-available">
-              可用硬币：{{ coins.join(', ') }} 元
+              {{ t('algorithmThinking.algorithm.availableCoins', { coins: coins.join(', ') }) }}
             </div>
             <div v-if="coinResult.length" class="coin-result">
-              <div class="result-title">找零方案：</div>
+              <div class="result-title">
+                {{ t('algorithmThinking.algorithm.changePlan') }}
+              </div>
               <div class="coin-list">
-                <span v-for="(c, i) in coinResult" :key="i" class="coin">{{ c }}元</span>
+                <span v-for="(c, i) in coinResult" :key="i" class="coin">
+                  {{ t('algorithmThinking.algorithm.coinUnit', { value: c }) }}
+                </span>
               </div>
               <div class="result-summary">
-                共 {{ coinResult.length }} 枚硬币
+                {{ t('algorithmThinking.algorithm.coinCount', { count: coinResult.length }) }}
               </div>
             </div>
           </div>
@@ -143,7 +159,9 @@
       </div>
 
       <div class="complexity-info">
-        <div class="info-title">时间复杂度速查</div>
+        <div class="info-title">
+          {{ t('algorithmThinking.algorithm.complexityTitle') }}
+        </div>
         <div class="complexity-list">
           <div v-for="c in complexities" :key="c.name" class="complexity-item">
             <span class="c-name">{{ c.name }}</span>
@@ -155,25 +173,24 @@
     </div>
 
     <div class="info-box">
-      <strong>核心思想：</strong>算法是解决问题的方法。好的算法能让程序效率提升几个数量级。理解算法思维，比记住具体算法更重要。
+      <strong>{{ t('algorithmThinking.algorithm.coreIdeaLabel') }}</strong>{{ t('algorithmThinking.algorithm.coreIdea') }}
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref, computed, reactive } from 'vue'
+import { useI18n } from '../../../composables/useI18n'
+import { computerFundamentalsLocale } from '../../../locales/computer-fundamentals'
 
-const activeAlgo = ref('二分查找')
+const { t, messages } = useI18n(computerFundamentalsLocale)
 
-const algorithms = [
-  { name: '二分查找', desc: '每次排除一半，O(log n)' },
-  { name: '排序', desc: '将无序变有序' },
-  { name: '递归', desc: '自己调用自己' },
-  { name: '贪心', desc: '每步选最优' }
-]
+const activeAlgo = ref('binary')
+
+const algorithms = computed(() => messages.value.algorithmThinking.algorithm.tabs)
 
 const currentAlgo = computed(() => {
-  return algorithms.find((a) => a.name === activeAlgo.value)
+  return algorithms.value.find((a) => a.id === activeAlgo.value)
 })
 
 const sortedArray = ref([1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25])
@@ -197,38 +214,58 @@ const runBinarySearch = () => {
     searchRange.right = right
 
     searchSteps.value.push(
-      `查找范围 [${left}, ${right}]，中间位置 ${mid}，值 ${sortedArray.value[mid]}`
+      t('algorithmThinking.algorithm.searchStep.range', {
+        left,
+        right,
+        mid,
+        value: sortedArray.value[mid]
+      })
     )
 
     if (sortedArray.value[mid] === searchTarget.value) {
       foundIndex.value = mid
-      searchSteps.value.push(`找到目标 ${searchTarget.value} 在位置 ${mid}`)
+      searchSteps.value.push(
+        t('algorithmThinking.algorithm.searchStep.found', {
+          target: searchTarget.value,
+          mid
+        })
+      )
       return
     } else if (sortedArray.value[mid] < searchTarget.value) {
       left = mid + 1
       searchSteps.value.push(
-        `${sortedArray.value[mid]} < ${searchTarget.value}，在右半部分继续查找`
+        t('algorithmThinking.algorithm.searchStep.right', {
+          value: sortedArray.value[mid],
+          target: searchTarget.value
+        })
       )
     } else {
       right = mid - 1
       searchSteps.value.push(
-        `${sortedArray.value[mid]} > ${searchTarget.value}，在左半部分继续查找`
+        t('algorithmThinking.algorithm.searchStep.left', {
+          value: sortedArray.value[mid],
+          target: searchTarget.value
+        })
       )
     }
   }
-  searchSteps.value.push(`未找到目标 ${searchTarget.value}`)
+  searchSteps.value.push(
+    t('algorithmThinking.algorithm.searchStep.notFound', {
+      target: searchTarget.value
+    })
+  )
 }
 
 const sortArray = ref([64, 34, 25, 12, 22, 11, 90, 45])
 const comparingIndices = ref([])
 const sortedIndices = ref([])
-const sortStatus = ref('点击"开始排序"观察冒泡排序过程')
+const sortStatus = ref(t('algorithmThinking.algorithm.sortStatus.initial'))
 
 const resetArray = () => {
   sortArray.value = [64, 34, 25, 12, 22, 11, 90, 45]
   comparingIndices.value = []
   sortedIndices.value = []
-  sortStatus.value = '数组已重置'
+  sortStatus.value = t('algorithmThinking.algorithm.sortStatus.reset')
 }
 
 const runSort = async () => {
@@ -239,13 +276,19 @@ const runSort = async () => {
   for (let i = 0; i < n - 1; i++) {
     for (let j = 0; j < n - i - 1; j++) {
       comparingIndices.value = [j, j + 1]
-      sortStatus.value = `比较 ${arr[j]} 和 ${arr[j + 1]}`
+      sortStatus.value = t('algorithmThinking.algorithm.sortStatus.compare', {
+        a: arr[j],
+        b: arr[j + 1]
+      })
       await new Promise((r) => setTimeout(r, 300))
 
       if (arr[j] > arr[j + 1]) {
         ;[arr[j], arr[j + 1]] = [arr[j + 1], arr[j]]
         sortArray.value = [...arr]
-        sortStatus.value = `交换 ${arr[j + 1]} 和 ${arr[j]}`
+        sortStatus.value = t('algorithmThinking.algorithm.sortStatus.swap', {
+          a: arr[j + 1],
+          b: arr[j]
+        })
         await new Promise((r) => setTimeout(r, 200))
       }
     }
@@ -253,7 +296,7 @@ const runSort = async () => {
   }
   sortedIndices.value.push(0)
   comparingIndices.value = []
-  sortStatus.value = '排序完成！'
+  sortStatus.value = t('algorithmThinking.algorithm.sortStatus.done')
 }
 
 const fibN = ref(8)
@@ -285,19 +328,9 @@ const calcCoins = () => {
   }
 }
 
-const complexities = [
-  { name: 'O(1)', value: '常数', desc: '最优，如数组访问', class: 'good' },
-  { name: 'O(log n)', value: '对数', desc: '很好，如二分查找', class: 'good' },
-  { name: 'O(n)', value: '线性', desc: '一般，如遍历', class: 'mid' },
-  {
-    name: 'O(n log n)',
-    value: '线性对数',
-    desc: '可接受，如快速排序',
-    class: 'mid'
-  },
-  { name: 'O(n²)', value: '平方', desc: '较慢，如冒泡排序', class: 'bad' },
-  { name: 'O(2ⁿ)', value: '指数', desc: '很慢，如暴力递归', class: 'bad' }
-]
+const complexities = computed(
+  () => messages.value.algorithmThinking.algorithm.complexities
+)
 </script>
 
 <style scoped>

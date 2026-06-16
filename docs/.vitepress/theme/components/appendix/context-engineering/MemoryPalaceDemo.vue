@@ -9,42 +9,13 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { contextEngineeringLocale } from '../../../locales/context-engineering/index.js'
+
+const { t, messages } = useI18n(contextEngineeringLocale)
 
 const currentStep = ref(0)
-const steps = [
-  { 
-    id: 'base',
-    title: '第一层：地基 (System)',
-    desc: '系统设定、身份、原则',
-    detail: '✅ 永远不变，利用 KV Cache 实现 0 成本背诵',
-    color: 'var(--vp-c-brand)',
-    icon: '🏛️'
-  },
-  { 
-    id: 'task',
-    title: '第二层：支柱 (Task)',
-    desc: '当前任务目标、用户画像',
-    detail: '📌 任务期内“钉死”，保证方向不偏',
-    color: '#8e44ad',
-    icon: '📌'
-  },
-  { 
-    id: 'chat',
-    title: '第三层：客厅 (Chat)',
-    desc: '最近 5-10 轮对话',
-    detail: '🔄 滑动窗口，旧的自动腾出空间',
-    color: '#e67e22',
-    icon: '💬'
-  },
-  { 
-    id: 'rag',
-    title: '第四层：图书馆 (RAG)',
-    desc: '按需检索的知识',
-    detail: '📚 不占脑子，用时再查，无限扩展',
-    color: '#27ae60',
-    icon: '🔍'
-  }
-]
+const steps = computed(() => messages.value.memoryPalace.steps)
 
 const nextStep = () => {
   if (currentStep.value < 4) {
@@ -59,10 +30,8 @@ const isComplete = computed(() => currentStep.value === 4)
 
 <template>
   <div class="memory-palace-demo">
-    <!-- Visual Area -->
     <div class="palace-container">
       <div class="palace-stack">
-        <!-- Layer 4: RAG (Top/Side) -->
         <div 
           class="layer-block rag-layer" 
           :class="{ visible: currentStep >= 4 }"
@@ -86,7 +55,6 @@ const isComplete = computed(() => currentStep.value === 4)
           </div>
         </div>
 
-        <!-- Layer 3: Chat -->
         <div 
           class="layer-block chat-layer" 
           :class="{ visible: currentStep >= 3 }"
@@ -110,7 +78,6 @@ const isComplete = computed(() => currentStep.value === 4)
           </div>
         </div>
 
-        <!-- Layer 2: Task -->
         <div 
           class="layer-block task-layer" 
           :class="{ visible: currentStep >= 2 }"
@@ -134,7 +101,6 @@ const isComplete = computed(() => currentStep.value === 4)
           </div>
         </div>
 
-        <!-- Layer 1: Base -->
         <div 
           class="layer-block base-layer" 
           :class="{ visible: currentStep >= 1 }"
@@ -158,61 +124,37 @@ const isComplete = computed(() => currentStep.value === 4)
           </div>
         </div>
         
-        <!-- Empty State Placeholder -->
         <div
           v-if="currentStep === 0"
           class="empty-placeholder"
         >
-          🚧 空地：点击下方按钮开始建造记忆宫殿
+          {{ t('memoryPalace.empty') }}
         </div>
       </div>
     </div>
 
-    <!-- Control Area -->
     <div class="control-area">
       <div class="step-indicator">
-        当前进度: {{ currentStep }}/4
+        {{ t('memoryPalace.progress', { current: currentStep }) }}
       </div>
       <button
         class="build-btn"
         :class="{ 'reset-mode': isComplete }"
         @click="nextStep"
       >
-        {{ isComplete ? '🔄 重置重建' : (currentStep === 0 ? '🏗️ 开始建造' : '➕ 添加下一层') }}
+        {{ isComplete ? t('memoryPalace.reset') : (currentStep === 0 ? t('memoryPalace.start') : t('memoryPalace.next')) }}
       </button>
     </div>
 
-    <!-- Explanation Box -->
     <div
       v-if="currentStep > 0"
       class="explanation-box"
     >
       <div class="exp-title">
-        为什么这样设计？
+        {{ t('memoryPalace.why') }}
       </div>
-      <div
-        v-if="currentStep === 1"
-        class="exp-content"
-      >
-        **地基最稳**：把 System Prompt 放在最前面，利用 KV Cache 机制，让 AI "背下来"，后续请求**速度快且免费**。
-      </div>
-      <div
-        v-if="currentStep === 2"
-        class="exp-content"
-      >
-        **目标明确**：无论聊得多嗨，任务目标（如“写一个 Python 爬虫”）必须**钉死**，防止 AI 聊偏了。
-      </div>
-      <div
-        v-if="currentStep === 3"
-        class="exp-content"
-      >
-        **保持鲜活**：最近的对话最重要，用滑动窗口保留，**旧的自动忘掉**，给新信息腾地方。
-      </div>
-      <div
-        v-if="currentStep === 4"
-        class="exp-content"
-      >
-        **无限外脑**：遇到不懂的，不要瞎编，去“图书馆”查资料。**用完即走**，不占宝贵的脑容量。
+      <div class="exp-content">
+        {{ messages.memoryPalace.explanations[currentStep - 1] }}
       </div>
     </div>
   </div>
@@ -231,7 +173,7 @@ const isComplete = computed(() => currentStep.value === 4)
   padding: 2rem;
   min-height: 320px;
   display: flex;
-  align-items: flex-end; /* Stack from bottom */
+  align-items: flex-end;
   justify-content: center;
   background: linear-gradient(to top, var(--vp-c-bg-alt), var(--vp-c-bg));
 }
@@ -240,7 +182,7 @@ const isComplete = computed(() => currentStep.value === 4)
   width: 100%;
   max-width: 400px;
   display: flex;
-  flex-direction: column-reverse; /* Stack from bottom */
+  flex-direction: column-reverse;
   gap: 8px;
   position: relative;
 }
@@ -264,30 +206,29 @@ const isComplete = computed(() => currentStep.value === 4)
   transform: translateY(0) scale(1);
 }
 
-/* Layer Specific Styles */
 .base-layer {
   border-color: var(--vp-c-brand);
-  border-bottom-width: 6px; /* Heavy foundation */
+  border-bottom-width: 6px;
   background: var(--vp-c-brand-dimm);
 }
 
 .task-layer {
   border-color: #8e44ad;
   background: rgba(142, 68, 173, 0.1);
-  margin: 0 10px; /* Slightly narrower */
+  margin: 0 10px;
 }
 
 .chat-layer {
   border-color: #e67e22;
   background: rgba(230, 126, 34, 0.1);
-  margin: 0 20px; /* Narrower */
+  margin: 0 20px;
 }
 
 .rag-layer {
   border-color: #27ae60;
   border-style: dashed;
   background: rgba(39, 174, 96, 0.1);
-  margin: 0 30px; /* Narrowest */
+  margin: 0 30px;
 }
 
 .layer-content {

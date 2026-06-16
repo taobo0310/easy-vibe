@@ -1,7 +1,7 @@
 <template>
   <div class="static-vs-dynamic-demo">
-    <h4>🔍 静态类型 vs 动态类型：实时对比</h4>
-    <p class="desc">选择一段代码，观察两种类型系统的不同行为</p>
+    <h4>{{ t('typeSystems.staticDynamic.title') }}</h4>
+    <p class="desc">{{ t('typeSystems.staticDynamic.desc') }}</p>
 
     <div class="example-selector">
       <button
@@ -17,8 +17,8 @@
     <div class="comparison">
       <div class="panel static-panel">
         <div class="panel-header">
-          <span class="badge">静态类型（TypeScript）</span>
-          <span class="timing">⏱ 编译时检查</span>
+          <span class="badge">{{ t('typeSystems.staticDynamic.staticLabel') }}</span>
+          <span class="timing">{{ t('typeSystems.staticDynamic.staticTiming') }}</span>
         </div>
         <pre class="code-block">{{ examples[selected].staticCode }}</pre>
         <div :class="['result', examples[selected].staticOk ? 'ok' : 'err']">
@@ -30,8 +30,8 @@
 
       <div class="panel dynamic-panel">
         <div class="panel-header">
-          <span class="badge dynamic">动态类型（JavaScript）</span>
-          <span class="timing">⏱ 运行时检查</span>
+          <span class="badge dynamic">{{ t('typeSystems.staticDynamic.dynamicLabel') }}</span>
+          <span class="timing">{{ t('typeSystems.staticDynamic.dynamicTiming') }}</span>
         </div>
         <pre class="code-block">{{ examples[selected].dynamicCode }}</pre>
         <div :class="['result', examples[selected].dynamicOk ? 'ok' : 'err']">
@@ -47,53 +47,14 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n'
+import { computerFundamentalsLocale } from '../../../locales/computer-fundamentals'
 
+const { t, messages } = useI18n(computerFundamentalsLocale)
 const selected = ref(0)
 
-const examples = [
-  {
-    label: '变量赋值',
-    staticCode: `let name: string = "Alice"
-name = 42  // ❌ 编译错误`,
-    dynamicCode: `let name = "Alice"
-name = 42  // ✅ 没问题`,
-    staticResult: '❌ Type "number" is not assignable to type "string"',
-    dynamicResult: '✅ 运行正常，name 变成了 42',
-    staticOk: false,
-    dynamicOk: true,
-    insight: '静态类型在你写代码时就发现错误，动态类型要等到运行时才知道。'
-  },
-  {
-    label: '函数参数',
-    staticCode: `function add(a: number, b: number) {
-  return a + b
-}
-add("1", 2)  // ❌ 编译错误`,
-    dynamicCode: `function add(a, b) {
-  return a + b
-}
-add("1", 2)  // ✅ 返回 "12"`,
-    staticResult: '❌ Argument of type "string" is not assignable to parameter of type "number"',
-    dynamicResult: '✅ 返回 "12"（字符串拼接，不是数学加法！）',
-    staticOk: false,
-    dynamicOk: true,
-    insight: '动态类型的"灵活"有时是 bug 的温床——你期望 3，却得到 "12"。'
-  },
-  {
-    label: '属性访问',
-    staticCode: `interface User { name: string }
-let user: User = { name: "Bob" }
-console.log(user.age)  // ❌ 编译错误`,
-    dynamicCode: `let user = { name: "Bob" }
-console.log(user.age)  // ✅ 输出 undefined`,
-    staticResult: '❌ Property "age" does not exist on type "User"',
-    dynamicResult: '✅ 输出 undefined（不报错，但可能导致后续逻辑出错）',
-    staticOk: false,
-    dynamicOk: true,
-    insight: '静态类型能在编译时捕获拼写错误和属性缺失，动态类型只会默默返回 undefined。'
-  }
-]
+const examples = computed(() => messages.value.typeSystems.staticDynamic.examples)
 </script>
 
 <style scoped>

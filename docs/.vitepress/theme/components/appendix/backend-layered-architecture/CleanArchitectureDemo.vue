@@ -1,16 +1,16 @@
 <template>
   <div class="clean-arch-demo">
     <div class="header">
-      <div class="title">整洁架构与分层架构对比</div>
-      <div class="subtitle">分层架构是整洁架构的基础，理解两者关系有助于构建更灵活的系统</div>
+      <div class="title">{{ t('clean.title') }}</div>
+      <div class="subtitle">{{ t('clean.subtitle') }}</div>
     </div>
 
     <div class="tabs">
       <button
-        v-for="t in tabs" :key="t.id"
-        :class="['tab', { active: current === t.id }]"
-        @click="current = t.id"
-      >{{ t.name }}</button>
+        v-for="tab in tabs" :key="tab.id"
+        :class="['tab', { active: current === tab.id }]"
+        @click="current = tab.id"
+      >{{ tab.name }}</button>
     </div>
 
     <div v-if="current === 'layered'" class="panel">
@@ -20,12 +20,9 @@
         </div>
       </div>
       <div class="traits">
-        <strong>传统分层架构特点</strong>
+        <strong>{{ t('clean.layeredTitle') }}</strong>
         <ul>
-          <li>垂直依赖：上层直接依赖下层</li>
-          <li>简单直观：结构清晰，易于理解</li>
-          <li>适合中小型项目：快速开发，上手简单</li>
-          <li>潜在问题：底层变更可能影响上层</li>
+          <li v-for="item in layeredTraits" :key="item">{{ item }}</li>
         </ul>
       </div>
     </div>
@@ -36,21 +33,18 @@
           <strong>{{ l.name }}</strong> <span>{{ l.items }}</span>
         </div>
       </div>
-      <div class="dep-rule">依赖方向：外层 → 内层，内层不知道外层的存在</div>
+      <div class="dep-rule">{{ t('clean.depRule') }}</div>
       <div class="traits">
-        <strong>整洁架构特点</strong>
+        <strong>{{ t('clean.cleanTitle') }}</strong>
         <ul>
-          <li>依赖倒置：依赖方向从外到内，通过接口隔离</li>
-          <li>领域为核心：业务逻辑位于中心，独立于框架</li>
-          <li>可测试性强：核心业务可脱离框架单元测试</li>
-          <li>技术无关：可轻松切换数据库、框架等</li>
+          <li v-for="item in cleanTraits" :key="item">{{ item }}</li>
         </ul>
       </div>
     </div>
 
     <div v-else class="panel">
       <table>
-        <thead><tr><th>特性</th><th>传统分层</th><th>整洁架构</th></tr></thead>
+        <thead><tr><th v-for="header in headers" :key="header">{{ header }}</th></tr></thead>
         <tbody>
           <tr v-for="r in compareRows" :key="r.feature">
             <td>{{ r.feature }}</td><td>{{ r.layered }}</td><td>{{ r.clean }}</td>
@@ -59,19 +53,15 @@
       </table>
       <div class="rec-grid">
         <div class="rec-card">
-          <strong>选择传统分层当...</strong>
+          <strong>{{ t('clean.layeredChoice') }}</strong>
           <ul>
-            <li>项目规模较小，业务简单</li>
-            <li>团队对 DDD 不熟悉</li>
-            <li>需要快速上线验证市场</li>
+            <li v-for="item in layeredChoiceItems" :key="item">{{ item }}</li>
           </ul>
         </div>
         <div class="rec-card recommended">
-          <strong>选择整洁架构当...</strong>
+          <strong>{{ t('clean.cleanChoice') }}</strong>
           <ul>
-            <li>业务复杂，领域模型丰富</li>
-            <li>需要长期维护和演进</li>
-            <li>需要频繁切换技术栈</li>
+            <li v-for="item in cleanChoiceItems" :key="item">{{ item }}</li>
           </ul>
         </div>
       </div>
@@ -80,37 +70,21 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { backendLayeredArchitectureLocale } from '../../../locales/backend-layered-architecture/index.js'
 
+const { t, messages } = useI18n(backendLayeredArchitectureLocale)
 const current = ref('layered')
-const tabs = [
-  { id: 'layered', name: '传统分层' },
-  { id: 'clean', name: '整洁架构' },
-  { id: 'compare', name: '对比总结' }
-]
-
-const layeredLayers = [
-  { name: 'Controller 层', desc: '接收请求、参数校验', cls: 'green' },
-  { name: 'Service 层', desc: '业务逻辑、事务管理', cls: 'orange' },
-  { name: 'Repository 层', desc: '数据访问、ORM 映射', cls: 'blue' },
-  { name: 'Domain 层', desc: '实体定义、业务规则', cls: 'teal' }
-]
-
-const cleanLayers = [
-  { name: '领域层（核心）', items: 'Entity / ValueObject / DomainService', cls: 'teal' },
-  { name: '应用层', items: 'Service / UseCase / DTO', cls: 'orange' },
-  { name: '接口适配层', items: 'Controller / Gateway / Presenter', cls: 'blue' },
-  { name: '框架与驱动层', items: 'Web / DB / UI / 外部接口', cls: 'gray' }
-]
-
-const compareRows = [
-  { feature: '依赖方向', layered: '从上到下', clean: '从外到内' },
-  { feature: '核心业务位置', layered: 'Service 层', clean: 'Domain 层（中心）' },
-  { feature: '框架依赖', layered: '较深', clean: '较浅（接口隔离）' },
-  { feature: '可测试性', layered: '需要集成测试', clean: '核心可单元测试' },
-  { feature: '学习曲线', layered: '平缓', clean: '较陡' },
-  { feature: '适用场景', layered: '中小型、快速迭代', clean: '大型复杂、长期维护' }
-]
+const tabs = computed(() => messages.value.clean.tabs)
+const layeredLayers = computed(() => messages.value.clean.layeredLayers)
+const cleanLayers = computed(() => messages.value.clean.cleanLayers)
+const layeredTraits = computed(() => messages.value.clean.layeredTraits)
+const cleanTraits = computed(() => messages.value.clean.cleanTraits)
+const headers = computed(() => messages.value.clean.headers)
+const compareRows = computed(() => messages.value.clean.compareRows)
+const layeredChoiceItems = computed(() => messages.value.clean.layeredChoiceItems)
+const cleanChoiceItems = computed(() => messages.value.clean.cleanChoiceItems)
 </script>
 
 <style scoped>

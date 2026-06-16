@@ -1,8 +1,8 @@
 <template>
   <div class="half-adder-demo">
     <div class="demo-header">
-      <span class="title">半加器 (Half Adder) — 交互演示</span>
-      <span class="subtitle">点击输入 A / B，看看这一位加法的结果</span>
+      <span class="title">{{ t('halfAdder.title') }}</span>
+      <span class="subtitle">{{ t('halfAdder.subtitle') }}</span>
     </div>
 
     <!-- 主交互区 -->
@@ -24,8 +24,12 @@
           </span>
         </div>
         <div class="result-labels">
-          <span class="rl carry-label" :class="{ lit: carryOut }">▲ 进位：向左边那列借一个 1</span>
-          <span class="rl sum-label" :class="{ lit: sumOut }">▲ 本位：这一列写下的数字</span>
+          <span class="rl carry-label" :class="{ lit: carryOut }">
+            ▲ {{ t('halfAdder.carryLabel') }}
+          </span>
+          <span class="rl sum-label" :class="{ lit: sumOut }">
+            ▲ {{ t('halfAdder.sumLabel') }}
+          </span>
         </div>
 
         <div class="explain-box">
@@ -35,10 +39,12 @@
 
       <!-- 右：四种情况对照表，高亮当前行 -->
       <div class="right-panel">
-        <div class="table-title">所有可能的情况</div>
+        <div class="table-title">{{ t('halfAdder.allCases') }}</div>
         <div class="truth-table">
           <div class="tr header">
-            <span>A</span><span>B</span><span class="sum-col">写下（本位）</span><span class="carry-col">进位</span>
+            <span>A</span><span>B</span>
+            <span class="sum-col">{{ t('halfAdder.sumColumn') }}</span>
+            <span class="carry-col">{{ t('halfAdder.carryColumn') }}</span>
           </div>
           <div
             v-for="row in cases"
@@ -53,10 +59,10 @@
           </div>
         </div>
         <div class="pattern-note">
-          <p>仔细看这张表，你会发现两个规律：</p>
+          <p>{{ t('halfAdder.patternIntro') }}</p>
           <ul>
-            <li>「写下」列：只有 A 和 B <strong>不一样</strong>时才是 1 → 这个规律叫 <code>XOR（异或）</code></li>
-            <li>「进位」列：只有 A 和 B <strong>都是 1</strong> 时才是 1 → 这个规律叫 <code>AND（与）</code></li>
+            <li>{{ t('halfAdder.patternSum') }}</li>
+            <li>{{ t('halfAdder.patternCarry') }}</li>
           </ul>
         </div>
       </div>
@@ -64,7 +70,7 @@
 
     <!-- 电路连接图 -->
     <div class="circuit-section">
-      <div class="circuit-label">电路是这样连的：</div>
+      <div class="circuit-label">{{ t('halfAdder.circuitLabel') }}</div>
       <div class="circuit-row">
         <div class="wire-inputs">
           <div class="wire-bit a-bit" :class="{ on: inputA }">A = {{ inputA ? '1' : '0' }}</div>
@@ -87,14 +93,20 @@
         </svg>
         <div class="gates-col">
           <div class="gate-chip xor" :class="{ active: sumOut }">
-            <div class="chip-name">XOR 异或门</div>
-            <div class="chip-rule">不同 → 1</div>
-            <div class="chip-out">输出: <strong>{{ sumOut ? '1' : '0' }}</strong></div>
+            <div class="chip-name">{{ t('halfAdder.xorGate') }}</div>
+            <div class="chip-rule">{{ t('halfAdder.xorRule') }}</div>
+            <div class="chip-out">
+              {{ t('halfAdder.output') }}
+              <strong>{{ sumOut ? '1' : '0' }}</strong>
+            </div>
           </div>
           <div class="gate-chip and" :class="{ active: carryOut }">
-            <div class="chip-name">AND 与门</div>
-            <div class="chip-rule">全1 → 1</div>
-            <div class="chip-out">输出: <strong>{{ carryOut ? '1' : '0' }}</strong></div>
+            <div class="chip-name">{{ t('halfAdder.andGate') }}</div>
+            <div class="chip-rule">{{ t('halfAdder.andRule') }}</div>
+            <div class="chip-out">
+              {{ t('halfAdder.output') }}
+              <strong>{{ carryOut ? '1' : '0' }}</strong>
+            </div>
           </div>
         </div>
         <svg class="out-svg" viewBox="0 0 40 80" preserveAspectRatio="none">
@@ -103,10 +115,10 @@
         </svg>
         <div class="output-col">
           <div class="out-chip sum" :class="{ active: sumOut }">
-            本位 (Sum)<br><strong>{{ sumOut ? '1' : '0' }}</strong>
+            {{ t('halfAdder.sumOut') }}<br /><strong>{{ sumOut ? '1' : '0' }}</strong>
           </div>
           <div class="out-chip carry" :class="{ active: carryOut }">
-            进位 (Carry)<br><strong>{{ carryOut ? '1' : '0' }}</strong>
+            {{ t('halfAdder.carryOut') }}<br /><strong>{{ carryOut ? '1' : '0' }}</strong>
           </div>
         </div>
       </div>
@@ -116,6 +128,10 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { computerFundamentalsLocale } from '../../../locales/computer-fundamentals/index.js'
+
+const { t, messages } = useI18n(computerFundamentalsLocale)
 
 const inputA = ref(false)
 const inputB = ref(false)
@@ -133,10 +149,7 @@ const cases = [
 const explainText = computed(() => {
   const a = +inputA.value
   const b = +inputB.value
-  if (a === 0 && b === 0) return '0 + 0 = 0。这一列写下 0，不需要进位。'
-  if (a === 0 && b === 1) return '0 + 1 = 1。这一列写下 1，不需要进位。'
-  if (a === 1 && b === 0) return '1 + 0 = 1。这一列写下 1，不需要进位。'
-  return '1 + 1 = 2。但二进制这一列最多写 1，所以写下 0，并且向左边那列"进一个 1"（进位）。就像十进制的 9+1=10，个位写 0、十位进 1。'
+  return messages.value.halfAdder.explanations[`${a}${b}`]
 })
 </script>
 

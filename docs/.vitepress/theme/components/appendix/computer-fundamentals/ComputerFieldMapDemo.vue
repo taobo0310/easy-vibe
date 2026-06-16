@@ -1,8 +1,8 @@
 <template>
   <div class="field-map-demo">
     <div class="demo-header">
-      <span class="title">计算机领域全景图</span>
-      <span class="subtitle">点击查看详情</span>
+      <span class="title">{{ t('computerOrganization.vibeCodingFullstack.fieldMap.title') }}</span>
+      <span class="subtitle">{{ t('computerOrganization.vibeCodingFullstack.fieldMap.subtitle') }}</span>
     </div>
 
     <div class="field-grid">
@@ -20,44 +20,18 @@
     </div>
 
     <div class="info-box">
-      <strong>建议：</strong>不要试图一次学完所有方向。先选一个方向深入，建立"根据地"，再横向扩展。
+      <strong>{{ t('computerOrganization.vibeCodingFullstack.fieldMap.adviceLabel') }}</strong>{{ t('computerOrganization.vibeCodingFullstack.fieldMap.advice') }}
     </div>
   </div>
 </template>
 
 <script setup>
-const fields = [
-  {
-    name: '前端',
-    desc: '用户能看到、能交互的一切',
-    techs: ['HTML/CSS', 'JavaScript', 'React/Vue']
-  },
-  {
-    name: '后端',
-    desc: '服务器端的业务逻辑和数据处理',
-    techs: ['Node.js', 'Go', 'Java', 'Python']
-  },
-  {
-    name: '移动端',
-    desc: '手机上的应用体验',
-    techs: ['Swift', 'Kotlin', 'Flutter']
-  },
-  {
-    name: 'AI/算法',
-    desc: '让系统变"聪明"',
-    techs: ['PyTorch', 'TensorFlow', '机器学习']
-  },
-  {
-    name: '运维/DevOps',
-    desc: '保证系统稳定运行',
-    techs: ['Docker', 'K8s', 'CI/CD']
-  },
-  {
-    name: '数据工程',
-    desc: '数据采集、存储、分析',
-    techs: ['SQL', 'Spark', '数据仓库']
-  }
-]
+import { computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { computerFundamentalsLocale } from '../../../locales/computer-fundamentals/index.js'
+
+const { t, messages } = useI18n(computerFundamentalsLocale)
+const fields = computed(() => messages.value.computerOrganization.vibeCodingFullstack.fieldMap.fields)
 </script>
 
 <style scoped>

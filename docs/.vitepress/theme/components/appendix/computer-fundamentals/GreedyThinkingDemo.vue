@@ -1,21 +1,23 @@
 <template>
   <div class="greedy-thinking-demo">
     <div class="demo-header">
-      <span class="title">贪心算法：每步都选当前最优</span>
-      <span class="subtitle">局部最优 → 全局最优?</span>
+      <span class="title">{{ t('algorithmThinking.greedy.title') }}</span>
+      <span class="subtitle">{{ t('algorithmThinking.greedy.subtitle') }}</span>
     </div>
 
     <div class="core-idea">
       <div class="idea-box">
         <div class="idea-text">
-          贪心算法在每一步选择中都采取当前状态下<strong>最优</strong>的选择<br />
-          希望通过一系列局部最优选择达到<strong>全局最优</strong>
+          {{ t('algorithmThinking.greedy.ideaLine1Prefix') }}<strong>{{ t('algorithmThinking.greedy.localBest') }}</strong>{{ t('algorithmThinking.greedy.ideaLine1Suffix') }}<br />
+          {{ t('algorithmThinking.greedy.ideaLine2Prefix') }}<strong>{{ t('algorithmThinking.greedy.globalBest') }}</strong>
         </div>
       </div>
     </div>
 
     <div class="scenario-selector">
-      <div class="selector-title">经典问题</div>
+      <div class="selector-title">
+        {{ t('algorithmThinking.greedy.scenarioTitle') }}
+      </div>
       <div class="scenario-buttons">
         <button
           v-for="scenario in scenarios"
@@ -28,12 +30,11 @@
       </div>
     </div>
 
-    <!-- 找零钱问题 -->
     <div v-if="activeScenario === 'change'" class="scenario-content">
-      <div class="content-title">找零钱问题</div>
+      <div class="content-title">{{ t('algorithmThinking.greedy.changeTitle') }}</div>
       <div class="change-demo">
         <div class="change-amount">
-          需要找零：<span class="amount">{{ changeAmount }}</span> 元
+          {{ t('algorithmThinking.greedy.changeAmount', { amount: changeAmount }) }}
         </div>
         <div class="change-process">
           <div
@@ -42,22 +43,23 @@
             class="process-step"
           >
             <div class="step-coin">{{ step.coin }}</div>
-            <div class="step-text">× {{ step.count }} = {{ step.value }}元</div>
+            <div class="step-text">
+              {{ t('algorithmThinking.greedy.changeStep', { count: step.count, value: step.value }) }}
+            </div>
           </div>
         </div>
         <div class="change-result">
-          共需要 <strong>{{ totalCoins }}</strong> 个硬币
+          {{ t('algorithmThinking.greedy.totalCoinsPrefix') }} <strong>{{ totalCoins }}</strong> {{ t('algorithmThinking.greedy.totalCoinsSuffix') }}
         </div>
       </div>
       <div class="scenario-note">
-        ✓ 贪心策略：每次选择面值最大的硬币<br />
-        ✓ 适用于人民币、美元等货币系统
+        {{ t('algorithmThinking.greedy.changeNote1') }}<br />
+        {{ t('algorithmThinking.greedy.changeNote2') }}
       </div>
     </div>
 
-    <!-- 活动选择问题 -->
     <div v-if="activeScenario === 'activity'" class="scenario-content">
-      <div class="content-title">活动选择问题</div>
+      <div class="content-title">{{ t('algorithmThinking.greedy.activityTitle') }}</div>
       <div class="activity-demo">
         <div class="activities-list">
           <div
@@ -75,25 +77,24 @@
           </div>
         </div>
         <div class="activity-rule">
-          贪心策略：<strong>选择最早结束</strong>的活动
+          {{ t('algorithmThinking.greedy.activityRulePrefix') }}<strong>{{ t('algorithmThinking.greedy.activityRuleStrong') }}</strong>{{ t('algorithmThinking.greedy.activityRuleSuffix') }}
         </div>
         <div class="activity-result">
-          最多可以参加 <strong>{{ selectedCount }}</strong> 个活动
+          {{ t('algorithmThinking.greedy.selectedPrefix') }} <strong>{{ selectedCount }}</strong> {{ t('algorithmThinking.greedy.selectedSuffix') }}
         </div>
       </div>
     </div>
 
-    <!-- 最短路径 -->
     <div v-if="activeScenario === 'shortest'" class="scenario-content">
-      <div class="content-title">最短路径问题 (Dijkstra)</div>
+      <div class="content-title">{{ t('algorithmThinking.greedy.shortestTitle') }}</div>
       <div class="shortest-demo">
         <div class="path-graph">
           <div class="graph-nodes">
-            <div class="node start">A(起点)</div>
+            <div class="node start">{{ t('algorithmThinking.greedy.startNode') }}</div>
             <div class="node">B</div>
             <div class="node">C</div>
             <div class="node">D</div>
-            <div class="node end">E(终点)</div>
+            <div class="node end">{{ t('algorithmThinking.greedy.endNode') }}</div>
           </div>
           <div class="graph-edges">
             <div class="edge">A-B: 4</div>
@@ -105,67 +106,48 @@
           </div>
         </div>
         <div class="path-result">
-          <div class="result-step">从 A 出发，选择距离最近的节点</div>
+          <div class="result-step">{{ t('algorithmThinking.greedy.pathStep') }}</div>
           <div class="result-path">A → C → D → E</div>
-          <div class="result-distance">总距离：2 + 1 + 2 = 5</div>
+          <div class="result-distance">{{ t('algorithmThinking.greedy.pathDistance') }}</div>
         </div>
       </div>
     </div>
 
-    <!-- 贪心 vs 动态规划 -->
     <div class="comparison">
-      <div class="comparison-title">贪心 vs 动态规划</div>
+      <div class="comparison-title">
+        {{ t('algorithmThinking.greedy.comparisonTitle') }}
+      </div>
       <div class="comparison-table">
         <table>
           <thead>
             <tr>
-              <th>特点</th>
-              <th>贪心算法</th>
-              <th>动态规划</th>
+              <th>{{ t('algorithmThinking.greedy.feature') }}</th>
+              <th>{{ t('algorithmThinking.greedy.greedyAlgorithm') }}</th>
+              <th>{{ t('algorithmThinking.greedy.dynamicProgramming') }}</th>
             </tr>
           </thead>
           <tbody>
-            <tr>
-              <td>决策方式</td>
-              <td>每步选当前最优</td>
-              <td>考虑所有可能，选最优</td>
-            </tr>
-            <tr>
-              <td>最优性</td>
-              <td>可能不是全局最优</td>
-              <td>保证全局最优</td>
-            </tr>
-            <tr>
-              <td>时间复杂度</td>
-              <td>O(n) 或 O(n log n)</td>
-              <td>O(n²) 或更高</td>
-            </tr>
-            <tr>
-              <td>适用场景</td>
-              <td>局部最优 → 全局最优</td>
-              <td>重叠子问题</td>
+            <tr v-for="row in comparisonRows" :key="row.feature">
+              <td>{{ row.feature }}</td>
+              <td>{{ row.greedy }}</td>
+              <td>{{ row.dp }}</td>
             </tr>
           </tbody>
         </table>
       </div>
     </div>
 
-    <!-- 优缺点 -->
     <div class="pros-cons">
       <div class="pros-column">
-        <div class="column-title">✓ 优点</div>
+        <div class="column-title">{{ t('algorithmThinking.greedy.prosTitle') }}</div>
         <ul>
-          <li>实现简单</li>
-          <li>效率高</li>
-          <li>空间复杂度低</li>
+          <li v-for="item in pros" :key="item">{{ item }}</li>
         </ul>
       </div>
       <div class="cons-column">
-        <div class="column-title">✗ 缺点</div>
+        <div class="column-title">{{ t('algorithmThinking.greedy.consTitle') }}</div>
         <ul>
-          <li>不保证全局最优</li>
-          <li>适用范围有限</li>
-          <li>需要证明最优性</li>
+          <li v-for="item in cons" :key="item">{{ item }}</li>
         </ul>
       </div>
     </div>
@@ -174,69 +156,37 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n'
+import { computerFundamentalsLocale } from '../../../locales/computer-fundamentals'
+
+const { t, messages } = useI18n(computerFundamentalsLocale)
 
 const activeScenario = ref('change')
 
-const scenarios = [
-  { id: 'change', name: '找零钱', icon: '💰' },
-  { id: 'activity', name: '活动选择', icon: '📅' },
-  { id: 'shortest', name: '最短路径', icon: '🗺️' }
-]
+const scenarios = computed(() => messages.value.algorithmThinking.greedy.scenarios)
 
 const changeAmount = ref(37)
 
-const changeSteps = [
-  { coin: '20元', count: 1, value: 20 },
-  { coin: '10元', count: 1, value: 10 },
-  { coin: '5元', count: 1, value: 5 },
-  { coin: '1元', count: 2, value: 2 }
-]
+const changeSteps = computed(
+  () => messages.value.algorithmThinking.greedy.changeSteps
+)
 
 const totalCoins = computed(() =>
-  changeSteps.reduce((sum, step) => sum + step.count, 0)
+  changeSteps.value.reduce((sum, step) => sum + step.count, 0)
 )
 
-const activities = [
-  {
-    start: '9:00',
-    end: '10:00',
-    name: '活动1',
-    selected: true,
-    conflicting: false
-  },
-  {
-    start: '9:30',
-    end: '11:30',
-    name: '活动2',
-    selected: false,
-    conflicting: true
-  },
-  {
-    start: '10:00',
-    end: '11:00',
-    name: '活动3',
-    selected: true,
-    conflicting: false
-  },
-  {
-    start: '10:30',
-    end: '12:00',
-    name: '活动4',
-    selected: false,
-    conflicting: true
-  },
-  {
-    start: '11:00',
-    end: '12:00',
-    name: '活动5',
-    selected: true,
-    conflicting: false
-  }
-]
+const activities = computed(
+  () => messages.value.algorithmThinking.greedy.activities
+)
 
 const selectedCount = computed(
-  () => activities.filter((a) => a.selected).length
+  () => activities.value.filter((a) => a.selected).length
 )
+const comparisonRows = computed(
+  () => messages.value.algorithmThinking.greedy.comparisonRows
+)
+const pros = computed(() => messages.value.algorithmThinking.greedy.pros)
+const cons = computed(() => messages.value.algorithmThinking.greedy.cons)
 </script>
 
 <style scoped>

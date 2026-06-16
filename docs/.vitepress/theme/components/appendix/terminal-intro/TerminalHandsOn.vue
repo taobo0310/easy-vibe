@@ -4,7 +4,7 @@
       <!-- Left Panel: Task Guide -->
       <div class="task-panel">
         <div class="panel-header">
-          <span class="panel-title">🎯 实操任务 ({{ currentTaskIndex + 1 }}/{{ tasks.length }})</span>
+          <span class="panel-title">🎯 {{ t('terminalHandsOn.taskTitle') }} ({{ currentTaskIndex + 1 }}/{{ tasks.length }})</span>
           <div class="os-selector">
             <select
               v-model="currentOS"
@@ -35,7 +35,7 @@
           <div class="ai-helper">
             <div class="ai-header">
               <span class="ai-icon">🤖</span>
-              <span class="ai-title">不知道怎么写？问问 AI</span>
+              <span class="ai-title">{{ t('terminalHandsOn.aiTitle') }}</span>
             </div>
             <div
               v-show="isAiOpen"
@@ -62,7 +62,7 @@
                     class="copy-btn"
                     @click="copyCommand(cmdItem.cmd)"
                   >
-                    {{ cmdItem.label || '复制命令' }}
+                    {{ cmdItem.label || t('terminalHandsOn.copyCmd') }}
                   </button>
                 </div>
                 <!-- Fallback for Single Command -->
@@ -71,7 +71,7 @@
                   class="copy-btn"
                   @click="copyCurrentTaskCommand"
                 >
-                  复制命令
+                  {{ t('terminalHandsOn.copyCmd') }}
                 </button>
               </div>
             </div>
@@ -81,7 +81,7 @@
             v-if="!isTaskCompleted"
             class="expected-result"
           >
-            <span class="label">预期目标：</span>
+            <span class="label">{{ t('terminalHandsOn.expectedGoal') }}</span>
             <span class="value">{{ currentTask.goal }}</span>
           </div>
 
@@ -90,20 +90,20 @@
             class="success-message"
           >
             <span class="icon">🎉</span>
-            <span>太棒了！任务完成！</span>
+            <span>{{ t('terminalHandsOn.taskComplete') }}</span>
             <button
               v-if="currentTaskIndex < tasks.length - 1"
               class="next-btn"
               @click="nextTask"
             >
-              下一关
+              {{ t('terminalHandsOn.nextLevel') }}
             </button>
             <button
               v-else
               class="reset-btn"
               @click="resetAll"
             >
-              重新开始
+              {{ t('terminalHandsOn.restart') }}
             </button>
           </div>
         </div>
@@ -160,7 +160,7 @@
             <span
               v-if="inputCmd.length > 0"
               class="enter-hint"
-            >⏎ 按回车执行</span>
+            >⏎ {{ t('terminalHandsOn.enterHint') }}</span>
           </div>
         </div>
       </div>
@@ -170,6 +170,10 @@
 
 <script setup>
 import { ref, computed, nextTick, watch } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { terminalIntroLocale } from '../../../locales/terminal-intro/index.js'
+
+const { t } = useI18n(terminalIntroLocale)
 
 const currentOS = ref('win-cmd')
 const currentTaskIndex = ref(0)
@@ -191,18 +195,18 @@ const prompt = computed(() => osConfig[currentOS.value].prompt)
 const terminalTitle = computed(() => osConfig[currentOS.value].title)
 
 // Tasks Definition
-const tasks = [
+const tasks = computed(() => [
   {
-    title: '第一步：看看这里有什么',
-    description: '在对文件进行操作之前，我们首先需要知道当前目录下有哪些文件。',
-    goal: '列出当前目录下的所有文件。',
-    aiQuery: '我想查看当前目录下的文件，应该用什么命令？',
+    title: t('terminalHandsOn.t1Title'),
+    description: t('terminalHandsOn.t1Desc'),
+    goal: t('terminalHandsOn.t1Goal'),
+    aiQuery: t('terminalHandsOn.t1Query'),
     aiResponse: {
-      mac: '在 macOS 和 Linux 中，查看文件列表使用 `ls` 命令 (List)。',
-      linux: '在 macOS 和 Linux 中，查看文件列表使用 `ls` 命令 (List)。',
-      'win-ps': '在 PowerShell 中，你可以使用 `ls` 或 `dir` 命令。',
-      'win-cmd': '在 Windows CMD 中，查看文件列表使用 `dir` 命令 (Directory)。',
-      common: '通常使用 ls 或 dir。'
+      mac: t('terminalHandsOn.t1AiMac'),
+      linux: t('terminalHandsOn.t1AiLinux'),
+      'win-ps': t('terminalHandsOn.t1AiPs'),
+      'win-cmd': t('terminalHandsOn.t1AiCmd'),
+      common: t('terminalHandsOn.t1AiCommon')
     },
     expectedCmd: {
       mac: 'ls',
@@ -229,14 +233,12 @@ d----           1/15/2026  9:00 AM                Downloads
     }
   },
   {
-    title: '第二步：创建一个新家',
-    description:
-      '文件太多会很乱，我们创建一个专门的文件夹来存放今天的练习文件。',
-    goal: '创建一个名为 "demo" 的文件夹。',
-    aiQuery: '怎么创建一个新的文件夹？名字叫 demo。',
+    title: t('terminalHandsOn.t2Title'),
+    description: t('terminalHandsOn.t2Desc'),
+    goal: t('terminalHandsOn.t2Goal'),
+    aiQuery: t('terminalHandsOn.t2Query'),
     aiResponse: {
-      common:
-        '创建文件夹（目录）的命令是 `mkdir` (Make Directory)。你可以输入 `mkdir demo`。'
+      common: t('terminalHandsOn.t2Ai')
     },
     expectedCmd: {
       common: 'mkdir demo'
@@ -245,12 +247,12 @@ d----           1/15/2026  9:00 AM                Downloads
     output: () => '' // mkdir usually has no output on success
   },
   {
-    title: '第三步：进入新家',
-    description: '文件夹建好了，但我们现在还在外面。我们需要“走”进去。',
-    goal: '进入 "demo" 文件夹。',
-    aiQuery: '怎么进入刚才建好的 demo 文件夹？',
+    title: t('terminalHandsOn.t3Title'),
+    description: t('terminalHandsOn.t3Desc'),
+    goal: t('terminalHandsOn.t3Goal'),
+    aiQuery: t('terminalHandsOn.t3Query'),
     aiResponse: {
-      common: '切换目录使用 `cd` 命令 (Change Directory)。输入 `cd demo` 即可。'
+      common: t('terminalHandsOn.t3Ai')
     },
     expectedCmd: {
       common: 'cd demo'
@@ -259,17 +261,15 @@ d----           1/15/2026  9:00 AM                Downloads
     output: () => '' // cd usually has no output, but prompt changes
   },
   {
-    title: '第四步：新建一个文件',
-    description: '现在我们在 demo 文件夹里了。来创建一个简单的文本文件吧。',
-    goal: '创建一个名为 "hello.txt" 的文件。',
-    aiQuery: '我想新建一个空文件叫 hello.txt，怎么做？',
+    title: t('terminalHandsOn.t4Title'),
+    description: t('terminalHandsOn.t4Desc'),
+    goal: t('terminalHandsOn.t4Goal'),
+    aiQuery: t('terminalHandsOn.t4Query'),
     aiResponse: {
-      mac: '在 Mac/Linux 上，使用 `touch hello.txt` 可以快速创建一个空文件。',
-      linux: '在 Mac/Linux 上，使用 `touch hello.txt` 可以快速创建一个空文件。',
-      'win-ps':
-        '在 PowerShell 中，可以使用 `ni hello.txt` 或 `echo "" > hello.txt`。',
-      'win-cmd':
-        '在 CMD 中，可以使用 `type nul > hello.txt` 或 `echo. > hello.txt`。'
+      mac: t('terminalHandsOn.t4AiMac'),
+      linux: t('terminalHandsOn.t4AiLinux'),
+      'win-ps': t('terminalHandsOn.t4AiPs'),
+      'win-cmd': t('terminalHandsOn.t4AiCmd')
     },
     expectedCmd: {
       mac: 'touch hello.txt',
@@ -291,37 +291,33 @@ d----           1/15/2026  9:00 AM                Downloads
     output: () => ''
   },
   {
-    title: '第五步：安装程序 (系统软件 & Python库)',
-    description:
-      '终端不仅能管理文件，还能安装软件。我们来尝试两种常见的安装场景：安装系统工具（如 wget/git）和安装 Python 库（如 requests）。',
-    goal: '任选其一：安装系统工具或 Python 库。',
-    aiQuery: '怎么用命令行安装软件？我想装 git 或者 python 的 requests 库。',
+    title: t('terminalHandsOn.t5Title'),
+    description: t('terminalHandsOn.t5Desc'),
+    goal: t('terminalHandsOn.t5Goal'),
+    aiQuery: t('terminalHandsOn.t5Query'),
     aiResponse: {
-      mac: 'macOS 推荐使用 Homebrew 安装系统软件，使用 pip 安装 Python 库。',
-      linux:
-        'Linux (Ubuntu/Debian) 使用 apt 安装系统软件，使用 pip 安装 Python 库。',
-      'win-ps':
-        'Windows PowerShell 推荐使用 winget 安装系统软件，使用 pip 安装 Python 库。',
-      'win-cmd':
-        'Windows CMD 推荐使用 winget 安装系统软件，使用 pip 安装 Python 库。',
-      common: '不同系统有不同的包管理器。'
+      mac: t('terminalHandsOn.t5AiMac'),
+      linux: t('terminalHandsOn.t5AiLinux'),
+      'win-ps': t('terminalHandsOn.t5AiPs'),
+      'win-cmd': t('terminalHandsOn.t5AiCmd'),
+      common: t('terminalHandsOn.t5AiCommon')
     },
     commands: {
       mac: [
-        { label: '安装 wget (系统)', cmd: 'brew install wget' },
-        { label: '安装 requests (Python)', cmd: 'pip install requests' }
+        { label: t('terminalHandsOn.t5InstallWget'), cmd: 'brew install wget' },
+        { label: t('terminalHandsOn.t5InstallRequests'), cmd: 'pip install requests' }
       ],
       linux: [
-        { label: '安装 git (系统)', cmd: 'sudo apt install git' },
-        { label: '安装 requests (Python)', cmd: 'pip install requests' }
+        { label: t('terminalHandsOn.t5InstallGit'), cmd: 'sudo apt install git' },
+        { label: t('terminalHandsOn.t5InstallRequests'), cmd: 'pip install requests' }
       ],
       'win-ps': [
-        { label: '安装 git (系统)', cmd: 'winget install git.git' },
-        { label: '安装 requests (Python)', cmd: 'pip install requests' }
+        { label: t('terminalHandsOn.t5InstallGit'), cmd: 'winget install git.git' },
+        { label: t('terminalHandsOn.t5InstallRequests'), cmd: 'pip install requests' }
       ],
       'win-cmd': [
-        { label: '安装 git (系统)', cmd: 'winget install git.git' },
-        { label: '安装 requests (Python)', cmd: 'pip install requests' }
+        { label: t('terminalHandsOn.t5InstallGit'), cmd: 'winget install git.git' },
+        { label: t('terminalHandsOn.t5InstallRequests'), cmd: 'pip install requests' }
       ]
     },
     expectedCmd: {
@@ -399,16 +395,15 @@ Setting up git (1:2.34.1-1ubuntu1.9) ...`
     }
   },
   {
-    title: '第六步：打扫战场',
-    description: '练习结束了，我们把刚才创建的文件删除掉，保持环境整洁。',
-    goal: '删除 "hello.txt" 文件。',
-    aiQuery: '我不想要 hello.txt 了，怎么删除它？',
+    title: t('terminalHandsOn.t6Title'),
+    description: t('terminalHandsOn.t6Desc'),
+    goal: t('terminalHandsOn.t6Goal'),
+    aiQuery: t('terminalHandsOn.t6Query'),
     aiResponse: {
-      mac: '删除文件使用 `rm` 命令 (Remove)。小心，这个操作通常不可撤销！输入 `rm hello.txt`。',
-      linux:
-        '删除文件使用 `rm` 命令 (Remove)。小心，这个操作通常不可撤销！输入 `rm hello.txt`。',
-      'win-ps': '在 PowerShell 中使用 `rm` 或 `del`。输入 `rm hello.txt`。',
-      'win-cmd': '在 CMD 中使用 `del` 命令 (Delete)。输入 `del hello.txt`。'
+      mac: t('terminalHandsOn.t6AiMac'),
+      linux: t('terminalHandsOn.t6AiLinux'),
+      'win-ps': t('terminalHandsOn.t6AiPs'),
+      'win-cmd': t('terminalHandsOn.t6AiCmd')
     },
     expectedCmd: {
       mac: 'rm hello.txt',
@@ -422,9 +417,9 @@ Setting up git (1:2.34.1-1ubuntu1.9) ...`
     },
     output: () => ''
   }
-]
+])
 
-const currentTask = computed(() => tasks[currentTaskIndex.value])
+const currentTask = computed(() => tasks.value[currentTaskIndex.value])
 const isTaskCompleted = ref(false)
 
 const toggleAi = () => {
@@ -499,7 +494,7 @@ const executeCommand = () => {
         // Initial state
         history.value.push({
           type: 'output',
-          content: tasks[0].output(currentOS.value)
+          content: tasks.value[0].output(currentOS.value)
         })
       } else if (currentTaskIndex.value >= 2) {
         // Inside demo
@@ -516,7 +511,7 @@ const executeCommand = () => {
       })
       history.value.push({
         type: 'info',
-        content: `💡 提示：试试点击左侧的“问问 AI”？`
+        content: `💡 ${t('terminalHandsOn.hintTryAi')}`
       })
     }
   }
@@ -525,13 +520,13 @@ const executeCommand = () => {
 }
 
 const nextTask = () => {
-  if (currentTaskIndex.value < tasks.length - 1) {
+  if (currentTaskIndex.value < tasks.value.length - 1) {
     currentTaskIndex.value++
     isTaskCompleted.value = false
     // Clear history to keep it clean? Or keep it? Let's keep it but maybe add a separator
     history.value.push({
       type: 'info',
-      content: `--- 进入下一关: ${currentTask.value.title} ---`
+      content: `${t('terminalHandsOn.nextLevelIntro')}: ${currentTask.value.title} ---`
     })
     scrollToBottom()
   }

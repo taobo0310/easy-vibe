@@ -1,12 +1,8 @@
-<!--
-  AvailabilityCalculatorDemo.vue
-  可用性计算器：展示不同 SLA 级别对应的停机时间
--->
 <template>
   <div class="availability-demo">
     <div class="header">
-      <div class="title">可用性等级计算器</div>
-      <div class="subtitle">点击查看不同"几个 9"对应的停机时间</div>
+      <div class="title">{{ t('availability.title') }}</div>
+      <div class="subtitle">{{ t('availability.subtitle') }}</div>
     </div>
 
     <div class="sla-cards">
@@ -25,20 +21,20 @@
       <div class="detail-title">{{ current.label }}（{{ current.percent }}）</div>
       <div class="downtime-grid">
         <div class="downtime-item">
-          <div class="dt-label">每年停机</div>
+          <div class="dt-label">{{ t('availability.labels.yearly') }}</div>
           <div class="dt-value">{{ current.yearly }}</div>
         </div>
         <div class="downtime-item">
-          <div class="dt-label">每月停机</div>
+          <div class="dt-label">{{ t('availability.labels.monthly') }}</div>
           <div class="dt-value">{{ current.monthly }}</div>
         </div>
         <div class="downtime-item">
-          <div class="dt-label">每周停机</div>
+          <div class="dt-label">{{ t('availability.labels.weekly') }}</div>
           <div class="dt-value">{{ current.weekly }}</div>
         </div>
       </div>
       <div class="detail-examples">
-        <span class="label">典型场景：</span>{{ current.examples }}
+        <span class="label">{{ t('availability.labels.examples') }}</span>{{ current.examples }}
       </div>
     </div>
   </div>
@@ -46,17 +42,16 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { highAvailabilityLocale } from '../../../locales/high-availability/index.js'
+
+const { t, messages } = useI18n(highAvailabilityLocale)
 
 const activeSla = ref('3')
 
-const slaLevels = [
-  { nines: '2', label: '2 个 9', percent: '99%', yearly: '3.65 天', monthly: '7.3 小时', weekly: '1.68 小时', examples: '内部工具、非关键系统' },
-  { nines: '3', label: '3 个 9', percent: '99.9%', yearly: '8.76 小时', monthly: '43.8 分钟', weekly: '10.1 分钟', examples: '普通 Web 应用、企业系统' },
-  { nines: '4', label: '4 个 9', percent: '99.99%', yearly: '52.6 分钟', monthly: '4.38 分钟', weekly: '1.01 分钟', examples: '电商平台、SaaS 服务' },
-  { nines: '5', label: '5 个 9', percent: '99.999%', yearly: '5.26 分钟', monthly: '26.3 秒', weekly: '6.05 秒', examples: '金融交易、电信核心网' }
-]
+const slaLevels = computed(() => messages.value.availability.slaLevels)
 
-const current = computed(() => slaLevels.find(s => s.nines === activeSla.value))
+const current = computed(() => slaLevels.value.find(s => s.nines === activeSla.value))
 </script>
 
 <style scoped>

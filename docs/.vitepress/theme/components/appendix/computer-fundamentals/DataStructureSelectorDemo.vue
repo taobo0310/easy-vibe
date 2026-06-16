@@ -1,12 +1,12 @@
 <template>
   <div class="ds-selector-demo">
     <div class="demo-header">
-      <span class="title">如何选择合适的数据结构？</span>
-      <span class="subtitle">根据场景需求做出最佳选择</span>
+      <span class="title">{{ t('dataStructures.selector.title') }}</span>
+      <span class="subtitle">{{ t('dataStructures.selector.subtitle') }}</span>
     </div>
 
     <div class="scenario-selector">
-      <div class="selector-title">你的使用场景是？</div>
+      <div class="selector-title">{{ t('dataStructures.selector.scenarioTitle') }}</div>
       <div class="scenario-grid">
         <div
           v-for="scenario in scenarios"
@@ -21,14 +21,15 @@
       </div>
     </div>
 
-    <!-- 推荐结果 -->
     <div v-if="activeScenario" class="recommendation">
       <div class="rec-header">
-        <span class="rec-title">推荐使用：{{ currentScenario.recommendation }}</span>
+        <span class="rec-title">
+          {{ t('dataStructures.selector.recommendation', { name: currentScenario.recommendation }) }}
+        </span>
       </div>
 
       <div class="rec-reason">
-        <div class="reason-title">为什么？</div>
+        <div class="reason-title">{{ t('dataStructures.selector.reasonTitle') }}</div>
         <div class="reason-list">
           <div
             v-for="(reason, index) in currentScenario.reasons"
@@ -42,20 +43,17 @@
       </div>
 
       <div class="rec-example">
-        <div class="example-title">实际例子</div>
+        <div class="example-title">{{ t('dataStructures.selector.exampleTitle') }}</div>
         <div class="example-content">{{ currentScenario.example }}</div>
       </div>
     </div>
 
-    <!-- 快速参考表 -->
     <div class="quick-reference">
-      <div class="ref-title">快速参考表</div>
+      <div class="ref-title">{{ t('dataStructures.selector.referenceTitle') }}</div>
       <table class="ref-table">
         <thead>
           <tr>
-            <th>场景需求</th>
-            <th>推荐数据结构</th>
-            <th>时间复杂度</th>
+            <th v-for="header in tableHeaders" :key="header">{{ header }}</th>
           </tr>
         </thead>
         <tbody>
@@ -68,42 +66,41 @@
       </table>
     </div>
 
-    <!-- 决策流程 -->
     <div class="decision-flow">
-      <div class="flow-title">选择决策流程</div>
+      <div class="flow-title">{{ t('dataStructures.selector.flowTitle') }}</div>
       <div class="flow-diagram">
         <div class="flow-step question">
           <div class="step-icon">❓</div>
-          <div class="step-text">需要快速访问元素？</div>
+          <div class="step-text">{{ t('dataStructures.selector.flow.fastAccess') }}</div>
         </div>
         <div class="flow-branch">
           <div class="branch-yes">
-            <div class="branch-label">是</div>
-            <div class="flow-result">数组 / 哈希表</div>
+            <div class="branch-label">{{ t('dataStructures.selector.flow.yes') }}</div>
+            <div class="flow-result">{{ t('dataStructures.selector.flow.arrayHash') }}</div>
           </div>
           <div class="branch-no">
-            <div class="branch-label">否</div>
+            <div class="branch-label">{{ t('dataStructures.selector.flow.no') }}</div>
             <div class="flow-step question">
-              <div class="step-text">需要频繁插入删除？</div>
+              <div class="step-text">{{ t('dataStructures.selector.flow.frequentInsertDelete') }}</div>
             </div>
             <div class="flow-branch">
               <div class="branch-yes">
-                <div class="branch-label">是</div>
-                <div class="flow-result">链表</div>
+                <div class="branch-label">{{ t('dataStructures.selector.flow.yes') }}</div>
+                <div class="flow-result">{{ t('dataStructures.selector.flow.linkedList') }}</div>
               </div>
               <div class="branch-no">
-                <div class="branch-label">否</div>
+                <div class="branch-label">{{ t('dataStructures.selector.flow.no') }}</div>
                 <div class="flow-step question">
-                  <div class="step-text">需要保持顺序？</div>
+                  <div class="step-text">{{ t('dataStructures.selector.flow.keepOrder') }}</div>
                 </div>
                 <div class="flow-branch">
                   <div class="branch-yes">
-                    <div class="branch-label">是</div>
-                    <div class="flow-result">栈 / 队列</div>
+                    <div class="branch-label">{{ t('dataStructures.selector.flow.yes') }}</div>
+                    <div class="flow-result">{{ t('dataStructures.selector.flow.stackQueue') }}</div>
                   </div>
                   <div class="branch-no">
-                    <div class="branch-label">否</div>
-                    <div class="flow-result">树 / 图</div>
+                    <div class="branch-label">{{ t('dataStructures.selector.flow.no') }}</div>
+                    <div class="flow-result">{{ t('dataStructures.selector.flow.treeGraph') }}</div>
                   </div>
                 </div>
               </div>
@@ -117,85 +114,22 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n'
+import { computerFundamentalsLocale } from '../../../locales/computer-fundamentals'
 
+const { t, messages } = useI18n(computerFundamentalsLocale)
 const activeScenario = ref(null)
 
-const scenarios = [
-  {
-    id: 'lookup',
-    icon: '🔍',
-    name: '快速查找',
-    desc: '根据关键词快速找到对应数据',
-    recommendation: '哈希表',
-    reasons: [
-      '平均查找时间 O(1)，瞬间找到',
-      '键值对存储，语义清晰',
-      '无需遍历整个数据集'
-    ],
-    example: '用户 ID 查找用户资料、字典查词、缓存系统'
-  },
-  {
-    id: 'ordered',
-    icon: '📊',
-    name: '保持顺序',
-    desc: '数据需要按插入顺序或特定顺序存储',
-    recommendation: '数组 或 链表',
-    reasons: [
-      '数组支持索引直接访问',
-      '链表可以灵活调整大小',
-      '按位置访问速度快'
-    ],
-    example: '学生成绩列表、时间序列数据、排行榜'
-  },
-  {
-    id: 'lifo',
-    icon: '🥞',
-    name: '后进先出',
-    desc: '最后进入的最先处理',
-    recommendation: '栈',
-    reasons: ['只能在栈顶操作', '入栈出栈都是 O(1)', '适合回溯和撤销操作'],
-    example: '浏览器后退、编辑器撤销、函数调用栈'
-  },
-  {
-    id: 'fifo',
-    icon: '🚶',
-    name: '先进先出',
-    desc: '先来的先处理',
-    recommendation: '队列',
-    reasons: ['一端入队，另一端出队', '入队出队都是 O(1)', '公平的调度方式'],
-    example: '打印队列、任务调度、消息队列'
-  },
-  {
-    id: 'hierarchy',
-    icon: '🌳',
-    name: '层级关系',
-    desc: '数据之间有父子层级关系',
-    recommendation: '树',
-    reasons: ['清晰表达层级结构', '查找效率 O(log n)', '支持多种遍历方式'],
-    example: '文件系统、组织架构、HTML DOM'
-  },
-  {
-    id: 'relationship',
-    icon: '🕸️',
-    name: '复杂关系',
-    desc: '数据之间有多对多的复杂连接',
-    recommendation: '图',
-    reasons: ['可以表示任意关系', '支持路径搜索算法', '适合网络和社交关系'],
-    example: '社交网络、地图导航、网页链接'
-  }
-]
-
-const referenceTable = [
-  { scenario: '随机访问', structure: '数组', complexity: 'O(1)' },
-  { scenario: '快速查找', structure: '哈希表', complexity: 'O(1)' },
-  { scenario: '有序查找', structure: '二叉搜索树', complexity: 'O(log n)' },
-  { scenario: '频繁插入删除', structure: '链表', complexity: 'O(1)' },
-  { scenario: '撤销操作', structure: '栈', complexity: 'O(1)' },
-  { scenario: '任务调度', structure: '队列', complexity: 'O(1)' }
-]
+const scenarios = computed(() => messages.value.dataStructures.selector.scenarios)
+const referenceTable = computed(
+  () => messages.value.dataStructures.selector.referenceTable
+)
+const tableHeaders = computed(
+  () => messages.value.dataStructures.selector.tableHeaders
+)
 
 const currentScenario = computed(() => {
-  return scenarios.find((s) => s.id === activeScenario.value)
+  return scenarios.value.find((s) => s.id === activeScenario.value)
 })
 </script>
 

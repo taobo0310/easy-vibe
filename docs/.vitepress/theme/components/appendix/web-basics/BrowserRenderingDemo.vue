@@ -1,6 +1,6 @@
 <template>
   <div class="browser-rendering-demo custom-demo-base">
-    <div class="demo-label">浏览器渲染 ── 干瘪文字拆解组装变成精美画面</div>
+    <div class="demo-label">{{ t('network.browserRendering.label') }}</div>
     <div class="demo-panel">
       
       <div class="stepper">
@@ -15,15 +15,15 @@
       </div>
 
       <div class="stage-window">
-        <!-- 侧边说明 -->
+        <!-- Side explanation -->
         <div class="explanations">
           <div class="exp-title">{{ steps[currentStep].title }}</div>
           <div class="exp-desc">{{ steps[currentStep].desc }}</div>
         </div>
 
-        <!-- 当前结果呈现区域 -->
+        <!-- Current rendering output -->
         <div class="render-canvas">
-          <!-- Step 0: 代码 -->
+          <!-- Step 0: source code -->
           <div v-if="currentStep === 0" class="canvas-item code-raw fade-in">
             <pre><code><b>&lt;html&gt;</b>
   <b>&lt;style&gt;</b>
@@ -38,28 +38,28 @@
 <b>&lt;/html&gt;</b></code></pre>
           </div>
 
-          <!-- Step 1: DOM树 -->
+          <!-- Step 1: DOM tree -->
           <div v-if="currentStep === 1" class="canvas-item dom-tree fade-in">
             <div class="tree-node">html
               <div class="tree-children">
                 <div class="tree-node">body
                   <div class="tree-children">
                     <div class="tree-node leaf">h1 (Google)</div>
-                    <div class="tree-node leaf">input (搜索框)</div>
+                    <div class="tree-node leaf">{{ t('network.browserRendering.domInput') }}</div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
 
-          <!-- Step 2: 结合 CSS -->
+          <!-- Step 2: merge CSS -->
           <div v-if="currentStep === 2" class="canvas-item css-merge fade-in">
              <div class="merge-box">
                 <div class="box-left">h1 (Google)</div>
                 <div class="box-plus">+</div>
                 <div class="box-right">.title { color: #f00 }</div>
                 <div class="box-arrow">↓</div>
-                <div class="box-result">h1 (红色文字规则)</div>
+                <div class="box-result">{{ t('network.browserRendering.cssResult') }}</div>
              </div>
           </div>
 
@@ -83,21 +83,18 @@
         </div>
       </div>
     </div>
-    <div class="demo-status">点击上方各步骤图标，查看每一阶段的工厂作业产出</div>
+    <div class="demo-status">{{ t('network.browserRendering.status') }}</div>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { webBasicsLocale } from '../../../locales/web-basics/index.js'
 
+const { t, messages } = useI18n(webBasicsLocale)
 const currentStep = ref(0)
-const steps = [
-  { icon: '📄', name: '源码', title: '拿到纯文本源代码', desc: '刚传回来的只是一堆干瘪的 HTML, CSS 等代码字符。这只是建造网页的说明书，不是真正的画面。' },
-  { icon: '🦴', name: 'DOM解析', title: '1. 搭骨架 (DOM 解析)', desc: '第一步通读 HTML 标签，构建树状骨架图（DOM 树），了解结构关系，例如"标题框在身体(body)里"。' },
-  { icon: '🎨', name: 'CSS解析', title: '2. 样式附加 (CSS 解析)', desc: '第二步读 CSS，把对应的样式规则（如"标题为红色"）关联并绑定到我们刚才搭建好的特定骨架节点上。' },
-  { icon: '📏', name: 'Layout排版', title: '3. 几何排版 (Layout)', desc: '第三步拿尺子量每个骨架的大小。结合你的屏幕尺寸，精确计算出每个元素所在的绝对坐标 x, y 和明确的长宽高尺寸。' },
-  { icon: '🖼️', name: 'Paint绘制', title: '4. 像素涂色 (Paint)', desc: '最后，有了骨架、颜色规则、和精准坐标尺寸，浏览器控制像素画笔，在一瞬间完成上色和填充！' }
-]
+const steps = computed(() => messages.value.network.browserRendering.steps)
 </script>
 
 <style scoped>

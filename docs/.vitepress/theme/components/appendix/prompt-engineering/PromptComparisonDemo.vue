@@ -1,7 +1,3 @@
-<!--
-  PromptComparisonDemo.vue
-  “清晰 vs 模糊”对比：把一个提示词拆成四块（任务/上下文/要求/输出），并展示哪些块缺失会导致输出跑偏。
--->
 <template>
   <el-card
     class="cmp-card"
@@ -11,24 +7,24 @@
       <div class="card-header">
         <div>
           <h3 class="title">
-            清晰 vs 模糊：差的不是“废话”，而是“缺项”
+            {{ t('promptComparison.title') }}
           </h3>
           <p class="subtitle">
-            勾选你想补充的信息，看看输出会怎么变。
+            {{ t('promptComparison.subtitle') }}
           </p>
         </div>
         <div class="task-select">
           <el-select
             v-model="task"
-            placeholder="选择任务"
+            :placeholder="t('promptComparison.selectTask')"
             style="width: 200px"
           >
             <el-option
-              label="写一段技术博客开头"
+              :label="t('promptComparison.taskBlog')"
               value="blog"
             />
             <el-option
-              label="把内容输出成 JSON"
+              :label="t('promptComparison.taskJson')"
               value="json"
             />
           </el-select>
@@ -39,22 +35,22 @@
     <div class="options-container">
       <el-checkbox
         v-model="useRole"
-        label="角色（你是谁）"
+        :label="t('promptComparison.checkRole')"
         border
       />
       <el-checkbox
         v-model="useAudience"
-        label="受众（写给谁）"
+        :label="t('promptComparison.checkAudience')"
         border
       />
       <el-checkbox
         v-model="useConstraints"
-        label="约束（长度/要点数）"
+        :label="t('promptComparison.checkConstraints')"
         border
       />
       <el-checkbox
         v-model="useFormat"
-        label="输出格式（JSON/列表）"
+        :label="t('promptComparison.checkFormat')"
         border
       />
     </div>
@@ -66,7 +62,7 @@
       >
         <template #header>
           <div class="panel-header">
-            你给 AI 的提示词
+            {{ t('promptComparison.promptPanel') }}
           </div>
         </template>
         <div class="code-block">
@@ -97,7 +93,7 @@
       >
         <template #header>
           <div class="panel-header">
-            AI 输出（示意）
+            {{ t('promptComparison.outputPanel') }}
           </div>
         </template>
         <div class="output-content">
@@ -120,7 +116,7 @@
         </div>
         <el-empty
           v-else
-          description="完美！没有明显问题。"
+          :description="t('promptComparison.perfect')"
           :image-size="60"
         />
       </el-card>
@@ -130,6 +126,10 @@
 
 <script setup>
 import { computed, ref } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { promptEngineeringLocale } from '../../../locales/prompt-engineering/index.js'
+
+const { t } = useI18n(promptEngineeringLocale)
 
 const task = ref('blog')
 const useRole = ref(false)
@@ -140,69 +140,66 @@ const useFormat = ref(false)
 const prompt = computed(() => {
   if (task.value === 'blog') {
     const lines = []
-    if (useRole.value) lines.push('你是资深前端工程师。')
-    lines.push('请写一段技术博客的开头，主题：提示词工程。')
-    if (useAudience.value) lines.push('目标读者：零基础新手。')
+    if (useRole.value) lines.push(t('promptComparison.blog.roleLine'))
+    lines.push(t('promptComparison.blog.taskLine'))
+    if (useAudience.value) lines.push(t('promptComparison.blog.audienceLine'))
     if (useConstraints.value)
-      lines.push('要求：80-120 字，口语化，带一个生活类比。')
-    if (useFormat.value) lines.push('输出：只输出一段文字，不要标题。')
+      lines.push(t('promptComparison.blog.constraintsLine'))
+    if (useFormat.value) lines.push(t('promptComparison.blog.formatLine'))
     return lines.join('\n')
   }
 
   // json task
   const lines = []
-  if (useRole.value) lines.push('你是信息抽取助手。')
-  lines.push('从下面这段文字中提取关键信息。')
-  if (useAudience.value) lines.push('用途：给产品经理快速阅读。')
-  if (useConstraints.value) lines.push('要求：提取 3-5 个关键词 + 1 句摘要。')
+  if (useRole.value) lines.push(t('promptComparison.json.roleLine'))
+  lines.push(t('promptComparison.json.taskLine'))
+  if (useAudience.value) lines.push(t('promptComparison.json.audienceLine'))
+  if (useConstraints.value) lines.push(t('promptComparison.json.constraintsLine'))
   if (useFormat.value) {
-    lines.push('输出格式（JSON）：')
+    lines.push(t('promptComparison.json.formatPrefix'))
     lines.push('{')
     lines.push('  "summary": "...",')
     lines.push('  "keywords": ["..."]')
     lines.push('}')
   }
-  lines.push('输入：')
-  lines.push('“提示词工程能显著提升模型输出质量，但需要清晰任务、约束和格式。”')
+  lines.push(t('promptComparison.json.inputLabel'))
+  lines.push(t('promptComparison.json.inputText'))
   return lines.join('\n')
 })
 
 const checklist = computed(() => [
-  { text: '任务清晰（要做什么）', ok: true },
-  { text: '角色定义（你是谁）', ok: useRole.value },
-  { text: '上下文/受众（给谁看）', ok: useAudience.value },
-  { text: '具体约束（怎么做）', ok: useConstraints.value },
-  { text: '格式要求（输出长啥样）', ok: useFormat.value }
+  { text: t('promptComparison.checklist.task'), ok: true },
+  { text: t('promptComparison.checklist.role'), ok: useRole.value },
+  { text: t('promptComparison.checklist.audience'), ok: useAudience.value },
+  { text: t('promptComparison.checklist.constraints'), ok: useConstraints.value },
+  { text: t('promptComparison.checklist.format'), ok: useFormat.value }
 ])
 
 const output = computed(() => {
   if (task.value === 'blog') {
     if (!useConstraints.value && !useAudience.value) {
-      return '提示词工程（Prompt Engineering）是指通过优化输入给大语言模型的文本提示，来引导模型生成更准确、高质量输出的技术。它涉及到理解模型的工作原理、设计有效的指令结构以及不断迭代测试。'
+      return t('promptComparison.blog.output1')
     }
     if (useAudience.value && !useConstraints.value) {
-      return '嘿，大家好！今天咱们来聊聊“提示词工程”。简单说，它就像是教你怎么跟超级聪明的机器人说话。只要你说得对，它就能帮你干大事！'
+      return t('promptComparison.blog.output2')
     }
-    return '嘿，朋友们！听说过“提示词工程”吗？其实它就像是在点外卖——你得告诉厨师（AI）你要微辣还是特辣（约束），是给小孩吃还是大人吃（受众）。说得越清楚，送来的饭（回答）才越合你胃口！今天咱们就来学学怎么“点菜”。'
+    return t('promptComparison.blog.output3')
   }
 
   // json
   if (!useFormat.value) {
-    return '这段文字主要讲了提示词工程的作用，以及它需要的三个要素：清晰任务、约束和格式。关键词包括提示词工程、模型输出质量等。'
+    return t('promptComparison.json.outputNoFormat')
   }
-  return `{
-  "summary": "提示词工程通过明确任务、约束及格式提升模型输出。",
-  "keywords": ["提示词工程", "输出质量", "清晰任务", "约束", "格式"]
-}`
+  return t('promptComparison.json.outputWithFormat')
 })
 
 const warnings = computed(() => {
   const w = []
-  if (!useRole.value) w.push('缺少角色设定，AI 语气可能不够专业或统一。')
+  if (!useRole.value) w.push(t('promptComparison.warnings.noRole'))
   if (!useAudience.value)
-    w.push('未指定受众，AI 可能不知道该用深奥术语还是大白话。')
-  if (!useConstraints.value) w.push('没给约束，AI 容易啰嗦或者写太短。')
-  if (!useFormat.value) w.push('没规定格式，后续程序很难自动解析结果。')
+    w.push(t('promptComparison.warnings.noAudience'))
+  if (!useConstraints.value) w.push(t('promptComparison.warnings.noConstraints'))
+  if (!useFormat.value) w.push(t('promptComparison.warnings.noFormat'))
   return w
 })
 </script>

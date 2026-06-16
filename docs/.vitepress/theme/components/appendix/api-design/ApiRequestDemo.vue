@@ -5,7 +5,7 @@
         <div class="ar-terminal">
           <div class="term-bar">
             <span class="dot r" /><span class="dot y" /><span class="dot g" />
-            <span class="term-title">API 请求演示</span>
+            <span class="term-title">{{ t('request.terminalTitle') }}</span>
           </div>
           <div ref="termEl" class="term-body">
             <div v-for="(l, i) in lines" :key="i" class="t-line">
@@ -36,7 +36,7 @@
             :disabled="running"
             @click="reset"
           >
-            重置
+            {{ t('request.reset') }}
           </button>
         </div>
       </div>
@@ -49,8 +49,8 @@
           >
             <div class="flow-header">
               <span class="flow-icon">💻</span>
-              <span class="flow-title">客户端</span>
-              <span class="flow-desc">发起请求</span>
+              <span class="flow-title">{{ t('request.client.title') }}</span>
+              <span class="flow-desc">{{ t('request.client.desc') }}</span>
             </div>
             <div class="flow-body">
               <div v-if="requestData" class="req-preview">
@@ -64,7 +64,7 @@
                   <pre>{{ requestData.body }}</pre>
                 </div>
               </div>
-              <div v-else class="flow-empty">等待请求...</div>
+              <div v-else class="flow-empty">{{ t('request.emptyRequest') }}</div>
             </div>
           </div>
 
@@ -82,15 +82,15 @@
           >
             <div class="flow-header">
               <span class="flow-icon">🖥️</span>
-              <span class="flow-title">服务器</span>
-              <span class="flow-desc">处理请求</span>
+              <span class="flow-title">{{ t('request.server.title') }}</span>
+              <span class="flow-desc">{{ t('request.server.desc') }}</span>
             </div>
             <div class="flow-body">
               <div v-if="serverStatus" class="server-status">
-                <span class="status-icon">{{ serverStatus.icon }}</span>
+                <span class="status-icon" v-html="serverStatus.icon" />
                 <span class="status-text">{{ serverStatus.text }}</span>
               </div>
-              <div v-else class="flow-empty">等待中...</div>
+              <div v-else class="flow-empty">{{ t('request.emptyServer') }}</div>
             </div>
           </div>
 
@@ -108,8 +108,8 @@
           >
             <div class="flow-header">
               <span class="flow-icon">📦</span>
-              <span class="flow-title">响应</span>
-              <span class="flow-desc">返回结果</span>
+              <span class="flow-title">{{ t('request.response.title') }}</span>
+              <span class="flow-desc">{{ t('request.response.desc') }}</span>
             </div>
             <div class="flow-body">
               <div v-if="responseData" class="res-preview">
@@ -120,7 +120,7 @@
                   <pre>{{ responseData.body }}</pre>
                 </div>
               </div>
-              <div v-else class="flow-empty">等待响应...</div>
+              <div v-else class="flow-empty">{{ t('request.emptyResponse') }}</div>
             </div>
           </div>
         </div>
@@ -132,16 +132,17 @@
 </template>
 
 <script setup>
-import { ref, nextTick } from 'vue'
+import { ref, nextTick, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { apiDesignLocale } from '../../../locales/api-design/index.js'
 
+const { t, messages } = useI18n(apiDesignLocale)
 const termEl = ref(null)
-const lines = ref([
-  { kind: 'dim', text: '// 点击下方按钮，模拟不同的 API 请求' }
-])
+const lines = ref([{ kind: 'dim', text: t('request.initialLine') }])
 const typing = ref('')
 const running = ref(false)
 const active = ref(null)
-const hint = ref('点击命令按钮，观察一次完整的 API 请求-响应流程。')
+const hint = ref(t('request.initialHint'))
 const pulseArea = ref(null)
 
 const requestData = ref(null)
@@ -150,144 +151,23 @@ const responseData = ref(null)
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
 
-const ops = [
-  {
-    id: 'get-users',
-    cmd: 'GET /api/users',
-    ok: () => true,
-    output: [
-      { kind: 'dim', text: '// 获取用户列表' },
-      { kind: 'grn', text: 'HTTP/1.1 200 OK' },
-      { kind: 'dim', text: 'Content-Type: application/json' },
-      { kind: 'dim', text: '' },
-      { kind: 'grn', text: '{ "code": 0, "data": { "items": [...] } }' }
-    ],
-    hint: 'GET 请求成功！状态码 200 表示请求正常。服务器返回了用户列表数据。',
-    do: async () => {
-      requestData.value = { method: 'GET', url: '/api/users' }
-      pulseArea.value = 'client'
-      await sleep(300)
-      pulseArea.value = 'request'
-      await sleep(300)
-      serverStatus.value = { icon: '⚡', text: '查询数据库...' }
-      pulseArea.value = 'server'
-      await sleep(500)
-      serverStatus.value = { icon: '✓', text: '处理完成' }
-      pulseArea.value = 'response'
-      await sleep(300)
-      responseData.value = {
-        status: '200 OK',
-        statusClass: 'success',
-        body: '{\n  "code": 0,\n  "data": {\n    "items": [\n      {"id": 1, "name": "张三"},\n      {"id": 2, "name": "李四"}\n    ]\n  }\n}'
-      }
-    }
-  },
-  {
-    id: 'post-user',
-    cmd: 'POST /api/users',
-    ok: () => true,
-    output: [
-      { kind: 'dim', text: '// 创建新用户' },
-      { kind: 'grn', text: 'HTTP/1.1 201 Created' },
-      { kind: 'dim', text: 'Location: /api/users/3' },
-      { kind: 'dim', text: '' },
-      {
-        kind: 'grn',
-        text: '{ "code": 0, "data": { "id": 3, "name": "王五" } }'
-      }
-    ],
-    hint: 'POST 创建成功！状态码 201 表示资源已创建，响应头 Location 指向新资源地址。',
-    do: async () => {
-      requestData.value = {
-        method: 'POST',
-        url: '/api/users',
-        body: '{\n  "name": "王五",\n  "email": "wangwu@example.com"\n}'
-      }
-      pulseArea.value = 'client'
-      await sleep(300)
-      pulseArea.value = 'request'
-      await sleep(300)
-      serverStatus.value = { icon: '⚡', text: '验证数据...' }
-      pulseArea.value = 'server'
-      await sleep(400)
-      serverStatus.value = { icon: '⚡', text: '写入数据库...' }
-      await sleep(400)
-      serverStatus.value = { icon: '✓', text: '创建成功' }
-      pulseArea.value = 'response'
-      await sleep(300)
-      responseData.value = {
-        status: '201 Created',
-        statusClass: 'success',
-        body: '{\n  "code": 0,\n  "data": {\n    "id": 3,\n    "name": "王五",\n    "email": "wangwu@example.com"\n  }\n}'
-      }
-    }
-  },
-  {
-    id: 'get-404',
-    cmd: 'GET /api/users/999',
-    ok: () => true,
-    output: [
-      { kind: 'dim', text: '// 获取不存在的用户' },
-      { kind: 'red', text: 'HTTP/1.1 404 Not Found' },
-      { kind: 'dim', text: '' },
-      { kind: 'red', text: '{ "code": 10002, "message": "用户不存在" }' }
-    ],
-    hint: '404 错误！请求的资源不存在。客户端应该检查请求的 ID 是否正确。',
-    do: async () => {
-      requestData.value = { method: 'GET', url: '/api/users/999' }
-      pulseArea.value = 'client'
-      await sleep(300)
-      pulseArea.value = 'request'
-      await sleep(300)
-      serverStatus.value = { icon: '🔍', text: '查找用户...' }
-      pulseArea.value = 'server'
-      await sleep(500)
-      serverStatus.value = { icon: '✗', text: '未找到' }
-      pulseArea.value = 'response'
-      await sleep(300)
-      responseData.value = {
-        status: '404 Not Found',
-        statusClass: 'error',
-        body: '{\n  "code": 10002,\n  "message": "用户不存在"\n}'
-      }
-    }
-  },
-  {
-    id: 'post-401',
-    cmd: 'POST /api/orders (无Token)',
-    ok: () => true,
-    output: [
-      { kind: 'dim', text: '// 未登录尝试下单' },
-      { kind: 'red', text: 'HTTP/1.1 401 Unauthorized' },
-      { kind: 'dim', text: 'WWW-Authenticate: Bearer' },
-      { kind: 'dim', text: '' },
-      { kind: 'red', text: '{ "code": 10018, "message": "请先登录" }' }
-    ],
-    hint: '401 错误！需要身份认证。客户端应该引导用户登录后再重试。',
-    do: async () => {
-      requestData.value = {
-        method: 'POST',
-        url: '/api/orders',
-        body: '{\n  "product_id": "P001",\n  "quantity": 2\n}'
-      }
-      pulseArea.value = 'client'
-      await sleep(300)
-      pulseArea.value = 'request'
-      await sleep(300)
-      serverStatus.value = { icon: '🔐', text: '验证身份...' }
-      pulseArea.value = 'server'
-      await sleep(400)
-      serverStatus.value = { icon: '✗', text: '未授权' }
-      pulseArea.value = 'response'
-      await sleep(300)
-      responseData.value = {
-        status: '401 Unauthorized',
-        statusClass: 'error',
-        body: '{\n  "code": 10018,\n  "message": "请先登录"\n}'
-      }
-    }
+const ops = computed(() => messages.value.request.ops.map((op) => ({ ...op, ok: () => true })))
+
+async function playFlow(op) {
+  requestData.value = op.request
+  pulseArea.value = 'client'
+  await sleep(300)
+  pulseArea.value = 'request'
+  await sleep(300)
+  pulseArea.value = 'server'
+  for (const step of op.serverSteps) {
+    serverStatus.value = step
+    await sleep(400)
   }
-]
+  pulseArea.value = 'response'
+  await sleep(300)
+  responseData.value = op.response
+}
 
 async function run(op) {
   if (running.value) return
@@ -318,7 +198,7 @@ async function run(op) {
     await sleep(50)
   }
 
-  await op.do()
+  await playFlow(op)
   await sleep(120)
   hint.value = op.hint
   running.value = false
@@ -332,10 +212,10 @@ function scroll() {
 }
 
 function reset() {
-  lines.value = [{ kind: 'dim', text: '// 点击下方按钮，模拟不同的 API 请求' }]
+  lines.value = [{ kind: 'dim', text: t('request.initialLine') }]
   active.value = null
   pulseArea.value = null
-  hint.value = '点击命令按钮，观察一次完整的 API 请求-响应流程。'
+  hint.value = t('request.initialHint')
   typing.value = ''
   running.value = false
   requestData.value = null
@@ -507,7 +387,6 @@ function reset() {
   display: none;
 }
 .ar-btn--reset::after {
-  content: '重置';
   font-size: 0.7rem;
   color: #585b70;
 }

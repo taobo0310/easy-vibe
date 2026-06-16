@@ -2,7 +2,7 @@
   <div class="demo">
     <div class="header">
       <span class="icon">📦</span>
-      <span class="title">data 字段设计规范</span>
+      <span class="title">{{ t('dataField.title') }}</span>
     </div>
 
     <div class="tabs">
@@ -12,51 +12,35 @@
         :class="['tab', { active: active === tab.id }]"
         @click="active = tab.id"
       >
-        {{ tab.icon }} {{ tab.name }}
+        <span v-html="tab.icon" />
+        {{ tab.name }}
       </button>
     </div>
 
     <div class="content">
       <div v-if="active === 'structure'" class="section">
-        <h4>单对象 vs 列表</h4>
+        <h4>{{ t('dataField.structure.title') }}</h4>
         <div class="compare-row">
           <div class="compare-col">
-            <div class="compare-title">单对象</div>
-            <pre class="code-sm">
-{
-  "code": 0,
-  "data": {
-    "id": 123,
-    "name": "张三"
-  }
-}</pre>
+            <div class="compare-title">{{ t('dataField.structure.singleTitle') }}</div>
+            <pre class="code-sm">{{ t('dataField.structure.singleCode') }}</pre>
           </div>
           <div class="compare-col">
-            <div class="compare-title">列表</div>
-            <pre class="code-sm">
-{
-  "code": 0,
-  "data": {
-    "items": [...],
-    "pagination": {
-      "page": 1,
-      "total": 100
-    }
-  }
-}</pre>
+            <div class="compare-title">{{ t('dataField.structure.listTitle') }}</div>
+            <pre class="code-sm">{{ t('dataField.structure.listCode') }}</pre>
           </div>
         </div>
         <div class="note">
-          列表数据包裹在 items 数组中，分页信息放在 pagination 对象
+          {{ t('dataField.structure.note') }}
         </div>
       </div>
 
       <div v-if="active === 'naming'" class="section">
-        <h4>字段命名规范</h4>
+        <h4>{{ t('dataField.namingTitle') }}</h4>
         <div class="rule-list">
           <div v-for="rule in namingRules" :key="rule.name" class="rule-item">
             <div class="rule-header">
-              <span class="rule-icon">{{ rule.icon }}</span>
+              <span class="rule-icon" v-html="rule.icon" />
               <span class="rule-name">{{ rule.name }}</span>
             </div>
             <div class="rule-examples">
@@ -70,66 +54,49 @@
       </div>
 
       <div v-if="active === 'datetime'" class="section">
-        <h4>时间格式设计</h4>
+        <h4>{{ t('dataField.datetime.title') }}</h4>
         <div class="time-example">
-          <pre class="code-block">
-{
-  "created_at": "2024-01-15T09:30:00.000Z",
-  "updated_at": "2024-01-15T10:00:00.000Z",
-  "expired_at": "2025-01-15T00:00:00.000Z"
-}</pre>
+          <pre class="code-block">{{ t('dataField.datetime.code') }}</pre>
         </div>
         <div class="time-rules">
-          <div class="time-rule">
-            <span class="rule-label">格式</span>
-            <span class="rule-value">ISO 8601</span>
-          </div>
-          <div class="time-rule">
-            <span class="rule-label">时区</span>
-            <span class="rule-value">UTC（Z 后缀）或明确偏移量</span>
-          </div>
-          <div class="time-rule">
-            <span class="rule-label">精度</span>
-            <span class="rule-value">毫秒 .000Z</span>
-          </div>
-          <div class="time-rule">
-            <span class="rule-label">命名</span>
-            <span class="rule-value">xxx_at 表示时间点，xxx_duration 表示时长</span>
+          <div
+            v-for="rule in datetimeRules"
+            :key="rule.label"
+            class="time-rule"
+          >
+            <span class="rule-label">{{ rule.label }}</span>
+            <span class="rule-value">{{ rule.value }}</span>
           </div>
         </div>
       </div>
 
       <div v-if="active === 'null'" class="section">
-        <h4>空值处理</h4>
+        <h4>{{ t('dataField.nulls.title') }}</h4>
         <div class="compare-row">
           <div class="compare-col good-col">
-            <div class="compare-title">✅ 推荐</div>
-            <pre class="code-sm">
-{
-  "name": "张三",
-  "nickname": null,
-  "avatar": null
-}</pre>
-            <div class="compare-desc">字段存在但无值时返回 null</div>
+            <div class="compare-title" v-html="t('dataField.nulls.goodTitle')" />
+            <pre class="code-sm">{{ t('dataField.nulls.goodCode') }}</pre>
+            <div class="compare-desc">{{ t('dataField.nulls.goodDesc') }}</div>
           </div>
           <div class="compare-col bad-col">
-            <div class="compare-title">❌ 不推荐</div>
-            <pre class="code-sm">
-{
-  "name": "张三"
-}</pre>
-            <div class="compare-desc">省略字段，前端需判断是否存在</div>
+            <div class="compare-title" v-html="t('dataField.nulls.badTitle')" />
+            <pre class="code-sm">{{ t('dataField.nulls.badCode') }}</pre>
+            <div class="compare-desc">{{ t('dataField.nulls.badDesc') }}</div>
           </div>
         </div>
         <div class="null-tips">
-          <div class="tip-item">空数组返回 <code>[]</code></div>
-          <div class="tip-item">空对象返回 <code>{}</code></div>
-          <div class="tip-item">前端可统一处理，无需判断字段是否存在</div>
+          <div
+            v-for="tip in nullTips"
+            :key="tip"
+            class="tip-item"
+          >
+            {{ tip }}
+          </div>
         </div>
       </div>
 
       <div v-if="active === 'relation'" class="section">
-        <h4>关联数据设计</h4>
+        <h4>{{ t('dataField.relationTitle') }}</h4>
         <div class="relation-tabs">
           <button
             v-for="r in relations"
@@ -149,105 +116,27 @@
 
     <div class="tips">
       <span class="tips-icon">💡</span>
-      <span class="tips-text">参考 ISO 8601 时间标准，字段命名保持 snake_case 风格</span>
+      <span class="tips-text">{{ t('dataField.tip') }}</span>
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { apiDesignLocale } from '../../../locales/api-design/index.js'
 
+const { t, messages } = useI18n(apiDesignLocale)
 const active = ref('structure')
 const rId = ref('embed')
-
-const tabs = [
-  { id: 'structure', icon: '📐', name: '结构设计' },
-  { id: 'naming', icon: '📝', name: '命名规范' },
-  { id: 'datetime', icon: '🕐', name: '时间格式' },
-  { id: 'null', icon: '∅', name: '空值处理' },
-  { id: 'relation', icon: '🔗', name: '关联数据' }
-]
-
-const namingRules = [
-  {
-    icon: '🔡',
-    name: '使用 snake_case',
-    good: 'created_at',
-    bad: 'createdAt',
-    desc: 'JSON 字段名统一用下划线'
-  },
-  {
-    icon: '📖',
-    name: '避免缩写',
-    good: 'user_id',
-    bad: 'uid',
-    desc: '保持可读性'
-  },
-  {
-    icon: '✅',
-    name: '布尔值加前缀',
-    good: 'is_active, has_permission',
-    bad: 'active, permission',
-    desc: '一眼识别布尔类型'
-  },
-  {
-    icon: '📅',
-    name: '时间带后缀',
-    good: 'created_at, expired_at',
-    bad: 'created, expired',
-    desc: '明确是时间字段'
-  },
-  {
-    icon: '🔢',
-    name: '数量带后缀',
-    good: 'total_count, page_size',
-    bad: 'total, size',
-    desc: '明确是数值类型'
-  }
-]
-
-const relations = [
-  {
-    id: 'embed',
-    name: '内嵌',
-    desc: '适合数据量小、频繁访问的关联数据',
-    code: `{
-  "id": 123,
-  "name": "张三",
-  "department": {
-    "id": 1,
-    "name": "技术部"
-  }
-}`
-  },
-  {
-    id: 'foreign',
-    name: '外键',
-    desc: '适合数据量大、按需加载的关联数据',
-    code: `{
-  "id": 123,
-  "name": "张三",
-  "department_id": 1
-}`
-  },
-  {
-    id: 'expand',
-    name: 'expand 参数',
-    desc: 'Stripe 风格，客户端按需展开',
-    code: `// GET /users/123?expand=department
-{
-  "id": 123,
-  "name": "张三",
-  "department": {
-    "id": 1,
-    "name": "技术部"
-  }
-}`
-  }
-]
+const tabs = computed(() => messages.value.dataField.tabs)
+const namingRules = computed(() => messages.value.dataField.namingRules)
+const datetimeRules = computed(() => messages.value.dataField.datetime.rules)
+const nullTips = computed(() => messages.value.dataField.nulls.tips)
+const relations = computed(() => messages.value.dataField.relations)
 
 const currentRelation = computed(() => {
-  return relations.find((r) => r.id === rId.value) || relations[0]
+  return relations.value.find((r) => r.id === rId.value) || relations.value[0]
 })
 </script>
 

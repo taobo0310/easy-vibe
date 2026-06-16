@@ -1,16 +1,11 @@
-<!--
-  UploadProcessDemo.vue
-  上传流程演示 - 展示直传、分片、断点续传等上传方式
--->
 <template>
   <div class="upload-process-demo">
     <div class="demo-header">
       <span class="icon">📤</span>
-      <span class="title">文件上传流程</span>
-      <span class="subtitle">理解直传、分片、断点续传三种方式</span>
+      <span class="title">{{ t('upload.title') }}</span>
+      <span class="subtitle">{{ t('upload.subtitle') }}</span>
     </div>
 
-    <!-- 上传方式选择 -->
     <div class="upload-methods">
       <div
         v-for="method in uploadMethods"
@@ -22,104 +17,65 @@
         <div class="method-icon">{{ method.icon }}</div>
         <div class="method-name">{{ method.name }}</div>
         <div class="method-desc">{{ method.description }}</div>
-        <div class="method-size">适合: {{ method.suitable }}</div>
+        <div class="method-size">{{ t('upload.suitable', { value: method.suitable }) }}</div>
       </div>
     </div>
 
-    <!-- 上传流程可视化 -->
     <div class="upload-flow">
       <div class="flow-title">
-        <span v-if="selectedMethod === 'direct'">🚀 直传流程</span>
-        <span v-else-if="selectedMethod === 'multipart'">🔪 分片上传流程</span>
-        <span v-else>💾 断点续传流程</span>
+        {{ flowTitle }}
       </div>
 
-      <!-- 直传流程 -->
       <div v-if="selectedMethod === 'direct'" class="flow-steps">
-        <div class="flow-step" :class="{ active: currentStep >= 1 }">
-          <div class="step-num">1</div>
+        <div
+          v-for="(step, index) in currentFlow"
+          :key="step.title"
+          class="flow-step"
+          :class="{ active: currentStep >= index + 1 }"
+        >
+          <div class="step-num">{{ index + 1 }}</div>
           <div class="step-content">
-            <div class="step-title">用户选择文件</div>
-            <div class="step-detail">浏览器选择 5MB 图片文件</div>
-          </div>
-        </div>
-        <div class="flow-arrow">⬇️</div>
-        <div class="flow-step" :class="{ active: currentStep >= 2 }">
-          <div class="step-num">2</div>
-          <div class="step-content">
-            <div class="step-title">申请上传凭证</div>
-            <div class="step-detail">前端 → 后端 → STS 临时凭证</div>
-          </div>
-        </div>
-        <div class="flow-arrow">⬇️</div>
-        <div class="flow-step" :class="{ active: currentStep >= 3 }">
-          <div class="step-num">3</div>
-          <div class="step-content">
-            <div class="step-title">直传到对象存储</div>
-            <div class="step-detail">浏览器 → OSS/COS（5MB 一次性上传）</div>
-          </div>
-        </div>
-        <div class="flow-arrow">⬇️</div>
-        <div class="flow-step" :class="{ active: currentStep >= 4 }">
-          <div class="step-num">4</div>
-          <div class="step-content">
-            <div class="step-title">上传完成</div>
-            <div class="step-detail">返回 URL，前端通知后端保存记录</div>
+            <div class="step-title">{{ step.title }}</div>
+            <div class="step-detail">{{ step.detail }}</div>
           </div>
         </div>
       </div>
 
-      <!-- 分片上传流程 -->
       <div v-else-if="selectedMethod === 'multipart'" class="flow-steps multipart-flow">
-        <div class="flow-step" :class="{ active: currentStep >= 1 }">
-          <div class="step-num">1</div>
+        <div
+          v-for="(step, index) in currentFlow"
+          :key="step.title"
+          class="flow-step"
+          :class="{ active: currentStep >= index + 1 }"
+        >
+          <div class="step-num">{{ index + 1 }}</div>
           <div class="step-content">
-            <div class="step-title">文件分片</div>
-            <div class="step-detail">500MB 视频 → 50个 10MB 分片</div>
-            <div class="chunks-preview">
+            <div class="step-title">{{ step.title }}</div>
+            <div class="step-detail">{{ step.detail }}</div>
+            <div v-if="index === 0" class="chunks-preview">
               <div v-for="i in 10" :key="i" class="chunk" :class="{ uploaded: i <= 3 }">{{ i }}</div>
               <span class="chunks-more">...</span>
             </div>
-          </div>
-        </div>
-        <div class="flow-arrow">⬇️</div>
-        <div class="flow-step" :class="{ active: currentStep >= 2 }">
-          <div class="step-num">2</div>
-          <div class="step-content">
-            <div class="step-title">初始化分片上传</div>
-            <div class="step-detail">获取 uploadId（上传会话 ID）</div>
-          </div>
-        </div>
-        <div class="flow-arrow">⬇️</div>
-        <div class="flow-step" :class="{ active: currentStep >= 3 }">
-          <div class="step-num">3</div>
-          <div class="step-content">
-            <div class="step-title">并行上传分片</div>
-            <div class="step-detail">3 个并发，每片 10MB</div>
-            <div class="parallel-upload">
-              <div class="upload-slot" :class="{ active: parallelActive >= 1 }">分片 1</div>
-              <div class="upload-slot" :class="{ active: parallelActive >= 2 }">分片 2</div>
-              <div class="upload-slot" :class="{ active: parallelActive >= 3 }">分片 3</div>
+            <div v-if="step.slots" class="parallel-upload">
+              <div
+                v-for="(slot, slotIndex) in step.slots"
+                :key="slot"
+                class="upload-slot"
+                :class="{ active: parallelActive >= slotIndex + 1 }"
+              >
+                {{ slot }}
+              </div>
             </div>
-          </div>
-        </div>
-        <div class="flow-arrow">⬇️</div>
-        <div class="flow-step" :class="{ active: currentStep >= 4 }">
-          <div class="step-num">4</div>
-          <div class="step-content">
-            <div class="step-title">合并分片</div>
-            <div class="step-detail">服务端合并所有分片为完整文件</div>
           </div>
         </div>
       </div>
 
-      <!-- 断点续传流程 -->
       <div v-else class="flow-steps resume-flow">
         <div class="flow-step" :class="{ active: currentStep >= 1 }">
           <div class="step-num">1</div>
           <div class="step-content">
-            <div class="step-title">开始上传 1GB 视频</div>
-            <div class="step-detail">已上传 6 个分片（60MB），正在上传第 7 个</div>
+            <div class="step-title">{{ currentFlow[0].title }}</div>
+            <div class="step-detail">{{ currentFlow[0].detail }}</div>
             <div class="progress-bar">
               <div class="progress-fill" style="width: 6%;"></div>
               <div class="progress-text">6% (60MB / 1GB)</div>
@@ -130,11 +86,11 @@
         <div class="flow-step error-step" :class="{ active: currentStep >= 2 }">
           <div class="step-num">⚠️</div>
           <div class="step-content">
-            <div class="step-title">网络中断！</div>
-            <div class="step-detail">WiFi 切换到 4G，上传中断，第 7 个分片上传失败</div>
+            <div class="step-title">{{ currentFlow[1].title }}</div>
+            <div class="step-detail">{{ currentFlow[1].detail }}</div>
             <div class="error-info">
               <span>❌ Error: ETIMEDOUT</span>
-              <span>已上传分片: 6/100</span>
+              <span>{{ t('upload.uploadedChunks') }}</span>
             </div>
           </div>
         </div>
@@ -142,16 +98,16 @@
         <div class="flow-step" :class="{ active: currentStep >= 3 }">
           <div class="step-num">3</div>
           <div class="step-content">
-            <div class="step-title">查询已上传分片</div>
-            <div class="step-detail">恢复网络后，查询服务端已保存的分片列表</div>
+            <div class="step-title">{{ currentFlow[2].title }}</div>
+            <div class="step-detail">{{ currentFlow[2].detail }}</div>
             <div class="resume-info">
               <div class="resume-item success">
-                <span>✅ 分片 1-6</span>
-                <span>已上传</span>
+                <span>{{ resumeUploaded[0] }}</span>
+                <span>{{ resumeUploaded[1] }}</span>
               </div>
               <div class="resume-item pending">
-                <span>⏳ 分片 7-100</span>
-                <span>待上传</span>
+                <span>{{ resumePending[0] }}</span>
+                <span>{{ resumePending[1] }}</span>
               </div>
             </div>
           </div>
@@ -160,20 +116,16 @@
         <div class="flow-step" :class="{ active: currentStep >= 4 }">
           <div class="step-num">4</div>
           <div class="step-content">
-            <div class="step-title">断点续传成功！</div>
-            <div class="step-detail">从第 7 个分片继续上传，无需重传前 6 个分片</div>
+            <div class="step-title">{{ currentFlow[3].title }}</div>
+            <div class="step-detail">{{ currentFlow[3].detail }}</div>
             <div class="success-info">
-              <div class="success-item">
-                <span>💾 节省流量</span>
-                <span>60MB</span>
-              </div>
-              <div class="success-item">
-                <span>⏱️ 节省时间</span>
-                <span>~6s</span>
-              </div>
-              <div class="success-item">
-                <span>🎯 续传进度</span>
-                <span>6% → 100%</span>
+              <div
+                v-for="item in successItems"
+                :key="item[0]"
+                class="success-item"
+              >
+                <span>{{ item[0] }}</span>
+                <span>{{ item[1] }}</span>
               </div>
             </div>
           </div>
@@ -183,76 +135,38 @@
 
     <div class="info-box">
       <span class="icon">💡</span>
-      <strong>核心思想：</strong>大文件分片上传提高可靠性，网络中断可以从断点续传，避免重复上传整个文件。
+      <strong>{{ t('common.coreIdea') }}</strong>{{ t('upload.idea') }}
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { cloudStorageCdnLocale } from '../../../locales/cloud-storage-cdn/index.js'
 
-// 上传方式数据
-const uploadMethods = [
-  {
-    id: 'direct',
-    name: '直传',
-    icon: '🚀',
-    description: '小文件一次性上传到对象存储',
-    suitable: '< 100MB'
-  },
-  {
-    id: 'multipart',
-    name: '分片上传',
-    icon: '🔪',
-    description: '大文件切分多片并行上传',
-    suitable: '> 100MB'
-  },
-  {
-    id: 'resume',
-    name: '断点续传',
-    icon: '💾',
-    description: '网络中断后从断点继续上传',
-    suitable: '任何大小'
-  }
-]
+const { t, messages } = useI18n(cloudStorageCdnLocale)
+const uploadMethods = computed(() => messages.value.upload.methods)
 
-// 状态
 const selectedMethod = ref('direct')
 const currentStep = ref(0)
 const parallelActive = ref(0)
-const stats = ref({
-  uploadedChunks: 3,
-  totalChunks: 50,
-  uploadedSize: '60MB',
-  totalSize: '1GB',
-  progress: 6
-})
 
-// 方法
+const flowTitle = computed(() => messages.value.upload.flowTitles[selectedMethod.value])
+const currentFlow = computed(() => messages.value.upload.flows[selectedMethod.value])
+const resumeUploaded = computed(() => messages.value.upload.resumeUploaded)
+const resumePending = computed(() => messages.value.upload.resumePending)
+const successItems = computed(() => messages.value.upload.successItems)
+
 const selectMethod = (id) => {
   selectedMethod.value = id
   resetDemo()
-}
-
-const simulateCacheHit = () => {
-  resetDemo()
-  currentStep.value = 4
-}
-
-const simulateCacheMiss = () => {
-  resetDemo()
-  currentStep.value = 4
 }
 
 const resetDemo = () => {
   currentStep.value = 0
   parallelActive.value = 0
 }
-
-// 计算属性
-const uploadProgress = computed(() => {
-  return Math.round((stats.value.uploadedChunks / stats.value.totalChunks) * 100)
-})
 </script>
 
 <style scoped>
@@ -426,7 +340,6 @@ const uploadProgress = computed(() => {
   font-size: 1rem;
 }
 
-/* 分片预览 */
 .chunks-preview {
   display: flex;
   align-items: center;
@@ -456,7 +369,6 @@ const uploadProgress = computed(() => {
   color: var(--vp-c-text-2);
 }
 
-/* 并行上传 */
 .parallel-upload {
   display: flex;
   gap: 0.5rem;
@@ -482,7 +394,6 @@ const uploadProgress = computed(() => {
   font-weight: 600;
 }
 
-/* 进度条 */
 .progress-bar {
   position: relative;
   height: 24px;
@@ -510,7 +421,6 @@ const uploadProgress = computed(() => {
   text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
 }
 
-/* 错误信息 */
 .error-info {
   display: flex;
   flex-direction: column;
@@ -528,7 +438,6 @@ const uploadProgress = computed(() => {
   font-family: var(--vp-font-family-mono);
 }
 
-/* 恢复信息 */
 .resume-info {
   margin-top: 0.5rem;
 }
@@ -565,7 +474,6 @@ const uploadProgress = computed(() => {
   color: var(--vp-c-text-2);
 }
 
-/* 成功信息 */
 .success-info {
   display: grid;
   grid-template-columns: repeat(3, 1fr);

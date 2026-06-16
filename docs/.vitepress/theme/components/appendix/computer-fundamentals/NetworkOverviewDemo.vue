@@ -1,24 +1,22 @@
 <template>
   <div class="network-overview-demo">
     <div class="demo-header">
-      <span class="title">网络是怎么连接的</span>
-      <span class="subtitle">从发送到接收的完整过程</span>
+      <span class="title">{{ t('computerOrganization.networkOverview.title') }}</span>
+      <span class="subtitle">{{ t('computerOrganization.networkOverview.subtitle') }}</span>
     </div>
 
     <div class="network-scene">
       <div class="scene-devices">
-        <!-- 发送方 -->
         <div class="device sender">
           <div class="device-icon">💻</div>
-          <div class="device-name">发送方</div>
+          <div class="device-name">{{ t('computerOrganization.networkOverview.sender') }}</div>
           <div class="device-ip">192.168.1.100</div>
           <div class="app-layer">
             <div class="app-icon">📧</div>
-            <div class="app-name">邮件应用</div>
+            <div class="app-name">{{ t('computerOrganization.networkOverview.mailApp') }}</div>
           </div>
         </div>
 
-        <!-- 网络路径 -->
         <div class="network-path">
           <div class="path-steps">
             <div
@@ -35,27 +33,25 @@
 
           <div class="data-flow">
             <div v-if="activeStep !== null" class="flow-animation">
-              <div class="flow-packet">📦 数据包</div>
+              <div class="flow-packet">{{ t('computerOrganization.networkOverview.packet') }}</div>
             </div>
           </div>
         </div>
 
-        <!-- 接收方 -->
         <div class="device receiver">
           <div class="device-icon">🖥️</div>
-          <div class="device-name">接收方</div>
+          <div class="device-name">{{ t('computerOrganization.networkOverview.receiver') }}</div>
           <div class="device-ip">192.168.1.200</div>
           <div class="app-layer">
             <div class="app-icon">📧</div>
-            <div class="app-name">邮件应用</div>
+            <div class="app-name">{{ t('computerOrganization.networkOverview.mailApp') }}</div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- 封装过程 -->
     <div class="encapsulation-process">
-      <div class="process-title">数据封装过程</div>
+      <div class="process-title">{{ t('computerOrganization.networkOverview.processTitle') }}</div>
       <div class="encapsulation-layers">
         <div
           v-for="(layer, index) in encapsulationLayers"
@@ -73,12 +69,11 @@
       </div>
     </div>
 
-    <!-- 协议栈 -->
     <div class="protocol-stack">
-      <div class="stack-title">网络协议栈 (OSI 模型)</div>
+      <div class="stack-title">{{ t('computerOrganization.networkOverview.stackTitle') }}</div>
       <div class="stack-container">
         <div class="stack-column sender-stack">
-          <div class="stack-header">发送方</div>
+          <div class="stack-header">{{ t('computerOrganization.networkOverview.sender') }}</div>
           <div
             v-for="(layer, index) in protocolLayers"
             :key="'sender-' + index"
@@ -91,7 +86,7 @@
         <div class="stack-arrow">→</div>
 
         <div class="stack-column receiver-stack">
-          <div class="stack-header">接收方</div>
+          <div class="stack-header">{{ t('computerOrganization.networkOverview.receiver') }}</div>
           <div
             v-for="(layer, index) in protocolLayers"
             :key="'receiver-' + index"
@@ -106,83 +101,17 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { computerFundamentalsLocale } from '../../../locales/computer-fundamentals/index.js'
+
+const { t, messages } = useI18n(computerFundamentalsLocale)
 
 const activeStep = ref(null)
 
-const pathSteps = [
-  {
-    icon: '📧',
-    name: '应用层',
-    desc: '邮件软件创建邮件内容'
-  },
-  {
-    icon: '🔐',
-    name: '传输层',
-    desc: 'TCP 添加端口号和序号'
-  },
-  {
-    icon: '🌐',
-    name: '网络层',
-    desc: 'IP 添加源地址和目标地址'
-  },
-  {
-    icon: '🔌',
-    name: '数据链路层',
-    desc: '以太网添加 MAC 地址'
-  },
-  {
-    icon: '⚡',
-    name: '物理层',
-    desc: '转换成电信号发送'
-  }
-]
-
-const encapsulationLayers = [
-  {
-    num: '7',
-    name: '应用层',
-    data: '邮件内容: "Hello!"'
-  },
-  {
-    num: '6',
-    name: '表示层',
-    data: '数据编码: UTF-8'
-  },
-  {
-    num: '5',
-    name: '会话层',
-    data: '会话ID: sess_123'
-  },
-  {
-    num: '4',
-    name: '传输层',
-    data: 'TCP 头: 端口 25'
-  },
-  {
-    num: '3',
-    name: '网络层',
-    data: 'IP 头: 192.168.1.100 → 192.168.1.200'
-  },
-  {
-    num: '2',
-    name: '数据链路层',
-    data: '以太网帧: MAC 地址'
-  },
-  {
-    num: '1',
-    name: '物理层',
-    data: '比特流: 01010101...'
-  }
-]
-
-const protocolLayers = [
-  '应用层 (HTTP, SMTP)',
-  '传输层 (TCP, UDP)',
-  '网络层 (IP)',
-  '数据链路层 (Ethernet)',
-  '物理层 (电信号)'
-]
+const pathSteps = computed(() => messages.value.computerOrganization.networkOverview.pathSteps)
+const encapsulationLayers = computed(() => messages.value.computerOrganization.networkOverview.encapsulationLayers)
+const protocolLayers = computed(() => messages.value.computerOrganization.networkOverview.protocolLayers)
 </script>
 
 <style scoped>

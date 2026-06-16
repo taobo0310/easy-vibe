@@ -1,29 +1,29 @@
 <template>
   <div class="demo-wrapper">
-    <div class="demo-header">WebSocket / 全双工通信演示</div>
+    <div class="demo-header">{{ t('websocket.title') }}</div>
     
     <div class="network-stage">
-      <!-- 客户端 -->
+      
       <div class="node client">
         <div class="node-icon">🎮</div>
-        <div class="node-label">Player 1</div>
-        <button 
-          v-if="isConnected" 
-          class="action-btn client-btn" 
+        <div class="node-label">{{ t('websocket.player1') }}</div>
+        <button
+          v-if="isConnected"
+          class="action-btn client-btn"
           @click="sendMessage('client')"
         >
-          发招：升龙拳！👊
+          {{ t('websocket.sendMove') }}
         </button>
       </div>
 
-      <!-- WebSocket 通信链路（包含左右两个方向的车道） -->
+      
       <div class="channel">
         <div class="ws-pipe" v-show="isConnected">
           <div class="line top-line"></div>
           <div class="line bottom-line"></div>
         </div>
         
-        <!-- 流动的数据包 -->
+        
         <div 
           v-for="msg in activeMessages" 
           :key="msg.id" 
@@ -34,28 +34,28 @@
         </div>
       </div>
 
-      <!-- 服务端 -->
+      
       <div class="node server">
         <div class="node-icon">🖥️</div>
-        <div class="node-label">Game Server</div>
-        <button 
-          v-if="isConnected" 
-          class="action-btn server-btn" 
+        <div class="node-label">{{ t('websocket.gameServer') }}</div>
+        <button
+          v-if="isConnected"
+          class="action-btn server-btn"
           @click="sendMessage('server')"
         >
-          群发：敌军出动！🛸
+          {{ t('websocket.broadcast') }}
         </button>
       </div>
     </div>
 
     <div class="status-panel">
       <div class="status-controls">
-        <button 
-          class="toggle-btn" 
-          :class="{ active: isConnected }" 
+        <button
+          class="toggle-btn"
+          :class="{ active: isConnected }"
           @click="toggleConnection"
         >
-          {{ isConnected ? '⏹ 挥泪握手告别' : '⚡ Upgrade: websocket 协议质变' }}
+          {{ isConnected ? t('websocket.disconnect') : t('websocket.connect') }}
         </button>
       </div>
       <div class="log-box">
@@ -69,6 +69,10 @@
 
 <script setup>
 import { ref, onUnmounted } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { browserFrontendLocale } from '../../../locales/browser-frontend/index.js'
+
+const { t } = useI18n(browserFrontendLocale)
 
 const isConnected = ref(false)
 const activeMessages = ref([])
@@ -83,33 +87,33 @@ const addLog = (msg) => {
 const toggleConnection = () => {
   if (isConnected.value) {
     isConnected.value = false
-    addLog('断开 WebSockets 连接 (TCP 四次挥手).')
+    addLog(t('websocket.logDisconnect'))
     activeMessages.value = []
   } else {
-    addLog('客户端发 HTTP 请求：Upgrade: websocket, Connection: Upgrade')
+    addLog(t('websocket.logClientRequest'))
     setTimeout(() => {
-      addLog('服务端响应：101 Switching Protocols。神级链路建立完成！')
+      addLog(t('websocket.logServerResponse'))
       isConnected.value = true
     }, 600)
   }
 }
 
 const sendMessage = (sender) => {
-  const text = sender === 'client' ? '【二进制帧】走位左移' : '【JSON帧】Boss 释放技能'
+  const text = sender === 'client' ? '【Binary Frame】Move Left' : '【JSON Frame】Boss Skill'
   const msgObj = { id: msgId++, text, sender }
   activeMessages.value.push(msgObj)
-  
+
   if (sender === 'client') {
-    addLog(`客户端：瞬间送出 0101 极简格式数据包`)
+    addLog(t('websocket.logClientSend'))
   } else {
-    addLog(`服务端：瞬间下发最新全局状态帧`)
+    addLog(t('websocket.logServerSend'))
   }
-  
-  // 模拟极快传输
+
+
   setTimeout(() => {
     activeMessages.value = activeMessages.value.filter(m => m.id !== msgObj.id)
-    if (sender === 'client') addLog('服务端：光速收到玩家操作响应。')
-    else addLog('客户端：光速渲染 Boss 动画！')
+    if (sender === 'client') addLog(t('websocket.logServerReceive'))
+    else addLog(t('websocket.logClientReceive'))
   }, 800)
 }
 

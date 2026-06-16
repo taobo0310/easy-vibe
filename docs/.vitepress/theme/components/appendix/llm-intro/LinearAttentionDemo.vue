@@ -5,20 +5,20 @@
         :class="{ active: mode === 'standard' }"
         @click="mode = 'standard'"
       >
-        标准 Attention (网状连接)
+        {{ t('linearAttention.modes.standard') }}
       </button>
       <button
         :class="{ active: mode === 'linear' }"
         @click="mode = 'linear'"
       >
-        线性 Attention (接力传递)
+        {{ t('linearAttention.modes.linear') }}
       </button>
     </div>
 
     <div class="visual-area">
       <div class="control-panel">
         <div class="label">
-          参与者数量 (N): {{ nValue }}
+          {{ t('linearAttention.participantCount', { n: nValue }) }}
         </div>
         <input
           v-model="nValue"
@@ -196,7 +196,7 @@
       <div class="stats-panel">
         <div class="stat-item">
           <div class="stat-label">
-            连接/操作次数
+            {{ t('linearAttention.operations') }}
           </div>
           <div
             class="stat-value"
@@ -207,12 +207,10 @@
         </div>
         <div class="stat-desc">
           <span v-if="mode === 'standard'">
-            每个人都要找其他人。<br>N={{ nValue }} 时，连接数高达
-            {{ nValue * nValue }}！
+            {{ t('linearAttention.standardDesc', { n: nValue, count: nValue * nValue }) }}
           </span>
           <span v-else>
-            每个人只传给下一个人。<br>N={{ nValue }} 时，操作数仅为
-            {{ nValue }}。
+            {{ t('linearAttention.linearDesc', { n: nValue, count: nValue }) }}
           </span>
         </div>
       </div>
@@ -220,17 +218,15 @@
 
     <div class="analogy-box">
       <div class="analogy-title">
-        💡 核心区别：要不要回头看？
+        {{ t('linearAttention.title') }}
       </div>
       <div v-if="mode === 'standard'">
-        <b>回看模式 (Retrospective)</b>：
-        <br>想象你在考试。每做一道新题，你都要<b>把之前做过的所有题目再检查一遍</b>，确认有没有关联。
-        <br>题目越多，你需要检查的次数就越多，最后累死在检查上。
+        <b>{{ t('linearAttention.standardTitle') }}</b>
+        <br>{{ t('linearAttention.standardBody') }}
       </div>
       <div v-else>
-        <b>状态模式 (Recurrent)</b>： <br>想象你在跑步。你不需要记得前 100
-        步每一步踩在哪，你只需要知道<b>现在的速度和位置</b>（State）。
-        <br>跑第 1000 步和跑第 1 步一样轻松，因为你不需要回头。
+        <b>{{ t('linearAttention.linearTitle') }}</b>
+        <br>{{ t('linearAttention.linearBody') }}
       </div>
     </div>
   </div>
@@ -238,7 +234,10 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { llmIntroLocale } from '../../../locales/llm-intro/index.js'
 
+const { t } = useI18n(llmIntroLocale)
 const mode = ref('standard')
 const nValue = ref(5)
 

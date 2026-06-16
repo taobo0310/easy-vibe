@@ -2,8 +2,8 @@
   <div class="permission-hierarchy-demo">
     <div class="demo-header">
       <span class="icon">🏛️</span>
-      <span class="title">权限层级结构</span>
-      <span class="subtitle">不同权限级别的范围差异</span>
+      <span class="title">{{ t('permissionHierarchy.title') }}</span>
+      <span class="subtitle">{{ t('permissionHierarchy.subtitle') }}</span>
     </div>
 
     <div class="main-area">
@@ -31,11 +31,11 @@
           {{ selectedLevelData.name }}
         </div>
         <div class="detail-row">
-          <span class="label">范围：</span>
+          <span class="label">{{ t('permissionHierarchy.scopeLabel') }}</span>
           <span class="value">{{ selectedLevelData.scope }}</span>
         </div>
         <div class="detail-row">
-          <span class="label">场景：</span>
+          <span class="label">{{ t('permissionHierarchy.scenarioLabel') }}</span>
           <span class="value">{{ selectedLevelData.scenario }}</span>
         </div>
         <div class="perms-list">
@@ -50,55 +50,21 @@
 
     <div class="info-box">
       <span class="icon">💡</span>
-      <strong>核心思想：</strong>最小权限原则——始终授予用户完成工作所需的最小权限。
+      <strong>{{ t('common.coreIdea') }}</strong>{{ t('permissionHierarchy.info') }}
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { cloudIamLocale } from '../../../locales/cloud-iam/index.js'
 
+const { t, messages } = useI18n(cloudIamLocale)
 const selectedLevel = ref(0)
+const hierarchyLevels = computed(() => messages.value.permissionHierarchy.levels)
 
-const hierarchyLevels = [
-  {
-    icon: '👑',
-    name: '根账号',
-    scope: '全账号最高权限',
-    scenario: '账号所有者，拥有所有权限',
-    permissions: [{ name: '完全管理' }, { name: '账单管理' }, { name: '关闭账号' }]
-  },
-  {
-    icon: '👤',
-    name: 'IAM 管理员',
-    scope: 'IAM 全权限',
-    scenario: '管理所有 IAM 用户、角色、策略',
-    permissions: [{ name: '创建/删除用户' }, { name: '管理策略' }, { name: '查看凭证' }]
-  },
-  {
-    icon: '👥',
-    name: '普通用户',
-    scope: '受限权限',
-    scenario: '日常开发，只能访问特定资源',
-    permissions: [{ name: '只读 EC2' }, { name: '读写 S3' }, { name: '查看日志' }]
-  },
-  {
-    icon: '🎭',
-    name: '临时角色',
-    scope: '按策略定义',
-    scenario: '跨账号访问、临时授权',
-    permissions: [{ name: '临时凭证' }, { name: '跨账号' }, { name: '无长期凭证' }]
-  },
-  {
-    icon: '🔑',
-    name: '服务账号',
-    scope: 'API 访问',
-    scenario: '应用程序、CI/CD 流水线',
-    permissions: [{ name: 'AK/SK' }, { name: '特定 API' }, { name: '定期轮换' }]
-  }
-]
-
-const selectedLevelData = computed(() => hierarchyLevels[selectedLevel.value])
+const selectedLevelData = computed(() => hierarchyLevels.value[selectedLevel.value])
 
 function selectLevel(index) {
   selectedLevel.value = index

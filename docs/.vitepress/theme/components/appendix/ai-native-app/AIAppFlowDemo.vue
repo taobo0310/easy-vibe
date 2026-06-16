@@ -1,8 +1,8 @@
 <template>
   <div class="flow-demo">
     <div class="header">
-      <div class="title">AI 应用请求处理流程</div>
-      <div class="subtitle">点击"发送请求"，观察一次 AI 请求的完整生命周期</div>
+      <div class="title">{{ t('flow.title') }}</div>
+      <div class="subtitle">{{ t('flow.subtitle') }}</div>
     </div>
 
     <div class="pipeline">
@@ -29,17 +29,17 @@
         class="action-btn"
         @click="startFlow"
       >
-        ▶ 发送请求
+        ▶ {{ t('flow.send') }}
       </button>
       <button
         v-else-if="!isRunning && currentStep >= steps.length"
         class="action-btn reset"
         @click="resetFlow"
       >
-        🔄 重置
+        🔄 {{ t('common.reset') }}
       </button>
       <div v-else-if="isRunning" class="running-hint">
-        ⏳ 处理中...
+        ⏳ {{ t('flow.running') }}
       </div>
     </div>
 
@@ -52,17 +52,17 @@
 
         <div class="io-section">
           <div class="io-block">
-            <div class="io-label">输入</div>
+            <div class="io-label">{{ t('flow.inputLabel') }}</div>
             <pre class="io-code"><code>{{ activeStep.input }}</code></pre>
           </div>
           <div class="io-block">
-            <div class="io-label">输出</div>
+            <div class="io-label">{{ t('flow.outputLabel') }}</div>
             <pre class="io-code"><code>{{ activeStep.output }}</code></pre>
           </div>
         </div>
 
         <div class="latency-bar">
-          <span class="latency-label">耗时</span>
+          <span class="latency-label">{{ t('flow.latencyLabel') }}</span>
           <div class="latency-track">
             <div
               class="latency-fill"
@@ -75,10 +75,9 @@
     </div>
 
     <div class="insight-bar">
-      <span class="insight-label">💡 关键洞察：</span>
+      <span class="insight-label">💡 {{ t('flow.insightLabel') }}</span>
       <span class="insight-text">
-        AI 应用的请求链路比传统应用更长，模型推理通常占总耗时的 60-80%。
-        优化重点在于：Prompt 缓存、流式输出、异步处理。
+        {{ t('flow.insight') }}
       </span>
     </div>
   </div>
@@ -86,60 +85,27 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { aiNativeAppLocale } from '../../../locales/ai-native-app/index.js'
 
-const steps = [
-  {
-    id: 'input', icon: '👤', name: '用户输入', en: 'User Input',
-    detail: '用户通过自然语言输入请求。系统需要处理多种输入形式：文本、语音转文字、图片描述等。与传统应用的表单提交不同，输入是开放式的、非结构化的。',
-    input: '"帮我总结这篇文章的核心观点"',
-    output: '{ text: "帮我总结...", type: "text", lang: "zh" }',
-    latency: '~0ms', latencyPct: 2
-  },
-  {
-    id: 'preprocess', icon: '🔧', name: '预处理', en: 'Preprocessing',
-    detail: '对用户输入进行清洗和增强：意图识别、关键词提取、上下文拼接、RAG 检索相关文档片段、构建完整的 Prompt。这一步决定了模型能获得多少有效信息。',
-    input: '{ text: "帮我总结...", context: [...历史对话] }',
-    output: '{ system_prompt: "你是...", user_prompt: "...", retrieved_docs: [...] }',
-    latency: '~200ms', latencyPct: 15
-  },
-  {
-    id: 'model', icon: '🧠', name: '模型推理', en: 'Model Inference',
-    detail: '将构建好的 Prompt 发送给大语言模型进行推理。这是整个链路中耗时最长的环节。模型会根据 Prompt 中的指令、上下文和检索到的知识，生成回答。',
-    input: '{ messages: [...], model: "gpt-4", temperature: 0.7 }',
-    output: '{ content: "这篇文章的核心观点有三个...", tokens: 256 }',
-    latency: '~2-8s', latencyPct: 75
-  },
-  {
-    id: 'postprocess', icon: '🛡️', name: '后处理', en: 'Post-processing',
-    detail: '对模型输出进行安全检查和格式化：内容审核过滤、幻觉检测、格式转换（Markdown 渲染）、引用来源标注、敏感信息脱敏等。',
-    input: '{ raw_output: "这篇文章的核心观点有三个..." }',
-    output: '{ safe: true, formatted: "## 核心观点\\n1. ...", sources: [...] }',
-    latency: '~100ms', latencyPct: 8
-  },
-  {
-    id: 'response', icon: '💬', name: '响应输出', en: 'Response',
-    detail: '将处理后的结果以流式方式返回给用户。前端逐步渲染 Markdown 内容，同时展示引用来源和置信度。用户可以在生成过程中随时中断或追问。',
-    input: '{ formatted: "## 核心观点\\n1. ...", stream: true }',
-    output: '用户看到逐字出现的回答 + 来源引用',
-    latency: '~50ms (首字节)', latencyPct: 5
-  }
-]
+const { t, messages } = useI18n(aiNativeAppLocale)
+const steps = computed(() => messages.value.flow.steps)
 
 const currentStep = ref(-1)
 const isRunning = ref(false)
 
 const activeStep = computed(() => {
-  const idx = Math.min(currentStep.value, steps.length - 1)
-  return idx >= 0 ? steps[idx] : steps[0]
+  const idx = Math.min(currentStep.value, steps.value.length - 1)
+  return idx >= 0 ? steps.value[idx] : steps.value[0]
 })
 
 const startFlow = async () => {
   isRunning.value = true
-  for (let i = 0; i < steps.length; i++) {
+  for (let i = 0; i < steps.value.length; i++) {
     currentStep.value = i
     await new Promise(r => setTimeout(r, 1200))
   }
-  currentStep.value = steps.length
+  currentStep.value = steps.value.length
   isRunning.value = false
 }
 

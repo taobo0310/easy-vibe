@@ -2,11 +2,10 @@
   <div class="planning-demo">
     <div class="header">
       <div class="title">
-        📋 Agent 的规划能力
+        {{ t('planningDemo.title') }}
       </div>
     </div>
 
-    <!-- 任务选择 -->
     <div class="task-tabs">
       <button
         v-for="task in tasks"
@@ -23,15 +22,12 @@
       </button>
     </div>
 
-    <!-- 目标 -->
     <div class="goal-bar">
       <span class="label">🎯</span>
       <span class="text">{{ currentTaskData.goal }}</span>
     </div>
 
-    <!-- 执行区域 -->
     <div class="execution-area">
-      <!-- 步骤进度条 -->
       <div class="steps-progress">
         <div
           v-for="(step, index) in currentTaskData.steps"
@@ -52,26 +48,25 @@
         </div>
       </div>
 
-      <!-- 日志和思考 -->
       <div class="info-row">
         <div class="log-box">
           <div class="box-header">
-            <span>📝 执行日志</span>
+            <span>{{ t('planningDemo.logTitle') }}</span>
             <span
               v-if="executionStatus === 'running'"
               class="status running"
-            >执行中</span>
+            >{{ t('planningDemo.running') }}</span>
             <span
               v-else-if="executionStatus === 'completed'"
               class="status completed"
-            >已完成</span>
+            >{{ t('planningDemo.completed') }}</span>
           </div>
           <div class="log-content">
             <div
               v-if="logs.length === 0"
               class="empty"
             >
-              点击"开始执行"查看过程
+              {{ t('planningDemo.emptyLog') }}
             </div>
             <div
               v-for="(log, i) in logs.slice(-4)"
@@ -94,7 +89,7 @@
           class="thought-box"
         >
           <div class="box-header">
-            🧠 正在思考
+            {{ t('planningDemo.thinking') }}
           </div>
           <div class="thought-content">
             {{ currentThought }}
@@ -103,37 +98,36 @@
       </div>
     </div>
 
-    <!-- 控制栏 -->
     <div class="control-bar">
       <button
         v-if="executionStatus === 'idle'"
         class="ctrl-btn primary"
         @click="startExecution"
       >
-        ▶ 开始执行
+        {{ t('planningDemo.start') }}
       </button>
       <button
         v-else-if="executionStatus === 'running'"
         class="ctrl-btn"
         disabled
       >
-        ⏳ 执行中...
+        {{ t('planningDemo.executing') }}
       </button>
       <button
         v-else
         class="ctrl-btn"
         @click="reset"
       >
-        🔄 重置
+        {{ t('planningDemo.reset') }}
       </button>
 
       <div
         v-if="executionStatus === 'completed'"
         class="stats"
       >
-        <span class="stat">{{ currentTaskData.steps.length }} 步骤</span>
+        <span class="stat">{{ t('planningDemo.stepsUnit', { count: currentTaskData.steps.length }) }}</span>
         <span class="stat">{{ executionTime }}s</span>
-        <span class="stat">{{ toolCalls }} 调用</span>
+        <span class="stat">{{ t('planningDemo.callsUnit', { count: toolCalls }) }}</span>
       </div>
 
       <div class="step-dots">
@@ -145,94 +139,20 @@
       </div>
     </div>
 
-    <!-- 提示 -->
     <div class="tip-bar">
       <span>💡</span>
-      <span>规划核心：将复杂任务分解为<strong>原子操作</strong>，根据上一步结果<strong>动态调整</strong>后续计划</span>
+      <span>{{ t('planningDemo.tipPrefix') }}<strong>{{ t('planningDemo.atomic') }}</strong>{{ t('planningDemo.tipMiddle') }}<strong>{{ t('planningDemo.dynamic') }}</strong>{{ t('planningDemo.tipSuffix') }}</span>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, nextTick } from 'vue'
+import { ref, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { agentIntroLocale } from '../../../locales/agent-intro/index.js'
 
-const tasks = [
-  {
-    id: 'simple',
-    icon: '🌤️',
-    name: '查天气',
-    complexity: 'easy',
-    complexityLabel: '简单',
-    goal: '查询北京今天的天气',
-    steps: [
-      { name: '调用天气 API', tool: 'weather_api' },
-      { name: '格式化结果', tool: 'formatter' }
-    ],
-    logs: [
-      { type: 'think', icon: '🧠', message: '需要查询北京天气' },
-      { type: 'action', icon: '🔧', message: 'weather_api(city="北京")' },
-      { type: 'result', icon: '📥', message: '晴, 25°C, 空气质量良' },
-      { type: 'complete', icon: '✅', message: '北京今天天气晴朗' }
-    ]
-  },
-  {
-    id: 'medium',
-    icon: '📊',
-    name: '数据分析',
-    complexity: 'medium',
-    complexityLabel: '中等',
-    goal: '分析销售 CSV，找出销售额最高月份',
-    steps: [
-      { name: '读取 CSV', tool: 'file_reader' },
-      { name: '解析数据', tool: 'data_parser' },
-      { name: '聚合计算', tool: 'calculator' },
-      { name: '生成报告', tool: 'report_generator' }
-    ],
-    logs: [
-      { type: 'think', icon: '🧠', message: '读取销售数据文件' },
-      { type: 'action', icon: '🔧', message: 'file_reader(path="sales.csv")' },
-      { type: 'result', icon: '📥', message: '读取 1200 行数据' },
-      { type: 'think', icon: '🧠', message: '解析数据结构' },
-      { type: 'action', icon: '🔧', message: 'data_parser(data)' },
-      { type: 'result', icon: '📥', message: '解析完成' },
-      { type: 'think', icon: '🧠', message: '按月份聚合销售额' },
-      { type: 'action', icon: '🔧', message: 'calculator.aggregate(by="month")' },
-      { type: 'result', icon: '📥', message: '11月销售额最高 ¥320K' },
-      { type: 'complete', icon: '✅', message: '分析完成' }
-    ]
-  },
-  {
-    id: 'complex',
-    icon: '🔬',
-    name: '研究报告',
-    complexity: 'hard',
-    complexityLabel: '复杂',
-    goal: '调研 AI Agent 进展，撰写完整报告',
-    steps: [
-      { name: '搜索资讯', tool: 'web_search' },
-      { name: '阅读文章', tool: 'web_reader' },
-      { name: '提取信息', tool: 'extractor' },
-      { name: '搜索厂商', tool: 'web_search' },
-      { name: '生成大纲', tool: 'planner' },
-      { name: '撰写报告', tool: 'writer' }
-    ],
-    logs: [
-      { type: 'think', icon: '🧠', message: '搜索最新 AI Agent 资讯' },
-      { type: 'action', icon: '🔧', message: 'web_search("AI Agent 2024")' },
-      { type: 'result', icon: '📥', message: '找到 15 篇文章' },
-      { type: 'action', icon: '🔧', message: 'web_reader(urls=[...])' },
-      { type: 'result', icon: '📥', message: '成功读取内容' },
-      { type: 'action', icon: '🔧', message: 'extractor(fields=[...])' },
-      { type: 'result', icon: '📥', message: '提取 45 个数据点' },
-      { type: 'action', icon: '🔧', message: 'web_search("AI Agent companies")' },
-      { type: 'result', icon: '📥', message: 'OpenAI, Anthropic, Microsoft...' },
-      { type: 'action', icon: '🔧', message: 'planner.generate_outline()' },
-      { type: 'result', icon: '📥', message: '大纲生成完成' },
-      { type: 'action', icon: '🔧', message: 'writer.generate_content()' },
-      { type: 'complete', icon: '✅', message: '报告生成完成，2500字' }
-    ]
-  }
-]
+const { t, messages } = useI18n(agentIntroLocale)
+const tasks = computed(() => messages.value.planningDemo.tasks)
 
 const currentTask = ref('simple')
 const executionStatus = ref('idle')
@@ -242,7 +162,7 @@ const currentThought = ref('')
 const executionTime = ref(0)
 const toolCalls = ref(0)
 
-const currentTaskData = computed(() => tasks.find(t => t.id === currentTask.value))
+const currentTaskData = computed(() => tasks.value.find(task => task.id === currentTask.value))
 
 const selectTask = (id) => {
   currentTask.value = id
@@ -282,7 +202,7 @@ const startExecution = async () => {
     }
     if (log.type === 'complete') currentThought.value = ''
 
-    logs.value.push({ ...log, time: new Date().toLocaleTimeString('zh-CN', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' }) })
+    logs.value.push({ ...log, time: new Date().toLocaleTimeString(t('planningDemo.timeLocale'), { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' }) })
     await wait(700)
   }
 
@@ -318,7 +238,6 @@ reset()
   -webkit-text-fill-color: transparent;
 }
 
-/* 任务标签 */
 .task-tabs {
   display: flex;
   gap: 8px;
@@ -357,7 +276,6 @@ reset()
 .complexity.medium { background: #fef3c7; color: #92400e; }
 .complexity.hard { background: #fee2e2; color: #991b1b; }
 
-/* 目标 */
 .goal-bar {
   background: var(--vp-c-brand-soft);
   border-left: 3px solid var(--vp-c-brand);
@@ -370,7 +288,6 @@ reset()
 .goal-bar .label { margin-right: 8px; }
 .goal-bar .text { font-weight: 600; }
 
-/* 步骤进度 */
 .steps-progress {
   display: flex;
   align-items: flex-start;
@@ -445,7 +362,6 @@ reset()
   background: #22c55e;
 }
 
-/* 信息行 */
 .info-row {
   display: grid;
   grid-template-columns: 2fr 1fr;
@@ -534,7 +450,6 @@ reset()
   line-height: 1.5;
 }
 
-/* 控制栏 */
 .control-bar {
   display: flex;
   justify-content: space-between;
@@ -585,7 +500,6 @@ reset()
 
 .dot.active { background: #22c55e; }
 
-/* 提示 */
 .tip-bar {
   display: flex;
   gap: 8px;

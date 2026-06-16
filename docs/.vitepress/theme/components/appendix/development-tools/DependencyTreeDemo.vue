@@ -1,8 +1,8 @@
 <template>
   <div class="demo-root">
     <div class="demo-header">
-      <span class="title">依赖树 & 版本语义</span>
-      <span class="subtitle">理解语义化版本号与依赖关系图</span>
+      <span class="title">{{ t('dependencyTree.title') }}</span>
+      <span class="subtitle">{{ t('dependencyTree.subtitle') }}</span>
     </div>
 
     <div class="control-panel">
@@ -18,7 +18,6 @@
       </div>
     </div>
 
-    <!-- Tab: 语义化版本 -->
     <div v-if="activeTab === 'semver'" class="visualization-area">
       <div class="semver-display">
         <div class="version-number">
@@ -40,20 +39,20 @@
         <transition name="fade">
           <div v-if="hoveredPart" class="ver-detail" :style="{ borderColor: currentPart.color }">
             <div class="ver-detail-title" :style="{ color: currentPart.color }">
-              {{ currentPart.label }} 版本
+              {{ currentPart.label }} {{ t('dependencyTree.versionSuffix') }}
             </div>
             <div class="ver-detail-desc">{{ currentPart.desc }}</div>
             <div class="ver-detail-example">
-              <span class="example-label">示例：</span>
+              <span class="example-label">{{ t('dependencyTree.exampleLabel') }}</span>
               <code>{{ currentPart.example }}</code>
             </div>
           </div>
         </transition>
-        <div v-if="!hoveredPart" class="ver-hint">← 鼠标悬停数字查看含义</div>
+        <div v-if="!hoveredPart" class="ver-hint">{{ t('dependencyTree.hoverHint') }}</div>
       </div>
 
       <div class="range-grid">
-        <div class="range-title">常用版本范围符号</div>
+        <div class="range-title">{{ t('dependencyTree.rangesTitle') }}</div>
         <div
           v-for="r in ranges"
           :key="r.sym"
@@ -66,14 +65,13 @@
           <div v-if="activeRange === r.sym" class="range-example">
             <div v-for="ex in r.examples" :key="ex.v" class="range-ex-row">
               <code>{{ ex.v }}</code>
-              <span :class="['ex-status', ex.ok ? 'ok' : 'no']">{{ ex.ok ? '✓ 接受' : '✗ 拒绝' }}</span>
+              <span :class="['ex-status', ex.ok ? 'ok' : 'no']">{{ ex.ok ? t('dependencyTree.accepted') : t('dependencyTree.rejected') }}</span>
             </div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Tab: 依赖树 -->
     <div v-if="activeTab === 'tree'" class="visualization-area">
       <div class="scenario-select">
         <button
@@ -89,7 +87,7 @@
       <div class="tree-container">
         <div class="tree-root-node node">
           <span class="node-name">{{ currentScenario.root }}</span>
-          <span class="node-badge root-badge">你的项目</span>
+          <span class="node-badge root-badge">{{ t('dependencyTree.rootBadge') }}</span>
         </div>
 
         <div class="tree-level">
@@ -102,7 +100,7 @@
             <div class="node dep-node">
               <span class="node-name">{{ dep.name }}</span>
               <span class="node-ver">{{ dep.version }}</span>
-              <span v-if="dep.conflict" class="conflict-badge">⚠ 冲突</span>
+              <span v-if="dep.conflict" class="conflict-badge">{{ t('dependencyTree.conflictBadge') }}</span>
             </div>
             <div v-if="dep.children && dep.children.length" class="sub-level">
               <div
@@ -128,23 +126,22 @@
       </div>
     </div>
 
-    <!-- Tab: 锁文件 -->
     <div v-if="activeTab === 'lockfile'" class="visualization-area">
       <div class="lockfile-compare">
         <div class="lf-col">
-          <div class="lf-title">📄 package.json（声明意图）</div>
+          <div class="lf-title">{{ t('dependencyTree.packageJsonTitle') }}</div>
           <div class="lf-content">
             <pre class="code-block">{{ packageJsonExample }}</pre>
           </div>
-          <div class="lf-note">用范围符号声明「可以接受哪些版本」</div>
+          <div class="lf-note">{{ t('dependencyTree.packageJsonNote') }}</div>
         </div>
         <div class="lf-arrow">→</div>
         <div class="lf-col">
-          <div class="lf-title">🔒 package-lock.json（固定现实）</div>
+          <div class="lf-title">{{ t('dependencyTree.lockfileTitle') }}</div>
           <div class="lf-content">
             <pre class="code-block">{{ lockfileExample }}</pre>
           </div>
-          <div class="lf-note">锁定实际安装的精确版本，团队共享</div>
+          <div class="lf-note">{{ t('dependencyTree.lockfileNote') }}</div>
         </div>
       </div>
 
@@ -164,161 +161,38 @@
     </div>
 
     <div class="info-box">
-      <strong>黄金法则：</strong>
-      <span v-if="activeTab === 'semver'">语义化版本 = MAJOR.MINOR.PATCH，MAJOR 变说明有破坏性改动，升级需谨慎。</span>
-      <span v-else-if="activeTab === 'tree'">依赖的依赖也是依赖，一个包可以间接引入几十个包，这就是"依赖树"。</span>
-      <span v-else>把锁文件提交到 Git，保证团队每个人、每次 CI 安装的包版本完全一致。</span>
+      <strong>{{ t('dependencyTree.goldenStrong') }}</strong>
+      <span v-if="activeTab === 'semver'">{{ t('dependencyTree.golden.semver') }}</span>
+      <span v-else-if="activeTab === 'tree'">{{ t('dependencyTree.golden.tree') }}</span>
+      <span v-else>{{ t('dependencyTree.golden.lockfile') }}</span>
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { developmentToolsLocale } from '../../../locales/development-tools/index.js'
+
+const { t, messages } = useI18n(developmentToolsLocale)
 
 const activeTab = ref('semver')
 const hoveredPart = ref(null)
 const activeRange = ref(null)
 const activeScenario = ref('normal')
 
-const tabs = [
-  { id: 'semver', label: '语义化版本' },
-  { id: 'tree', label: '依赖树' },
-  { id: 'lockfile', label: '锁文件' }
-]
-
-const versionParts = [
-  {
-    id: 'major',
-    num: '2',
-    label: 'MAJOR',
-    color: '#ef4444',
-    desc: '主版本号。有破坏性 API 变更时递增，通常不向后兼容。升级前必须看 CHANGELOG。',
-    example: 'React 16 → 17 → 18，每次都有较大改动'
-  },
-  {
-    id: 'minor',
-    num: '8',
-    label: 'MINOR',
-    color: '#f59e0b',
-    desc: '次版本号。新增功能但向后兼容时递增，可以放心升级。',
-    example: 'axios 1.5.0 → 1.6.0，新增了功能但不影响老用法'
-  },
-  {
-    id: 'patch',
-    num: '3',
-    label: 'PATCH',
-    color: '#22c55e',
-    desc: '补丁版本号。只修复 bug，完全向后兼容，建议及时升级。',
-    example: 'lodash 4.17.20 → 4.17.21，修复安全漏洞'
-  }
-]
+const tabs = computed(() => messages.value.dependencyTree.tabs)
+const versionParts = computed(() => messages.value.dependencyTree.versionParts)
 
 const currentPart = computed(
-  () => versionParts.find(p => p.id === hoveredPart.value) || versionParts[0]
+  () => versionParts.value.find(p => p.id === hoveredPart.value) || versionParts.value[0]
 )
 
-const ranges = [
-  {
-    sym: '^2.8.3',
-    name: '兼容范围（推荐）',
-    desc: '允许 MINOR 和 PATCH 升级，锁定 MAJOR',
-    examples: [
-      { v: '2.8.3', ok: true }, { v: '2.9.0', ok: true },
-      { v: '3.0.0', ok: false }, { v: '2.8.2', ok: false }
-    ]
-  },
-  {
-    sym: '~2.8.3',
-    name: '近似范围（保守）',
-    desc: '只允许 PATCH 升级，锁定 MAJOR 和 MINOR',
-    examples: [
-      { v: '2.8.3', ok: true }, { v: '2.8.9', ok: true },
-      { v: '2.9.0', ok: false }, { v: '3.0.0', ok: false }
-    ]
-  },
-  {
-    sym: '2.8.3',
-    name: '精确版本（严格）',
-    desc: '只接受这一个版本，完全锁定',
-    examples: [
-      { v: '2.8.3', ok: true }, { v: '2.8.4', ok: false },
-      { v: '2.9.0', ok: false }, { v: '2.8.2', ok: false }
-    ]
-  },
-  {
-    sym: '*',
-    name: '任意版本（危险）',
-    desc: '接受任何版本，包括主版本升级，生产环境禁止',
-    examples: [
-      { v: '1.0.0', ok: true }, { v: '2.8.3', ok: true },
-      { v: '99.0.0', ok: true }, { v: '0.0.1', ok: true }
-    ]
-  }
-]
+const ranges = computed(() => messages.value.dependencyTree.ranges)
+const scenarios = computed(() => messages.value.dependencyTree.scenarios)
+const allScenarios = computed(() => messages.value.dependencyTree.allScenarios)
 
-const scenarios = [
-  { id: 'normal', label: '正常依赖' },
-  { id: 'shared', label: '共享依赖' },
-  { id: 'conflict', label: '版本冲突' }
-]
-
-const allScenarios = {
-  normal: {
-    root: 'my-app',
-    type: 'success',
-    icon: '✅',
-    description: '正常情况：直接依赖 axios 和 lodash，它们各自有少量子依赖，无冲突。',
-    direct: [
-      {
-        name: 'axios',
-        version: '^1.6.8',
-        children: [
-          { name: 'follow-redirects', version: '^1.15.6' },
-          { name: 'form-data', version: '^4.0.0' }
-        ]
-      },
-      { name: 'lodash', version: '^4.17.21', children: [] }
-    ]
-  },
-  shared: {
-    root: 'my-app',
-    type: 'info',
-    icon: '📌',
-    description: '共享依赖：react-dom 和 react-router 都依赖同一个 react，npm 会自动复用，不重复安装。',
-    direct: [
-      {
-        name: 'react-dom',
-        version: '^18.2.0',
-        children: [{ name: 'react', version: '^18.2.0' }]
-      },
-      {
-        name: 'react-router',
-        version: '^6.22.0',
-        children: [{ name: 'react', version: '^18.2.0' }]
-      }
-    ]
-  },
-  conflict: {
-    root: 'my-app',
-    type: 'warning',
-    icon: '⚠️',
-    description: '版本冲突：pkg-a 需要 lodash@^3.0.0，pkg-b 需要 lodash@^4.0.0，MAJOR 不同无法共享，npm 会安装两份，导致包体积膨胀。',
-    direct: [
-      {
-        name: 'pkg-a',
-        version: '^1.0.0',
-        children: [{ name: 'lodash', version: '^3.10.1', conflict: true }]
-      },
-      {
-        name: 'pkg-b',
-        version: '^2.0.0',
-        children: [{ name: 'lodash', version: '^4.17.21', conflict: true }]
-      }
-    ]
-  }
-}
-
-const currentScenario = computed(() => allScenarios[activeScenario.value])
+const currentScenario = computed(() => allScenarios.value[activeScenario.value])
 
 const packageJsonExample = `{
   "dependencies": {
@@ -339,12 +213,7 @@ const lockfileExample = `{
   }
 }`
 
-const lockfileRules = [
-  { icon: '📌', title: '必须提交到 Git', desc: '锁文件是团队契约，让所有成员、CI/CD 安装完全相同的版本。' },
-  { icon: '🚫', title: '不要手动编辑', desc: '锁文件由包管理器自动维护，手动修改极易引入错误。' },
-  { icon: '🔄', title: 'npm install 会更新它', desc: '每次 install/update 后，锁文件会自动更新到最新解析结果。' },
-  { icon: '🧪', title: 'npm ci 严格遵守它', desc: 'CI 环境用 npm ci 而非 npm install，保证精确复现锁文件记录的版本。' }
-]
+const lockfileRules = computed(() => messages.value.dependencyTree.lockfileRules)
 </script>
 
 <style scoped>

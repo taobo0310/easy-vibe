@@ -2,17 +2,17 @@
   <div class="language-comparison-demo">
     <div class="demo-header">
       <span class="icon">⚖️</span>
-      <span class="title">语言天平</span>
-      <span class="subtitle">权衡不同维度的优劣势</span>
+      <span class="title">{{ t('comparison.title') }}</span>
+      <span class="subtitle">{{ t('comparison.subtitle') }}</span>
     </div>
 
     <div class="intro-text">
-      想象你在<span class="highlight">超市购物</span>：有的商品便宜但不耐用，有的质量好但价格高。选择后端语言也一样，需要在性能、开发效率、生态成熟度等多个维度之间做权衡。
+      {{ t('comparison.introPrefix') }}<span class="highlight">{{ t('comparison.introHighlight') }}</span>{{ t('comparison.introSuffix') }}
     </div>
 
     <div class="dimension-selector">
       <div class="dimension-label">
-        选择比较维度：
+        {{ t('comparison.dimensionLabel') }}
       </div>
       <div class="dimension-buttons">
         <button
@@ -58,114 +58,37 @@
     <div class="insight-box">
       <span class="icon">🔍</span>
       <div class="insight-content">
-        <strong>洞察分析：</strong>
+        <strong>{{ t('comparison.insightStrong') }}</strong>
         <p>{{ getDimensionInfo().insight }}</p>
       </div>
     </div>
 
     <div class="info-box">
       <span class="icon">💡</span>
-      <strong>核心思想：</strong>没有"万能银弹"。高性能往往意味着高开发成本（C++、Rust），快速开发通常伴随性能损失（Python、Ruby）。根据项目核心诉求做取舍，而不是追求"样样都行"。
+      <strong>{{ t('comparison.infoStrong') }}</strong>{{ t('comparison.info') }}
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { backendLanguagesLocale } from '../../../locales/backend-languages/index.js'
+
+const { t, messages } = useI18n(backendLanguagesLocale)
 
 const selectedDimension = ref('performance')
-
-const dimensions = [
-  { key: 'performance', icon: '⚡', label: '性能' },
-  { key: 'efficiency', icon: '🚀', label: '开发效率' },
-  { key: 'ecosystem', icon: '📦', label: '生态成熟度' },
-  { key: 'learning', icon: '📚', label: '学习曲线' },
-  { key: 'concurrency', icon: '🔄', label: '并发能力' }
-]
-
-const dimensionInfo = {
-  performance: {
-    title: '性能对比',
-    unit: '(分数越高越快)',
-    insight: 'C++ 和 Rust 在性能方面遥遥领先，但学习曲线极其陡峭。Go 和 Java 在性能和开发效率之间取得了很好的平衡。Python 和 Ruby 性能最弱，但开发速度最快。'
-  },
-  efficiency: {
-    title: '开发效率',
-    unit: '(分数越高越快)',
-    insight: 'Python 和 Ruby 在快速开发方面无与伦比，适合原型和初创公司。Go 和 Node.js 居中，兼顾了开发速度和性能。Rust 和 C++ 开发效率最低，主要受学习曲线影响。'
-  },
-  ecosystem: {
-    title: '生态成熟度',
-    unit: '(分数越高库越多)',
-    insight: 'Java、Python、Node.js 拥有最成熟的生态系统。Go 和 Rust 虽然年轻，但发展迅速。C++ 生态成熟但学习成本高。Ruby 生态主要集中在 Web 开发领域。'
-  },
-  learning: {
-    title: '学习曲线',
-    unit: '(分数越高越简单)',
-    insight: 'Python、Ruby、Go 最容易上手。Node.js 需要理解异步概念。Java 需要掌握面向对象和框架。Rust 和 C++ 学习曲线最陡，需要深入理解内存管理。'
-  },
-  concurrency: {
-    title: '并发能力',
-    unit: '(分数越高越强)',
-    insight: 'Go 的 Goroutine 是并发的王者，轻量且简单。Rust 的异步模型性能强大但复杂。Java 的线程池成熟稳定。Node.js 的事件循环适合 I/O 密集型。Python 的 GIL 限制了多线程性能。'
-  }
-}
-
-const languageScores = {
-  performance: [
-    { name: 'C++', score: 98 },
-    { name: 'Rust', score: 95 },
-    { name: 'Go', score: 90 },
-    { name: 'Java', score: 75 },
-    { name: 'Node.js', score: 70 },
-    { name: 'Python', score: 30 },
-    { name: 'Ruby', score: 25 }
-  ],
-  efficiency: [
-    { name: 'Python', score: 95 },
-    { name: 'Ruby', score: 90 },
-    { name: 'Go', score: 85 },
-    { name: 'Node.js', score: 85 },
-    { name: 'Java', score: 60 },
-    { name: 'Rust', score: 40 },
-    { name: 'C++', score: 35 }
-  ],
-  ecosystem: [
-    { name: 'Java', score: 95 },
-    { name: 'Python', score: 95 },
-    { name: 'Node.js', score: 95 },
-    { name: 'C++', score: 90 },
-    { name: 'Go', score: 75 },
-    { name: 'Ruby', score: 70 },
-    { name: 'Rust', score: 70 }
-  ],
-  learning: [
-    { name: 'Python', score: 95 },
-    { name: 'Ruby', score: 85 },
-    { name: 'Go', score: 80 },
-    { name: 'Node.js', score: 75 },
-    { name: 'Java', score: 40 },
-    { name: 'C++', score: 25 },
-    { name: 'Rust', score: 20 }
-  ],
-  concurrency: [
-    { name: 'Go', score: 95 },
-    { name: 'Rust', score: 90 },
-    { name: 'Node.js', score: 85 },
-    { name: 'Java', score: 80 },
-    { name: 'C++', score: 85 },
-    { name: 'Python', score: 30 },
-    { name: 'Ruby', score: 25 }
-  ]
-}
+const dimensions = computed(() => messages.value.comparison.dimensions)
+const dimensionInfo = computed(() => messages.value.comparison.dimensionInfo)
+const languageScores = computed(() => messages.value.comparison.languageScores)
 
 const sortedLanguages = computed(() => {
-  const scores = languageScores[selectedDimension.value]
+  const scores = languageScores.value[selectedDimension.value]
   return [...scores].sort((a, b) => b.score - a.score)
 })
 
 const getDimensionInfo = () => {
-  return dimensionInfo[selectedDimension.value]
+  return dimensionInfo.value[selectedDimension.value]
 }
 
 const getBarClass = (score) => {

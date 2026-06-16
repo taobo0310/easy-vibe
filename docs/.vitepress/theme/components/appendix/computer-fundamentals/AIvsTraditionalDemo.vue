@@ -1,13 +1,13 @@
 <template>
   <div class="ai-vs-traditional-demo">
     <div class="demo-header">
-      <span class="title">AI 工程师 vs 传统工程师</span>
-      <span class="subtitle">工作方式的差异</span>
+      <span class="title">{{ t('computerOrganization.vibeCodingFullstack.aiVsTraditional.title') }}</span>
+      <span class="subtitle">{{ t('computerOrganization.vibeCodingFullstack.aiVsTraditional.subtitle') }}</span>
     </div>
 
     <div class="comparison-container">
       <div class="comparison-column traditional">
-        <div class="column-header">传统工程师</div>
+        <div class="column-header">{{ t('computerOrganization.vibeCodingFullstack.aiVsTraditional.traditional') }}</div>
         <div class="work-flow">
           <div v-for="(step, index) in traditionalSteps" :key="index" class="flow-step">
             <span class="step-num">{{ index + 1 }}</span>
@@ -16,11 +16,11 @@
         </div>
         <div class="column-stats">
           <div class="stat-item">
-            <span class="stat-label">编码时间占比</span>
+            <span class="stat-label">{{ t('computerOrganization.vibeCodingFullstack.aiVsTraditional.codingTime') }}</span>
             <span class="stat-value">60-70%</span>
           </div>
           <div class="stat-item">
-            <span class="stat-label">思考时间占比</span>
+            <span class="stat-label">{{ t('computerOrganization.vibeCodingFullstack.aiVsTraditional.thinkingTime') }}</span>
             <span class="stat-value">30-40%</span>
           </div>
         </div>
@@ -31,7 +31,7 @@
       </div>
 
       <div class="comparison-column ai">
-        <div class="column-header">AI 工程师</div>
+        <div class="column-header">{{ t('computerOrganization.vibeCodingFullstack.aiVsTraditional.ai') }}</div>
         <div class="work-flow">
           <div v-for="(step, index) in aiSteps" :key="index" class="flow-step">
             <span class="step-num">{{ index + 1 }}</span>
@@ -40,11 +40,11 @@
         </div>
         <div class="column-stats">
           <div class="stat-item">
-            <span class="stat-label">编码时间占比</span>
+            <span class="stat-label">{{ t('computerOrganization.vibeCodingFullstack.aiVsTraditional.codingTime') }}</span>
             <span class="stat-value">20-30%</span>
           </div>
           <div class="stat-item">
-            <span class="stat-label">思考时间占比</span>
+            <span class="stat-label">{{ t('computerOrganization.vibeCodingFullstack.aiVsTraditional.thinkingTime') }}</span>
             <span class="stat-value">70-80%</span>
           </div>
         </div>
@@ -52,54 +52,39 @@
     </div>
 
     <div class="skill-shift">
-      <div class="shift-title">能力重心转移</div>
+      <div class="shift-title">{{ t('computerOrganization.vibeCodingFullstack.aiVsTraditional.shiftTitle') }}</div>
       <div class="shift-grid">
         <div v-for="item in skillShift" :key="item.from" class="shift-item">
           <div class="shift-from">
             <span class="arrow">↓</span>
             <span class="text">{{ item.from }}</span>
-            <span class="trend down">重要性下降</span>
+            <span class="trend down">{{ t('computerOrganization.vibeCodingFullstack.aiVsTraditional.down') }}</span>
           </div>
           <div class="shift-to">
             <span class="arrow">↑</span>
             <span class="text">{{ item.to }}</span>
-            <span class="trend up">重要性上升</span>
+            <span class="trend up">{{ t('computerOrganization.vibeCodingFullstack.aiVsTraditional.up') }}</span>
           </div>
         </div>
       </div>
     </div>
 
     <div class="info-box">
-      <strong>AI 时代的核心竞争力：</strong>不是"会写代码"，而是"会描述需求、会判断对错、会设计方案"。AI 是你的编程助手，但决策者永远是你。
+      <strong>{{ t('computerOrganization.vibeCodingFullstack.aiVsTraditional.competitivenessLabel') }}</strong>{{ t('computerOrganization.vibeCodingFullstack.aiVsTraditional.competitiveness') }}
     </div>
   </div>
 </template>
 
 <script setup>
-const traditionalSteps = [
-  '理解需求',
-  '查阅文档学习语法',
-  '手写代码实现',
-  '调试修复 Bug',
-  '优化代码性能',
-  '编写测试用例'
-]
+import { computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { computerFundamentalsLocale } from '../../../locales/computer-fundamentals/index.js'
 
-const aiSteps = [
-  '理解需求',
-  '用自然语言描述给 AI',
-  '审核 AI 生成的代码',
-  '判断是否符合预期',
-  '调整需求重新生成',
-  '整合到项目中'
-]
+const { t, messages } = useI18n(computerFundamentalsLocale)
 
-const skillShift = [
-  { from: '语法记忆', to: '需求描述能力' },
-  { from: '手写代码速度', to: '代码审核能力' },
-  { from: '查文档能力', to: '架构设计能力' },
-  { from: '调试技巧', to: '问题定位能力' }
-]
+const traditionalSteps = computed(() => messages.value.computerOrganization.vibeCodingFullstack.aiVsTraditional.traditionalSteps)
+const aiSteps = computed(() => messages.value.computerOrganization.vibeCodingFullstack.aiVsTraditional.aiSteps)
+const skillShift = computed(() => messages.value.computerOrganization.vibeCodingFullstack.aiVsTraditional.skillShift)
 </script>
 
 <style scoped>

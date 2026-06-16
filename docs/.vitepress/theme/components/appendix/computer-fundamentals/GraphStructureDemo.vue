@@ -1,36 +1,25 @@
 <template>
   <div class="graph-structure-demo">
     <div class="demo-header">
-      <span class="title">图结构：复杂关系的表示</span>
-      <span class="subtitle">节点和边的网络</span>
+      <span class="title">{{ t('dataStructures.graph.title') }}</span>
+      <span class="subtitle">{{ t('dataStructures.graph.subtitle') }}</span>
     </div>
 
     <div class="graph-types">
       <div class="type-selector">
         <button
-          :class="['type-btn', { active: graphType === 'undirected' }]"
-          @click="graphType = 'undirected'"
+          v-for="type in graphTypes"
+          :key="type.id"
+          :class="['type-btn', { active: graphType === type.id }]"
+          @click="graphType = type.id"
         >
-          无向图
-        </button>
-        <button
-          :class="['type-btn', { active: graphType === 'directed' }]"
-          @click="graphType = 'directed'"
-        >
-          有向图
-        </button>
-        <button
-          :class="['type-btn', { active: graphType === 'weighted' }]"
-          @click="graphType = 'weighted'"
-        >
-          带权图
+          {{ type.name }}
         </button>
       </div>
     </div>
 
     <div class="graph-visualization">
       <svg viewBox="0 0 400 300" class="graph-svg">
-        <!-- 连接线 -->
         <line
           v-for="edge in edges"
           :key="edge.id"
@@ -43,7 +32,6 @@
           :marker-end="graphType === 'directed' ? 'url(#arrow)' : ''"
         />
 
-        <!-- 箭头定义 -->
         <defs v-if="graphType === 'directed'">
           <marker
             id="arrow"
@@ -58,7 +46,6 @@
           </marker>
         </defs>
 
-        <!-- 节点 -->
         <g
           v-for="(node, index) in nodes"
           :key="index"
@@ -93,41 +80,29 @@
     </div>
 
     <div class="graph-info">
-      <div class="info-title">图的特点</div>
+      <div class="info-title">{{ t('dataStructures.graph.infoTitle') }}</div>
       <div class="info-grid">
         <div class="info-item">
-          <div class="item-label">节点 (V)</div>
+          <div class="item-label">{{ t('dataStructures.graph.vertices') }}</div>
           <div class="item-value">{{ nodes.length }}</div>
         </div>
         <div class="info-item">
-          <div class="item-label">边 (E)</div>
+          <div class="item-label">{{ t('dataStructures.graph.edges') }}</div>
           <div class="item-value">{{ edges.length }}</div>
         </div>
         <div class="info-item">
-          <div class="item-label">度</div>
+          <div class="item-label">{{ t('dataStructures.graph.degree') }}</div>
           <div class="item-value">{{ averageDegree }}</div>
         </div>
       </div>
     </div>
 
     <div class="applications">
-      <div class="app-title">应用场景</div>
+      <div class="app-title">{{ t('dataStructures.graph.appTitle') }}</div>
       <div class="app-list">
-        <div class="app-item">
-          <span class="app-icon">🗺️</span>
-          <span class="app-text">地图导航（最短路径）</span>
-        </div>
-        <div class="app-item">
-          <span class="app-icon">👥</span>
-          <span class="app-text">社交网络（好友关系）</span>
-        </div>
-        <div class="app-item">
-          <span class="app-icon">🌐</span>
-          <span class="app-text">网页链接（PageRank）</span>
-        </div>
-        <div class="app-item">
-          <span class="app-icon">🔗</span>
-          <span class="app-text">依赖关系（包管理）</span>
+        <div v-for="app in applications" :key="app.text" class="app-item">
+          <span class="app-icon">{{ app.icon }}</span>
+          <span class="app-text">{{ app.text }}</span>
         </div>
       </div>
     </div>
@@ -136,9 +111,15 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n'
+import { computerFundamentalsLocale } from '../../../locales/computer-fundamentals'
+
+const { t, messages } = useI18n(computerFundamentalsLocale)
 
 const graphType = ref('undirected')
 const selectedNode = ref(null)
+const graphTypes = computed(() => messages.value.dataStructures.graph.types)
+const applications = computed(() => messages.value.dataStructures.graph.applications)
 
 const nodes = [
   { label: 'A', x: 200, y: 50 },

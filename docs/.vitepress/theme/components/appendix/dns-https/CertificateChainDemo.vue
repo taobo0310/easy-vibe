@@ -1,10 +1,10 @@
 <template>
   <div class="cert-chain-demo">
     <h4 style="margin: 0 0 12px 0; color: #1a1a2e">
-      🔗 证书信任链可视化
+      {{ t('certificate.title') }}
     </h4>
     <p class="intro-text">
-      点击每一层证书，查看它的详细信息和在信任链中的角色。
+      {{ t('certificate.intro') }}
     </p>
 
     <div class="chain-container">
@@ -20,7 +20,7 @@
         <div class="cert-title">{{ cert.title }}</div>
         <div class="cert-subtitle">{{ cert.subtitle }}</div>
         <div v-if="idx < certs.length - 1" class="chain-arrow">
-          <span class="arrow-text">签发</span>
+          <span class="arrow-text">{{ t('certificate.issuedBy') }}</span>
           <span class="arrow-symbol">↓</span>
         </div>
       </div>
@@ -35,7 +35,11 @@
         <span class="detail-name">{{ certs[selectedIdx].title }}</span>
       </div>
       <div class="detail-body">
-        <div class="detail-row" v-for="(item, i) in certs[selectedIdx].details" :key="i">
+        <div
+          v-for="(item, i) in certs[selectedIdx].details"
+          :key="i"
+          class="detail-row"
+        >
           <span class="detail-label">{{ item.label }}</span>
           <span class="detail-value">{{ item.value }}</span>
         </div>
@@ -46,7 +50,7 @@
     </div>
 
     <div class="verify-box">
-      <div class="verify-title">🔍 浏览器验证流程</div>
+      <div class="verify-title">{{ t('certificate.verifyTitle') }}</div>
       <div class="verify-steps">
         <div v-for="(s, i) in verifySteps" :key="i" class="verify-step">
           <span class="verify-num">{{ i + 1 }}</span>
@@ -59,63 +63,15 @@
 
 <script setup>
 import { ref } from 'vue'
+import { computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { dnsHttpsLocale } from '../../../locales/dns-https/index.js'
 
 const selectedIdx = ref(0)
+const { t, messages } = useI18n(dnsHttpsLocale)
 
-const certs = [
-  {
-    icon: '🏛️',
-    title: '根证书（Root CA）',
-    subtitle: '信任的起点',
-    color: '#c62828',
-    explain:
-      '根证书是整个信任链的锚点。它由根证书颁发机构自签名，预装在操作系统和浏览器中。全球只有少数几十个根 CA，它们的安全性由严格的审计和物理安全措施保障。根 CA 的私钥通常存储在离线的硬件安全模块（HSM）中。',
-    details: [
-      { label: '签发者', value: 'DigiCert Global Root G2（自签名）' },
-      { label: '有效期', value: '25 年（2013 - 2038）' },
-      { label: '密钥长度', value: 'RSA 2048 位' },
-      { label: '存储位置', value: '操作系统 / 浏览器内置信任库' },
-      { label: '数量级', value: '全球约 150 个受信根证书' }
-    ]
-  },
-  {
-    icon: '🏢',
-    title: '中间证书（Intermediate CA）',
-    subtitle: '信任的桥梁',
-    color: '#e65100',
-    explain:
-      '中间证书由根 CA 签发，作为根证书和服务器证书之间的桥梁。这种分层设计的好处是：即使中间证书被泄露，也可以单独吊销它而不影响根证书。中间 CA 负责日常的证书签发工作，根 CA 的私钥因此可以保持离线状态。',
-    details: [
-      { label: '签发者', value: 'DigiCert Global Root G2' },
-      { label: '持有者', value: 'DigiCert SHA2 Extended Validation Server CA' },
-      { label: '有效期', value: '10 年' },
-      { label: '用途', value: '签发终端实体（服务器）证书' },
-      { label: '可吊销', value: '是（通过 CRL 或 OCSP）' }
-    ]
-  },
-  {
-    icon: '🌐',
-    title: '服务器证书（Server Certificate）',
-    subtitle: '网站的身份证',
-    color: '#1565c0',
-    explain:
-      '服务器证书是网站向浏览器证明自己身份的凭证。它由中间 CA 签发，包含网站的域名、公钥和有效期等信息。当浏览器收到这张证书后，会沿着信任链向上验证，直到找到一个已经信任的根证书为止。',
-    details: [
-      { label: '签发者', value: 'DigiCert SHA2 Extended Validation Server CA' },
-      { label: '持有者', value: 'www.example.com' },
-      { label: '有效期', value: '1 年（行业标准）' },
-      { label: '包含公钥', value: 'ECDSA P-256 公钥' },
-      { label: '验证级别', value: 'EV（扩展验证）/ DV（域名验证）' }
-    ]
-  }
-]
-
-const verifySteps = [
-  '浏览器收到服务器证书，读取其签发者信息',
-  '找到中间证书，用中间 CA 的公钥验证服务器证书的签名',
-  '再用根 CA 的公钥验证中间证书的签名',
-  '确认根证书在本地信任库中 → 整条链验证通过'
-]
+const certs = computed(() => messages.value.certificate.certs)
+const verifySteps = computed(() => messages.value.certificate.verifySteps)
 </script>
 
 <style scoped>

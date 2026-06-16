@@ -1,7 +1,6 @@
 <template>
   <div class="gc-root">
     <div class="gc-layout">
-      <!-- 左侧：终端 + 按钮 -->
       <div class="gc-left">
         <div class="gc-terminal">
           <div class="term-bar">
@@ -29,29 +28,28 @@
           >
             <code>{{ op.cmd }}</code>
           </button>
-          <button class="gc-btn gc-btn--reset" :disabled="running" @click="reset">重置</button>
+          <button class="gc-btn gc-btn--reset" :disabled="running" @click="reset">{{ t('common.reset') }}</button>
         </div>
       </div>
 
-      <!-- 右侧：三区缩小展示 -->
       <div class="gc-right">
         <div class="gc-three-areas">
       <div class="area-col area-work" :class="{ 'area-highlight': pulseArea === 'work' }">
         <div class="area-header">
           <span class="area-icon">📝</span>
-          <span class="area-title">工作区</span>
-          <span class="area-desc">Working Directory<br />你正在改的文件</span>
+          <span class="area-title">{{ t('commitFlow.areas.work.title') }}</span>
+          <span class="area-desc">{{ t('commitFlow.areas.work.desc') }}<br />{{ t('commitFlow.areas.work.detail') }}</span>
         </div>
         <div class="area-body">
-          <div class="area-label">Changes not staged for commit:</div>
+          <div class="area-label">{{ t('commitFlow.areas.work.label') }}</div>
           <template v-if="workFiles.length">
             <div v-for="f in workFiles" :key="f.name" class="file-row file-mod">
               <span class="file-badge">M</span>
               <code class="file-name">{{ f.name }}</code>
-              <span class="file-state">未暂存</span>
+              <span class="file-state">{{ t('commitFlow.areas.work.state') }}</span>
             </div>
           </template>
-          <div v-else class="area-empty">（无未暂存修改）</div>
+          <div v-else class="area-empty">{{ t('commitFlow.areas.work.empty') }}</div>
         </div>
       </div>
 
@@ -64,19 +62,19 @@
       <div class="area-col area-stage" :class="{ 'area-highlight': pulseArea === 'stage' }">
         <div class="area-header">
           <span class="area-icon">📦</span>
-          <span class="area-title">暂存区</span>
-          <span class="area-desc">Staging Area<br />准备这次提交的文件</span>
+          <span class="area-title">{{ t('commitFlow.areas.stage.title') }}</span>
+          <span class="area-desc">{{ t('commitFlow.areas.stage.desc') }}<br />{{ t('commitFlow.areas.stage.detail') }}</span>
         </div>
         <div class="area-body">
-          <div class="area-label">Changes to be committed:</div>
+          <div class="area-label">{{ t('commitFlow.areas.stage.label') }}</div>
           <template v-if="stagedFiles.length">
             <div v-for="f in stagedFiles" :key="f.name" class="file-row file-staged">
               <span class="file-badge">A</span>
               <code class="file-name">{{ f.name }}</code>
-              <span class="file-state">已暂存</span>
+              <span class="file-state">{{ t('commitFlow.areas.stage.state') }}</span>
             </div>
           </template>
-          <div v-else class="area-empty">（空）</div>
+          <div v-else class="area-empty">{{ t('commitFlow.areas.stage.empty') }}</div>
         </div>
       </div>
 
@@ -89,11 +87,11 @@
       <div class="area-col area-repo" :class="{ 'area-highlight': pulseArea === 'repo' }">
         <div class="area-header">
           <span class="area-icon">🗄️</span>
-          <span class="area-title">仓库</span>
-          <span class="area-desc">Repository (.git)<br />永久保存的版本</span>
+          <span class="area-title">{{ t('commitFlow.areas.repo.title') }}</span>
+          <span class="area-desc">{{ t('commitFlow.areas.repo.desc') }}<br />{{ t('commitFlow.areas.repo.detail') }}</span>
         </div>
         <div class="area-body">
-          <div class="area-label">已提交记录 (git log):</div>
+          <div class="area-label">{{ t('commitFlow.areas.repo.label') }}</div>
           <template v-if="commits.length">
             <div v-for="(c, i) in commits" :key="c.hash" class="commit-row">
               <span class="commit-badge">✓</span>
@@ -102,27 +100,29 @@
               <span v-if="i === 0" class="commit-head">HEAD</span>
             </div>
           </template>
-          <div v-else class="area-empty">（无提交）</div>
+          <div v-else class="area-empty">{{ t('commitFlow.areas.repo.empty') }}</div>
         </div>
       </div>
     </div>
     </div>
     </div>
 
-    <!-- Hint -->
     <div v-if="hint" class="gc-hint">💡 {{ hint }}</div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, nextTick } from 'vue'
+import { ref, computed, nextTick, watch } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { gitIntroLocale } from '../../../locales/git-intro/index.js'
 
+const { t, messages, locale } = useI18n(gitIntroLocale)
 const termEl = ref(null)
-const lines = ref([{ kind: 'dim', text: '# 你刚改了 3 个文件，现在演示 add → commit 流程' }])
+const lines = ref([])
 const typing = ref('')
 const running = ref(false)
 const active = ref(null)
-const hint = ref('点击下方命令按钮，按顺序执行。观察右侧三区里文件如何随命令移动。')
+const hint = ref('')
 const pulseArea = ref(null)
 
 const files = ref([
@@ -130,13 +130,11 @@ const files = ref([
   { name: 'style.css', staged: false, committed: false },
   { name: 'debug.log', staged: false, committed: false },
 ])
-const commits = ref([{ hash: '9f3e1b2', msg: 'init: 项目初始化' }])
+const commits = ref([])
 
-// 工作区：未暂存且未提交的修改（git status 里红色的）
 const workFiles = computed(() =>
   files.value.filter(f => !f.staged && !f.committed)
 )
-// 暂存区：已暂存但还没提交的（git status 里绿色的）
 const stagedFiles = computed(() =>
   files.value.filter(f => f.staged && !f.committed)
 )
@@ -148,36 +146,16 @@ const ops = [
     id: 'status',
     cmd: 'git status',
     ok: () => true,
-    output: [
-      { kind: 'dim', text: 'On branch main' },
-      { kind: 'dim', text: '' },
-      { kind: 'dim', text: 'Changes not staged for commit:' },
-      { kind: 'red', text: '  modified:   login.js' },
-      { kind: 'red', text: '  modified:   style.css' },
-      { kind: 'red', text: '  modified:   debug.log' },
-      { kind: 'dim', text: '' },
-      { kind: 'dim', text: 'no changes added to commit (use "git add")' },
-    ],
-    hint: '红色 = 改了但还没暂存。三区里可以看到：3 个文件都在「工作区」，暂存区是空的。先用 git status 看清楚状态，再决定下一步。',
+    output: () => messages.value.commitFlow.ops.status.output,
+    hint: () => messages.value.commitFlow.ops.status.hint,
     do: () => { pulseArea.value = 'work' },
   },
   {
     id: 'add',
     cmd: 'git add login.js style.css',
     ok: () => !addDone,
-    output: [
-      { kind: 'dim', text: '# git add 只加你指定的文件，debug.log 跳过' },
-      { kind: 'dim', text: '' },
-      { kind: 'dim', text: 'On branch main' },
-      { kind: 'dim', text: '' },
-      { kind: 'dim', text: 'Changes to be committed:' },
-      { kind: 'grn', text: '  modified:   login.js' },
-      { kind: 'grn', text: '  modified:   style.css' },
-      { kind: 'dim', text: '' },
-      { kind: 'red', text: 'Untracked files:' },
-      { kind: 'red', text: '  debug.log   ← 没 add，不会提交' },
-    ],
-    hint: '绿色 = 进入暂存区。观察：login.js 和 style.css 从工作区「搬进」了暂存区；debug.log 仍留在工作区（未暂存），不会参与这次提交。',
+    output: () => messages.value.commitFlow.ops.add.output,
+    hint: () => messages.value.commitFlow.ops.add.hint,
     do: () => {
       addDone = true
       files.value[0].staged = true
@@ -187,22 +165,17 @@ const ops = [
   },
   {
     id: 'commit',
-    cmd: 'git commit -m "feat: 添加登录功能"',
+    cmd: () => messages.value.commitFlow.ops.commit.cmd,
     ok: () => addDone && !commitDone,
-    output: [
-      { kind: 'dim', text: '[main a1b2c3d] feat: 添加登录功能' },
-      { kind: 'dim', text: ' 2 files changed, 47 insertions(+)' },
-      { kind: 'dim', text: ' create mode 100644 login.js' },
-      { kind: 'dim', text: ' create mode 100644 style.css' },
-    ],
-    hint: 'commit 成功！暂存区里的内容被「封存」进仓库，形成新的一条提交记录。暂存区变空；debug.log 仍在工作区，不受影响。',
+    output: () => messages.value.commitFlow.ops.commit.output,
+    hint: () => messages.value.commitFlow.ops.commit.hint,
     do: () => {
       commitDone = true
       files.value[0].staged = false
       files.value[0].committed = true
       files.value[1].staged = false
       files.value[1].committed = true
-      commits.value.unshift({ hash: 'a1b2c3d', msg: 'feat: 添加登录功能' })
+      commits.value.unshift({ hash: 'a1b2c3d', msg: messages.value.commitFlow.ops.commit.commitMsg })
       pulseArea.value = 'repo'
     },
   },
@@ -210,26 +183,16 @@ const ops = [
     id: 'log',
     cmd: 'git log --oneline',
     ok: () => commitDone,
-    output: [
-      { kind: 'yel', text: 'a1b2c3d (HEAD -> main) feat: 添加登录功能' },
-      { kind: 'yel', text: '9f3e1b2 init: 项目初始化' },
-    ],
-    hint: '每行一个 commit，最新的在最上面。仓库区里可以看到完整的历史时间轴；工作区里只剩 debug.log（未提交的临时文件）。',
+    output: () => messages.value.commitFlow.ops.log.output,
+    hint: () => messages.value.commitFlow.ops.log.hint,
     do: () => { pulseArea.value = 'repo' },
   },
   {
     id: 'status2',
     cmd: 'git status',
     ok: () => commitDone,
-    output: [
-      { kind: 'dim', text: 'On branch main' },
-      { kind: 'dim', text: '' },
-      { kind: 'dim', text: 'Changes not staged for commit:' },
-      { kind: 'red', text: '  modified:   debug.log' },
-      { kind: 'dim', text: '' },
-      { kind: 'dim', text: 'no changes added to commit (use "git add")' },
-    ],
-    hint: '提交后：login.js 和 style.css 已进仓库，工作区里只剩 debug.log 的修改。红色 = 改了但还没暂存，下次提交前可再 git add。',
+    output: () => messages.value.commitFlow.ops.status2.output,
+    hint: () => messages.value.commitFlow.ops.status2.hint,
     do: () => { pulseArea.value = 'work' },
   },
 ]
@@ -244,18 +207,19 @@ async function run(op) {
   typing.value = ''
   pulseArea.value = null
 
-  for (const ch of op.cmd) {
+  const cmd = typeof op.cmd === 'function' ? op.cmd() : op.cmd
+  for (const ch of cmd) {
     typing.value += ch
     await sleep(22)
   }
   await sleep(80)
-  lines.value.push({ kind: 'cmd', text: op.cmd })
+  lines.value.push({ kind: 'cmd', text: cmd })
   typing.value = ''
   await nextTick()
   scroll()
   await sleep(150)
 
-  for (const l of op.output) {
+  for (const l of op.output()) {
     lines.value.push(l)
     await nextTick()
     scroll()
@@ -264,7 +228,7 @@ async function run(op) {
 
   op.do()
   await sleep(120)
-  hint.value = op.hint
+  hint.value = op.hint()
   running.value = false
   setTimeout(() => { pulseArea.value = null }, 1500)
 }
@@ -274,17 +238,20 @@ function scroll() {
 }
 
 function reset() {
-  lines.value = [{ kind: 'dim', text: '# 你刚改了 3 个文件，现在演示 add → commit 流程' }]
+  lines.value = [{ kind: 'dim', text: messages.value.commitFlow.initialLine }]
   files.value.forEach(f => { f.staged = false; f.committed = false })
-  commits.value = [{ hash: '9f3e1b2', msg: 'init: 项目初始化' }]
+  commits.value = [{ ...messages.value.commitFlow.initialCommit }]
   addDone = false
   commitDone = false
   active.value = null
   pulseArea.value = null
-  hint.value = '点击下方命令按钮，按顺序执行。观察右侧三区里文件如何随命令移动。'
+  hint.value = messages.value.commitFlow.initialHint
   typing.value = ''
   running.value = false
 }
+
+reset()
+watch(locale, reset)
 </script>
 
 <style scoped>
@@ -297,7 +264,6 @@ function reset() {
   font-size: 0.85rem;
 }
 
-/* 左右分栏：左终端+按钮，右三区缩小 */
 .gc-layout {
   display: flex;
   align-items: stretch;
@@ -383,11 +349,10 @@ function reset() {
   background: transparent;
   border-color: #313244;
   margin-left: auto;
+  font-size: 0.7rem;
+  color: #585b70;
 }
-.gc-btn--reset code { display: none; }
-.gc-btn--reset::after { content: '重置'; font-size: 0.7rem; color: #585b70; }
 
-/* 三区布局：右侧缩小、垂直堆叠 */
 .gc-three-areas {
   display: flex;
   flex-direction: column;
@@ -553,7 +518,6 @@ function reset() {
 }
 .gc-right .commit-head { font-size: 0.6rem; padding: 1px 4px; }
 
-/* 箭头：↓ + 命令 */
 .area-arrow {
   display: flex;
   flex-direction: row;

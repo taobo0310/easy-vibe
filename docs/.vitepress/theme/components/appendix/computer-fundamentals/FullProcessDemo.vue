@@ -1,6 +1,6 @@
 <template>
   <div class="full-demo">
-    <div class="demo-title">从按下电源到看到网页 ── 完整链路</div>
+    <div class="demo-title">{{ t('powerOnToWeb.full.title') }}</div>
     <div class="chain">
       <div v-for="(phase, i) in phases" :key="phase.name" class="chain-item">
         <div class="phase-card" :style="{ borderLeftColor: phase.color }">
@@ -14,7 +14,7 @@
         </div>
         <div v-if="i < phases.length - 1" class="chain-arrow">
           <svg width="20" height="14" viewBox="0 0 20 14">
-            <path d="M0 7h14M10 2l6 5-6 5" fill="none" stroke="var(--vp-c-text-3)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M0 7h14M10 2l6 5-6 5" fill="none" stroke="var(--vp-c-text-3)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
           </svg>
         </div>
       </div>
@@ -23,13 +23,12 @@
 </template>
 
 <script setup>
-const phases = [
-  { icon: '🔌', name: '硬件启动', color: '#f59e0b', steps: '电源 → 主板 → CPU → BIOS' },
-  { icon: '🔍', name: '固件自检', color: '#ef4444', steps: 'POST → 初始化 → 找启动盘' },
-  { icon: '💻', name: '系统启动', color: '#8b5cf6', steps: '引导 → 内核 → 服务 → 桌面' },
-  { icon: '🌐', name: '浏览器启动', color: '#3b82f6', steps: '创建进程 → 加载代码 → 就绪' },
-  { icon: '📡', name: '网络请求与渲染', color: '#10b981', steps: 'DNS → TCP → HTTP → 渲染' }
-]
+import { computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n'
+import { computerFundamentalsLocale } from '../../../locales/computer-fundamentals'
+
+const { t, messages } = useI18n(computerFundamentalsLocale)
+const phases = computed(() => messages.value.powerOnToWeb.full.phases)
 </script>
 
 <style scoped>

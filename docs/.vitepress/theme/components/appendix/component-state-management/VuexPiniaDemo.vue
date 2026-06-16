@@ -2,12 +2,12 @@
   <div class="vuex-pinia-demo">
     <div class="demo-header">
       <span class="icon">🍍</span>
-      <span class="title">Vuex vs Pinia</span>
-      <span class="subtitle">Vue 状态管理的新老方案</span>
+      <span class="title">{{ t('vuexPinia.title') }}</span>
+      <span class="subtitle">{{ t('vuexPinia.subtitle') }}</span>
     </div>
 
     <div class="intro-text">
-      想象你在<span class="highlight">餐厅</span>点餐：Vuex 就像传统餐厅，需要分部门（state/mutations/actions）填写单据；Pinia 就像快餐店，直接在一个柜台（组合式 API）搞定所有流程。
+      {{ t('vuexPinia.introPrefix') }}<span class="highlight">{{ t('vuexPinia.introHighlight') }}</span>{{ t('vuexPinia.introSuffix') }}
     </div>
 
     <div class="demo-content">
@@ -20,21 +20,16 @@
           <div class="card-header">
             <span class="card-icon">🌿</span>
             <span class="card-title">Vuex</span>
-            <span class="card-badge">经典</span>
+            <span class="card-badge">{{ t('vuexPinia.classic') }}</span>
           </div>
           <div class="card-body">
             <div class="feature-list">
-              <div class="feature-item">
-                ✅ 选项式 API
-              </div>
-              <div class="feature-item">
-                ✅ State / Mutations / Actions 分离
-              </div>
-              <div class="feature-item">
-                ❌ 样板代码较多
-              </div>
-              <div class="feature-item">
-                ❌ TypeScript 支持较弱
+              <div
+                v-for="(item, idx) in t('vuexPinia.cards.vuex')"
+                :key="idx"
+                class="feature-item"
+              >
+                {{ item }}
               </div>
             </div>
           </div>
@@ -48,21 +43,16 @@
           <div class="card-header">
             <span class="card-icon">🍍</span>
             <span class="card-title">Pinia</span>
-            <span class="card-badge recommended">推荐</span>
+            <span class="card-badge recommended">{{ t('vuexPinia.recommended') }}</span>
           </div>
           <div class="card-body">
             <div class="feature-list">
-              <div class="feature-item">
-                ✅ 组合式 API
-              </div>
-              <div class="feature-item">
-                ✅ 去除 Mutations，简化代码
-              </div>
-              <div class="feature-item">
-                ✅ 完美 TypeScript 支持
-              </div>
-              <div class="feature-item">
-                ✅ 自动代码分割
+              <div
+                v-for="(item, idx) in t('vuexPinia.cards.pinia')"
+                :key="idx"
+                class="feature-item"
+              >
+                {{ item }}
               </div>
             </div>
           </div>
@@ -79,7 +69,7 @@
           class="code-example"
         >
           <div class="code-title">
-            Vuex 代码示例
+            {{ t('vuexPinia.vuexCodeTitle') }}
           </div>
           <pre class="code-block"><code>// store/index.js
 export default createStore({
@@ -103,7 +93,7 @@ export default createStore({
           class="code-example"
         >
           <div class="code-title">
-            Pinia 代码示例
+            {{ t('vuexPinia.piniaCodeTitle') }}
           </div>
           <pre class="code-block"><code>// stores/counter.js
 export const useCounterStore = defineStore('counter', () => {
@@ -121,13 +111,17 @@ export const useCounterStore = defineStore('counter', () => {
 
     <div class="info-box">
       <span class="icon">💡</span>
-      <strong>选择建议：</strong>Vue 3 新项目直接用 Pinia，语法更简洁、TypeScript 支持更好。老项目用 Vuex 也没问题，但推荐逐步迁移到 Pinia。
+      <strong>{{ t('common.recommendation') }}</strong>{{ t('vuexPinia.idea') }}
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { componentStateManagementLocale } from '../../../locales/component-state-management/index.js'
+
+const { t } = useI18n(componentStateManagementLocale)
 
 const activeTab = ref('pinia')
 </script>

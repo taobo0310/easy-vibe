@@ -1,50 +1,45 @@
 <template>
   <div class="domain-demo">
     <div class="header">
-      <div class="title">Domain 层：领域模型设计</div>
-      <div class="subtitle">Domain 是业务概念的载体，所有层的依赖基础</div>
+      <div class="title">{{ t('domain.title') }}</div>
+      <div class="subtitle">{{ t('domain.subtitle') }}</div>
     </div>
 
     <div class="tabs">
       <button
-        v-for="t in tabs" :key="t.id"
-        :class="['tab', { active: current === t.id }]"
-        @click="current = t.id"
-      >{{ t.name }}</button>
+        v-for="tab in tabs" :key="tab.id"
+        :class="['tab', { active: current === tab.id }]"
+        @click="current = tab.id"
+      >{{ tab.name }}</button>
     </div>
 
     <div v-if="current === 'comparison'" class="cards">
       <div class="card bad">
         <div class="card-head">
-          <span class="card-title">贫血模型 (Anemic)</span>
-          <span class="card-badge bad">传统做法</span>
+          <span class="card-title">{{ t('domain.anemicTitle') }}</span>
+          <span class="card-badge bad">{{ t('domain.traditional') }}</span>
         </div>
         <pre class="code"><code>{{ anemicEntity }}</code></pre>
         <pre class="code"><code>{{ anemicService }}</code></pre>
         <div class="result-box bad">
-          <strong>贫血模型的问题</strong>
+          <strong>{{ t('domain.anemicProblemsTitle') }}</strong>
           <ul>
-            <li>违背面向对象：对象只有数据没有行为</li>
-            <li>逻辑分散：同样的规则可能在多个 Service 重复</li>
-            <li>难以维护：改一个规则要找所有用到的地方</li>
+            <li v-for="item in anemicProblems" :key="item">{{ item }}</li>
           </ul>
         </div>
       </div>
 
       <div class="card good">
         <div class="card-head">
-          <span class="card-title">充血模型 (Rich Domain)</span>
-          <span class="card-badge good">推荐做法</span>
+          <span class="card-title">{{ t('domain.richTitle') }}</span>
+          <span class="card-badge good">{{ t('domain.recommended') }}</span>
         </div>
         <pre class="code"><code>{{ richEntity }}</code></pre>
         <pre class="code"><code>{{ richService }}</code></pre>
         <div class="result-box good">
-          <strong>充血模型的优势</strong>
+          <strong>{{ t('domain.richBenefitsTitle') }}</strong>
           <ul>
-            <li>符合面向对象：数据和行为封装在一起</li>
-            <li>业务内聚：规则跟着对象走，改一处处处生效</li>
-            <li>可测试：领域对象是纯内存对象，不需要数据库</li>
-            <li>表达力强：order.cancel() 比 orderService.cancel(order) 更自然</li>
+            <li v-for="item in richBenefits" :key="item">{{ item }}</li>
           </ul>
         </div>
       </div>
@@ -52,16 +47,16 @@
 
     <div v-else class="vo-section">
       <div class="vo-intro">
-        <strong>什么是值对象（Value Object）？</strong>
-        <p>没有唯一标识、不可变的对象，描述某种特征或属性。两个值对象所有属性相等就被认为是同一个。</p>
+        <strong>{{ t('domain.valueObjectTitle') }}</strong>
+        <p>{{ t('domain.valueObjectDesc') }}</p>
       </div>
       <div class="vo-examples">
         <div class="vo-card">
-          <div class="vo-name">地址 Address</div>
+          <div class="vo-name">{{ t('domain.addressTitle') }}</div>
           <pre class="code"><code>{{ addressVO }}</code></pre>
         </div>
         <div class="vo-card">
-          <div class="vo-name">金钱 Money</div>
+          <div class="vo-name">{{ t('domain.moneyTitle') }}</div>
           <pre class="code"><code>{{ moneyVO }}</code></pre>
         </div>
       </div>
@@ -70,92 +65,21 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { backendLayeredArchitectureLocale } from '../../../locales/backend-layered-architecture/index.js'
 
+const { t, messages } = useI18n(backendLayeredArchitectureLocale)
 const current = ref('comparison')
-const tabs = [
-  { id: 'comparison', name: '贫血 vs 充血' },
-  { id: 'valueobject', name: '值对象设计' }
-]
-
-const anemicEntity = `@Entity
-public class Order {
-    @Id private Long id;
-    private BigDecimal totalAmount;
-    private OrderStatus status;
-    // 只有 getter/setter，没有业务逻辑
-    public Long getId() { return id; }
-    public void setStatus(OrderStatus s) { this.status = s; }
-}`
-
-const anemicService = `@Service
-public class OrderService {
-    public void cancelOrder(Long orderId) {
-        Order order = orderRepository.findById(orderId).orElseThrow();
-        // 贫血模型：业务逻辑散落在 Service 里
-        if (order.getStatus() == OrderStatus.SHIPPED)
-            throw new IllegalStateException("已发货不能取消");
-        order.setStatus(OrderStatus.CANCELLED);
-        orderRepository.save(order);
-    }
-}`
-
-const richEntity = `@Entity
-public class Order {
-    @Id private Long id;
-    private BigDecimal totalAmount;
-    private OrderStatus status;
-
-    // 业务行为封装在实体里
-    public void cancel() {
-        if (this.status == OrderStatus.SHIPPED)
-            throw new IllegalStateException("已发货不能取消");
-        this.status = OrderStatus.CANCELLED;
-        registerEvent(new OrderCancelledEvent(this.id));
-    }
-
-    public void pay(Payment payment) {
-        if (this.status != OrderStatus.PENDING_PAYMENT)
-            throw new IllegalStateException("状态不正确");
-        this.status = OrderStatus.PAID;
-    }
-}`
-
-const richService = `@Service
-public class OrderService {
-    @Transactional
-    public void cancelOrder(Long orderId) {
-        Order order = orderRepository.findById(orderId).orElseThrow();
-        order.cancel(); // 调用领域对象的业务方法
-        orderRepository.save(order);
-    }
-}`
-
-const addressVO = `// 值对象：不可变、无 ID
-public record Address(String province, String city, String district, String street) {
-    public String toDisplayString() {
-        return String.format("%s%s%s%s", province, city, district, street);
-    }
-}
-// 地址相等只要属性相同
-Address a1 = new Address("广东", "深圳", "南山", "科技园");
-Address a2 = new Address("广东", "深圳", "南山", "科技园");
-a1.equals(a2); // true`
-
-const moneyVO = `public record Money(BigDecimal amount, Currency currency) {
-    public static Money yuan(BigDecimal amount) {
-        return new Money(amount, Currency.getInstance("CNY"));
-    }
-    // 运算返回新的值对象（不可变）
-    public Money add(Money other) {
-        if (!this.currency.equals(other.currency))
-            throw new IllegalArgumentException("Cannot add different currencies");
-        return new Money(this.amount.add(other.amount), this.currency);
-    }
-}
-Money price = Money.yuan(new BigDecimal("199.99"));
-Money shipping = Money.yuan(new BigDecimal("10.00"));
-Money total = price.add(shipping); // ¥209.99`
+const tabs = computed(() => messages.value.domain.tabs)
+const anemicProblems = computed(() => messages.value.domain.anemicProblems)
+const richBenefits = computed(() => messages.value.domain.richBenefits)
+const anemicEntity = computed(() => messages.value.domain.anemicEntity)
+const anemicService = computed(() => messages.value.domain.anemicService)
+const richEntity = computed(() => messages.value.domain.richEntity)
+const richService = computed(() => messages.value.domain.richService)
+const addressVO = computed(() => messages.value.domain.addressVO)
+const moneyVO = computed(() => messages.value.domain.moneyVO)
 </script>
 
 <style scoped>

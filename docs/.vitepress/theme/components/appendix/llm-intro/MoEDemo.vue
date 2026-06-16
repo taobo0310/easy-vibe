@@ -9,14 +9,14 @@
           :class="['mode-tab', { active: architecture === mode }]"
           @click="setArchitecture(mode)"
         >
-          {{ mode === 'dense' ? 'Dense (传统模型)' : 'MoE (混合专家)' }}
+          {{ modeLabels[mode] }}
         </button>
       </div>
       <div class="mode-desc">
         {{
           architecture === 'dense'
-            ? '全能天才：每个 Token 都激活所有神经元 (100% 激活)'
-            : '专家团队：每个 Token 路由给特定专家 (Token-Level Routing)'
+            ? t('moe.descriptions.dense')
+            : t('moe.descriptions.moe')
         }}
       </div>
     </div>
@@ -26,7 +26,7 @@
       <!-- Step 1: Input Selection -->
       <div class="stage-section input-section">
         <div class="section-label">
-          1. 选择输入 (Select Input)
+          {{ t('moe.labels.selectInput') }}
         </div>
         <div class="task-selector">
           <button
@@ -51,7 +51,7 @@
           class="token-flow-viz"
         >
           <div class="current-token-display">
-            <span class="token-label">Current Token:</span>
+            <span class="token-label">{{ t('moe.labels.currentToken') }}</span>
             <span
               class="token-badge"
               :style="{ borderColor: getExpertColor(currentToken?.expert) }"
@@ -64,11 +64,11 @@
         <!-- Step 2: Processing Unit (Dense or MoE) -->
         <div class="stage-section process-section">
           <div class="section-label">
-            2. 模型处理 (Processing)
+            {{ t('moe.labels.processing') }}
             <span
               v-if="processing"
               class="status-badge"
-            >生成中...</span>
+            >{{ t('moe.labels.generating') }}</span>
           </div>
 
           <!-- Dense Visualization -->
@@ -94,7 +94,7 @@
                 v-if="processing"
                 class="activation-info"
               >
-                🔥 激活率: 100% (All Parameters)
+                {{ t('moe.labels.activation') }}
               </div>
             </div>
           </div>
@@ -110,7 +110,7 @@
               :class="{ active: processing && currentStep === 'router' }"
             >
               <div class="router-label">
-                Router (Token 分发)
+                {{ t('moe.labels.router') }}
               </div>
               <div
                 v-if="processing && currentToken"
@@ -172,7 +172,7 @@
       <!-- Step 3: Output -->
       <div class="stage-section output-section">
         <div class="section-label">
-          3. 逐步生成 (Output Stream)
+          {{ t('moe.labels.output') }}
         </div>
         <div class="output-box">
           <span class="output-content">
@@ -192,7 +192,7 @@
             v-if="generatedTokens.length === 0 && !processing"
             class="placeholder"
           >
-            点击运行查看生成过程...
+            {{ t('moe.labels.placeholder') }}
           </div>
         </div>
       </div>
@@ -205,7 +205,7 @@
         :disabled="processing"
         @click="runDemo"
       >
-        {{ processing ? '正在生成 (Generating)...' : '▶️ 开始生成 (Run Generation)' }}
+        {{ processing ? t('moe.labels.generatingButton') : t('moe.labels.runButton') }}
       </button>
     </div>
   </div>
@@ -213,7 +213,10 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useI18n } from '../../../composables/useI18n.js'
+import { llmIntroLocale } from '../../../locales/llm-intro/index.js'
 
+const { t, messages } = useI18n(llmIntroLocale)
 const architecture = ref('moe')
 const processing = ref(false)
 const currentStep = ref('idle') // idle, router, expert
@@ -227,10 +230,8 @@ const experts = [
   { icon: '📝', name: 'Grammar', color: '#7c3aed' }   // Purple
 ]
 
-const tasks = [
+const taskTokens = [
   {
-    label: 'Python 代码示例',
-    icon: '🐍',
     tokens: [
       { text: 'def', expert: 0 },
       { text: ' calc', expert: 3 },
@@ -248,8 +249,6 @@ const tasks = [
     ]
   },
   {
-    label: '科幻小说片段',
-    icon: '🚀',
     tokens: [
       { text: 'The', expert: 3 },
       { text: ' spaceship', expert: 2 },
@@ -267,7 +266,15 @@ const tasks = [
   }
 ]
 
-const selectedTask = ref(tasks[0])
+const modeLabels = computed(() => messages.value.moe.modes)
+const tasks = computed(() =>
+  messages.value.moe.tasks.map((task, index) => ({
+    ...task,
+    tokens: taskTokens[index].tokens
+  }))
+)
+
+const selectedTask = ref(tasks.value[0])
 
 const setArchitecture = (mode) => {
   if (processing.value) return

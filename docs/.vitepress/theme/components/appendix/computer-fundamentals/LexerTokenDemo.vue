@@ -1,13 +1,13 @@
 <template>
   <div class="lexer-token-demo">
-    <h4>🔤 词法分析器：把代码拆成 Token</h4>
-    <p class="desc">输入一行代码，实时看到词法分析的结果</p>
+    <h4>{{ t('compilers.lexer.title') }}</h4>
+    <p class="desc">{{ t('compilers.lexer.desc') }}</p>
 
     <div class="input-area">
       <input
         v-model="code"
         class="code-input"
-        placeholder="试试输入: let x = 10 + 5;"
+        :placeholder="t('compilers.lexer.placeholder')"
         @input="tokenize"
       />
       <div class="presets">
@@ -18,17 +18,17 @@
     </div>
 
     <div v-if="tokens.length" class="token-stream">
-      <div class="stream-label">Token 流：</div>
+      <div class="stream-label">{{ t('compilers.lexer.streamLabel') }}</div>
       <div class="tokens">
         <span
-          v-for="(t, i) in tokens"
+          v-for="(token, i) in tokens"
           :key="i"
-          :class="['token', 'token-' + t.type]"
+          :class="['token', 'token-' + token.type]"
           @mouseenter="hovered = i"
           @mouseleave="hovered = null"
         >
-          {{ t.value }}
-          <span v-if="hovered === i" class="token-tip">{{ t.label }}</span>
+          {{ token.value }}
+          <span v-if="hovered === i" class="token-tip">{{ token.label }}</span>
         </span>
       </div>
     </div>
@@ -36,13 +36,21 @@
     <div v-if="tokens.length" class="token-table">
       <table>
         <thead>
-          <tr><th>Token</th><th>类型</th><th>说明</th></tr>
+          <tr>
+            <th>Token</th>
+            <th>{{ t('compilers.lexer.type') }}</th>
+            <th>{{ t('compilers.lexer.explanation') }}</th>
+          </tr>
         </thead>
         <tbody>
-          <tr v-for="(t, i) in tokens" :key="i">
-            <td><code>{{ t.value }}</code></td>
-            <td><span :class="['type-badge', 'token-' + t.type]">{{ t.label }}</span></td>
-            <td class="explain">{{ t.explain }}</td>
+          <tr v-for="(token, i) in tokens" :key="i">
+            <td><code>{{ token.value }}</code></td>
+            <td>
+              <span :class="['type-badge', 'token-' + token.type]">
+                {{ token.label }}
+              </span>
+            </td>
+            <td class="explain">{{ token.explain }}</td>
           </tr>
         </tbody>
       </table>
@@ -51,17 +59,17 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { computed, ref, onMounted } from 'vue'
+import { useI18n } from '../../../composables/useI18n'
+import { computerFundamentalsLocale } from '../../../locales/computer-fundamentals'
+
+const { t, messages } = useI18n(computerFundamentalsLocale)
 
 const code = ref('let x = 10 + 5;')
 const tokens = ref([])
 const hovered = ref(null)
 
-const presets = [
-  'let x = 10 + 5;',
-  'if (a > b) { return a; }',
-  'function add(a, b) { return a + b; }'
-]
+const presets = computed(() => messages.value.compilers.lexer.presets)
 
 const keywords = new Set(['let', 'const', 'var', 'if', 'else', 'for', 'while', 'function', 'return', 'class', 'import', 'export', 'true', 'false', 'null', 'undefined'])
 
@@ -74,36 +82,72 @@ function tokenize() {
     if (/[0-9]/.test(s[i])) {
       let num = ''
       while (i < s.length && /[0-9.]/.test(s[i])) num += s[i++]
-      result.push({ value: num, type: 'number', label: '数字', explain: '数值字面量' })
+      result.push({
+        value: num,
+        type: 'number',
+        ...t('compilers.lexer.tokenTypes.number')
+      })
     } else if (/[a-zA-Z_$]/.test(s[i])) {
       let id = ''
       while (i < s.length && /[a-zA-Z0-9_$]/.test(s[i])) id += s[i++]
       if (keywords.has(id)) {
-        result.push({ value: id, type: 'keyword', label: '关键字', explain: '语言保留字' })
+        result.push({
+          value: id,
+          type: 'keyword',
+          ...t('compilers.lexer.tokenTypes.keyword')
+        })
       } else {
-        result.push({ value: id, type: 'identifier', label: '标识符', explain: '变量/函数名' })
+        result.push({
+          value: id,
+          type: 'identifier',
+          ...t('compilers.lexer.tokenTypes.identifier')
+        })
       }
     } else if (s[i] === '"' || s[i] === "'") {
       const q = s[i]; let str = q; i++
       while (i < s.length && s[i] !== q) str += s[i++]
       if (i < s.length) str += s[i++]
-      result.push({ value: str, type: 'string', label: '字符串', explain: '字符串字面量' })
+      result.push({
+        value: str,
+        type: 'string',
+        ...t('compilers.lexer.tokenTypes.string')
+      })
     } else if ('+-*/%'.includes(s[i])) {
-      result.push({ value: s[i], type: 'operator', label: '运算符', explain: '算术运算' })
+      result.push({
+        value: s[i],
+        type: 'operator',
+        ...t('compilers.lexer.tokenTypes.operatorArithmetic')
+      })
       i++
     } else if ('=<>!'.includes(s[i])) {
       let op = s[i]; i++
       if (i < s.length && s[i] === '=') { op += s[i]; i++ }
       if (i < s.length && s[i] === '=') { op += s[i]; i++ }
-      result.push({ value: op, type: 'operator', label: '运算符', explain: '比较/赋值运算' })
+      result.push({
+        value: op,
+        type: 'operator',
+        ...t('compilers.lexer.tokenTypes.operatorCompare')
+      })
     } else if ('(){}[]'.includes(s[i])) {
-      result.push({ value: s[i], type: 'bracket', label: '括号', explain: '分组/作用域' })
+      result.push({
+        value: s[i],
+        type: 'bracket',
+        ...t('compilers.lexer.tokenTypes.bracket')
+      })
       i++
     } else if (';,'.includes(s[i])) {
-      result.push({ value: s[i], type: 'punctuation', label: '分隔符', explain: '语句/参数分隔' })
+      result.push({
+        value: s[i],
+        type: 'punctuation',
+        ...t('compilers.lexer.tokenTypes.punctuation')
+      })
       i++
     } else {
-      result.push({ value: s[i], type: 'unknown', label: '未知', explain: '无法识别' })
+      result.push({
+        value: s[i],
+        type: 'unknown',
+        ...t('compilers.lexer.tokenTypes.unknown')
+      })
       i++
     }
   }

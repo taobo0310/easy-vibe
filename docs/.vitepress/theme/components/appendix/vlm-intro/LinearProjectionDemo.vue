@@ -4,7 +4,7 @@
       <!-- Step 1: Patch -->
       <div class="step-box">
         <div class="label">
-          1. Patch (16×16×3) (示意 / Toy)
+          {{ t('linearProjection.patchLabel') }}
         </div>
         <div class="grid-patch">
           <div
@@ -15,7 +15,7 @@
           />
         </div>
         <div class="desc">
-          16×16 像素 × 3 通道 = 768 标量值
+          {{ t('linearProjection.patchDesc') }}
         </div>
       </div>
 
@@ -26,7 +26,7 @@
       <!-- Step 2: Flattened -->
       <div class="step-box">
         <div class="label">
-          2. Flatten
+          {{ t('linearProjection.flattenLabel') }}
         </div>
         <div class="vector-container">
           <div
@@ -40,7 +40,7 @@
           </div>
         </div>
         <div class="desc">
-          得到 1×768 向量 (Vector)
+          {{ t('linearProjection.flattenDesc') }}
         </div>
       </div>
 
@@ -51,7 +51,7 @@
       <!-- Step 3: Projected -->
       <div class="step-box">
         <div class="label">
-          3. Embedding
+          {{ t('linearProjection.embeddingLabel') }}
         </div>
         <div class="embedding-container">
           <div
@@ -61,7 +61,7 @@
           />
         </div>
         <div class="desc">
-          映射到 D 维 (示意 D=8；常见 D=768)
+          {{ t('linearProjection.embeddingDesc') }}
         </div>
       </div>
     </div>
@@ -69,6 +69,11 @@
 </template>
 
 <script setup>
+import { useI18n } from '../../../composables/useI18n.js'
+import { vlmIntroLocale } from '../../../locales/vlm-intro/index.js'
+
+const { t } = useI18n(vlmIntroLocale)
+
 const patchCellCount = 16 * 16
 const flattenSampleCount = 32
 
