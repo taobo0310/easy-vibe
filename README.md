@@ -13,9 +13,9 @@
 <a href="https://trendshift.io/repositories/22079" target="_blank"><img src="https://trendshift.io/api/badge/repositories/22079" alt="datawhalechina/easy-vibe | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
 
 <p align="center" style="font-size: 1.05em; color: #666; margin: 16px 0;">
-  你好 · Hello · 哈囉 · こんにちは · 안녕하세요 · Hola · Bonjour · Hallo · Ciao · Olá · Привет · Xin chào · مرحبا<br>
-  Our tutorial supports 13 languages. Let's code together!<br>
-  <span style="font-size: 0.9em; color: #888;">我们的教程支持 13 种语言，欢迎世界各地的朋友一起 coding！</span>
+  你好 · Hello · 哈囉 · こんにちは · 안녕하세요 · Hola · Bonjour · Hallo · مرحبا · Xin chào<br>
+  Our tutorial supports 10 languages. Let's code together!<br>
+  <span style="font-size: 0.9em; color: #888;">我们的教程支持 10 种语言，欢迎世界各地的朋友一起 coding！</span>
 </p>
 
 <p align="center">
@@ -151,9 +151,7 @@ Easy-Vibe teaches you how to turn that into a real product.
 
 ## 🔥 News
 
-- **[2026-05-31]** 🌍 **Stage 3 multilingual coverage is now complete**: Stage 3 (Advanced Developer) is fully available across all supported locales (zh-cn, en, zh-tw, ja-jp, ko-kr, es-es, fr-fr, de-de, ar-sa, vi-vn), covering 25 chapters of core skills, cross-platform development, personal brand, and AI advanced topics.
-- **[2026-05-26]** 🌍 **Stage 2 multilingual coverage is now complete**: Stage 2 (Junior Developer) is fully available across all supported locales (zh-cn, en, zh-tw, ja-jp, ko-kr, es-es, fr-fr, de-de, ar-sa, vi-vn), covering 24 chapters of frontend, backend, AI capabilities, and comprehensive projects.
-- **[2026-05-20]** 🌍 **Stage 1 multilingual coverage is now complete**: Stage 1 is fully available across all supported locales (zh-cn, en, zh-tw, ja-jp, ko-kr, es-es, fr-fr, de-de, ar-sa, vi-vn). Navigation/build checks have been verified to avoid 404s.
+- **[2026-06-17]** 🌍 **Full multilingual coverage complete**: All tutorial content (Stages 1-3) is now available in 10 languages (zh-cn, en, zh-tw, ja-jp, ko-kr, es-es, fr-fr, de-de, ar-sa, vi-vn), covering product prototyping, full-stack development, and cross-platform development.
 - **[2026-03-29]** ✨ **Vibe Stories launched and upgraded with real user journeys**: Added a new homepage Vibe Stories section with an interactive carousel and dedicated story pages, then replaced placeholder content with four real user stories featuring a rural primary school teacher, a college student, a high school IT teacher, and a truck driver who built real products with AI. [👉 View the stories](https://datawhalechina.github.io/easy-vibe/zh-cn/vibe-stories/story-1.html)
 - **[2026-03-26]** 🚀 **Major Stage 2 practice update**: Completed the SaaS capstone project "[Your First SaaS Full-Stack App: Copywriting Generator Website](https://datawhalechina.github.io/easy-vibe/en/stage-2/assignments/fullstack-app/)" and substantially expanded the "[How to integrate Stripe and payment systems](https://datawhalechina.github.io/easy-vibe/en/stage-2/backend/stripe-payment/)" section, plus key content around multi-product UI and WeChat Mini Program backend workflows.
 - **[2026-03-25]** 📚 **New appendix: User Research and Requirement Validation**: Added four new articles covering idea sourcing, the Double Diamond model, Jobs to Be Done, and The Mom Test to help beginners discover and validate product ideas. [👉 Read the appendix](https://datawhalechina.github.io/easy-vibe/en/appendix/)
